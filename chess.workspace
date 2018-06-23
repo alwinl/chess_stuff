@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Chess">
+		<Project filename="chessmfc/chessmfc.cbp" />
+		<Project filename="chess/chess.cbp" />
+		<Project filename="Borland1/Borland.cbp" />
+		<Project filename="Borland2/Borland.cbp" />
+		<Project filename="Borland3/Borland.cbp" />
+		<Project filename="Borland4/Borland.cbp" />
+		<Project filename="other/other.cbp" />
+		<Project filename="Borland5/Borland.cbp" />
+		<Project filename="calc_square/calc_square.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Other" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="other" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="other" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="chessapp.cpp" />
+		<Unit filename="chessapp.h" />
+		<Unit filename="chessapp.rc" />
+		<Unit filename="chssabtd.cpp" />
+		<Unit filename="chssabtd.h" />
+		<Unit filename="chssendd.cpp" />
+		<Unit filename="chssendd.h" />
+		<Unit filename="chsswndw.cpp" />
+		<Unit filename="chsswndw.h" />
+		<Unit filename="pvalue.cpp" />
+		<Unit filename="tabotdlg.cpp" />
+		<Unit filename="tabotdlg.h" />
+		<Unit filename="tchess.cpp" />
+		<Unit filename="tchess.h" />
+		<Unit filename="tchess.rc" />
+		<Unit filename="tchessvw.cpp" />
+		<Unit filename="tchessvw.h" />
+		<Unit filename="tedtbrwn.cpp" />
+		<Unit filename="tedtbrwn.h" />
+		<Unit filename="tinfwndw.cpp" />
+		<Unit filename="tinfwndw.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

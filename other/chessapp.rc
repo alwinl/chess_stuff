@@ -1,0 +1,596 @@
+/*  Project chess
+	 Naivasha Enterprises
+	 Copyright © 1995. All Rights Reserved.
+
+	 SUBSYSTEM:    chess.exe Application
+	 FILE:         chessapp.rc
+	 AUTHOR:       A.J. Leerling
+
+
+	 OVERVIEW
+	 ========
+	 All resources defined here.
+*/
+
+#if !defined(WORKSHOP_INVOKED)
+#include <windows.h>
+#endif
+#include "chessapp.rh"
+
+#define ID_FNAME 3100
+#define ID_FPATH 3101
+#define ID_DLIST 3102
+#define ID_FLIST 3103
+
+SDI_MENU MENU 
+{
+ POPUP "&Game"
+ {
+  MENUITEM "&New", CM_FILENEW
+  MENUITEM "&Restore...", CM_FILEOPEN
+  MENUITEM "&Save", CM_FILESAVE, GRAYED
+  MENUITEM "Save &as...", CM_FILESAVEAS, GRAYED
+  MENUITEM SEPARATOR
+  MENUITEM "E&xit", CM_EXIT
+  MENUITEM SEPARATOR
+  MENUITEM "&Play", IDM_PASS
+  MENUITEM "&Hint", IDM_HINT
+ }
+
+ POPUP "&Edit"
+ {
+  MENUITEM "&Undo\aALT+BkSp", CM_EDITUNDO, GRAYED
+  MENUITEM "&Redo\aCTRL+BkSp", CM_REDO, GRAYED
+  MENUITEM SEPARATOR
+  MENUITEM "&Arrange", IDM_MOVEPIECE
+ }
+
+ POPUP "&Level"
+ {
+  MENUITEM "&Easy", IDM_EASY
+  MENUITEM "&Time per move...", IDM_MOVETIME
+  MENUITEM "T&otal Time...", IDM_TOTALTIME
+  MENUITEM "&Matching", IDM_MATCHING
+  MENUITEM "&Infinite", IDM_INFINITE
+  MENUITEM "&PlySearch...", IDM_PLY
+  MENUITEM "M&ateSearch", IDM_MATE
+ }
+
+ POPUP "&Options"
+ {
+  MENUITEM "&Two player", IDM_TWOPLAYER
+  MENUITEM "&Demo mode", IDM_DEMO
+  MENUITEM "&Piece Values...", IDM_PIECEVALUES
+  MENUITEM SEPARATOR
+  POPUP "&Movement"
+  {
+   MENUITEM "&Drag", IDM_MOUSEDRAG, CHECKED
+   MENUITEM "&Select", IDM_MOUSESELECT
+  }
+
+  MENUITEM "&Sound", IDM_SOUND, CHECKED
+ }
+
+ POPUP "&Display"
+ {
+  MENUITEM "&Colors...", IDM_COLORS
+  MENUITEM "&Reverse board", IDM_REVERSE
+  MENUITEM "&Show BestLine", IDM_BESTLINE, CHECKED
+ }
+
+ POPUP "&Help", HELP
+ {
+  MENUITEM "&About...", CM_HELPABOUT
+ }
+
+}
+
+
+TChessThinkMenu  MENU LOADONCALL MOVEABLE PURE DISCARDABLE
+BEGIN
+		  MENUITEM "&Stop", CM_STOP
+END
+
+TChessEditMenu MENU LOADONCALL MOVEABLE PURE DISCARDABLE
+BEGIN
+		  MENUITEM "&Done", EM_DONE
+		  MENUITEM "&Clear", EM_CLEAR
+		  POPUP "&Turn"
+			  BEGIN
+				  MENUITEM "&White", IDM_WHITETURN, CHECKED
+				  MENUITEM "&Black", IDM_BLACKTURN
+			  END
+		  MENUITEM "C&ancel", EM_CANCEL
+END
+
+
+// Accelerator table for short-cut to menu commands. (include\owl\editfile.rc)
+SDI_MENU ACCELERATORS
+BEGIN
+	VK_BACK, CM_EDITUNDO, VIRTKEY, ALT
+	VK_BACK, CM_REDO, VIRTKEY, CONTROL
+END
+
+
+//
+// Table of help hints displayed in the status bar.
+//
+STRINGTABLE
+BEGIN
+	 -1,                         "File/document operations"
+	 CM_FILENEW,                 "Creates a new window"
+	 CM_FILEOPEN,                "Opens a window"
+	 CM_FILECLOSE,               "Close this document"
+	 CM_FILESAVE,                "Saves this document"
+	 CM_FILESAVEAS,              "Saves this document with a new name"
+	 CM_EXIT,                    "Quits chessApp and prompts to save the documents"
+	 CM_EDITUNDO-1,              "Edit operations"
+	 CM_EDITUNDO,                "Reverses the last operation"
+	 CM_EDITCUT,                 "Cuts the selection and puts it on the Clipboard"
+	 CM_EDITCOPY,                "Copies the selection and puts it on the Clipboard"
+	 CM_EDITPASTE,               "Inserts the clipboard contents at the insertion point"
+	 CM_EDITDELETE,              "Deletes the selection"
+	 CM_EDITCLEAR,               "Clear the document"
+	 CM_EDITADD,                 "Insert a new line"
+	 CM_EDITEDIT,                "Edit the current line"
+	 CM_EDITFIND-1,              "Search/replace operations"
+	 CM_EDITFIND,                "Finds the specified text"
+	 CM_EDITREPLACE,             "Finds the specified text and changes it"
+	 CM_EDITFINDNEXT,            "Finds the next match"
+	 CM_HELPABOUT-1,             "Access About"
+	 CM_HELPABOUT,               "About the chess application"
+END
+
+
+//
+// OWL string table
+//
+
+// EditFile (include\owl\editfile.rc and include\owl\editsear.rc)
+STRINGTABLE LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+	 IDS_CANNOTFIND,             "Cannot find ""%s""."
+	 IDS_UNTITLED,               "Document"
+	 IDS_UNABLEREAD,             "Unable to read file %s from disk."
+	 IDS_UNABLEWRITE,            "Unable to write file %s to disk."
+	 IDS_FILECHANGED,            "The text in the %s file has changed.\n\nDo you want to save the changes?"
+	 IDS_FILEFILTER,             "Text files (*.TXT)|*.TXT|AllFiles (*.*)|*.*|"
+END
+
+
+// Exception string resources (include\owl\except.rc)
+STRINGTABLE LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+	 IDS_OWLEXCEPTION,           "ObjectWindows Exception"
+	 IDS_UNHANDLEDXMSG,          "Unhandled Exception"
+	 IDS_OKTORESUME,             "OK to resume?"
+	 IDS_UNKNOWNEXCEPTION,       "Unknown exception"
+
+	 IDS_UNKNOWNERROR,           "Unknown error"
+	 IDS_NOAPP,                  "No application object"
+	 IDS_OUTOFMEMORY,            "Out of memory"
+	 IDS_INVALIDMODULE,          "Invalid module specified for window"
+	 IDS_INVALIDMAINWINDOW,      "Invalid MainWindow"
+	 IDS_VBXLIBRARYFAIL,         "VBX Library init failure"
+
+	 IDS_INVALIDWINDOW,          "Invalid window %s"
+	 IDS_INVALIDCHILDWINDOW,     "Invalid child window %s"
+	 IDS_INVALIDCLIENTWINDOW,    "Invalid client window %s"
+
+	 IDS_CLASSREGISTERFAIL,      "Class registration fail for window %s"
+	 IDS_CHILDREGISTERFAIL,      "Child class registration fail for window %s"
+	 IDS_WINDOWCREATEFAIL,       "Create fail for window %s"
+	 IDS_WINDOWEXECUTEFAIL,      "Execute fail for window %s"
+	 IDS_CHILDCREATEFAIL,        "Child create fail for window %s"
+
+	 IDS_MENUFAILURE,            "Menu creation failure"
+	 IDS_VALIDATORSYNTAX,        "Validator syntax error"
+	 IDS_PRINTERERROR,           "Printer error"
+
+	 IDS_LAYOUTINCOMPLETE,       "Incomplete layout constraints specified in window %s"
+	 IDS_LAYOUTBADRELWIN,        "Invalid relative window specified in layout constraint in window %s"
+
+	 IDS_GDIFAILURE,             "GDI failure"
+	 IDS_GDIALLOCFAIL,           "GDI allocate failure"
+	 IDS_GDICREATEFAIL,          "GDI creation failure"
+	 IDS_GDIRESLOADFAIL,         "GDI resource load failure"
+	 IDS_GDIFILEREADFAIL,        "GDI file read failure"
+	 IDS_GDIDELETEFAIL,          "GDI object %X delete failure"
+	 IDS_GDIDESTROYFAIL,         "GDI object %X destroy failure"
+	 IDS_INVALIDDIBHANDLE,       "Invalid DIB handle %X"
+END
+
+
+// General Window's status bar messages. (include\owl\statusba.rc)
+STRINGTABLE
+BEGIN
+	 IDS_MODES                   "EXT|CAPS|NUM|SCRL|OVR|REC"
+	 IDS_MODESOFF                "   |    |   |    |   |   "
+	 SC_SIZE,                    "Changes the size of the window"
+	 SC_MOVE,                    "Moves the window to another position"
+	 SC_MINIMIZE,                "Reduces the window to an icon"
+	 SC_MAXIMIZE,                "Enlarges the window to it maximum size"
+	 SC_RESTORE,                 "Restores the window to its previous size"
+	 SC_CLOSE,                   "Closes the window"
+	 SC_TASKLIST,                "Opens task list"
+	 SC_NEXTWINDOW,              "Switches to next window"
+END
+
+
+// Validator messages (include\owl\validate.rc)
+STRINGTABLE LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+	 IDS_VALPXPCONFORM          "Input does not conform to picture:\n""%s"""
+	 IDS_VALINVALIDCHAR         "Invalid character in input"
+	 IDS_VALNOTINRANGE          "Value is not in the range %ld to %ld."
+	 IDS_VALNOTINLIST           "Input is not in valid-list"
+END
+
+
+//
+// Bitmaps used by the speedbar.  Each bitmap is associated with a
+// particular menu command.
+//
+CM_FILENEW BITMAP "new.bmp"
+CM_FILEOPEN BITMAP "open.bmp"
+CM_FILESAVE BITMAP "save.bmp"
+
+CM_EDITUNDO BITMAP "undo.bmp"
+CM_EDITCUT BITMAP "cut.bmp"
+CM_EDITCOPY BITMAP "copy.bmp"
+CM_EDITPASTE BITMAP "paste.bmp"
+
+CM_EDITFIND BITMAP "find.bmp"
+CM_EDITFINDNEXT BITMAP "findnext.bmp"
+
+CM_FILEPRINT BITMAP "print.bmp"
+
+ChessIcon ICON chess.ico
+
+BPawnBmp BITMAP bpawn.bmp
+@RookBmp BITMAP brook.bmp
+BKnightBmp BITMAP bkngt.bmp
+BBishopBmp BITMAP bbishop.bmp
+BQueenBmp BITMAP bqueen.bmp
+BKingBmp  BITMAP bking.bmp
+
+WPawnBmp BITMAP wpawn.bmp
+WRookBmp BITMAP wrook.bmp
+WKnightBmp BITMAP wkngt.bmp
+WBishopBmp BITMAP wbishop.bmp
+WQueenBmp BITMAP wqueen.bmp
+WKingBmp  BITMAP wking.bmp
+
+PMaskBmp BITMAP pmask.bmp
+RMaskBmp BITMAP rmask.bmp
+KTMaskBmp BITMAP ktmask.bmp
+BMaskBmp BITMAP bmask.bmp
+QMaskBmp BITMAP qmask.bmp
+KMaskBmp BITMAP kmask.bmp
+
+
+BKBrushBmp BITMAP bkbrush.bmp
+
+//
+// Misc application definitions
+//
+
+// Application ICON
+IDI_SDIAPPLICATION ICON "applsdi.ico"
+
+
+// About box.
+
+// BWCC bitmaps for the about box.
+#define IDB_BWCC_ABOUT_ICON     1450
+#define IDB_BWCC_ABOUT_ICON2    2450            // This definition is for EGA and related video modes.
+
+IDB_BWCC_ABOUT_ICON BITMAP "borabout.bmp"
+IDB_BWCC_ABOUT_ICON2 BITMAP "borabout.bmp"
+
+IDD_ABOUT DIALOG 56, 40, 199, 98
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CLASS "bordlg_gray"
+CAPTION "About chess"
+FONT 8, "MS Sans Serif"
+{
+ CONTROL "", -1, "BorShade", BSS_GROUP | BSS_CAPTION | BSS_LEFT | WS_CHILD | WS_VISIBLE, 48, 6, 144, 51
+ CONTROL "Version", IDC_VERSION, "BorStatic", SS_LEFT | SS_NOPREFIX | WS_CHILD | WS_VISIBLE | WS_GROUP, 51, 18, 138, 9
+ CONTROL "Button", IDB_BWCC_ABOUT_ICON - 1000, "BorBtn", BBS_BITMAP | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 6, 9, 38, 41
+ CONTROL "Chess", -1, "BorStatic", SS_LEFT | SS_NOPREFIX | WS_CHILD | WS_VISIBLE | WS_GROUP, 51, 9, 138, 9
+ CONTROL "", IDC_COPYRIGHT, "BorStatic", SS_LEFT | SS_NOPREFIX | WS_CHILD | WS_VISIBLE | WS_GROUP, 51, 27, 138, 27
+ CONTROL "", IDC_DEBUG, "BorStatic", SS_RIGHT | SS_NOPREFIX | WS_CHILD | WS_VISIBLE | WS_GROUP, 131, 87, 66, 8
+ CONTROL "", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 81, 66, 37, 25
+}
+
+About DIALOG 7, 22, 140, 96
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CLASS "BorDlg"
+CAPTION "About OWL Chess"
+BEGIN
+	CONTROL "Copyright (C) 1992", -1, "STATIC", SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 40, 42, 60, 8
+	ICON "ChessIcon", -1, 23, 23, 16, 16
+	LTEXT "Object Windows ", -1, 43, 13, 54, 8
+	CTEXT "CHESS", -1, 50, 23, 39, 8
+	LTEXT "Borland International, Inc.", -1, 28, 51, 84, 8
+	CONTROL "", IDOK, "BorBtn", WS_TABSTOP, 54, 72, 32, 20
+	CONTROL "", -1, "BorShade", 1, 17, 11, 105, 52
+	CONTROL "", -1, "BorShade", 2, 0, 67, 141, 1
+END
+
+
+
+
+// TInputDialog class dialog box.
+IDD_INPUTDIALOG DIALOG 20, 24, 180, 70
+STYLE WS_POPUP | WS_CAPTION | DS_SETFONT
+CLASS "bordlg"
+FONT 8, "Helv"
+{
+ LTEXT "", ID_PROMPT, 10, 8, 160, 10, SS_NOPREFIX
+ EDITTEXT ID_INPUT, 10, 20, 160, 12, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP | ES_AUTOHSCROLL
+ CONTROL "Button", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 47, 42, 37, 25
+ CONTROL "Button", IDCANCEL, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 93, 42, 37, 25
+}
+
+SD_FILEOPEN DIALOG 9, 29, 197, 150
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME
+CLASS "BorDlg"
+CAPTION "Restore Game"
+BEGIN
+	CONTROL "", -1, "BorShade", 1, 5, 4, 148, 18
+	CONTROL "", -1, "BorShade", 1, 5, 57, 70, 89
+	CONTROL "", -1, "BorShade", 1, 82, 57, 70, 89
+	CONTROL "", -1, "BorShade", BSS_VDAP, 156, 0, 1, 150
+	LTEXT " File&name:", -1, 6, 8, 36, 10
+	CONTROL "", ID_FNAME, "EDIT", WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP | ES_AUTOHSCROLL, 42, 7, 106, 12
+	LTEXT " Directory:", -1, 5, 29, 37, 10
+	LTEXT "", ID_FPATH, 42, 29, 110, 10
+	LTEXT " &Files:", -1, 5, 47, 69, 10
+	CONTROL "", ID_FLIST, "LISTBOX", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LBS_STANDARD, 8, 61, 64, 82
+	LTEXT " &Directories:", -1, 82, 47, 69, 10
+	CONTROL "", ID_DLIST, "LISTBOX", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LBS_STANDARD, 85, 61, 64, 82
+	CONTROL "&Ok", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_TABSTOP, 160, 4, 33, 21
+	CONTROL "&Cancel", IDCANCEL, "BorBtn", BS_PUSHBUTTON | WS_TABSTOP, 160, 34, 33, 20
+END
+
+
+SD_FILESAVE DIALOG DISCARDABLE LOADONCALL PURE MOVEABLE 11, 25, 146, 144
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME
+CLASS "BorDlg"
+CAPTION "Save Game As"
+BEGIN
+	CONTROL "", -1, "BorShade", 1, 4, 53, 70, 89
+	CONTROL "", -1, "BorShade", 1, 4, 4, 139, 18
+	CONTROL "", -1, "BorShade", BSS_VDIP, 82, 43, 1, 101
+	CONTROL "", -1, "BorShade", BSS_HDIP, 83, 43, 64, 1
+	LTEXT " File&name:", -1, 5, 7, 36, 10
+	CONTROL "", ID_FNAME, "EDIT", WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP | ES_AUTOHSCROLL, 40, 7, 98, 12
+	LTEXT " Directory:", -1, 4, 27, 36, 10
+	LTEXT "", ID_FPATH, 40, 27, 102, 10
+	LTEXT " &Directories:", -1, 4, 43, 69, 10
+	CONTROL "", ID_DLIST, "LISTBOX", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LBS_STANDARD, 7, 57, 64, 82
+	CONTROL "Button", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_TABSTOP, 97, 64, 36, 24
+	CONTROL "&Cancel", IDCANCEL, "BorBtn", BS_PUSHBUTTON | WS_TABSTOP, 97, 99, 36, 24
+END
+
+SD_INPUTDIALOG DIALOG 6, 19, 180, 76
+STYLE WS_POPUP | WS_CAPTION
+CLASS "BorDlg"
+{
+ CONTROL "", -1, "BorShade", BSS_GROUP | BSS_LEFT | WS_CHILD | WS_VISIBLE, 10, 23, 160, 18
+ CONTROL "", -1, "BorShade", BSS_HDIP | BSS_LEFT | WS_CHILD | WS_VISIBLE, 0, 45, 180, 1
+ LTEXT "", ID_PROMPT, 10, 7, 159, 12
+ EDITTEXT ID_INPUT, 13, 26, 154, 12, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP | ES_AUTOHSCROLL
+ CONTROL "&Ok", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 46, 50, 33, 21
+ CONTROL "&Cancel", IDCANCEL, "BorBtn", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 97, 50, 33, 21
+}
+
+SD_ENDGAMEDLG DIALOG 19, 26, 142, 88
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CLASS "bordlg"
+CAPTION "OWL Chess"
+{
+ CONTROL "", -1, "BorShade", BSS_GROUP | BSS_LEFT | WS_CHILD | WS_VISIBLE, 11, 9, 120, 38
+ CTEXT "", ID_INPUT, 18, 15, 106, 18
+ CTEXT "Play again?", -1, 36, 32, 70, 8
+ CONTROL "", IDYES, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 29, 62, 33, 21
+ CONTROL "", IDNO, "BorBtn", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 80, 62, 33, 21
+ CONTROL "", -1, "BorShade", BSS_HDIP | BSS_LEFT | WS_CHILD | WS_VISIBLE, 0, 55, 142, 1
+}
+
+
+SD_CHESSERROR DIALOG 18, 18, 140, 76
+CAPTION "OWL Chess Error"
+CLASS "BorDlg"
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+BEGIN
+	CONTROL "", -1, "BorShade", 1 | WS_CHILD | WS_VISIBLE, 9, 6, 122, 28
+	CONTROL "Button", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 54, 50, 32, 20
+	CONTROL "", -1, "BorShade", 2 | WS_CHILD | WS_VISIBLE, 1, 43, 141, 1
+	CTEXT "", ID_INPUT, 13, 10, 114, 19, WS_CHILD | WS_VISIBLE | WS_GROUP
+END
+
+ColorsDialog DIALOG 10, 25, 219, 132
+CAPTION "Set Square Colors"
+CLASS "bordlg"
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+BEGIN
+	SCROLLBAR IDD_WRED, 17, 44, 9, 62, SBS_VERT | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+	SCROLLBAR IDD_WGREEN, 41, 44, 9, 62, SBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	SCROLLBAR IDD_WBLUE, 65, 45, 9, 61, SBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	CONTROL "", -1, "BorShade", 1 | WS_CHILD | WS_VISIBLE, 7, 15, 79, 111
+	EDITTEXT IDD_WEDITRED, 13, 110, 16, 12
+	EDITTEXT IDD_WEDITGREEN, 37, 110, 16, 12
+	EDITTEXT IDD_WEDITBLUE, 61, 110, 16, 12
+	LTEXT " ""White"" Square", -1, 7, 6, 78, 9, WS_CHILD | WS_VISIBLE | WS_GROUP
+	CONTROL "", -1, "BorShade", 1 | WS_CHILD | WS_VISIBLE, 93, 15, 79, 111
+	LTEXT " ""Black"" Square", -1, 93, 6, 78, 9, WS_CHILD | WS_VISIBLE | WS_GROUP
+	SCROLLBAR IDD_BRED, 106, 44, 9, 62, SBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	SCROLLBAR IDD_BGREEN, 129, 44, 9, 62, SBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	SCROLLBAR IDD_BBLUE, 153, 44, 9, 62, SBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP
+	EDITTEXT IDD_BEDITRED, 102, 110, 16, 12
+	EDITTEXT IDD_BEDITGREEN, 126, 110, 16, 12
+	EDITTEXT IDD_BEDITBLUE, 150, 110, 16, 12
+	CONTROL "Button", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 182, 31, 32, 20
+	CONTROL "Button", IDCANCEL, "BorBtn", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 182, 81, 32, 20
+	CONTROL "Text", IDD_WHITECOLOR, "BUTTON", BS_OWNERDRAW | WS_CHILD | WS_VISIBLE, 35, 20, 20, 20
+	CONTROL "Text", IDD_BLACKCOLOR, "BUTTON", BS_OWNERDRAW | WS_CHILD | WS_VISIBLE, 124, 20, 20, 20
+	CONTROL "", -1, "BorShade", 3 | WS_CHILD | WS_VISIBLE, 177, 1, 1, 131
+END
+
+
+PieceValueDlg DIALOG 7, 24, 178, 93
+CAPTION "Piece Values"
+CLASS "BORDLG"
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+BEGIN
+	EDITTEXT IDD_EQUEEN, 6, 7, 19, 12
+	LTEXT "Queen", -1, 28, 10, 31, 8
+	SCROLLBAR IDD_QUEEN, 58, 9, 74, 9
+	SCROLLBAR IDD_ROOK, 58, 26, 74, 9
+	SCROLLBAR IDD_BISHOP, 58, 43, 74, 9
+	SCROLLBAR IDD_KNIGHT, 58, 60, 74, 9
+	SCROLLBAR IDD_PAWN, 58, 77, 74, 9
+	LTEXT "Rook", -1, 28, 27, 30, 8
+	LTEXT "Bishop", -1, 28, 44, 29, 8
+	LTEXT "Knight", -1, 28, 61, 28, 8
+	LTEXT "Pawn", -1, 28, 78, 28, 8
+	EDITTEXT IDD_EROOK, 6, 24, 19, 12
+	EDITTEXT IDD_EBISHOP, 6, 41, 19, 12
+	EDITTEXT IDD_EKNIGHT, 6, 58, 19, 12
+	EDITTEXT IDD_EPAWN, 6, 75, 19, 12
+	CONTROL "", -1, "BorShade", 1 | WS_CHILD | WS_VISIBLE, 3, 4, 132, 86
+	CONTROL "", -1, "BorShade", 3 | WS_CHILD | WS_VISIBLE, 138, -2, 1, 95
+	CONTROL "Button", IDOK, "BorBtn", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 7, 32, 20
+	CONTROL "", IDCANCEL, "BorBtn", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 65, 32, 20
+	CONTROL "&Default", IDD_DEFAULT, "BorBtn", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 36, 32, 20
+END
+
+
+// Horizontal slider thumb bitmap for TSlider and VSlider (include\owl\slider.rc)
+IDB_HSLIDERTHUMB BITMAP PRELOAD MOVEABLE DISCARDABLE
+BEGIN
+	 '42 4D 66 01 00 00 00 00 00 00 76 00 00 00 28 00'
+	 '00 00 12 00 00 00 14 00 00 00 01 00 04 00 00 00'
+	 '00 00 F0 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	 '00 00 10 00 00 00 00 00 00 00 00 00 C0 00 00 C0'
+	 '00 00 00 C0 C0 00 C0 00 00 00 C0 00 C0 00 C0 C0'
+	 '00 00 C0 C0 C0 00 80 80 80 00 00 00 FF 00 00 FF'
+	 '00 00 00 FF FF 00 FF 00 00 00 FF 00 FF 00 FF FF'
+	 '00 00 FF FF FF 00 BB BB 0B BB BB BB B0 BB BB 00'
+	 '00 00 BB B0 80 BB BB BB 08 0B BB 00 00 00 BB 08'
+	 'F8 0B BB B0 87 70 BB 00 00 00 B0 8F F8 80 BB 08'
+	 '77 77 0B 00 00 00 08 F8 88 88 00 88 88 87 70 00'
+	 '00 00 0F F7 77 88 00 88 77 77 70 00 00 00 0F F8'
+	 '88 88 00 88 88 87 70 00 00 00 0F F7 77 88 00 88'
+	 '77 77 70 00 00 00 0F F8 88 88 00 88 88 87 70 00'
+	 '00 00 0F F7 77 88 00 88 77 77 70 00 00 00 0F F8'
+	 '88 88 00 88 88 87 70 00 00 00 0F F7 77 88 00 88'
+	 '77 77 70 00 00 00 0F F8 88 88 00 88 88 87 70 00'
+	 '00 00 0F F7 77 88 00 88 77 77 70 00 00 00 0F F8'
+	 '88 88 00 88 88 87 70 00 00 00 0F F7 77 88 00 88'
+	 '77 77 70 00 00 00 0F F8 88 88 00 88 88 87 70 00'
+	 '00 00 0F F7 77 78 00 88 77 77 70 00 00 00 0F FF'
+	 'FF FF 00 88 88 88 80 00 00 00 B0 00 00 00 BB 00'
+	 '00 00 0B 00 00 00'
+END
+
+
+// Fertical slider thumb bitmap for TSlider and HSlider (include\owl\slider.rc)
+IDB_VSLIDERTHUMB BITMAP PRELOAD MOVEABLE DISCARDABLE
+BEGIN
+	 '42 4D 2A 01 00 00 00 00 00 00 76 00 00 00 28 00'
+	 '00 00 28 00 00 00 09 00 00 00 01 00 04 00 00 00'
+	 '00 00 B4 00 00 00 00 00 00 00 00 00 00 00 00 00'
+	 '00 00 10 00 00 00 00 00 00 00 00 00 C0 00 00 C0'
+	 '00 00 00 C0 C0 00 C0 00 00 00 C0 00 C0 00 C0 C0'
+	 '00 00 C0 C0 C0 00 80 80 80 00 00 00 FF 00 00 FF'
+	 '00 00 00 FF FF 00 FF 00 00 00 FF 00 FF 00 FF FF'
+	 '00 00 FF FF FF 00 B0 00 00 00 00 00 00 00 00 0B'
+	 'B0 00 00 00 00 00 00 00 00 0B 0F 88 88 88 88 88'
+	 '88 88 88 80 08 88 88 88 88 88 88 88 88 80 0F 77'
+	 '77 77 77 77 77 77 77 80 08 77 77 77 77 77 77 77'
+	 '77 80 0F 77 FF FF FF FF FF FF F7 80 08 77 FF FF'
+	 'FF FF FF FF F7 80 0F 70 00 00 00 00 00 00 77 80'
+	 '08 70 00 00 00 00 00 00 77 80 0F 77 77 77 77 77'
+	 '77 77 77 80 08 77 77 77 77 77 77 77 77 80 0F 77'
+	 '77 77 77 77 77 77 77 80 08 77 77 77 77 77 77 77'
+	 '77 80 0F FF FF FF FF FF FF FF FF F0 08 88 88 88'
+	 '88 88 88 88 88 80 B0 00 00 00 00 00 00 00 00 0B'
+	 'B0 00 00 00 00 00 00 00 00 0B'
+END
+
+
+// Version info.
+//
+#if !defined(__DEBUG_)
+// Non-Debug VERSIONINFO
+1 VERSIONINFO LOADONCALL MOVEABLE
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
+FILEFLAGSMASK 0
+FILEFLAGS VS_FFI_FILEFLAGSMASK
+FILEOS VOS__WINDOWS16
+FILETYPE VFT_APP
+BEGIN
+	 BLOCK "StringFileInfo"
+	 BEGIN
+		  // Language type = U.S. English (0x0409) and Character Set = Windows, Multilingual(0x04e4)
+		  BLOCK "040904E4"                            // Matches VarFileInfo Translation hex value.
+		  BEGIN
+				VALUE "CompanyName", "Naivasha Enterprises\000"
+				VALUE "FileDescription", "chess for Windows\000"
+				VALUE "FileVersion", "1.0\000"
+				VALUE "InternalName", "chess\000"
+				VALUE "LegalCopyright", "Copyright © 1995. All Rights Reserved.\000"
+				VALUE "LegalTrademarks", "Windows (TM) is a trademark of Microsoft Corporation\000"
+				VALUE "OriginalFilename", "chess.EXE\000"
+				VALUE "ProductName", "chess\000"
+				VALUE "ProductVersion", "1.0\000"
+		  END
+	 END
+
+	 BLOCK "VarFileInfo"
+	 BEGIN
+		  VALUE "Translation", 0x0409, 0x04e4        // U.S. English(0x0409) & Windows Multilingual(0x04e4) 1252
+	 END
+
+END
+#else
+
+// Debug VERSIONINFO
+1 VERSIONINFO LOADONCALL MOVEABLE
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
+FILEFLAGSMASK VS_FF_DEBUG | VS_FF_PRERELEASE | VS_FF_PATCHED | VS_FF_PRIVATEBUILD | VS_FF_SPECIALBUILD
+FILEFLAGS VS_FFI_FILEFLAGSMASK
+FILEOS VOS__WINDOWS16
+FILETYPE VFT_APP
+BEGIN
+	 BLOCK "StringFileInfo"
+	 BEGIN
+		  // Language type = U.S. English (0x0409) and Character Set = Windows, Multilingual(0x04e4)
+		  BLOCK "040904E4"                            // Matches VarFileInfo Translation hex value.
+		  BEGIN
+				VALUE "CompanyName", "Naivasha Enterprises\000"
+				VALUE "FileDescription", "chess for Windows\000"
+				VALUE "FileVersion", "1.0\000"
+				VALUE "InternalName", "chess\000"
+				VALUE "LegalCopyright", "Copyright © 1995. All Rights Reserved.\000"
+				VALUE "LegalTrademarks", "Windows (TM) is a trademark of Microsoft Corporation\000"
+				VALUE "OriginalFilename", "chess.EXE\000"
+				VALUE "ProductName", "chess\000"
+				VALUE "ProductVersion", "1.0\000"
+				VALUE "SpecialBuild", "Debug Version\000"
+				VALUE "PrivateBuild", "Built by A.J. Leerling\000"
+		  END
+	 END
+
+	 BLOCK "VarFileInfo"
+	 BEGIN
+		  VALUE "Translation", 0x0409, 0x04e4        // U.S. English(0x0409) & Windows Multilingual(0x04e4) 1252
+	 END
+
+END
+#endif

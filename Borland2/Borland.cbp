@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Borland2" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="Borland" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="Borland" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="appldocv.ico" />
+		<Unit filename="board.cpp" />
+		<Unit filename="chess.ico" />
+		<Unit filename="colors.cpp" />
+		<Unit filename="colors.h" />
+		<Unit filename="display.cpp" />
+		<Unit filename="drag.cpp" />
+		<Unit filename="edit.cpp" />
+		<Unit filename="edit.h" />
+		<Unit filename="evalu.cpp" />
+		<Unit filename="evalu2.cpp" />
+		<Unit filename="externs.h" />
+		<Unit filename="info.cpp" />
+		<Unit filename="info.h" />
+		<Unit filename="movgen.cpp" />
+		<Unit filename="pvalue.cpp" />
+		<Unit filename="pvalue.h" />
+		<Unit filename="res/applsdi.ico" />
+		<Unit filename="res/bbishop.bmp" />
+		<Unit filename="res/bkbrush.bmp" />
+		<Unit filename="res/bking.bmp" />
+		<Unit filename="res/bkngt.bmp" />
+		<Unit filename="res/bmask.bmp" />
+		<Unit filename="res/borabout.bmp" />
+		<Unit filename="res/bpawn.bmp" />
+		<Unit filename="res/bqueen.bmp" />
+		<Unit filename="res/brook.bmp" />
+		<Unit filename="res/chess.ico" />
+		<Unit filename="res/copy.bmp" />
+		<Unit filename="res/cut.bmp" />
+		<Unit filename="res/find.bmp" />
+		<Unit filename="res/findnext.bmp" />
+		<Unit filename="res/kmask.bmp" />
+		<Unit filename="res/ktmask.bmp" />
+		<Unit filename="res/new.bmp" />
+		<Unit filename="res/open.bmp" />
+		<Unit filename="res/opening.lib" />
+		<Unit filename="res/paste.bmp" />
+		<Unit filename="res/pmask.bmp" />
+		<Unit filename="res/print.bmp" />
+		<Unit filename="res/qmask.bmp" />
+		<Unit filename="res/rmask.bmp" />
+		<Unit filename="res/save.bmp" />
+		<Unit filename="res/undo.bmp" />
+		<Unit filename="res/wbishop.bmp" />
+		<Unit filename="res/wking.bmp" />
+		<Unit filename="res/wkngt.bmp" />
+		<Unit filename="res/wpawn.bmp" />
+		<Unit filename="res/wqueen.bmp" />
+		<Unit filename="res/wrook.bmp" />
+		<Unit filename="saverest.cpp" />
+		<Unit filename="search.cpp" />
+		<Unit filename="small.cpp" />
+		<Unit filename="talk.cpp" />
+		<Unit filename="timelib.cpp" />
+		<Unit filename="wcdefs.h" />
+		<Unit filename="wchess.cpp" />
+		<Unit filename="wchess.h" />
+		<Unit filename="wchess.rc" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
