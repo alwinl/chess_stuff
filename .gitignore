@@ -1,8 +1,9 @@
-bin/*
-obj/*
+*/bin/*
+*/obj/*
 *.*~
-resources.c
-chess.depend
-chess.layout
-doxygen/html/*
-doxygen/doxygen.log
+*/*.depend
+*/*.layout
+chess/doxygen/html/*
+chess/doxygen/doxygen.log
+chess/resources.c
+
