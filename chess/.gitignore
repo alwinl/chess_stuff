@@ -1,0 +1,8 @@
+bin/*
+obj/*
+*.*~
+resources.c
+chess.depend
+chess.layout
+doxygen/html/*
+doxygen/doxygen.log
