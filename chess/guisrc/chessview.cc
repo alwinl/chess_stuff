@@ -42,12 +42,12 @@ ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Build
 	set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
 
 	ui_model->get_widget_derived("canvas", board_area, app );
-	ui_model->get_widget_derived("widInfo", info_area );
-	ui_model->get_widget_derived("widEdit", edit_area, app );
+	//ui_model->get_widget_derived("widInfo", info_area );
+	//ui_model->get_widget_derived("widEdit", edit_area, app );
 
 	show_all_children();
 
-	edit_area->hide();
+	//edit_area->hide();
 }
 
 /**-----------------------------------------------------------------------------
@@ -65,23 +65,23 @@ void ChessWindow::set_drag_piece( char piece )
 
 void ChessWindow::set_info( STInfo& info )
 {
-    info_area->set_turn_text( info.turn );
-    info_area->set_white_text( info.white );
-    info_area->set_black_text(  info.black );
-    info_area->set_time_text( info.time );
-    info_area->set_level_text( info.level );
-    info_area->set_value_text( info.value );
-    info_area->set_nodes_text( info.nodes );
-    info_area->set_n_sec_text( info.n_sec );
-    info_area->set_depth_text( info.depth );
-    info_area->set_bestline_text( info.bestline );
+    board_area->set_turn_text( info.turn );
+    board_area->set_white_text( info.white );
+    board_area->set_black_text(  info.black );
+    board_area->set_time_text( info.time );
+    board_area->set_level_text( info.level );
+    board_area->set_value_text( info.value );
+    board_area->set_nodes_text( info.nodes );
+    board_area->set_n_sec_text( info.n_sec );
+    board_area->set_depth_text( info.depth );
+    board_area->set_bestline_text( info.bestline );
 }
 
 void ChessWindow::set_colours( STColours& colours )
 {
-    board_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.white), Gdk::RGBA(colours.black) );
-    info_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.fg) );
-    edit_area->set_colours( Gdk::RGBA(colours.bg) );
+    board_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.white), Gdk::RGBA(colours.black), Gdk::RGBA(colours.fg) );
+    //info_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.fg) );
+    //edit_area->set_colours( Gdk::RGBA(colours.bg) );
 }
 
 bool ChessWindow::reverse_board()
@@ -91,20 +91,12 @@ bool ChessWindow::reverse_board()
 
 bool ChessWindow::toggle_bestline_display()
 {
-    return info_area->toggle_bestline();
+    return board_area->toggle_bestline();
 }
 
 bool ChessWindow::toggle_edit_area_display( )
 {
-    if( edit_area_visible ) {
-        edit_area->hide();
-        info_area->show();
-        edit_area_visible = false;
-    } else {
-        edit_area->show();
-        info_area->hide();
-        edit_area_visible = true;
-    }
+	edit_area_visible = board_area->set_edit( ! edit_area_visible );
 
     return edit_area_visible;
 }

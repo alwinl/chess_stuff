@@ -22,6 +22,8 @@
 #include "chessboard.h"
 #include "chessapplication.h"
 
+using namespace std;
+
 /**-----------------------------------------------------------------------------
  * \brief ChessBoard constructor
  *
@@ -31,7 +33,7 @@
  *
  */
 ChessBoard::ChessBoard(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app )
-                            : Gtk::DrawingArea(cobject), reversed(false), drag_code(' '), controller(app)
+                            : Gtk::DrawingArea(cobject), reversed(false), drag_code(' '), is_edit(false), controller(app)
 {
 	using namespace Cairo;
 
@@ -61,6 +63,20 @@ ChessBoard::ChessBoard(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     source_offsets['b'] = Gdk::Point( 3 * SQUARE_SIZE, 1 * SQUARE_SIZE );
     source_offsets['n'] = Gdk::Point( 4 * SQUARE_SIZE, 1 * SQUARE_SIZE );
     source_offsets['p'] = Gdk::Point( 5 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+
+    info_data.push_back( pair<string,string>("Turn", "empty") );
+    info_data.push_back( pair<string,string>("White", "empty") );
+    info_data.push_back( pair<string,string>("Black", "empty") );
+    info_data.push_back( pair<string,string>("Time", "empty") );
+    info_data.push_back( pair<string,string>("Level", "empty") );
+    info_data.push_back( pair<string,string>("Value", "empty") );
+    info_data.push_back( pair<string,string>("Nodes", "empty") );
+    info_data.push_back( pair<string,string>("N/Sec", "empty") );
+    info_data.push_back( pair<string,string>("Depth", "empty") );
+    info_data.push_back( pair<string,string>("Bestline", "empty") );
+
+    show_bestline_info = true;
+
 }
 
 /**-----------------------------------------------------------------------------
@@ -68,6 +84,13 @@ ChessBoard::ChessBoard(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
  *
  * Recalculate our screen real estate. Can be used as a trigger to
  * recalculate other drawing parameters.
+ *
+ * We have three distinct portions in the window
+ * chess board on the left, info window/edit window on the right
+ *
+ * Note that only one of the edit and info windows are shown at the same time
+ * We reserve the right most 226 pixels for the edit/info window and
+ * allocate the rest to the board.
  *
  * \param GdkEventConfigure*event
  * \return bool
@@ -77,40 +100,44 @@ bool ChessBoard::on_configure_event( GdkEventConfigure*event )
 {
 	Gtk::Allocation allocation = get_allocation();
 
-	outline_in_pixels = Gdk::Rectangle(
-            allocation.get_width()/2 - 4 * SQUARE_SIZE,
-            allocation.get_height()/2 - 4 * SQUARE_SIZE,
+	board_outline = Gdk::Rectangle(
+            (allocation.get_width() - 226)/2 - 4 * SQUARE_SIZE, /* the left side of the board is midway of our allocated width minus half the board */
+            allocation.get_height()/2 - 4 * SQUARE_SIZE,		/* the top side of the board is midway of the height minus half the board height */
             8 * SQUARE_SIZE,
             8 * SQUARE_SIZE
     );
 
+	info_outline = Gdk::Rectangle(
+			allocation.get_width() - 226, /* the info widow is placed in the right most 226 pixels of our window */
+			0,
+			226,
+			allocation.get_height()
+	);
+
+	edit_outline = Gdk::Rectangle(
+			allocation.get_width() - 113 - 3 * SQUARE_SIZE, /* the edit window is halfway of the rightmost 226 minus the width of half the pieces bitmap */
+			allocation.get_height()/2 - 1 * SQUARE_SIZE,
+			6 * SQUARE_SIZE,
+			2 * SQUARE_SIZE
+	);
+
 	return false;
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Paint a chessboard
- *
- * \param cr const Cairo::RefPtr<Cairo::Context>&
- * \return bool
- *
- */
-bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
+bool ChessBoard::draw_board( const Cairo::RefPtr<Cairo::Context>& cr )
 {
-	// Draw background
-	cr->set_source_rgb( background_colour.get_red(), background_colour.get_green(), background_colour.get_blue() );
- 	cr->paint();
-
 	// Draw border and board
-	cr->rectangle( outline_in_pixels.get_x(), outline_in_pixels.get_y(), outline_in_pixels.get_width(), outline_in_pixels.get_height() );
+	cr->rectangle( board_outline.get_x(), board_outline.get_y(), board_outline.get_width(), board_outline.get_height() );
 	cr->set_source_rgb( 0, 0, 0);								// border
 	cr->stroke_preserve();
-	cr->set_source( background_image_, outline_in_pixels.get_x(), outline_in_pixels.get_y());	// board
+	cr->set_source( background_image_, board_outline.get_x(), board_outline.get_y());	// board
 	cr->fill();
 
-	// Draw the pieces
-	if( piece_positions.empty() )
-        return false;
+    return false;
+}
 
+bool ChessBoard::draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr )
+{
     STSquare square = make_square(0,7);         // first = file, second is rank
 
     for( char& code : piece_positions ) {
@@ -124,7 +151,7 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
             // calculate the destination pixel position by taking the left top of the board and
             // adding (converted) rank and file positions. Note y axis is reversed.
             // If the board is reversed, the x-axis is reversed, not the y-axis
-            Gdk::Rectangle dest = Gdk::Rectangle( outline_in_pixels.get_x(), outline_in_pixels.get_y(), SQUARE_SIZE, SQUARE_SIZE );
+            Gdk::Rectangle dest = Gdk::Rectangle( board_outline.get_x(), board_outline.get_y(), SQUARE_SIZE, SQUARE_SIZE );
 
             if( reversed ) {
                 dest.set_x( dest.get_x() + (7 - square.file)  * SQUARE_SIZE );
@@ -147,15 +174,112 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
         }
     }
 
-	// Draw the drag piece
-    if( drag_code != ' ' ) {
-        Gdk::Rectangle dest = Gdk::Rectangle( drag_point.get_x(), drag_point.get_y(), SQUARE_SIZE, SQUARE_SIZE );
-        Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[drag_code].get_x(), dest.get_y() - source_offsets[drag_code].get_y() );
+    return false;
+}
 
-        cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
-        cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
-        cr->fill();
+bool ChessBoard::draw_info( const Cairo::RefPtr<Cairo::Context>& cr )
+{
+    Cairo::TextExtents extents;
+
+    cr->set_font_size( 12 );
+    cr->get_text_extents( info_data[0].first, extents ); // Need it for the height of the frame
+
+    int height = (show_bestline_info ? 12 : 11 ) * (extents.height + 5);
+
+ 	// Draw a frame
+    cr->set_source_rgb(  foreground_colour.get_red(), foreground_colour.get_green(), foreground_colour.get_blue() );
+	cr->rectangle( info_outline.get_x() + 5, info_outline.get_y() + 10, info_outline.get_width() - 10, height );
+	cr->stroke();
+
+	// blank the area behind the word "Information"
+    cr->get_text_extents( "Information", extents );
+
+	cr->set_source_rgb( background_colour.get_red(), background_colour.get_green(), background_colour.get_blue() );
+	cr->rectangle( info_outline.get_x() + 10, info_outline.get_y() + 5, extents.width + 10, extents.height );
+	cr->fill();
+
+	// now paint the word "Information"
+    cr->set_source_rgb(  foreground_colour.get_red(), foreground_colour.get_green(), foreground_colour.get_blue() );
+    cr->move_to( info_outline.get_x() + 15, info_outline.get_y() + extents.height + 5 );
+    cr->show_text( "Information" );
+
+	// paint the information
+    cr->get_text_extents( info_data[9].first, extents ); // "Bestline" is the longest word
+
+    double offset_y = info_outline.get_y() + extents.height + 25;
+    double label_offset_x = info_outline.get_x() + 10;
+    double info_offset_x = info_outline.get_x() + 10 + extents.width + 10;
+
+    vector< pair<string,string> >::iterator last_item = info_data.end();
+
+    if( ! show_bestline_info )
+        --last_item;
+
+    for( vector< pair<string,string> >::iterator it = info_data.begin(); it != last_item; ++it ) {
+
+        cr->move_to( label_offset_x, offset_y );
+        cr->show_text( (*it).first );
+
+        cr->move_to( info_offset_x, offset_y );
+        cr->show_text( (*it).second );
+
+        offset_y += extents.height + 5;
     }
+
+    return false;
+}
+
+bool ChessBoard::draw_edit( const Cairo::RefPtr<Cairo::Context>& cr )
+{
+	// Draw border and pieces bitmap
+	cr->rectangle( edit_outline.get_x(), edit_outline.get_y(), edit_outline.get_width(), edit_outline.get_height() );
+	cr->set_source_rgb( 0, 0, 0);								// border
+	cr->stroke_preserve();
+	cr->set_source( pieces_surface_, edit_outline.get_x(), edit_outline.get_y());	// pieces bitmap
+	cr->fill();
+
+	return false;
+}
+
+bool ChessBoard::draw_drag_piece( const Cairo::RefPtr<Cairo::Context>& cr )
+{
+   Gdk::Rectangle dest = Gdk::Rectangle( drag_point.get_x(), drag_point.get_y(), SQUARE_SIZE, SQUARE_SIZE );
+	Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[drag_code].get_x(), dest.get_y() - source_offsets[drag_code].get_y() );
+
+	cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
+	cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
+	cr->fill();
+
+	return false;
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Paint a chessboard
+ *
+ * \param cr const Cairo::RefPtr<Cairo::Context>&
+ * \return bool
+ *
+ */
+bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
+{
+	// Draw background
+	cr->set_source_rgb( background_colour.get_red(), background_colour.get_green(), background_colour.get_blue() );
+ 	cr->paint();
+
+ 	draw_board( cr );
+
+	if( !piece_positions.empty() )
+		draw_pieces( cr );
+
+    // Now draw either the info window or the edit window
+    if( is_edit )
+		draw_edit( cr );
+    else
+    	draw_info( cr );
+
+	// Draw the drag piece
+    if( drag_code != ' ' )
+		draw_drag_piece( cr );
 
 	return false;
 
@@ -170,8 +294,8 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
 STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
 {
     return make_square(
-        (point.get_x() - outline_in_pixels.get_x()) / SQUARE_SIZE,
-        (point.get_y() - outline_in_pixels.get_y()) / SQUARE_SIZE
+        (point.get_x() - board_outline.get_x()) / SQUARE_SIZE,
+        (point.get_y() - board_outline.get_y()) / SQUARE_SIZE
     );
 }
 
@@ -184,7 +308,7 @@ STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
 bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 {
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( button_event->x, button_event->y, 1, 1 );
-    bool intersecting = outline_in_pixels.intersects( mouse_pos );
+    bool intersecting = board_outline.intersects( mouse_pos );
 
     if( !intersecting )
         return true;
@@ -207,7 +331,7 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
         return true;
 
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( release_event->x, release_event->y, 1, 1 );
-    bool intersecting = outline_in_pixels.intersects( mouse_pos );
+    bool intersecting = board_outline.intersects( mouse_pos );
 
     if( !intersecting ) {
         controller.drag_cancelled();
@@ -274,13 +398,14 @@ void ChessBoard::set_piece_positions( std::string FEN_string )
  * \return void
  *
  */
-void ChessBoard::set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black )
+void ChessBoard::set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg )
 {
 	using namespace Cairo;
 
     background_colour = bg;
     white_colour = white;
     black_colour = black;
+	foreground_colour = fg;
 
 	/* Create a context for the background image object so we can draw on it */
 	RefPtr<Context> context = Context::create( background_image_ );
@@ -313,5 +438,42 @@ bool ChessBoard::toggle_reverse()
 
     return reversed;
 }
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * \return bool
+ */
+bool ChessBoard::toggle_bestline()
+{
+    show_bestline_info = ! show_bestline_info;
+    update();
+
+    return show_bestline_info;
+}
+
+bool ChessBoard::set_edit( bool on )
+{
+	if( is_edit != on ) {
+		is_edit = on;
+		update();
+	}
+
+	return is_edit;
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * \param index int
+ * \param text std::string
+ * \return void
+ */
+void ChessBoard::set_text( int index, string text )
+{
+    info_data[index].second = text;
+    update();
+}
+
 
 
