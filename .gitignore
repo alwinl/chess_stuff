@@ -3,6 +3,7 @@
 *.*~
 */*.depend
 */*.layout
+*.layout
 chess/doxygen/html/*
 chess/doxygen/doxygen.log
 chess/resources.c
