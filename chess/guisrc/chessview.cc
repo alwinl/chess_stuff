@@ -20,7 +20,7 @@
  */
 
 #include "chessview.h"
-#include "chessapplication.h"
+#include "chesscontroller.h"
 #include "chessboard.h"
 #include "chessinfo.h"
 #include "chessedit.h"
@@ -35,7 +35,7 @@
  * \param model_init AppModel&
  *
  */
-ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app )
+ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
 			: Gtk::ApplicationWindow(cobject), edit_area_visible(false)
 {
 	set_default_size( 640,480 );
@@ -99,5 +99,10 @@ bool ChessWindow::toggle_edit_area_display( )
 	edit_area_visible = board_area->set_edit( ! edit_area_visible );
 
     return edit_area_visible;
+}
+
+void ChessWindow::set_edit_mode( bool on )
+{
+	board_area->set_edit( on );
 }
 

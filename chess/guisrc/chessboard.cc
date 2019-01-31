@@ -20,7 +20,7 @@
  */
 
 #include "chessboard.h"
-#include "chessapplication.h"
+#include "chesscontroller.h"
 
 using namespace std;
 
@@ -32,7 +32,7 @@ using namespace std;
  * \param model_init AppModel&
  *
  */
-ChessBoard::ChessBoard(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app )
+ChessBoard::ChessBoard(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
                             : Gtk::DrawingArea(cobject), reversed(false), drag_code(' '), is_edit(false), controller(app)
 {
 	using namespace Cairo;
@@ -299,6 +299,27 @@ STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
     );
 }
 
+/** \brief
+ *
+ * The bitmap is organised as:
+ *          KQRBNP
+ *          kqrbnp
+ *
+ * \param point Gdk::Point
+ * \return char
+ *
+ */
+char ChessBoard::calc_piece_from_point( Gdk::Point point )
+{
+	static string piece_chars = "KQRBNPkqrbnp";
+
+	// to find out which piece we got, we need to calculate how many squares in and down the point falls
+	int col = (point.get_x() - edit_outline.get_x()) / SQUARE_SIZE;
+	int row = (point.get_y() - edit_outline.get_y()) / SQUARE_SIZE;
+
+	return piece_chars[ row * 6 + col ];
+}
+
 /**-----------------------------------------------------------------------------
  * \brief
  *
@@ -308,13 +329,18 @@ STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
 bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 {
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( button_event->x, button_event->y, 1, 1 );
-    bool intersecting = board_outline.intersects( mouse_pos );
 
-    if( !intersecting )
+    if( board_outline.intersects( mouse_pos ) ) {
+		drag_point = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+		controller.drag_start( calc_square_from_point( Gdk::Point(button_event->x, button_event->y) ) );
         return true;
+    }
 
-    drag_point = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
-    controller.drag_start( calc_square_from_point( Gdk::Point(button_event->x, button_event->y) ) );
+    if( is_edit && edit_outline.intersects( mouse_pos ) ) {
+		drag_point = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+		controller.select_edit_piece( calc_piece_from_point( Gdk::Point(button_event->x, button_event->y ) ) );
+		return true;
+    }
 
     return true;
 }

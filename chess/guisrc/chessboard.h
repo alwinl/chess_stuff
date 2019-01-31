@@ -29,7 +29,7 @@
 
 #include <gtkmm.h>
 
-class ChessApplication;
+class ChessController;
 class STSquare;
 
 
@@ -45,7 +45,7 @@ private:
 	static const int SQUARE_SIZE = 36;
 
 public:
-	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app );
+	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
 	bool set_edit( bool on );
 
@@ -77,6 +77,7 @@ private:
 	void update();
 	void set_text( int index, std::string text );
 	STSquare calc_square_from_point( Gdk::Point point );
+	char calc_piece_from_point( Gdk::Point point );
 
 	bool draw_board( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr );
@@ -105,7 +106,7 @@ private:
 	std::vector< std::pair<std::string,std::string> > info_data;
 
 
-	ChessApplication& controller;
+	ChessController& controller;
 };
 
 #endif // CHESSBOARD_H_INCLUDED

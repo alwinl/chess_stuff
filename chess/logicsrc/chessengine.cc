@@ -62,6 +62,22 @@ void ChessEngine::cancel_move( )
 
 }
 
+void ChessEngine::select_edit_piece( char piece )
+{
+    app->set_drag_piece( piece );
+}
+
+void ChessEngine::select_edit_mode()
+{
+		app->select_edit_mode();
+}
+
+void ChessEngine::leave_edit_mode()
+{
+	app->end_edit_mode();
+}
+
+
 void ChessEngine::open_file( )
 {
     string filename = app->open_filename( "", "~/" );

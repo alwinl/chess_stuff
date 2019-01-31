@@ -26,7 +26,7 @@
 
 #include <../logicsrc/chessappbase.h>
 
-class ChessApplication;
+class ChessController;
 
 class ChessAppGUI : public ChessAppBase
 {
@@ -44,13 +44,16 @@ public:
     virtual void message_dialog( std::string message );
     virtual STPieceValues run_piece_value_dialog( STPieceValues& current );
 
+    virtual void start_edit_mode();
+    virtual void end_edit_mode();
+
     virtual std::string open_filename( std::string filename, std::string working_dir );
     virtual std::string save_filename( std::string filename, std::string working_dir );
 
     virtual void quit();
 
 private:
-	Glib::RefPtr<ChessApplication> controller;
+	Glib::RefPtr<ChessController> controller;
 };
 
 #endif // CHESSAPPGUI_H

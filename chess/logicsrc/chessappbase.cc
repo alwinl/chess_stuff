@@ -36,6 +36,9 @@ ChessAppBase::~ChessAppBase()
 void ChessAppBase::start_move( STSquare square ) { engine->start_move(square); };
 void ChessAppBase::do_move( STSquare square ){ engine->do_move( square ); };
 void ChessAppBase::cancel_move() { engine->cancel_move(); };
+void ChessAppBase::select_edit_mode() { engine->select_edit_mode(); };
+void ChessAppBase::end_edit_mode() { engine->leave_edit_mode(); };
+void ChessAppBase::select_edit_piece( char piece ) { engine->select_edit_piece( piece ); };
 void ChessAppBase::advance() { engine->advance(); };
 void ChessAppBase::piece_value_changes() { engine->piece_value_changes(); };
 void ChessAppBase::new_game() { engine->new_game(); };
@@ -43,4 +46,5 @@ void ChessAppBase::end_app() { engine->quit(); };
 void ChessAppBase::open_file() { engine->open_file(); };
 void ChessAppBase::save_file() { engine->save_file(); };
 void ChessAppBase::save_as() { engine->save_as(); };
+
 

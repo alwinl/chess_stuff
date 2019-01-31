@@ -50,6 +50,9 @@ public:
     virtual void message_dialog( std::string message ) = 0;
     virtual STPieceValues run_piece_value_dialog( STPieceValues& current ) = 0;
 
+    virtual void start_edit_mode() = 0;
+    virtual void end_edit_mode() = 0;
+
     virtual std::string open_filename( std::string filename, std::string working_dir ) = 0;
     virtual std::string save_filename( std::string filename, std::string working_dir ) = 0;
 
@@ -59,7 +62,9 @@ public:
     void start_move( STSquare square );
     void do_move( STSquare square );
     void cancel_move();
+    void select_edit_piece( char piece );
     void advance();
+    void select_edit_mode();
     void piece_value_changes();
     void new_game();
     void end_app();

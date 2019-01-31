@@ -42,25 +42,27 @@ class GUIPieceValues;
 /**-----------------------------------------------------------------------------
  * \brief Main application object
  *
- * The ChessApplication class is the controller of the MVC construct employed here
+ * The ChessController class is the controller of the MVC construct employed here
  * This class combines and regulates the existence of windows or views (the V in MVC,
  * the existence and status of the application data and logic (the M(odel) in MVC)
  *
  * The Gtk::Application class already has management functions for windows
  * so what we have to add is the model paradigm.
  */
-class ChessApplication : public Gtk::Application
+class ChessController : public Gtk::Application
 {
 public:
 	// Construction/destruction. Constructor is private, class is a terminal class
-	virtual ~ChessApplication();
+	virtual ~ChessController();
 
 	// Instance creator as constructor is private
-	static Glib::RefPtr<ChessApplication> create( ChessAppBase* director_init );
+	static Glib::RefPtr<ChessController> create( ChessAppBase* director_init );
 
 	void drag_start( STSquare square );
 	void drag_end( STSquare square );
 	void drag_cancelled();
+
+	void select_edit_piece( char piece );
 
     void set_piece_positions( std::string FEN_string, STInfo info );
     void set_drag_piece( char piece );
@@ -68,12 +70,16 @@ public:
     void message_dialog( std::string message );
     STPieceValues run_piece_value_dialog( STPieceValues current );
 
+    void start_edit_mode();
+    void end_edit_mode();
+
+
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );
 
 private:
 	// Private construction to ensure only references can be obtained. Private as class is terminal
-	ChessApplication( ChessAppBase* director_init );
+	ChessController( ChessAppBase* director_init );
 
 	virtual void on_startup();
 	virtual void on_activate();

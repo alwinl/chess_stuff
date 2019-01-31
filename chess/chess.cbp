@@ -81,14 +81,6 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessapplication.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessapplication.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
 		<Unit filename="guisrc/chessboard.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -97,19 +89,11 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessedit.cc">
+		<Unit filename="guisrc/chesscontroller.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessedit.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessinfo.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessinfo.h">
+		<Unit filename="guisrc/chesscontroller.h">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>

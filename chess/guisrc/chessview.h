@@ -26,11 +26,8 @@
 
 #include <gtkmm.h>
 
-class ChessApplication;
-
+class ChessController;
 class ChessBoard;
-class ChessInfo;
-class ChessEdit;
 
 struct STColours;
 struct STInfo;
@@ -38,7 +35,7 @@ struct STInfo;
 class ChessWindow : public Gtk::ApplicationWindow
 {
 public:
-	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app );
+	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
 	void set_piece_positions( std::string FEN_string );
 	void set_drag_piece( char piece );
@@ -46,12 +43,12 @@ public:
 	void set_colours( STColours& colours );
 	bool reverse_board();
 	bool toggle_bestline_display();
+
+	void set_edit_mode( bool on );
     bool toggle_edit_area_display( );
 
 private:
-	ChessInfo * info_area;
 	ChessBoard * board_area;
-	ChessEdit * edit_area;
 
 	bool edit_area_visible;
 };

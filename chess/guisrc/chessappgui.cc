@@ -20,7 +20,7 @@
  */
 
 #include "chessappgui.h"
-#include "chessapplication.h"
+#include "chesscontroller.h"
 
 #include "../logicsrc/pods.h"
 
@@ -37,7 +37,7 @@ ChessAppGUI::~ChessAppGUI()
 /* called from main function */;
 int ChessAppGUI::run(  int argc, char *argv[] )
 {
-	controller = ChessApplication::create( this );
+	controller = ChessController::create( this );
 
 	return controller->run( argc, argv );
 }
@@ -46,6 +46,13 @@ int ChessAppGUI::run(  int argc, char *argv[] )
 
 void ChessAppGUI::set_piece_positions( std::string FEN_string, STInfo& info )
 	{ controller->set_piece_positions( FEN_string, info ); }
+
+void ChessAppGUI::start_edit_mode()
+	{ controller->start_edit_mode(); }
+
+void ChessAppGUI::end_edit_mode()
+	{ controller->end_edit_mode(); }
+
 
 void ChessAppGUI::set_drag_piece( char piece )
 	{ controller->set_drag_piece( piece ); }

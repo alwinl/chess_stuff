@@ -43,6 +43,11 @@ public:
     void do_move( STSquare square );
     void cancel_move();
 
+	void select_edit_piece( char piece );
+
+	void select_edit_mode();
+	void leave_edit_mode();
+
     void advance();
 
     void piece_value_changes();
