@@ -282,23 +282,6 @@
       <action-widget response="-6">button4</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkListStore" id="liststore1">
-    <columns>
-      <!-- column-name x-coord -->
-      <column type="gdouble"/>
-      <!-- column-name y-coord -->
-      <column type="gdouble"/>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">-4.5</col>
-        <col id="1">-2</col>
-        <col id="2" translatable="yes">Start</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkWindow" id="main_view">
     <property name="can_focus">False</property>
     <child>
