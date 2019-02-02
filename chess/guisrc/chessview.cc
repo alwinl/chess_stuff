@@ -22,8 +22,6 @@
 #include "chessview.h"
 #include "chesscontroller.h"
 #include "chessboard.h"
-#include "chessinfo.h"
-#include "chessedit.h"
 
 #include "../logicsrc/pods.h"
 
@@ -42,12 +40,15 @@ ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Build
 	set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
 
 	ui_model->get_widget_derived("canvas", board_area, app );
-	//ui_model->get_widget_derived("widInfo", info_area );
-	//ui_model->get_widget_derived("widEdit", edit_area, app );
+
+    ui_model->get_widget( "mnuGame", mnuGame );
+    ui_model->get_widget( "mnuArrange", mnuArrange );
+    ui_model->get_widget( "mnuStop", mnuStop );
 
 	show_all_children();
 
-	//edit_area->hide();
+	mnuArrange->hide();
+	mnuStop->hide();
 }
 
 /**-----------------------------------------------------------------------------
@@ -103,6 +104,16 @@ bool ChessWindow::toggle_edit_area_display( )
 
 void ChessWindow::set_edit_mode( bool on )
 {
+
+	mnuGame->hide();
+	mnuStop->hide();
+	mnuArrange->hide();
+
+	if( on )
+		mnuArrange->show();
+	else
+		mnuGame->show();
+
 	board_area->set_edit( on );
 }
 

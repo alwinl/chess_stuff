@@ -27,10 +27,6 @@
 #include <gtkmm.h>
 
 #include "../logicsrc/pods.h"
-//class STSquare;
-//class STInfo;
-//class STPieceValues;
-//class STColours;
 
 class ChessAppBase;
 
@@ -73,7 +69,6 @@ public:
     void start_edit_mode();
     void end_edit_mode();
 
-
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );
 
@@ -106,7 +101,13 @@ private:
     void on_action_showbestline();
 	void on_action_help_about();
 
-    void select_level( Gtk::CheckMenuItem * selected_item );
+	void on_action_arrange_done();
+	void on_action_arrange_clear();
+	void on_action_arrange_whiteturn();
+	void on_action_arrange_blackturn();
+	void on_action_arrange_cancel();
+
+	void on_action_thinking_stop();
 
 	STColours app_colours;
 	ChessAppBase* director;
@@ -114,12 +115,7 @@ private:
 	// Widgets
 	ChessWindow * view;
     Gtk::Statusbar * status_bar;
-    Gtk::CheckMenuItem * chkLevelEasy;
-    Gtk::CheckMenuItem * chkLevelTimed;
-    Gtk::CheckMenuItem * chkLevelTotalTime;
-    Gtk::CheckMenuItem * chkLevelInfinite;
-    Gtk::CheckMenuItem * chkLevelPlaySearch;
-    Gtk::CheckMenuItem * chkLevelMateSearch;
+
     GUIColourChooser * dlgColourChooser;
     GUITimeInputter * dlgTimeInputter;
     GUIPieceValues * dlgPieceValues;

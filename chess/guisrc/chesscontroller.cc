@@ -108,26 +108,19 @@ void ChessController::on_startup()
 
     add_action("about",   sigc::mem_fun( *this, &ChessController::on_action_help_about ) );
 
-#if 0
-    MenuItem "think_stop", CM_STOP
-    MenuItem "edit_pop_done", EM_DONE
-    MenuItem "edit_pop_clear", EM_CLEAR
-    MenuItem "edit_pop_white_turn", IDM_WHITETURN, CHECKED
-    MenuItem "edit_pop_black_turn", IDM_BLACKTURN
-    MenuItem "edit_pop_cancel", EM_CANCEL
-#endif // 0
+    add_action("arrange_done", sigc::mem_fun( *this, &ChessController::on_action_arrange_done ) );
+    add_action("arrange_clear", sigc::mem_fun( *this, &ChessController::on_action_arrange_clear ) );
+    add_action("arrange_white_turn", sigc::mem_fun( *this, &ChessController::on_action_arrange_whiteturn ) );
+    add_action("arrange_black_turn", sigc::mem_fun( *this, &ChessController::on_action_arrange_blackturn ) );
+    add_action("arrange_cancel",  sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
+
+    add_action("thinking_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
+
 
     Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
 
 	ui_model->get_widget_derived("main_view", view, *this );
-
     ui_model->get_widget( "widStatusBar", status_bar );
-    ui_model->get_widget( "chkLevelEasy", chkLevelEasy );
-    ui_model->get_widget( "chkLevelTimed", chkLevelTimed );
-    ui_model->get_widget( "chkLevelTotalTime", chkLevelTotalTime );
-    ui_model->get_widget( "chkLevelInfinite", chkLevelInfinite );
-    ui_model->get_widget( "chkLevelPlaySearch", chkLevelPlaySearch );
-    ui_model->get_widget( "chkLevelMateSearch", chkLevelMateSearch );
 
 	dlgColourChooser = new GUIColourChooser( ui_model, *view );
 	dlgTimeInputter = new GUITimeInputter( ui_model, *view );
@@ -148,11 +141,6 @@ void ChessController::on_activate()
     view->set_colours( app_colours );
 
     on_action_new();
-}
-
-void ChessController::set_drag_piece( char piece )
-{
-    view->set_drag_piece( piece );
 }
 
 
@@ -183,6 +171,11 @@ void ChessController::set_piece_positions( std::string FEN_string, STInfo info )
 {
     view->set_piece_positions( FEN_string );
     view->set_info( info );
+}
+
+void ChessController::set_drag_piece( char piece )
+{
+    view->set_drag_piece( piece );
 }
 
 /**-----------------------------------------------------------------------------
@@ -295,9 +288,24 @@ void ChessController::on_action_piecevalues()
  */
 void ChessController::on_action_arrange()
 {
-	director->start_edit_mode();
+	//director->start_edit_mode();
     //view->toggle_edit_area_display();
+
+	view->set_edit_mode( true );
+
 }
+
+
+void ChessController::on_action_thinking_stop() {}
+
+void ChessController::on_action_arrange_done() { view->set_edit_mode( false ); }
+void ChessController::on_action_arrange_clear() {}
+void ChessController::on_action_arrange_whiteturn() {}
+void ChessController::on_action_arrange_blackturn() {}
+void ChessController::on_action_arrange_cancel() {}
+
+
+
 
 void ChessController::start_edit_mode()
 {
@@ -313,27 +321,9 @@ void ChessController::end_edit_mode()
 /**-----------------------------------------------------------------------------
  * \brief
  */
-void ChessController::select_level( Gtk::CheckMenuItem * selected_item )
-{
-    /*
-    chkLevelEasy->set_active(false);
-    chkLevelTimed->set_active(false);
-    chkLevelTotalTime->set_active(false);
-    chkLevelInfinite->set_active(false);
-    chkLevelPlaySearch->set_active(false);
-    chkLevelMateSearch->set_active(false);
-*/
-    //selected_item->set_active(true);
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
 void ChessController::on_action_easy()
 {
 	message_dialog( "on_action_easy not implemented yet" );
-
-    select_level( chkLevelEasy );
 }
 
 /**-----------------------------------------------------------------------------
@@ -345,8 +335,6 @@ void ChessController::on_action_timed()
 
     if( ! retval.first )
         return;
-
-    select_level( chkLevelTimed );
 
 //    int sec_per_move = retval.second;
     // now we need to do something with sec_per_move.
@@ -361,8 +349,6 @@ void ChessController::on_action_totaltime()
 
     if( ! retval.first )
         return;
-
-    select_level( chkLevelTotalTime );
 
 //    int minutes_per_game = retval.second;
     // now we need to do something with minutes_per_game.
@@ -384,7 +370,6 @@ void ChessController::on_action_infinite()
 {
 	message_dialog( "on_action_infinite not implemented yet" );
 
-    select_level( chkLevelInfinite );
 }
 
 /**-----------------------------------------------------------------------------
@@ -393,8 +378,6 @@ void ChessController::on_action_infinite()
 void ChessController::on_action_play_search()
 {
 	message_dialog( "on_action_play_search not implemented yet" );
-
-    select_level( chkLevelPlaySearch );
 }
 
 /**-----------------------------------------------------------------------------
@@ -403,8 +386,6 @@ void ChessController::on_action_play_search()
 void ChessController::on_action_mate_search()
 {
 	message_dialog( "on_action_mate_search not implemented yet" );
-
-    select_level( chkLevelMateSearch );
 }
 
 /**-----------------------------------------------------------------------------

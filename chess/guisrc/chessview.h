@@ -50,6 +50,10 @@ public:
 private:
 	ChessBoard * board_area;
 
+    Gtk::MenuBar * mnuGame;
+    Gtk::MenuBar * mnuArrange;
+    Gtk::MenuBar * mnuStop;
+
 	bool edit_area_visible;
 };
 
