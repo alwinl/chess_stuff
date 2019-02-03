@@ -29,10 +29,9 @@
 
 #include <gtkmm.h>
 
-class ChessController;
-class STSquare;
-class STInfo;
+#include "../logicsrc/pods.h"
 
+class ChessController;
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
@@ -48,12 +47,12 @@ private:
 public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
-	bool set_edit( bool on );
+	void set_edit( bool on );
 
     void set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg );
     void set_piece_positions( std::string FEN_string );
     void set_drag_piece( char piece ) { drag_code = piece; update(); };
-    bool toggle_reverse();
+    void toggle_reverse();
 
     void toggle_bestline();
 
@@ -70,6 +69,7 @@ private:
 
 	STSquare calc_square_from_point( Gdk::Point point );
 	char calc_piece_from_point( Gdk::Point point );
+	char calc_piece_from_square( STSquare square );
 
 	bool draw_board( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr );
@@ -86,14 +86,19 @@ private:
 	Gdk::RGBA white_colour;
 	Gdk::RGBA black_colour;
 	Gdk::RGBA foreground_colour;
+
 	Gdk::Point drag_point;
-	std::map< char, Gdk::Point > source_offsets;
-    std::string piece_positions;
-	bool reversed;
 	char drag_code;
+	STSquare drag_start_square;
+
+	std::map< char, Gdk::Point > source_offsets;
+    //std::string piece_positions;
+	bool reversed;
 	bool is_edit;
 	bool show_bestline_info;
 	std::vector< std::pair<std::string,std::string> > info_data;
+
+	std::map<STSquare,char> pieces;
 
 
 	ChessController& controller;
