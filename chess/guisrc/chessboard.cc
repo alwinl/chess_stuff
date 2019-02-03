@@ -470,12 +470,12 @@ bool ChessBoard::toggle_reverse()
  *
  * \return bool
  */
-bool ChessBoard::toggle_bestline()
+void ChessBoard::toggle_bestline()
 {
     show_bestline_info = ! show_bestline_info;
     update();
 
-    return show_bestline_info;
+    return;
 }
 
 bool ChessBoard::set_edit( bool on )

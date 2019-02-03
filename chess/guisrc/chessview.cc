@@ -34,7 +34,7 @@
  *
  */
 ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
-			: Gtk::ApplicationWindow(cobject), edit_area_visible(false)
+			: Gtk::ApplicationWindow(cobject)
 {
 	set_default_size( 640,480 );
 	set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
@@ -81,30 +81,20 @@ void ChessWindow::set_info( STInfo& info )
 void ChessWindow::set_colours( STColours& colours )
 {
     board_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.white), Gdk::RGBA(colours.black), Gdk::RGBA(colours.fg) );
-    //info_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.fg) );
-    //edit_area->set_colours( Gdk::RGBA(colours.bg) );
 }
 
-bool ChessWindow::reverse_board()
+void ChessWindow::reverse_board()
 {
-    return board_area->toggle_reverse();
+    board_area->toggle_reverse();
 }
 
-bool ChessWindow::toggle_bestline_display()
+void ChessWindow::toggle_bestline_display()
 {
-    return board_area->toggle_bestline();
-}
-
-bool ChessWindow::toggle_edit_area_display( )
-{
-	edit_area_visible = board_area->set_edit( ! edit_area_visible );
-
-    return edit_area_visible;
+    board_area->toggle_bestline();
 }
 
 void ChessWindow::set_edit_mode( bool on )
 {
-
 	mnuGame->hide();
 	mnuStop->hide();
 	mnuArrange->hide();

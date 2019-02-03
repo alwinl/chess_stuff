@@ -64,7 +64,7 @@ public:
     void set_n_sec_text( std::string text ) { set_text( 7, text); };
     void set_depth_text( std::string text ) { set_text( 8, text); };
     void set_bestline_text( std::string text ) { set_text( 9, text); };
-    bool toggle_bestline();
+    void toggle_bestline();
 
 
 private:

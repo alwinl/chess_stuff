@@ -41,11 +41,10 @@ public:
 	void set_drag_piece( char piece );
 	void set_info( STInfo& info );
 	void set_colours( STColours& colours );
-	bool reverse_board();
-	bool toggle_bestline_display();
-
 	void set_edit_mode( bool on );
-    bool toggle_edit_area_display( );
+	void reverse_board();
+	void toggle_bestline_display();
+
 
 private:
 	ChessBoard * board_area;
@@ -53,8 +52,6 @@ private:
     Gtk::MenuBar * mnuGame;
     Gtk::MenuBar * mnuArrange;
     Gtk::MenuBar * mnuStop;
-
-	bool edit_area_visible;
 };
 
 #endif // APPVIEW_H
