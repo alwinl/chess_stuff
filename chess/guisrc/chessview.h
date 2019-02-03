@@ -32,6 +32,11 @@ class ChessBoard;
 struct STColours;
 struct STInfo;
 
+/**-----------------------------------------------------------------------------
+ * \brief The main application window
+ *
+ * This class manages the top level window
+ */
 class ChessWindow : public Gtk::ApplicationWindow
 {
 public:
@@ -43,7 +48,6 @@ public:
 	void set_edit_mode( bool on );
 	void reverse_board();
 	void toggle_bestline_display();
-
 
 private:
 	ChessBoard * board_area;

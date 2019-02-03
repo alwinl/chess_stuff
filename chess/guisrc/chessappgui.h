@@ -28,6 +28,11 @@
 
 class ChessController;
 
+/**-----------------------------------------------------------------------------
+ * \brief GUI Application entry
+ *
+ * This is a derived class to run the GUI application
+ */
 class ChessAppGUI : public ChessAppBase
 {
 public:

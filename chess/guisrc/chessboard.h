@@ -36,8 +36,8 @@ class ChessController;
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
  *
- * This class encapsulates the drawing of a complete chessboard with background
- * on a DrawingArea widget.
+ * This class encapsulates the drawing of a complete chessboard, info area and edit bitmap
+ * with background on a DrawingArea widget.
  */
 class ChessBoard : public Gtk::DrawingArea
 {
