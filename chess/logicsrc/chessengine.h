@@ -28,6 +28,8 @@ class AppModel;
 class ChessAppBase;
 class STSquare;
 
+#include "pods.h"
+
 /** \brief
  */
 class ChessEngine
@@ -40,11 +42,12 @@ public:
     void set_application_pointer( ChessAppBase* app );
 
     void start_move( STSquare square );
-    void do_move( STSquare square );
+    void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
 
 	void arranging_start();
 	void arranging_clear();
+	void arranging_drop( STSquare square, char piece );
 	void arranging_end( bool canceled );
 
 //	void select_edit_mode();
@@ -70,6 +73,8 @@ private:
 	AppModel * model;
 	ChessAppBase * app;
     std::string filename;
+
+    STGameState arrange_state;
 };
 
 #endif // CHESSENGINE_H

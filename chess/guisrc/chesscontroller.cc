@@ -191,6 +191,8 @@ void ChessController::on_action_arrange_done() { director->arrange_end( false );
 void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
 void ChessController::on_action_arrange_cancel() { director->arrange_end( true ); }
 
+void ChessController::do_arrange_drop( STSquare square, char piece ) { director->arrange_drop( square, piece ); }
+void ChessController::make_move(  STSquare start_square, STSquare end_square ) { director->do_move( start_square, end_square ); }
 
 /**-----------------------------------------------------------------------------
  * \brief

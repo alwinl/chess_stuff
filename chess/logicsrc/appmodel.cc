@@ -91,3 +91,4 @@ char AppModel::get_piece( STSquare square )
     return 'K';
 }
 
+

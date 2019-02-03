@@ -66,7 +66,7 @@ public:
 
     void initialise();
     void insert_piece( STSquare square, char piece );
-    void remove_piece( STSquare square, char piece );       // piece used for checking, not necessary for operation
+    void remove_piece( STSquare square );       // piece used for checking, not necessary for operation
 
     void add_move( );
     void remove_move();

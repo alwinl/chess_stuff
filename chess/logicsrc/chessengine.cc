@@ -23,6 +23,8 @@
 #include "appmodel.h"
 #include "chessappbase.h"
 
+#include "fentranslator.h"
+
 using namespace std;
 
 
@@ -50,8 +52,9 @@ void ChessEngine::start_move( STSquare square )
     // if checking succeeds store the fact that the user has picked up a piece
 }
 
-void ChessEngine::do_move( STSquare square )
+void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 {
+	//model->remove_piece()
 }
 
 void ChessEngine::cancel_move( )
@@ -60,12 +63,42 @@ void ChessEngine::cancel_move( )
 
 void ChessEngine::arranging_start()
 {
+	arrange_state = STGameState();
+
+    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    arrange_state.is_white_move = true;             // is it whites next move?
+
 	app->start_arranging();
+
+    STInfo tmp;
+    app->set_piece_positions( arrange_state.piece_positions, tmp );
+}
+
+void ChessEngine::arranging_drop( STSquare square, char piece )
+{
+	FENTranslator translator;
+
+	translator.from_FEN( arrange_state.piece_positions );
+
+	if( translator.query_square(square) != ' ' )
+		translator.remove_from_square( square );
+
+	if( piece != ' ' )
+		translator.add_to_square( square, piece );
+
+	arrange_state.piece_positions = translator.to_FEN();
+
+    STInfo tmp;
+    app->set_piece_positions( arrange_state.piece_positions, tmp );
 }
 
 void ChessEngine::arranging_clear()
 {
+    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    arrange_state.is_white_move = true;             // is it whites next move?
 
+    STInfo tmp;
+    app->set_piece_positions( arrange_state.piece_positions, tmp );
 }
 
 void ChessEngine::arranging_end( bool canceled )

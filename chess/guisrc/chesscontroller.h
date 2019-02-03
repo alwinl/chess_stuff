@@ -61,6 +61,8 @@ public:
 
     void start_edit_mode();
     void end_edit_mode();
+	void do_arrange_drop( STSquare square, char piece );
+	void make_move(  STSquare start_square, STSquare end_square );
 
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );

@@ -411,23 +411,29 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( release_event->x, release_event->y, 1, 1 );
     bool intersecting = board_outline.intersects( mouse_pos );
 
-    if( !intersecting ) {
-        //controller.drag_cancelled();
-        drag_code = ' ';
+    if( is_edit ) {
+		if( intersecting ) {
+			STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
+			controller.do_arrange_drop( end_square, drag_code );
+		} else
+			controller.do_arrange_drop( drag_start_square, ' ' ); /* dropping a space is removing the piece */
 
+		drag_code = ' ';
 		update();
+		return true;
+    }
 
+    if( !intersecting ) {
+        drag_code = ' ';
+		update();
         return true;
     }
 
-
-    //if( is_edit )
-	//	STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
-
-    //controller.drag_end( calc_square_from_point( Gdk::Point(release_event->x, release_event->y) ) );
+	// here we need to do the move
+	STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
+	controller.make_move( drag_start_square, end_square );
 
 	drag_code = ' ';
-
 	update();
 
     return true;

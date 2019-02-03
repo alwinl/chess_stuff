@@ -59,12 +59,13 @@ public:
 
     /* called from GUI */
     void start_move( STSquare square );
-    void do_move( STSquare square );
+    void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();
 
     void arrange_start();
     void arrange_clear();
+    void arrange_drop( STSquare square, char piece );
     void arrange_end( bool canceled );
 
     void piece_value_changes();
