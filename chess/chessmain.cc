@@ -30,12 +30,13 @@
 
 int main( int argc, char *argv[] )
 {
-#ifdef TESTING
-    return TestApplication().run();
-#else
     ChessEngine engine;
 
+#ifdef TESTING
+	ChessAppBase * application = new TestApplication( &engine );
+#else
     ChessAppBase * application = new ChessAppGUI( &engine );
+#endif // TESTING
 
     engine.set_application_pointer( application );
 
@@ -44,5 +45,4 @@ int main( int argc, char *argv[] )
     delete application;
 
     return result;
-#endif // TESTING
 }

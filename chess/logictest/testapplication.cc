@@ -29,12 +29,14 @@
 
 #include <iostream>
 
-TestApplication::TestApplication()
+#include "../logicsrc/pods.h"
+
+TestApplication::TestApplication( ChessEngine* engine_init ) : ChessAppBase( engine_init )
 {
     //ctor
 }
 
-int TestApplication::run()
+int TestApplication::run( int argc, char *argv[] )
 {
 	 // Get the top level suite from the registry
 	CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
@@ -48,3 +50,16 @@ int TestApplication::run()
 
 	return runner.run() ? 0 : 1;		// Return error code 1 if the one of test failed.
 }
+
+void TestApplication::set_piece_positions( std::string FEN_string, STInfo& info ) {}
+void TestApplication::push_statusbar_text( std::string message ) {}
+void TestApplication::message_dialog( std::string message ) {}
+STPieceValues TestApplication::edit_piecevalues( STPieceValues& current ) { return current; }
+
+void TestApplication::start_arranging() {};
+void TestApplication::end_arranging() {};
+
+std::string TestApplication::open_filename( std::string filename, std::string working_dir ) { return "open_name.chess"; }
+std::string TestApplication::save_filename( std::string filename, std::string working_dir ) { return "save_name.chess"; }
+
+void TestApplication::quit() {}

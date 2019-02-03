@@ -22,6 +22,7 @@
 #include "testcolourchooser.h"
 
 #include "../logicsrc/colourchooser.h"
+#include "../logicsrc/pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestColourChooser );
 

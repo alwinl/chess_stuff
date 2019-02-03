@@ -22,17 +22,37 @@
 #ifndef APPTESTER_H
 #define APPTESTER_H
 
+#include "../logicsrc/chessappbase.h"
 
-class TestApplication
+class ChessController;
+
+/** \brief
+ */
+class TestApplication : public ChessAppBase
 {
 public:
-    /** Default constructor */
-    TestApplication();
+	TestApplication( ChessEngine* engine_init );
+	virtual ~TestApplication() {};
 
-    int run();
-protected:
+	/* called from main function */;
+	virtual int run(  int argc, char *argv[] );
+
+	/* Called from logic */
+    virtual void set_piece_positions( std::string FEN_string, STInfo& info );
+    virtual void push_statusbar_text( std::string message );
+    virtual void message_dialog( std::string message );
+    virtual STPieceValues edit_piecevalues( STPieceValues& current );
+
+    virtual void start_arranging();
+    virtual void end_arranging();
+
+    virtual std::string open_filename( std::string filename, std::string working_dir );
+    virtual std::string save_filename( std::string filename, std::string working_dir );
+
+    virtual void quit();
 
 private:
+	ChessEngine* engine;
 };
 
 #endif // APPTESTER_H
