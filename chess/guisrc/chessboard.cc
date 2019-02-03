@@ -488,18 +488,20 @@ bool ChessBoard::set_edit( bool on )
 	return is_edit;
 }
 
-/**-----------------------------------------------------------------------------
- * \brief
- *
- * \param index int
- * \param text std::string
- * \return void
- */
-void ChessBoard::set_text( int index, string text )
+void ChessBoard::set_info( STInfo& info )
 {
-    info_data[index].second = text;
+    info_data[0].second = info.turn;
+    info_data[1].second = info.white;
+    info_data[2].second = info.black;
+    info_data[3].second = info.time;
+    info_data[4].second = info.level;
+    info_data[5].second = info.value;
+    info_data[6].second = info.nodes;
+    info_data[7].second = info.n_sec;
+    info_data[8].second = info.depth;
+    info_data[9].second = info.bestline;
+
     update();
 }
-
 
 

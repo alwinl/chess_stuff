@@ -66,16 +66,7 @@ void ChessWindow::set_drag_piece( char piece )
 
 void ChessWindow::set_info( STInfo& info )
 {
-    board_area->set_turn_text( info.turn );
-    board_area->set_white_text( info.white );
-    board_area->set_black_text(  info.black );
-    board_area->set_time_text( info.time );
-    board_area->set_level_text( info.level );
-    board_area->set_value_text( info.value );
-    board_area->set_nodes_text( info.nodes );
-    board_area->set_n_sec_text( info.n_sec );
-    board_area->set_depth_text( info.depth );
-    board_area->set_bestline_text( info.bestline );
+	board_area->set_info( info );
 }
 
 void ChessWindow::set_colours( STColours& colours )
