@@ -41,7 +41,6 @@ void ChessAppBase::arrange_clear() { engine->arranging_clear(); };
 void ChessAppBase::arrange_end( bool canceled ) { engine->arranging_end(canceled); };
 
 
-void ChessAppBase::select_edit_piece( char piece ) { engine->select_edit_piece( piece ); };
 void ChessAppBase::piece_value_changes() { engine->piece_value_changes(); };
 
 void ChessAppBase::new_game() { engine->new_game(); };

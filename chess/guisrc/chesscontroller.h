@@ -28,8 +28,6 @@
 
 #include "../logicsrc/pods.h"
 
-//#include "chesslevel.h"
-
 class ChessAppBase;
 
 class ChessWindow;
@@ -56,13 +54,7 @@ public:
 	// Instance creator as constructor is private
 	static Glib::RefPtr<ChessController> create( ChessAppBase* director_init );
 
-	void drag_start( STSquare square );
-	void drag_end( STSquare square );
-	void drag_cancelled();
-
-	void select_edit_piece( char piece );
-
-    void set_piece_positions( std::string FEN_string, STInfo info );
+	void set_piece_positions( std::string FEN_string, STInfo info );
     void push_statusbar_text( std::string message );
     void message_dialog( std::string message );
     STPieceValues run_piece_value_dialog( STPieceValues current );

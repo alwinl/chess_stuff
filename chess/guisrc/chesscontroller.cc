@@ -161,19 +161,6 @@ void ChessController::on_action_not_implemented()
 /**-----------------------------------------------------------------------------
  * \brief engine dispatchers
  */
-void ChessController::drag_start( STSquare square )
-    { director->start_move( square ); }
-
-void ChessController::drag_end( STSquare square )
-    { director->do_move( square ); }
-
-void ChessController::drag_cancelled()
-    { director->cancel_move(  ); }
-
-void ChessController::select_edit_piece( char piece )
-	{ director->select_edit_piece( piece ); }
-
-
 void ChessController::on_action_new() { director->new_game(  ); }
 
 void ChessController::on_action_open() { director->open_file(  ); }

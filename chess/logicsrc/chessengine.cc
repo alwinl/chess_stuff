@@ -58,11 +58,6 @@ void ChessEngine::cancel_move( )
 {
 }
 
-void ChessEngine::select_edit_piece( char piece )
-{
-}
-
-
 void ChessEngine::arranging_start()
 {
 	app->start_arranging();

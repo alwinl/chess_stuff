@@ -43,8 +43,6 @@ public:
     void do_move( STSquare square );
     void cancel_move();
 
-	void select_edit_piece( char piece );
-
 	void arranging_start();
 	void arranging_clear();
 	void arranging_end( bool canceled );

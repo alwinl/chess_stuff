@@ -61,7 +61,6 @@ public:
     void start_move( STSquare square );
     void do_move( STSquare square );
     void cancel_move();
-    void select_edit_piece( char piece );
     void advance();
 
     void arrange_start();
