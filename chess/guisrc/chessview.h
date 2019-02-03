@@ -38,7 +38,6 @@ public:
 	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
 	void set_piece_positions( std::string FEN_string );
-	void set_drag_piece( char piece );
 	void set_info( STInfo& info );
 	void set_colours( STColours& colours );
 	void set_edit_mode( bool on );

@@ -44,27 +44,22 @@ void ChessEngine::set_application_pointer( ChessAppBase* app_init )
 
 void ChessEngine::start_move( STSquare square )
 {
-    char piece = model->get_piece( square );
+//    char piece = model->get_piece( square );
 
     // put in checking code, is there actually a piece on this square and is it the right colour
     // if checking succeeds store the fact that the user has picked up a piece
-    app->set_drag_piece( piece );
 }
 
 void ChessEngine::do_move( STSquare square )
 {
-    app->set_drag_piece( ' ' );
 }
 
 void ChessEngine::cancel_move( )
 {
-    app->set_drag_piece( ' ' );
-
 }
 
 void ChessEngine::select_edit_piece( char piece )
 {
-    app->set_drag_piece( piece );
 }
 
 

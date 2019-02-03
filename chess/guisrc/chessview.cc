@@ -59,11 +59,6 @@ void ChessWindow::set_piece_positions( std::string FEN_string )
     board_area->set_piece_positions( FEN_string );
 }
 
-void ChessWindow::set_drag_piece( char piece )
-{
-    board_area->set_drag_piece( piece );
-}
-
 void ChessWindow::set_info( STInfo& info )
 {
 	board_area->set_info( info );

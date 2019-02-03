@@ -48,14 +48,10 @@ public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
 	void set_edit( bool on );
-
     void set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg );
     void set_piece_positions( std::string FEN_string );
-    void set_drag_piece( char piece ) { drag_code = piece; update(); };
     void toggle_reverse();
-
     void toggle_bestline();
-
 	void set_info( STInfo& info );
 
 private:
@@ -92,14 +88,11 @@ private:
 	STSquare drag_start_square;
 
 	std::map< char, Gdk::Point > source_offsets;
-    //std::string piece_positions;
 	bool reversed;
 	bool is_edit;
 	bool show_bestline_info;
 	std::vector< std::pair<std::string,std::string> > info_data;
-
 	std::map<STSquare,char> pieces;
-
 
 	ChessController& controller;
 };

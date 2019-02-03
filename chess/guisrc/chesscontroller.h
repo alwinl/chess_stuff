@@ -63,7 +63,6 @@ public:
 	void select_edit_piece( char piece );
 
     void set_piece_positions( std::string FEN_string, STInfo info );
-    void set_drag_piece( char piece );
     void push_statusbar_text( std::string message );
     void message_dialog( std::string message );
     STPieceValues run_piece_value_dialog( STPieceValues current );

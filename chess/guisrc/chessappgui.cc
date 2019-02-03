@@ -43,9 +43,6 @@ int ChessAppGUI::run(  int argc, char *argv[] )
 void ChessAppGUI::set_piece_positions( std::string FEN_string, STInfo& info )
 	{ controller->set_piece_positions( FEN_string, info ); }
 
-void ChessAppGUI::set_drag_piece( char piece )
-	{ controller->set_drag_piece( piece ); }
-
 void ChessAppGUI::push_statusbar_text( std::string message )
 	{ controller->push_statusbar_text( message ); }
 

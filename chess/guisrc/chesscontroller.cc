@@ -316,11 +316,6 @@ void ChessController::set_piece_positions( std::string FEN_string, STInfo info )
     view->set_info( info );
 }
 
-void ChessController::set_drag_piece( char piece )
-{
-    view->set_drag_piece( piece );
-}
-
 STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
 {
     dlgPieceValues->get_new_piece_values( current );

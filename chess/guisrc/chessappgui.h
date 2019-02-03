@@ -39,7 +39,6 @@ public:
 
 	/* Called from logic */
     virtual void set_piece_positions( std::string FEN_string, STInfo& info );
-    virtual void set_drag_piece( char piece );
     virtual void push_statusbar_text( std::string message );
     virtual void message_dialog( std::string message );
     virtual STPieceValues edit_piecevalues( STPieceValues& current );
