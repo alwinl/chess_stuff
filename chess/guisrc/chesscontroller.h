@@ -28,6 +28,8 @@
 
 #include "../logicsrc/pods.h"
 
+//#include "chesslevel.h"
+
 class ChessAppBase;
 
 class ChessWindow;
@@ -81,40 +83,48 @@ private:
 
 	// actions
 	void on_action_not_implemented();
+
 	void on_action_new();			// initialise the model to the empty condition
 	void on_action_open();			// load the model from a file
 	void on_action_save();			// save the model to a file
 	void on_action_save_as();		// save the model to a new file
 	void on_action_quit();			// quit application
 	void on_action_play();
+	void on_action_hint();
+
+	void on_action_undo();
+	void on_action_redo();
 	void on_action_arrange();
-	void on_action_easy();
-	void on_action_timed();
-	void on_action_totaltime();
-    void on_action_matching();
-    void on_action_infinite();
-    void on_action_play_search();
-    void on_action_mate_search();
+
+	void on_level_changed();
+
     void on_action_piecevalues();
+
 	void on_action_colours();
     void on_action_reverse();
     void on_action_showbestline();
+
 	void on_action_help_about();
 
 	void on_action_arrange_done();
 	void on_action_arrange_clear();
-	void on_action_arrange_whiteturn();
-	void on_action_arrange_blackturn();
+	void on_arrange_turn_changed();
 	void on_action_arrange_cancel();
 
 	void on_action_thinking_stop();
 
+	enum eTurns { TURNWHITE, TURNBLACK, TURNCOUNT };
+
 	STColours app_colours;
 	ChessAppBase* director;
+	eLevels current_level;
+	eTurns current_turn;
 
 	// Widgets
 	ChessWindow * view;
     Gtk::Statusbar * status_bar;
+	Gtk::RadioMenuItem * chkLevel[LEVELCOUNT];
+	Gtk::RadioMenuItem * chkTurn[TURNCOUNT];
 
     GUIColourChooser * dlgColourChooser;
     GUITimeInputter * dlgTimeInputter;

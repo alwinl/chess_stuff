@@ -25,22 +25,25 @@
 
 ChessAppBase::ChessAppBase( ChessEngine* engine_init ) :  engine(engine_init)
 {
-	//ctor
 }
 
 ChessAppBase::~ChessAppBase()
 {
-	//dtor
 }
 
 void ChessAppBase::start_move( STSquare square ) { engine->start_move(square); };
 void ChessAppBase::do_move( STSquare square ){ engine->do_move( square ); };
 void ChessAppBase::cancel_move() { engine->cancel_move(); };
-void ChessAppBase::select_edit_mode() { engine->select_edit_mode(); };
-void ChessAppBase::end_edit_mode() { engine->leave_edit_mode(); };
-void ChessAppBase::select_edit_piece( char piece ) { engine->select_edit_piece( piece ); };
 void ChessAppBase::advance() { engine->advance(); };
+
+void ChessAppBase::arrange_start() { engine->arranging_start(); };
+void ChessAppBase::arrange_clear() { engine->arranging_clear(); };
+void ChessAppBase::arrange_end( bool canceled ) { engine->arranging_end(canceled); };
+
+
+void ChessAppBase::select_edit_piece( char piece ) { engine->select_edit_piece( piece ); };
 void ChessAppBase::piece_value_changes() { engine->piece_value_changes(); };
+
 void ChessAppBase::new_game() { engine->new_game(); };
 void ChessAppBase::end_app() { engine->quit(); };
 void ChessAppBase::open_file() { engine->open_file(); };

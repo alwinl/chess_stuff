@@ -48,10 +48,10 @@ public:
     virtual void set_drag_piece( char piece ) = 0;
     virtual void push_statusbar_text( std::string message ) = 0;
     virtual void message_dialog( std::string message ) = 0;
-    virtual STPieceValues run_piece_value_dialog( STPieceValues& current ) = 0;
+    virtual STPieceValues edit_piecevalues( STPieceValues& current ) = 0;
 
-    virtual void start_edit_mode() = 0;
-    virtual void end_edit_mode() = 0;
+    virtual void start_arranging() = 0;
+    virtual void end_arranging() = 0;
 
     virtual std::string open_filename( std::string filename, std::string working_dir ) = 0;
     virtual std::string save_filename( std::string filename, std::string working_dir ) = 0;
@@ -64,7 +64,11 @@ public:
     void cancel_move();
     void select_edit_piece( char piece );
     void advance();
-    void select_edit_mode();
+
+    void arrange_start();
+    void arrange_clear();
+    void arrange_end( bool canceled );
+
     void piece_value_changes();
     void new_game();
     void end_app();

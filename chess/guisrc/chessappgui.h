@@ -42,10 +42,10 @@ public:
     virtual void set_drag_piece( char piece );
     virtual void push_statusbar_text( std::string message );
     virtual void message_dialog( std::string message );
-    virtual STPieceValues run_piece_value_dialog( STPieceValues& current );
+    virtual STPieceValues edit_piecevalues( STPieceValues& current );
 
-    virtual void start_edit_mode();
-    virtual void end_edit_mode();
+    virtual void start_arranging();
+    virtual void end_arranging();
 
     virtual std::string open_filename( std::string filename, std::string working_dir );
     virtual std::string save_filename( std::string filename, std::string working_dir );

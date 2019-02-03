@@ -67,15 +67,22 @@ void ChessEngine::select_edit_piece( char piece )
     app->set_drag_piece( piece );
 }
 
-void ChessEngine::select_edit_mode()
+
+void ChessEngine::arranging_start()
 {
-		app->select_edit_mode();
+	app->start_arranging();
 }
 
-void ChessEngine::leave_edit_mode()
+void ChessEngine::arranging_clear()
 {
-	app->end_edit_mode();
+
 }
+
+void ChessEngine::arranging_end( bool canceled )
+{
+	app->end_arranging();
+}
+
 
 
 void ChessEngine::open_file( )
@@ -147,7 +154,7 @@ void ChessEngine::piece_value_changes( )
 {
     STPieceValues current;
 
-    app->run_piece_value_dialog( current );
+    app->edit_piecevalues( current );
 }
 
 void ChessEngine::quit( )

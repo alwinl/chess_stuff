@@ -45,8 +45,12 @@ public:
 
 	void select_edit_piece( char piece );
 
-	void select_edit_mode();
-	void leave_edit_mode();
+	void arranging_start();
+	void arranging_clear();
+	void arranging_end( bool canceled );
+
+//	void select_edit_mode();
+//	void leave_edit_mode();
 
     void advance();
 

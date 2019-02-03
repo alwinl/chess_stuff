@@ -24,6 +24,8 @@
 
 #include <string>
 
+enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLAYSEARCH, MATESEARCH, LEVELCOUNT };
+
 /**-----------------------------------------------------------------------------
  * \brief Struct to hold the colours we need in this application
  *

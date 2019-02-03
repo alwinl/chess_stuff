@@ -26,33 +26,22 @@
 
 ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
 {
-	//ctor
 }
 
 ChessAppGUI::~ChessAppGUI()
 {
-	//dtor
 }
 
 /* called from main function */;
 int ChessAppGUI::run(  int argc, char *argv[] )
 {
 	controller = ChessController::create( this );
-
 	return controller->run( argc, argv );
 }
 
 /* Called from logic */
-
 void ChessAppGUI::set_piece_positions( std::string FEN_string, STInfo& info )
 	{ controller->set_piece_positions( FEN_string, info ); }
-
-void ChessAppGUI::start_edit_mode()
-	{ controller->start_edit_mode(); }
-
-void ChessAppGUI::end_edit_mode()
-	{ controller->end_edit_mode(); }
-
 
 void ChessAppGUI::set_drag_piece( char piece )
 	{ controller->set_drag_piece( piece ); }
@@ -63,7 +52,13 @@ void ChessAppGUI::push_statusbar_text( std::string message )
 void ChessAppGUI::message_dialog( std::string message )
 	{ controller->message_dialog( message ); }
 
-STPieceValues ChessAppGUI::run_piece_value_dialog( STPieceValues& current )
+void ChessAppGUI::start_arranging()
+	{ controller->start_edit_mode(); }
+
+void ChessAppGUI::end_arranging()
+	{ controller->end_edit_mode(); }
+
+STPieceValues ChessAppGUI::edit_piecevalues( STPieceValues& current )
 	{ return controller->run_piece_value_dialog( current ); }
 
 std::string ChessAppGUI::open_filename( std::string filename, std::string working_dir )

@@ -80,19 +80,11 @@ void ChessController::on_startup()
     add_action("saveas",  sigc::mem_fun( *this, &ChessController::on_action_save_as ) );
     add_action("quit",    sigc::mem_fun( *this, &ChessController::on_action_quit ) );
     add_action("play",    sigc::mem_fun( *this, &ChessController::on_action_play ) );
-    add_action("hint",    sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
+    add_action("hint",    sigc::mem_fun( *this, &ChessController::on_action_hint ) );
 
-    add_action("undo",    sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
-    add_action("redo",    sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
+    add_action("undo",    sigc::mem_fun( *this, &ChessController::on_action_undo ) );
+    add_action("redo",    sigc::mem_fun( *this, &ChessController::on_action_redo ) );
     add_action("arrange", sigc::mem_fun( *this, &ChessController::on_action_arrange ) );
-
-    add_action("easy",       sigc::mem_fun( *this, &ChessController::on_action_easy ) );
-    add_action("timed",      sigc::mem_fun( *this, &ChessController::on_action_timed ) );
-    add_action("total",      sigc::mem_fun( *this, &ChessController::on_action_totaltime ) );
-    add_action("matching",   sigc::mem_fun( *this, &ChessController::on_action_matching ) );
-    add_action("infinite",   sigc::mem_fun( *this, &ChessController::on_action_infinite ) );
-    add_action("playsearch", sigc::mem_fun( *this, &ChessController::on_action_play_search ) );
-    add_action("matesearch", sigc::mem_fun( *this, &ChessController::on_action_mate_search ) );
 
     add_action("twoplayer",   sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
     add_action("demomode",    sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
@@ -105,22 +97,36 @@ void ChessController::on_startup()
     add_action("reverse",      sigc::mem_fun( *this, &ChessController::on_action_reverse ) );
     add_action("showbestline", sigc::mem_fun( *this, &ChessController::on_action_showbestline ) );
 
-
     add_action("about",   sigc::mem_fun( *this, &ChessController::on_action_help_about ) );
 
     add_action("arrange_done", sigc::mem_fun( *this, &ChessController::on_action_arrange_done ) );
     add_action("arrange_clear", sigc::mem_fun( *this, &ChessController::on_action_arrange_clear ) );
-    add_action("arrange_white_turn", sigc::mem_fun( *this, &ChessController::on_action_arrange_whiteturn ) );
-    add_action("arrange_black_turn", sigc::mem_fun( *this, &ChessController::on_action_arrange_blackturn ) );
     add_action("arrange_cancel",  sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
 
     add_action("thinking_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
-
 
     Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
 
 	ui_model->get_widget_derived("main_view", view, *this );
     ui_model->get_widget( "widStatusBar", status_bar );
+
+	vector<string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
+	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
+		ui_model->get_widget( level_widgets[level], chkLevel[level] );
+		chkLevel[level]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_level_changed ) );
+	}
+
+	chkLevel[EASY]->set_active();
+	current_level = EASY;
+
+	vector<string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
+	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
+		ui_model->get_widget( turn_widgets[turn], chkTurn[turn] );
+		chkTurn[turn]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_arrange_turn_changed ) );
+	}
+
+	chkTurn[TURNWHITE]->set_active();
+	current_turn = TURNWHITE;
 
 	dlgColourChooser = new GUIColourChooser( ui_model, *view );
 	dlgTimeInputter = new GUITimeInputter( ui_model, *view );
@@ -145,28 +151,165 @@ void ChessController::on_activate()
 
 
 /**-----------------------------------------------------------------------------
- * \brief
+ * \brief Place holder for actions we have not programmed yet
  */
-void ChessController::message_dialog( string message )
+void ChessController::on_action_not_implemented()
 {
-    Gtk::MessageDialog( *view, message, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	message_dialog( "not implemented yet" );
 }
+
+/**-----------------------------------------------------------------------------
+ * \brief engine dispatchers
+ */
+void ChessController::drag_start( STSquare square )
+    { director->start_move( square ); }
+
+void ChessController::drag_end( STSquare square )
+    { director->do_move( square ); }
+
+void ChessController::drag_cancelled()
+    { director->cancel_move(  ); }
+
+void ChessController::select_edit_piece( char piece )
+	{ director->select_edit_piece( piece ); }
+
+
+void ChessController::on_action_new() { director->new_game(  ); }
+
+void ChessController::on_action_open() { director->open_file(  ); }
+
+void ChessController::on_action_save() { director->save_file(  ); }
+
+void ChessController::on_action_save_as() { director->save_as(  ); }
+
+void ChessController::on_action_quit() { director->end_app(  ); }
+
+void ChessController::on_action_play() { director->advance(  ); }
+
+void ChessController::on_action_hint() { }
+
+void ChessController::on_action_undo() { }
+
+void ChessController::on_action_redo() { }
+
+void ChessController::on_action_piecevalues() { director->piece_value_changes(  ); }
+
+
+void ChessController::on_action_arrange() { director->arrange_start(); }
+
+
+void ChessController::on_action_thinking_stop() {}
+
+void ChessController::on_action_arrange_done() { director->arrange_end( false ); }
+void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
+void ChessController::on_action_arrange_cancel() { director->arrange_end( true ); }
 
 
 /**-----------------------------------------------------------------------------
  * \brief
  *
- * \param message string
  * \return void
+ *
  */
+void ChessController::on_level_changed()
+{
+	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
+		if( chkLevel[level]->get_active() ) {
+			if( current_level != level ) {
+				message_dialog( "level changed" );
+				current_level = (eLevels)level;
+			}
+		}
+	}
+}
+
+
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * \return void
+ *
+ */
+void ChessController::on_arrange_turn_changed()
+{
+	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
+		if( chkTurn[turn]->get_active() ) {
+			if( current_turn != turn ) {
+				message_dialog( "turn changed" );
+				current_turn = (eTurns)turn;
+			}
+		}
+	}
+}
+
+/*
+ * The next couple of functions do not need to be dispatched up to the engine.
+ * These are purely GUI matters.
+ */
+
+/**-----------------------------------------------------------------------------
+ * \brief Run the Colours Dialog
+ *
+ * Provide the user with a means to set the background, foreground and white and black tile colours
+ */
+void ChessController::on_action_colours()
+{
+    dlgColourChooser->choose_colours( app_colours );
+    view->set_colours( app_colours );
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Tell the view to turn the board 180 degrees
+ */
+void ChessController::on_action_reverse()
+{
+	view->reverse_board();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Tell the view to toggle displaying the bestline information
+ */
+void ChessController::on_action_showbestline()
+{
+    view->toggle_bestline_display();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Show some application information
+ *
+ * Show our Help About... box
+ */
+void ChessController::on_action_help_about()
+{
+    Gtk::AboutDialog dlg;
+
+    dlg.set_transient_for( *view ) ;
+    dlg.set_name("chess") ;
+    dlg.set_logo( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") ) ;
+    dlg.set_version( "0.01" ) ;
+    dlg.set_comments("A GtkMM translation of Borland Chess") ;
+    dlg.set_copyright( "Copyright © 2017 Alwin Leerling" ) ;
+    dlg.set_website( "http://github" ) ;
+
+    dlg.run();
+}
+
+
+/*
+ * The next functions are called from the engine
+ */
+
+void ChessController::message_dialog( string message )
+{
+    Gtk::MessageDialog( *view, message, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+}
+
 void ChessController::push_statusbar_text( string message )
 {
     status_bar->push( message );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief
- */
 void ChessController::set_piece_positions( std::string FEN_string, STInfo info )
 {
     view->set_piece_positions( FEN_string );
@@ -176,6 +319,23 @@ void ChessController::set_piece_positions( std::string FEN_string, STInfo info )
 void ChessController::set_drag_piece( char piece )
 {
     view->set_drag_piece( piece );
+}
+
+STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
+{
+    dlgPieceValues->get_new_piece_values( current );
+
+    return current;
+}
+
+void ChessController::start_edit_mode()
+{
+	view->set_edit_mode( true );
+}
+
+void ChessController::end_edit_mode()
+{
+	view->set_edit_mode( false );
 }
 
 /**-----------------------------------------------------------------------------
@@ -238,94 +398,7 @@ string ChessController::save_filename( string filename, string working_dir )
     return ( dlg.run() != Gtk::RESPONSE_OK ) ? "" :  dlg.get_filename();
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Place holder for actions we have not programmed yet
- */
-void ChessController::on_action_not_implemented()
-{
-	message_dialog( "not implemented yet" );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief engine dispatchers
- */
-void ChessController::drag_start( STSquare square )
-    { director->start_move( square ); }
-
-void ChessController::drag_end( STSquare square )
-    { director->do_move( square ); }
-
-void ChessController::drag_cancelled()
-    { director->cancel_move(  ); }
-
-void ChessController::select_edit_piece( char piece )
-	{ director->select_edit_piece( piece ); }
-
-
-void ChessController::on_action_new()
-    { director->new_game(  ); }
-
-void ChessController::on_action_open()
-    { director->open_file(  ); }
-
-void ChessController::on_action_save()
-    { director->save_file(  ); }
-
-void ChessController::on_action_save_as()
-    { director->save_as(  ); }
-
-void ChessController::on_action_quit()
-    { director->end_app(  ); }
-
-void ChessController::on_action_play()
-    { director->advance(  ); }
-
-void ChessController::on_action_piecevalues()
-    { director->piece_value_changes(  ); }
-
-/**-----------------------------------------------------------------------------
- * \brief Tell the view to toggle displaying the bestline information
- */
-void ChessController::on_action_arrange()
-{
-	//director->start_edit_mode();
-    //view->toggle_edit_area_display();
-
-	view->set_edit_mode( true );
-
-}
-
-
-void ChessController::on_action_thinking_stop() {}
-
-void ChessController::on_action_arrange_done() { view->set_edit_mode( false ); }
-void ChessController::on_action_arrange_clear() {}
-void ChessController::on_action_arrange_whiteturn() {}
-void ChessController::on_action_arrange_blackturn() {}
-void ChessController::on_action_arrange_cancel() {}
-
-
-
-
-void ChessController::start_edit_mode()
-{
-	view->set_edit_mode( true );
-}
-
-void ChessController::end_edit_mode()
-{
-	view->set_edit_mode( false );
-}
-
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_easy()
-{
-	message_dialog( "on_action_easy not implemented yet" );
-}
-
+#if 0
 /**-----------------------------------------------------------------------------
  * \brief
  */
@@ -353,95 +426,5 @@ void ChessController::on_action_totaltime()
 //    int minutes_per_game = retval.second;
     // now we need to do something with minutes_per_game.
 }
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_matching()
-{
-	message_dialog( "on_action_matching not implemented yet" );
-
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_infinite()
-{
-	message_dialog( "on_action_infinite not implemented yet" );
-
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_play_search()
-{
-	message_dialog( "on_action_play_search not implemented yet" );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_mate_search()
-{
-	message_dialog( "on_action_mate_search not implemented yet" );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
-{
-    dlgPieceValues->get_new_piece_values( current );
-
-    return current;
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Run the Colours Dialog
- *
- * Provide the user with a means to set the background, foreground and white and black tile colours
- */
-void ChessController::on_action_colours()
-{
-    dlgColourChooser->choose_colours( app_colours );
-    view->set_colours( app_colours );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Tell the view to turn the board 180 degrees
- */
-void ChessController::on_action_reverse()
-{
-	view->reverse_board();
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Tell the view to toggle displaying the bestline information
- */
-void ChessController::on_action_showbestline()
-{
-    view->toggle_bestline_display();
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Show some application information
- *
- * Show our Help About... box
- */
-void ChessController::on_action_help_about()
-{
-    Gtk::AboutDialog dlg;
-
-    dlg.set_transient_for( *view ) ;
-    dlg.set_name("chess") ;
-    dlg.set_logo( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") ) ;
-    dlg.set_version( "0.01" ) ;
-    dlg.set_comments("A GtkMM translation of Borland Chess") ;
-    dlg.set_copyright( "Copyright © 2017 Alwin Leerling" ) ;
-    dlg.set_website( "http://github" ) ;
-
-    dlg.run();
-}
+#endif // 0
 

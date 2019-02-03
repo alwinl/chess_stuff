@@ -282,18 +282,6 @@
       <action-widget response="-6">button4</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkRadioMenuItem" id="radioLevel">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="action_name">app.easy</property>
-    <property name="draw_as_radio">True</property>
-  </object>
-  <object class="GtkRadioMenuItem" id="radioTurn">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="action_name">app.arrange_turn</property>
-    <property name="draw_as_radio">True</property>
-  </object>
   <object class="GtkWindow" id="main_view">
     <property name="can_focus">False</property>
     <child>
@@ -463,61 +451,54 @@
                           <object class="GtkRadioMenuItem" id="chkLevelEasy">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.easy</property>
                             <property name="label" translatable="yes">_Easy</property>
                             <property name="use_underline">True</property>
                             <property name="active">True</property>
-                            <property name="group">radioLevel</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkRadioMenuItem" id="chkLevelTimed">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.timed</property>
                             <property name="label" translatable="yes">_Time per move...</property>
                             <property name="use_underline">True</property>
-                            <property name="group">radioLevel</property>
+                            <property name="group">chkLevelEasy</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkRadioMenuItem" id="chkLevelTotalTime">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.total</property>
                             <property name="label" translatable="yes">T_otal Time...</property>
                             <property name="use_underline">True</property>
-                            <property name="group">radioLevel</property>
+                            <property name="group">chkLevelEasy</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkRadioMenuItem" id="chkLevelInfinite">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.infinite</property>
                             <property name="label" translatable="yes">_Infinite</property>
                             <property name="use_underline">True</property>
-                            <property name="group">radioLevel</property>
+                            <property name="group">chkLevelEasy</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkRadioMenuItem" id="chkLevelPlaySearch">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.playsearch</property>
                             <property name="label" translatable="yes">_Play search...</property>
                             <property name="use_underline">True</property>
-                            <property name="group">radioLevel</property>
+                            <property name="group">chkLevelEasy</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkRadioMenuItem" id="chkLevelMateSearch">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.matesearch</property>
                             <property name="label" translatable="yes">M_ate search</property>
                             <property name="use_underline">True</property>
-                            <property name="group">radioLevel</property>
+                            <property name="group">chkLevelEasy</property>
                           </object>
                         </child>
                       </object>
@@ -715,26 +696,23 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkRadioMenuItem">
+                          <object class="GtkRadioMenuItem" id="chkTurnWhite">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.arrange_white_turn</property>
                             <property name="label" translatable="yes">_White Turn</property>
                             <property name="use_underline">True</property>
                             <property name="active">True</property>
                             <property name="draw_as_radio">True</property>
-                            <property name="group">radioTurn</property>
                           </object>
                         </child>
                         <child>
-                          <object class="GtkRadioMenuItem">
+                          <object class="GtkRadioMenuItem" id="chkTurnBlack">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action_name">app.arrange_black_turn</property>
                             <property name="label" translatable="yes">_Black Turn</property>
                             <property name="use_underline">True</property>
                             <property name="draw_as_radio">True</property>
-                            <property name="group">radioTurn</property>
+                            <property name="group">chkTurnWhite</property>
                           </object>
                         </child>
                         <child>

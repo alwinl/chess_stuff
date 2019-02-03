@@ -15,6 +15,7 @@
 					<Add option="-g" />
 					<Add directory="logicsrc/" />
 					<Add directory="guisrc/" />
+					<Add directory="./" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -26,6 +27,7 @@
 					<Add option="-O2" />
 					<Add directory="logicsrc/" />
 					<Add directory="guisrc/" />
+					<Add directory="./" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -40,6 +42,7 @@
 					<Add option="-g" />
 					<Add option="-DTESTING" />
 					<Add directory="logicsrc/" />
+					<Add directory="./" />
 				</Compiler>
 				<Linker>
 					<Add library="cppunit" />
