@@ -44,10 +44,12 @@ public:
 
 	/* Called from logic */
 
-    virtual void set_piece_positions( std::string FEN_string, STInfo& info ) = 0;
+    virtual void set_piece_positions( std::string FEN_string ) = 0;
+    virtual void set_info(  STInfo& info ) = 0;
     virtual void push_statusbar_text( std::string message ) = 0;
     virtual void message_dialog( std::string message ) = 0;
     virtual STPieceValues edit_piecevalues( STPieceValues& current ) = 0;
+	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 
     virtual void start_arranging() = 0;
     virtual void end_arranging() = 0;
@@ -58,7 +60,6 @@ public:
     virtual void quit() = 0;
 
     /* called from GUI */
-    void start_move( STSquare square );
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();

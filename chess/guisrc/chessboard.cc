@@ -76,7 +76,9 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
     info_data.push_back( pair<string,string>("Bestline", "empty") );
 
     show_bestline_info = true;
+    animate_code = ' ';
 
+    controller.set_board( this );
 }
 
 /**-----------------------------------------------------------------------------
@@ -258,6 +260,21 @@ bool ChessBoard::draw_drag_piece( const Cairo::RefPtr<Cairo::Context>& cr )
 }
 
 /**-----------------------------------------------------------------------------
+ * \brief
+ */
+bool ChessBoard::draw_animate_piece( const Cairo::RefPtr<Cairo::Context>& cr )
+{
+	Gdk::Rectangle dest = Gdk::Rectangle( animate_point.get_x(), animate_point.get_y(), SQUARE_SIZE, SQUARE_SIZE );
+	Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[animate_code].get_x(), dest.get_y() - source_offsets[animate_code].get_y() );
+
+	cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
+	cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
+	cr->fill();
+
+	return false;
+}
+
+/**-----------------------------------------------------------------------------
  * \brief Paint a chessboard
  *
  * \param cr const Cairo::RefPtr<Cairo::Context>&
@@ -284,6 +301,9 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
 	// Draw the drag piece
     if( drag_code != ' ' )
 		draw_drag_piece( cr );
+
+	if( animate_code != ' ' )
+		draw_animate_piece( cr );
 
 	return false;
 
@@ -412,29 +432,28 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
     bool intersecting = board_outline.intersects( mouse_pos );
 
     if( is_edit ) {
+		drag_code = ' ';
+		update();
+
 		if( intersecting ) {
 			STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
 			controller.do_arrange_drop( end_square, drag_code );
 		} else
 			controller.do_arrange_drop( drag_start_square, ' ' ); /* dropping a space is removing the piece */
 
-		drag_code = ' ';
-		update();
 		return true;
     }
 
+	drag_code = ' ';
+	update();
+
     if( !intersecting ) {
-        drag_code = ' ';
-		update();
         return true;
     }
 
 	// here we need to do the move
 	STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
 	controller.make_move( drag_start_square, end_square );
-
-	drag_code = ' ';
-	update();
 
     return true;
 }
@@ -482,6 +501,8 @@ void ChessBoard::set_piece_positions( std::string FEN_string )
             ++square.file;
         }
     }
+
+    animate_code = ' ';
 
     update();
 }
@@ -576,4 +597,58 @@ void ChessBoard::set_info( STInfo& info )
     update();
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ */
+void ChessBoard::animate_start( STSquare start_square, STSquare end_square, char piece )
+{
+	Gdk::Point end_point;
 
+	if( reversed ) {
+		start_square.file = 7 - start_square.file;
+		end_square.file = 7 - end_square.file;
+	} else {
+		start_square.rank = 7 - start_square.rank;
+		end_square.rank = 7 - end_square.rank;
+	}
+
+	animate_point.set_x( board_outline.get_x() + start_square.file * SQUARE_SIZE );
+	animate_point.set_y( board_outline.get_y() + start_square.rank * SQUARE_SIZE );
+
+	end_point.set_x( board_outline.get_x() + end_square.file * SQUARE_SIZE );
+	end_point.set_y( board_outline.get_y() + end_square.rank * SQUARE_SIZE );
+
+	annimate_delta.set_x( (end_point.get_x() - animate_point.get_x()) / 10 );
+	annimate_delta.set_y( (end_point.get_y() - animate_point.get_y()) / 10 );
+
+	animate_point.set_x( animate_point.get_x() + annimate_delta.get_x() );
+	animate_point.set_y( animate_point.get_y() + annimate_delta.get_y() );
+
+	animate_code = piece;
+
+	update();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ */
+void ChessBoard::animate_step( )
+{
+	animate_point.set_x( animate_point.get_x() + annimate_delta.get_x() );
+	animate_point.set_y( animate_point.get_y() + annimate_delta.get_y() );
+
+	update();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ */
+void ChessBoard::animate_stop()
+{
+	animate_code = ' ';
+
+	update();
+}

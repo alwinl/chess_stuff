@@ -21,6 +21,7 @@
 
 #include "chesscontroller.h"
 #include "chessview.h"
+#include "chessboard.h"
 #include "dlgcolours.h"
 #include "dlginput.h"
 #include "dlgpiecevalues.h"
@@ -51,6 +52,7 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 
 	dlgColourChooser = nullptr;
 	dlgTimeInputter = nullptr;
+	board = nullptr;
 
     app_colours.bg = "rgb(78,154,6)";
     app_colours.fg = "rgb(0,0,0)";
@@ -144,7 +146,9 @@ void ChessController::on_activate()
 {
     add_window( *view );
     view->show();
-    view->set_colours( app_colours );
+    //view->set_colours( app_colours );
+    if( board )
+		board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
 
     on_action_new();
 }
@@ -193,6 +197,8 @@ void ChessController::on_action_arrange_cancel() { director->arrange_end( true )
 
 void ChessController::do_arrange_drop( STSquare square, char piece ) { director->arrange_drop( square, piece ); }
 void ChessController::make_move(  STSquare start_square, STSquare end_square ) { director->do_move( start_square, end_square ); }
+
+
 
 /**-----------------------------------------------------------------------------
  * \brief
@@ -245,7 +251,8 @@ void ChessController::on_arrange_turn_changed()
 void ChessController::on_action_colours()
 {
     dlgColourChooser->choose_colours( app_colours );
-    view->set_colours( app_colours );
+
+    board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
 }
 
 /**-----------------------------------------------------------------------------
@@ -253,7 +260,7 @@ void ChessController::on_action_colours()
  */
 void ChessController::on_action_reverse()
 {
-	view->reverse_board();
+	board->toggle_reverse();
 }
 
 /**-----------------------------------------------------------------------------
@@ -261,7 +268,7 @@ void ChessController::on_action_reverse()
  */
 void ChessController::on_action_showbestline()
 {
-    view->toggle_bestline_display();
+    board->toggle_bestline();
 }
 
 /**-----------------------------------------------------------------------------
@@ -288,38 +295,62 @@ void ChessController::on_action_help_about()
 /*
  * The next functions are called from the engine
  */
+void ChessController::set_piece_positions( std::string FEN_string )
+	{ board->set_piece_positions( FEN_string ); }
 
-void ChessController::message_dialog( string message )
-{
-    Gtk::MessageDialog( *view, message, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-}
+void ChessController::set_info( STInfo info )
+	{ board->set_info( info ); }
 
-void ChessController::push_statusbar_text( string message )
-{
-    status_bar->push( message );
-}
+void ChessController::push_statusbar_text( std::string message )
+	{ status_bar->push( message ); }
 
-void ChessController::set_piece_positions( std::string FEN_string, STInfo info )
-{
-    view->set_piece_positions( FEN_string );
-    view->set_info( info );
-}
+void ChessController::message_dialog( std::string message )
+	{ Gtk::MessageDialog( *view, message, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run(); }
 
 STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
-{
-    dlgPieceValues->get_new_piece_values( current );
-
-    return current;
-}
+	{ dlgPieceValues->get_new_piece_values( current ); return current; }
 
 void ChessController::start_edit_mode()
 {
 	view->set_edit_mode( true );
+	board->set_edit( true );
 }
 
 void ChessController::end_edit_mode()
 {
 	view->set_edit_mode( false );
+	board->set_edit( false );
+}
+
+void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
+{
+	board->animate_start( start_square, end_square, piece );
+
+	animate_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_timeout), 100 );
+
+	Glib::RefPtr<Gdk::Window> win = board->get_window();
+
+	while( animate_counter ) {
+		// pump messages
+		while( Gtk::Main::instance()->events_pending() )
+			Gtk::Main::instance()->iteration();
+	}
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ */
+bool ChessController::on_timeout()
+{
+	if( ! --animate_counter ) {
+		board->animate_stop();
+		return false;
+	}
+
+	board->animate_step();
+	return true;
 }
 
 /**-----------------------------------------------------------------------------

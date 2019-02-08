@@ -43,10 +43,12 @@ public:
 	virtual int run(  int argc, char *argv[] );
 
 	/* Called from logic */
-    virtual void set_piece_positions( std::string FEN_string, STInfo& info );
+    virtual void set_piece_positions( std::string FEN_string );
+    virtual void set_info( STInfo& info );
     virtual void push_statusbar_text( std::string message );
     virtual void message_dialog( std::string message );
     virtual STPieceValues edit_piecevalues( STPieceValues& current );
+	virtual void animate( STSquare start_square, STSquare end_square, char piece );
 
     virtual void start_arranging();
     virtual void end_arranging();

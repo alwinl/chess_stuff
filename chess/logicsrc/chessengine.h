@@ -41,7 +41,6 @@ public:
 
     void set_application_pointer( ChessAppBase* app );
 
-    void start_move( STSquare square );
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
 

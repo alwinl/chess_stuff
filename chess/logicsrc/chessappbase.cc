@@ -31,7 +31,6 @@ ChessAppBase::~ChessAppBase()
 {
 }
 
-void ChessAppBase::start_move( STSquare square ) { engine->start_move(square); };
 void ChessAppBase::do_move( STSquare start_square, STSquare end_square ){ engine->do_move( start_square, end_square ); };
 void ChessAppBase::cancel_move() { engine->cancel_move(); };
 void ChessAppBase::advance() { engine->advance(); };

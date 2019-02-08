@@ -51,34 +51,6 @@ ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Build
 	mnuStop->hide();
 }
 
-/**-----------------------------------------------------------------------------
- * The following functions dispatch to the appropriate sub object
- */
-void ChessWindow::set_piece_positions( std::string FEN_string )
-{
-    board_area->set_piece_positions( FEN_string );
-}
-
-void ChessWindow::set_info( STInfo& info )
-{
-	board_area->set_info( info );
-}
-
-void ChessWindow::set_colours( STColours& colours )
-{
-    board_area->set_colours( Gdk::RGBA(colours.bg), Gdk::RGBA(colours.white), Gdk::RGBA(colours.black), Gdk::RGBA(colours.fg) );
-}
-
-void ChessWindow::reverse_board()
-{
-    board_area->toggle_reverse();
-}
-
-void ChessWindow::toggle_bestline_display()
-{
-    board_area->toggle_bestline();
-}
-
 void ChessWindow::set_edit_mode( bool on )
 {
 	mnuGame->hide();
@@ -89,7 +61,5 @@ void ChessWindow::set_edit_mode( bool on )
 		mnuArrange->show();
 	else
 		mnuGame->show();
-
-	board_area->set_edit( on );
 }
 

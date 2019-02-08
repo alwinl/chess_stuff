@@ -31,6 +31,8 @@
 class ChessAppBase;
 
 class ChessWindow;
+class ChessBoard;
+
 class GUIColourChooser;
 class GUITimeInputter;
 class GUIPieceValues;
@@ -54,18 +56,22 @@ public:
 	// Instance creator as constructor is private
 	static Glib::RefPtr<ChessController> create( ChessAppBase* director_init );
 
-	void set_piece_positions( std::string FEN_string, STInfo info );
+	// These functions are called from the logic
+	void set_piece_positions( std::string FEN_string );
+	void set_info( STInfo info );
     void push_statusbar_text( std::string message );
     void message_dialog( std::string message );
     STPieceValues run_piece_value_dialog( STPieceValues current );
-
     void start_edit_mode();
     void end_edit_mode();
-	void do_arrange_drop( STSquare square, char piece );
-	void make_move(  STSquare start_square, STSquare end_square );
-
+	void animate( STSquare start_square, STSquare end_square, char piece );
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );
+
+    // These three functions are call backs from the board
+    void set_board( ChessBoard * board_init ) { board = board_init; };
+	void do_arrange_drop( STSquare square, char piece );
+	void make_move(  STSquare start_square, STSquare end_square );
 
 private:
 	// Private construction to ensure only references can be obtained. Private as class is terminal
@@ -73,6 +79,8 @@ private:
 
 	virtual void on_startup();
 	virtual void on_activate();
+
+	bool on_timeout();
 
 	// actions
 	void on_action_not_implemented();
@@ -112,6 +120,7 @@ private:
 	ChessAppBase* director;
 	eLevels current_level;
 	eTurns current_turn;
+	int animate_counter;
 
 	// Widgets
 	ChessWindow * view;
@@ -122,6 +131,8 @@ private:
     GUIColourChooser * dlgColourChooser;
     GUITimeInputter * dlgTimeInputter;
     GUIPieceValues * dlgPieceValues;
+
+    ChessBoard * board;
 };
 
 #endif // APPCONTROLLER_H

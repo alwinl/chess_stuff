@@ -19,6 +19,11 @@
  *
  */
 
+ //#include <unistd.h>
+
+ #include <chrono>
+ #include <thread>
+
 #include "chessengine.h"
 #include "appmodel.h"
 #include "chessappbase.h"
@@ -44,17 +49,35 @@ void ChessEngine::set_application_pointer( ChessAppBase* app_init )
     app = app_init;
 }
 
-void ChessEngine::start_move( STSquare square )
-{
-//    char piece = model->get_piece( square );
-
-    // put in checking code, is there actually a piece on this square and is it the right colour
-    // if checking succeeds store the fact that the user has picked up a piece
-}
-
 void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 {
-	//model->remove_piece()
+	FENTranslator translator;
+	char piece;
+
+	translator.from_FEN( model->get_piece_positions() );
+
+	piece = translator.query_square( start_square );
+	if( piece == ' ' )
+		return;		/* invalid move */
+
+	/*
+	 *	We need to do a bunch more checking here
+	 */
+
+	translator.remove_from_square( start_square );
+
+    app->set_piece_positions( translator.to_FEN() );
+
+
+	app->animate( start_square, end_square, piece );
+
+	//for( int i = 0; i < 10; i++ ) {
+	//	app->advance_piece();
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	//}
+
+	translator.add_to_square( end_square, piece );
+    app->set_piece_positions( translator.to_FEN() );
 }
 
 void ChessEngine::cancel_move( )
@@ -70,8 +93,7 @@ void ChessEngine::arranging_start()
 
 	app->start_arranging();
 
-    STInfo tmp;
-    app->set_piece_positions( arrange_state.piece_positions, tmp );
+    app->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::arranging_drop( STSquare square, char piece )
@@ -88,8 +110,7 @@ void ChessEngine::arranging_drop( STSquare square, char piece )
 
 	arrange_state.piece_positions = translator.to_FEN();
 
-    STInfo tmp;
-    app->set_piece_positions( arrange_state.piece_positions, tmp );
+    app->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::arranging_clear()
@@ -97,8 +118,7 @@ void ChessEngine::arranging_clear()
     arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
     arrange_state.is_white_move = true;             // is it whites next move?
 
-    STInfo tmp;
-    app->set_piece_positions( arrange_state.piece_positions, tmp );
+    app->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::arranging_end( bool canceled )
@@ -159,7 +179,8 @@ void ChessEngine::advance( )
     model->advance();
 
     STInfo tmp = model->get_info();
-    app->set_piece_positions( model->get_piece_positions(), tmp );
+    app->set_piece_positions( model->get_piece_positions() );
+    app->set_info( tmp );
 }
 
 void ChessEngine::new_game( )
@@ -168,7 +189,8 @@ void ChessEngine::new_game( )
     model->initialise();
 
     STInfo tmp = model->get_info();
-    app->set_piece_positions( model->get_piece_positions(), tmp );
+    app->set_piece_positions( model->get_piece_positions() );
+    app->set_info( tmp );
 
     app->push_statusbar_text( string("New game") );
 }

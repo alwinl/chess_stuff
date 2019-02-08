@@ -50,9 +50,12 @@ public:
 	void set_edit( bool on );
     void set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg );
     void set_piece_positions( std::string FEN_string );
+	void set_info( STInfo& info );
     void toggle_reverse();
     void toggle_bestline();
-	void set_info( STInfo& info );
+	void animate_start( STSquare start_square, STSquare end_square, char piece );
+	void animate_step( );
+	void animate_stop();
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
@@ -72,6 +75,7 @@ private:
 	bool draw_info( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_edit( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_drag_piece( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_animate_piece( const Cairo::RefPtr<Cairo::Context>& cr );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image_;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_surface_;
@@ -86,6 +90,11 @@ private:
 	Gdk::Point drag_point;
 	char drag_code;
 	STSquare drag_start_square;
+
+	char animate_code;
+	Gdk::Point animate_point;
+	Gdk::Point annimate_delta;
+	int animate_counter;
 
 	std::map< char, Gdk::Point > source_offsets;
 	bool reversed;

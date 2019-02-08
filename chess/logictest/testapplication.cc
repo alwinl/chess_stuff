@@ -51,10 +51,12 @@ int TestApplication::run( int argc, char *argv[] )
 	return runner.run() ? 0 : 1;		// Return error code 1 if the one of test failed.
 }
 
-void TestApplication::set_piece_positions( std::string FEN_string, STInfo& info ) {}
+void TestApplication::set_piece_positions( std::string FEN_string ) {}
+void TestApplication::set_info( STInfo& info ) {}
 void TestApplication::push_statusbar_text( std::string message ) {}
 void TestApplication::message_dialog( std::string message ) {}
 STPieceValues TestApplication::edit_piecevalues( STPieceValues& current ) { return current; }
+void animate( STSquare start_square, STSquare end_square, char piece ) {}
 
 void TestApplication::start_arranging() {};
 void TestApplication::end_arranging() {};

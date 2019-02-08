@@ -40,8 +40,11 @@ int ChessAppGUI::run(  int argc, char *argv[] )
 }
 
 /* Called from logic */
-void ChessAppGUI::set_piece_positions( std::string FEN_string, STInfo& info )
-	{ controller->set_piece_positions( FEN_string, info ); }
+void ChessAppGUI::set_piece_positions( std::string FEN_string )
+	{ controller->set_piece_positions( FEN_string ); }
+
+void ChessAppGUI::set_info( STInfo& info )
+	{ controller->set_info( info ); }
 
 void ChessAppGUI::push_statusbar_text( std::string message )
 	{ controller->push_statusbar_text( message ); }
@@ -57,6 +60,9 @@ void ChessAppGUI::end_arranging()
 
 STPieceValues ChessAppGUI::edit_piecevalues( STPieceValues& current )
 	{ return controller->run_piece_value_dialog( current ); }
+
+void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
+	{ controller->animate( start_square, end_square, piece ); }
 
 std::string ChessAppGUI::open_filename( std::string filename, std::string working_dir )
 	{ return controller->open_filename( filename, working_dir ); }

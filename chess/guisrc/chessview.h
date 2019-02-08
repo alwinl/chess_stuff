@@ -31,6 +31,7 @@ class ChessBoard;
 
 struct STColours;
 struct STInfo;
+struct STSquare;
 
 /**-----------------------------------------------------------------------------
  * \brief The main application window
@@ -42,12 +43,7 @@ class ChessWindow : public Gtk::ApplicationWindow
 public:
 	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
-	void set_piece_positions( std::string FEN_string );
-	void set_info( STInfo& info );
-	void set_colours( STColours& colours );
 	void set_edit_mode( bool on );
-	void reverse_board();
-	void toggle_bestline_display();
 
 private:
 	ChessBoard * board_area;
