@@ -33,7 +33,7 @@ using namespace std;
  *
  */
 ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
-                            : Gtk::DrawingArea(cobject), drag_code(' '), reversed(false), is_edit(false), controller(app)
+                            : Gtk::DrawingArea(cobject), floating_piece_code(' '), reversed(false), is_edit(false), controller(app)
 {
 	using namespace Cairo;
 
@@ -76,7 +76,8 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
     info_data.push_back( pair<string,string>("Bestline", "empty") );
 
     show_bestline_info = true;
-    animate_code = ' ';
+	is_dragging = false;
+	is_animating = false;
 
     controller.set_board( this );
 }
@@ -247,25 +248,10 @@ bool ChessBoard::draw_edit( const Cairo::RefPtr<Cairo::Context>& cr )
 /**-----------------------------------------------------------------------------
  * \brief
  */
-bool ChessBoard::draw_drag_piece( const Cairo::RefPtr<Cairo::Context>& cr )
+bool ChessBoard::draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr )
 {
-	Gdk::Rectangle dest = Gdk::Rectangle( drag_point.get_x(), drag_point.get_y(), SQUARE_SIZE, SQUARE_SIZE );
-	Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[drag_code].get_x(), dest.get_y() - source_offsets[drag_code].get_y() );
-
-	cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
-	cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
-	cr->fill();
-
-	return false;
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-bool ChessBoard::draw_animate_piece( const Cairo::RefPtr<Cairo::Context>& cr )
-{
-	Gdk::Rectangle dest = Gdk::Rectangle( animate_point.get_x(), animate_point.get_y(), SQUARE_SIZE, SQUARE_SIZE );
-	Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[animate_code].get_x(), dest.get_y() - source_offsets[animate_code].get_y() );
+	Gdk::Rectangle dest = Gdk::Rectangle( floating_piece_position.get_x(), floating_piece_position.get_y(), SQUARE_SIZE, SQUARE_SIZE );
+	Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[floating_piece_code].get_x(), dest.get_y() - source_offsets[floating_piece_code].get_y() );
 
 	cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
 	cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
@@ -299,11 +285,8 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
     	draw_info( cr );
 
 	// Draw the drag piece
-    if( drag_code != ' ' )
-		draw_drag_piece( cr );
-
-	if( animate_code != ' ' )
-		draw_animate_piece( cr );
+    if( floating_piece_code != ' ' )
+		draw_floating_piece( cr );
 
 	return false;
 
@@ -390,14 +373,19 @@ char ChessBoard::calc_piece_from_square( STSquare square )
  */
 bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 {
+	if( is_animating )
+		return true;
+
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( button_event->x, button_event->y, 1, 1 );
 
     if( board_outline.intersects( mouse_pos ) ) {
 
 		drag_start_square = calc_square_from_point( Gdk::Point(button_event->x, button_event->y) );
 
-		drag_code = calc_piece_from_square( drag_start_square );
-		drag_point = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+		floating_piece_code = calc_piece_from_square( drag_start_square );
+		floating_piece_position = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+
+		is_dragging = true;
 
 		update();
 
@@ -406,8 +394,10 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
     if( is_edit && edit_outline.intersects( mouse_pos ) ) {
 
-		drag_code = calc_piece_from_point( Gdk::Point(button_event->x, button_event->y ) );
-		drag_point = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+		floating_piece_code = calc_piece_from_point( Gdk::Point(button_event->x, button_event->y ) );
+		floating_piece_position = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+
+		is_dragging = true;
 
 		update();
 
@@ -425,35 +415,36 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
  */
 bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 {
-    if( drag_code == ' ' )
-        return true;
+	if( !is_dragging )
+		return true;
 
+	is_dragging = false;
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( release_event->x, release_event->y, 1, 1 );
     bool intersecting = board_outline.intersects( mouse_pos );
 
     if( is_edit ) {
-		drag_code = ' ';
-		update();
 
 		if( intersecting ) {
 			STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
-			controller.do_arrange_drop( end_square, drag_code );
+			controller.do_arrange_drop( end_square, floating_piece_code );
 		} else
 			controller.do_arrange_drop( drag_start_square, ' ' ); /* dropping a space is removing the piece */
+
+		floating_piece_code = ' ';
+		update();
 
 		return true;
     }
 
-	drag_code = ' ';
+	floating_piece_code = ' ';
 	update();
 
-    if( !intersecting ) {
-        return true;
+    if( intersecting ) {
+		// here we need to do the move
+		STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
+		controller.make_move( drag_start_square, end_square );
     }
 
-	// here we need to do the move
-	STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
-	controller.make_move( drag_start_square, end_square );
 
     return true;
 }
@@ -466,10 +457,10 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
  */
 bool ChessBoard::on_motion_notify_event( GdkEventMotion* motion_event )
 {
-    if( drag_code == ' ' )
+    if( !is_dragging )
         return true;
 
-    drag_point = Gdk::Point( motion_event->x - .5 * SQUARE_SIZE, motion_event->y - .5 * SQUARE_SIZE );
+    floating_piece_position = Gdk::Point( motion_event->x - .5 * SQUARE_SIZE, motion_event->y - .5 * SQUARE_SIZE );
 
     update();
 
@@ -502,7 +493,7 @@ void ChessBoard::set_piece_positions( std::string FEN_string )
         }
     }
 
-    animate_code = ' ';
+//    animate_code = ' ';
 
     update();
 }
@@ -613,19 +604,21 @@ void ChessBoard::animate_start( STSquare start_square, STSquare end_square, char
 		end_square.rank = 7 - end_square.rank;
 	}
 
-	animate_point.set_x( board_outline.get_x() + start_square.file * SQUARE_SIZE );
-	animate_point.set_y( board_outline.get_y() + start_square.rank * SQUARE_SIZE );
+	floating_piece_position.set_x( board_outline.get_x() + start_square.file * SQUARE_SIZE );
+	floating_piece_position.set_y( board_outline.get_y() + start_square.rank * SQUARE_SIZE );
 
 	end_point.set_x( board_outline.get_x() + end_square.file * SQUARE_SIZE );
 	end_point.set_y( board_outline.get_y() + end_square.rank * SQUARE_SIZE );
 
-	annimate_delta.set_x( (end_point.get_x() - animate_point.get_x()) / 10 );
-	annimate_delta.set_y( (end_point.get_y() - animate_point.get_y()) / 10 );
+	annimate_delta.set_x( (end_point.get_x() - floating_piece_position.get_x()) / 10 );
+	annimate_delta.set_y( (end_point.get_y() - floating_piece_position.get_y()) / 10 );
 
-	animate_point.set_x( animate_point.get_x() + annimate_delta.get_x() );
-	animate_point.set_y( animate_point.get_y() + annimate_delta.get_y() );
+	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
+	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
 
-	animate_code = piece;
+	floating_piece_code = piece;
+
+	is_animating = true;
 
 	update();
 }
@@ -636,8 +629,8 @@ void ChessBoard::animate_start( STSquare start_square, STSquare end_square, char
  */
 void ChessBoard::animate_step( )
 {
-	animate_point.set_x( animate_point.get_x() + annimate_delta.get_x() );
-	animate_point.set_y( animate_point.get_y() + annimate_delta.get_y() );
+	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
+	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
 
 	update();
 }
@@ -648,7 +641,9 @@ void ChessBoard::animate_step( )
  */
 void ChessBoard::animate_stop()
 {
-	animate_code = ' ';
+	floating_piece_code = ' ';
+
+	is_animating = false;
 
 	update();
 }

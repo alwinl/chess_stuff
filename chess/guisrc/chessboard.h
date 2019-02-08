@@ -74,8 +74,7 @@ private:
 	bool draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_info( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_edit( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_drag_piece( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_animate_piece( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image_;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_surface_;
@@ -87,14 +86,12 @@ private:
 	Gdk::RGBA black_colour;
 	Gdk::RGBA foreground_colour;
 
-	Gdk::Point drag_point;
-	char drag_code;
+	Gdk::Point floating_piece_position;
+	char floating_piece_code;
 	STSquare drag_start_square;
-
-	char animate_code;
-	Gdk::Point animate_point;
+	bool is_dragging;
+	bool is_animating;
 	Gdk::Point annimate_delta;
-	int animate_counter;
 
 	std::map< char, Gdk::Point > source_offsets;
 	bool reversed;
