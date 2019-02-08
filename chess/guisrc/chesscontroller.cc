@@ -146,7 +146,7 @@ void ChessController::on_activate()
 {
     add_window( *view );
     view->show();
-    //view->set_colours( app_colours );
+
     if( board )
 		board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
 
@@ -166,31 +166,17 @@ void ChessController::on_action_not_implemented()
  * \brief engine dispatchers
  */
 void ChessController::on_action_new() { director->new_game(  ); }
-
 void ChessController::on_action_open() { director->open_file(  ); }
-
 void ChessController::on_action_save() { director->save_file(  ); }
-
 void ChessController::on_action_save_as() { director->save_as(  ); }
-
 void ChessController::on_action_quit() { director->end_app(  ); }
-
 void ChessController::on_action_play() { director->advance(  ); }
-
-void ChessController::on_action_hint() { }
-
+void ChessController::on_action_hint() { director->hint(); }
 void ChessController::on_action_undo() { }
-
 void ChessController::on_action_redo() { }
-
 void ChessController::on_action_piecevalues() { director->piece_value_changes(  ); }
-
-
 void ChessController::on_action_arrange() { director->arrange_start(); }
-
-
 void ChessController::on_action_thinking_stop() {}
-
 void ChessController::on_action_arrange_done() { director->arrange_end( false ); }
 void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
 void ChessController::on_action_arrange_cancel() { director->arrange_end( true ); }
@@ -322,29 +308,9 @@ void ChessController::end_edit_mode()
 	board->set_edit( false );
 }
 
-void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
+bool ChessController::on_animate_timeout()
 {
-	board->animate_start( start_square, end_square, piece );
-
-	animate_counter = 10;
-	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_timeout), 100 );
-
-	Glib::RefPtr<Gdk::Window> win = board->get_window();
-
-	while( animate_counter ) {
-		// pump messages
-		while( Gtk::Main::instance()->events_pending() )
-			Gtk::Main::instance()->iteration();
-	}
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- *
- */
-bool ChessController::on_timeout()
-{
-	if( ! --animate_counter ) {
+	if( ! --timeout_counter ) {
 		board->animate_stop();
 		return false;
 	}
@@ -352,6 +318,48 @@ bool ChessController::on_timeout()
 	board->animate_step();
 	return true;
 }
+
+void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
+{
+	board->animate_start( start_square, end_square, piece );
+
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
+
+	while( timeout_counter ) {
+		while( Gtk::Main::instance()->events_pending() )
+			Gtk::Main::instance()->iteration();
+	}
+}
+
+bool ChessController::on_flash_timeout()
+{
+	static bool highlight_on = false;
+
+	if( ! --timeout_counter ) {
+		highlight_on = false;
+		board->highlight_flash( highlight_on );
+		return false;
+	}
+
+	highlight_on = !highlight_on;
+	board->highlight_flash( highlight_on );
+	return true;
+}
+
+void ChessController::flash_square( STSquare square )
+{
+	board->highlight_start( square );
+
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_flash_timeout), 100 );
+
+	while( timeout_counter ) {
+		while( Gtk::Main::instance()->events_pending() )
+			Gtk::Main::instance()->iteration();
+	}
+}
+
 
 /**-----------------------------------------------------------------------------
  * \brief Ask the user for the name of a chess file

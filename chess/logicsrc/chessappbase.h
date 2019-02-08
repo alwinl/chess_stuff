@@ -50,6 +50,7 @@ public:
     virtual void message_dialog( std::string message ) = 0;
     virtual STPieceValues edit_piecevalues( STPieceValues& current ) = 0;
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
+	virtual void flash_square( STSquare square ) = 0;
 
     virtual void start_arranging() = 0;
     virtual void end_arranging() = 0;
@@ -63,6 +64,7 @@ public:
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();
+    void hint();
 
     void arrange_start();
     void arrange_clear();

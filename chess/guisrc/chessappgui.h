@@ -49,6 +49,7 @@ public:
     virtual void message_dialog( std::string message );
     virtual STPieceValues edit_piecevalues( STPieceValues& current );
 	virtual void animate( STSquare start_square, STSquare end_square, char piece );
+	virtual void flash_square( STSquare square );
 
     virtual void start_arranging();
     virtual void end_arranging();

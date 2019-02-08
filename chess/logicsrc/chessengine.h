@@ -54,6 +54,8 @@ public:
 
     void advance();
 
+    void hint();
+
     void piece_value_changes();
 
     //int store_game( const std::string& file_name );

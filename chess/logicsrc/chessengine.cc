@@ -80,6 +80,12 @@ void ChessEngine::do_move( STSquare start_square, STSquare end_square )
     app->set_piece_positions( translator.to_FEN() );
 }
 
+void ChessEngine::hint()
+{
+	STSquare square = make_square( 3, 3 );
+
+	app->flash_square( square );
+}
 void ChessEngine::cancel_move( )
 {
 }

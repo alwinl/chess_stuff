@@ -64,6 +64,10 @@ STPieceValues ChessAppGUI::edit_piecevalues( STPieceValues& current )
 void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
 	{ controller->animate( start_square, end_square, piece ); }
 
+void ChessAppGUI::flash_square( STSquare square )
+	{ controller->flash_square( square ); }
+
+
 std::string ChessAppGUI::open_filename( std::string filename, std::string working_dir )
 	{ return controller->open_filename( filename, working_dir ); }
 

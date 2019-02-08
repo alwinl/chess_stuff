@@ -78,6 +78,7 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
     show_bestline_info = true;
 	is_dragging = false;
 	is_animating = false;
+	draw_highlight = false;
 
     controller.set_board( this );
 }
@@ -255,7 +256,18 @@ bool ChessBoard::draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr )
 
 	cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
 	cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
+	cr->set_line_width( 2.0 );
 	cr->fill();
+
+	return false;
+}
+
+bool ChessBoard::draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr )
+{
+    cr->set_source_rgb(  foreground_colour.get_red(), foreground_colour.get_green(), foreground_colour.get_blue() );
+    cr->set_line_width( 4.0 );
+	cr->rectangle( highlight_pos.get_x(), highlight_pos.get_y(), SQUARE_SIZE, SQUARE_SIZE );
+	cr->stroke();
 
 	return false;
 }
@@ -287,6 +299,9 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
 	// Draw the drag piece
     if( floating_piece_code != ' ' )
 		draw_floating_piece( cr );
+
+	if( draw_highlight )
+		draw_square_highlight( cr );
 
 	return false;
 
@@ -644,6 +659,31 @@ void ChessBoard::animate_stop()
 	floating_piece_code = ' ';
 
 	is_animating = false;
+
+	update();
+}
+
+void ChessBoard::highlight_start( STSquare square )
+{
+	if( reversed ) {
+		square.file = 7 - square.file;
+		square.file = 7 - square.file;
+	} else {
+		square.rank = 7 - square.rank;
+		square.rank = 7 - square.rank;
+	}
+
+	highlight_pos.set_x( board_outline.get_x() + square.file * SQUARE_SIZE );
+	highlight_pos.set_y( board_outline.get_y() + square.rank * SQUARE_SIZE );
+
+	draw_highlight = true;
+
+	update();
+}
+
+void ChessBoard::highlight_flash( bool on )
+{
+	draw_highlight = on;
 
 	update();
 }

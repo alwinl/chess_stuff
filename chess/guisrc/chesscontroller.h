@@ -65,6 +65,7 @@ public:
     void start_edit_mode();
     void end_edit_mode();
 	void animate( STSquare start_square, STSquare end_square, char piece );
+	void flash_square( STSquare square );
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );
 
@@ -80,7 +81,8 @@ private:
 	virtual void on_startup();
 	virtual void on_activate();
 
-	bool on_timeout();
+	bool on_animate_timeout();
+	bool on_flash_timeout();
 
 	// actions
 	void on_action_not_implemented();
@@ -120,7 +122,8 @@ private:
 	ChessAppBase* director;
 	eLevels current_level;
 	eTurns current_turn;
-	int animate_counter;
+	int timeout_counter;
+
 
 	// Widgets
 	ChessWindow * view;

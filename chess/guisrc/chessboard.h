@@ -56,6 +56,8 @@ public:
 	void animate_start( STSquare start_square, STSquare end_square, char piece );
 	void animate_step( );
 	void animate_stop();
+	void highlight_start( STSquare square );
+	void highlight_flash( bool on );
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
@@ -75,6 +77,7 @@ private:
 	bool draw_info( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_edit( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image_;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_surface_;
@@ -92,6 +95,9 @@ private:
 	bool is_dragging;
 	bool is_animating;
 	Gdk::Point annimate_delta;
+
+	Gdk::Point highlight_pos;
+	bool draw_highlight;
 
 	std::map< char, Gdk::Point > source_offsets;
 	bool reversed;
