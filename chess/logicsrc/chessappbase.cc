@@ -33,15 +33,15 @@ void ChessAppBase::advance() { engine->advance(); };
 void ChessAppBase::hint() { engine->hint(); };
 void ChessAppBase::arrange_start() { engine->arranging_start(); };
 void ChessAppBase::arrange_clear() { engine->arranging_clear(); };
-//void ChessAppBase::remove_piece_from_square( STSquare square ) { engine->remove_piece_from_square( square ); };
 void ChessAppBase::put_piece_on_square( STSquare square, char piece ) { engine->put_piece_on_square( square, piece ); };
 void ChessAppBase::arrange_end( bool canceled ) { engine->arranging_end(canceled); };
 void ChessAppBase::piece_value_changes() { engine->piece_value_changes(); };
 void ChessAppBase::new_game() { engine->new_game(); };
 void ChessAppBase::end_app() { engine->quit(); };
-void ChessAppBase::open_file() { engine->open_file(); };
-void ChessAppBase::save_file() { engine->save_file(); };
-void ChessAppBase::save_as() { engine->save_as(); };
+
+std::string ChessAppBase::open_file() { return engine->open_file(); };
+std::string ChessAppBase::save_file() { return engine->save_file(); };
+std::string ChessAppBase::save_as() { return engine->save_as(); };
 
 void ChessAppBase::undo() { engine->undo(); }
 void ChessAppBase::redo() { engine->redo(); }

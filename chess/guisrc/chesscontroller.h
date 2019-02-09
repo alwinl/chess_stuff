@@ -28,6 +28,9 @@
 
 #include "../logicsrc/pods.h"
 
+class TimeInputter;
+class PieceValues;
+
 class ChessAppBase;
 
 class ChessWindow;
@@ -59,17 +62,16 @@ public:
 	// These functions are called from the logic
 	void set_piece_positions( std::string FEN_string );
 	void set_info( STInfo info );
-    void push_statusbar_text( std::string message );
-    void message_dialog( std::string message );
     STPieceValues run_piece_value_dialog( STPieceValues current );
-    void start_edit_mode();
-    void end_edit_mode();
     void start_thinking();
     void stop_thinking();
 	void animate( STSquare start_square, STSquare end_square, char piece );
 	void flash_square( STSquare square );
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );
+
+	TimeInputter* get_time_inputter();
+	PieceValues * get_piece_valuer();
 
     // These four functions are call backs from the board
     void set_board( ChessBoard * board_init ) { board = board_init; };

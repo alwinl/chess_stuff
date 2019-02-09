@@ -64,9 +64,9 @@ public:
     void new_game();
     void quit();
 
-    void open_file();
-    void save_file();
-    void save_as();
+    std::string open_file();
+    std::string save_file();
+    std::string save_as();
 
 	void undo();
 	void redo();
@@ -82,6 +82,8 @@ private:
 	AppModel * model;
 	ChessAppBase * app;
     std::string filename;
+
+    STPieceValues current;
 
     STGameState arrange_state;
     bool is_arranging;

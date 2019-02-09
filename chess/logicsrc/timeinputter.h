@@ -33,11 +33,11 @@ public:
     TimeInputter() {};
     virtual ~TimeInputter() {};
 
-    std::pair<bool, int> time_per_move()
-        { return get_input( "Timed Level", "Seconds per move:" ); };
+    std::pair<bool, int> time_per_move( int current_value )
+        { return get_input( "Timed Level", "Seconds per move:", current_value ); };
 
-    std::pair<bool, int> total_game_time()
-        { return get_input( "Total Time Level", "Minutes per game:" ); };
+    std::pair<bool, int> total_game_time( int current_value )
+        { return get_input( "Total Time Level", "Minutes per game:", current_value ); };
 
 protected:
     virtual void set_up( const std::string& title, const std::string& prompt, int& value ) = 0;
@@ -45,10 +45,10 @@ protected:
     virtual int new_time( ) = 0;
 
 private:
-    std::pair<bool, int> get_input( const std::string& title, const std::string& prompt )
+    std::pair<bool, int> get_input( const std::string& title, const std::string& prompt, int current_value )
     {
         bool retval;
-        int value = 120;
+        int value = current_value;
 
         set_up( title, prompt, value );
         if( (retval = manipulate_data( )) == true )

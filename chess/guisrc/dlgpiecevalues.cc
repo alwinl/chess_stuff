@@ -30,7 +30,7 @@ class DialogPieceValues : public Gtk::Dialog
 public:
     DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
-    void set_piece_values( STPieceValues& values );
+    void set_piece_values( STPieceValues values );
     STPieceValues piece_values( );
 
 private:
@@ -39,6 +39,9 @@ private:
     Gtk::SpinButton * spnBishop;
     Gtk::SpinButton * spnKnight;
     Gtk::SpinButton * spnPawn;
+
+    void on_revert_clicked();
+    STPieceValues original;
 };
 
 /** \brief
@@ -58,15 +61,21 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
     ui_model->get_widget( "spnBishop", spnBishop );
     ui_model->get_widget( "spnKnight", spnKnight );
     ui_model->get_widget( "spnPawn", spnPawn );
+
+    Gtk::Button * btnRevert;
+    ui_model->get_widget( "btnRevert", btnRevert );
+    btnRevert->signal_clicked().connect( sigc::mem_fun( *this, &DialogPieceValues::on_revert_clicked ));
 }
 
-void DialogPieceValues::set_piece_values( STPieceValues& values )
+void DialogPieceValues::set_piece_values( STPieceValues values )
 {
     spnQueen->set_value( values.QueenValue );
     spnRook->set_value( values.RookValue );
     spnBishop->set_value( values.BishopValue );
     spnKnight->set_value( values.KnightValue );
     spnPawn->set_value( values.PawnValue );
+
+    original = values;
 }
 
 STPieceValues DialogPieceValues::piece_values( )
@@ -82,6 +91,10 @@ STPieceValues DialogPieceValues::piece_values( )
     return values;
 }
 
+void DialogPieceValues::on_revert_clicked()
+{
+	set_piece_values( original );
+}
 
 /** \brief
  *

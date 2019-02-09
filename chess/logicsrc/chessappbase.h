@@ -29,6 +29,9 @@
 //class STSquare;
 //class STPieceValues;
 
+class TimeInputter;
+class PieceValues;
+
 class ChessEngine;
 
 
@@ -44,21 +47,17 @@ public:
 	virtual int run(  int argc, char *argv[] ) = 0;
 
 	/* Called from logic */
-
     virtual void set_piece_positions( std::string FEN_string ) = 0;
     virtual void set_info(  STInfo& info ) = 0;
-    virtual void push_statusbar_text( std::string message ) = 0;
-    virtual void message_dialog( std::string message ) = 0;
     virtual STPieceValues edit_piecevalues( STPieceValues& current ) = 0;
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 	virtual void flash_square( STSquare square ) = 0;
 
-    virtual void start_arranging() = 0;
-    virtual void end_arranging() = 0;
-
     virtual std::string open_filename( std::string filename, std::string working_dir ) = 0;
     virtual std::string save_filename( std::string filename, std::string working_dir ) = 0;
 
+	virtual TimeInputter* get_time_inputter() = 0;
+	virtual PieceValues * get_piece_valuer() = 0;
     virtual void quit() = 0;
 
     /* called from GUI */
@@ -83,9 +82,10 @@ public:
     void piece_value_changes();
     void new_game();
     void end_app();
-    void open_file();
-    void save_file();
-    void save_as();
+
+    std::string open_file();
+    std::string save_file();
+    std::string save_as();
 
 private:
 	ChessEngine* engine;

@@ -185,23 +185,64 @@ bool ChessController::on_flash_timeout()
  */
 void ChessController::on_action_not_implemented()
 {
-	message_dialog( "not implemented yet" );
+	Gtk::MessageDialog( *view, "not implemented yet", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
 }
 
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
-void ChessController::on_action_new() { director->new_game(  ); }
-void ChessController::on_action_open() { director->open_file(  ); }
-void ChessController::on_action_save() { director->save_file(  ); }
-void ChessController::on_action_save_as() { director->save_as(  ); }
+void ChessController::on_action_new()
+{
+	director->new_game(  );
+
+	status_bar->push( string("New game") );
+}
+
+void ChessController::on_action_open()
+{
+	std::string name = director->open_file(  );
+
+	if( name.empty() )
+		Gtk::MessageDialog( *view, "Error restoring game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	else
+		status_bar->push( string("Opened ") + name );
+}
+
+void ChessController::on_action_save()
+{
+	std::string name = director->save_file(  );
+
+	if( name.empty() )
+		Gtk::MessageDialog( *view, "Error saving game. Try Save As", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	else
+		status_bar->push( string("Saved ") + name );
+}
+
+void ChessController::on_action_save_as()
+{
+	std::string name = director->save_as(  );
+
+	if( name.empty() )
+		Gtk::MessageDialog( *view, "Error saving game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	else
+		status_bar->push( string("Saved ") + name );
+}
+
+
 void ChessController::on_action_quit() { director->end_app(  ); }
 void ChessController::on_action_play() { director->advance(  ); }
 void ChessController::on_action_hint() { director->hint(); }
 
 void ChessController::on_action_undo() { director->undo(); }
 void ChessController::on_action_redo() { director->redo(); }
-void ChessController::on_action_arrange() { director->arrange_start(); }
+
+void ChessController::on_action_arrange()
+{
+	director->arrange_start();
+
+	view->show_menu( ChessWindow::MENU_ARRANGE );
+	board->set_edit( true );
+}
 
 void ChessController::on_action_level()
 {
@@ -264,7 +305,14 @@ void ChessController::on_action_help_about()
 
 
 
-void ChessController::on_action_arrange_done() { director->arrange_end( false ); }
+void ChessController::on_action_arrange_done()
+{
+	director->arrange_end( false );
+
+	view->show_menu( ChessWindow::MENU_GAME );
+	board->set_edit( false );
+}
+
 void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
 
 void ChessController::on_action_arrange_turn()
@@ -279,15 +327,29 @@ void ChessController::on_action_arrange_turn()
 	}
 }
 
-void ChessController::on_action_arrange_cancel() { director->arrange_end( true ); }
+void ChessController::on_action_arrange_cancel()
+{
+	director->arrange_end( true );
+
+	view->show_menu( ChessWindow::MENU_GAME );
+	board->set_edit( false );
+}
 
 void ChessController::on_action_thinking_stop() { director->stop_thinking(); }
 
 /**-----------------------------------------------------------------------------
  *  The next functions are call backs from the board
  */
-void ChessController::put_piece_on_square( STSquare square, char piece ) { director->put_piece_on_square( square, piece ); }
-void ChessController::make_move(  STSquare start_square, STSquare end_square ) { director->do_move( start_square, end_square ); }
+void ChessController::put_piece_on_square( STSquare square, char piece )
+{
+	director->put_piece_on_square( square, piece );
+}
+
+void ChessController::make_move(  STSquare start_square, STSquare end_square )
+{
+	director->do_move( start_square, end_square );
+}
+
 char ChessController::get_piece( STSquare square ) { return director->get_piece( square); };
 
 /*
@@ -299,26 +361,8 @@ void ChessController::set_piece_positions( std::string FEN_string )
 void ChessController::set_info( STInfo info )
 	{ board->set_info( info ); }
 
-void ChessController::push_statusbar_text( std::string message )
-	{ status_bar->push( message ); }
-
-void ChessController::message_dialog( std::string message )
-	{ Gtk::MessageDialog( *view, message, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run(); }
-
 STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
 	{ dlgPieceValues->get_new_piece_values( current ); return current; }
-
-void ChessController::start_edit_mode()
-{
-	view->show_menu( ChessWindow::MENU_ARRANGE );
-	board->set_edit( true );
-}
-
-void ChessController::end_edit_mode()
-{
-	view->show_menu( ChessWindow::MENU_GAME );
-	board->set_edit( false );
-}
 
 void ChessController::start_thinking()
 {
@@ -417,33 +461,9 @@ string ChessController::save_filename( string filename, string working_dir )
     return ( dlg.run() != Gtk::RESPONSE_OK ) ? "" :  dlg.get_filename();
 }
 
-#if 0
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_timed()
-{
-    std::pair<bool,int> retval = dlgTimeInputter->time_per_move();
+TimeInputter* ChessController::get_time_inputter()
+	{ return dlgTimeInputter; }
 
-    if( ! retval.first )
-        return;
-
-//    int sec_per_move = retval.second;
-    // now we need to do something with sec_per_move.
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::on_action_totaltime()
-{
-    std::pair<bool,int> retval = dlgTimeInputter->total_game_time();
-
-    if( ! retval.first )
-        return;
-
-//    int minutes_per_game = retval.second;
-    // now we need to do something with minutes_per_game.
-}
-#endif // 0
+PieceValues * ChessController::get_piece_valuer()
+	{ return dlgPieceValues; }
 

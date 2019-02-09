@@ -53,14 +53,9 @@ int TestApplication::run( int argc, char *argv[] )
 
 void TestApplication::set_piece_positions( std::string FEN_string ) {}
 void TestApplication::set_info( STInfo& info ) {}
-void TestApplication::push_statusbar_text( std::string message ) {}
-void TestApplication::message_dialog( std::string message ) {}
 STPieceValues TestApplication::edit_piecevalues( STPieceValues& current ) { return current; }
-void animate( STSquare start_square, STSquare end_square, char piece ) {}
-
-void TestApplication::start_arranging() {};
-void TestApplication::end_arranging() {};
-
+void TestApplication::animate( STSquare start_square, STSquare end_square, char piece ) {}
+void TestApplication::flash_square( STSquare square ) {}
 std::string TestApplication::open_filename( std::string filename, std::string working_dir ) { return "open_name.chess"; }
 std::string TestApplication::save_filename( std::string filename, std::string working_dir ) { return "save_name.chess"; }
 

@@ -23,6 +23,7 @@
 #include "chesscontroller.h"
 
 #include "../logicsrc/pods.h"
+#include "../logicsrc/timeinputter.h"
 
 ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
 {
@@ -46,12 +47,6 @@ void ChessAppGUI::set_piece_positions( std::string FEN_string )
 void ChessAppGUI::set_info( STInfo& info )
 	{ controller->set_info( info ); }
 
-void ChessAppGUI::push_statusbar_text( std::string message )
-	{ controller->push_statusbar_text( message ); }
-
-void ChessAppGUI::message_dialog( std::string message )
-	{ controller->message_dialog( message ); }
-
 STPieceValues ChessAppGUI::edit_piecevalues( STPieceValues& current )
 	{ return controller->run_piece_value_dialog( current ); }
 
@@ -61,17 +56,17 @@ void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piec
 void ChessAppGUI::flash_square( STSquare square )
 	{ controller->flash_square( square ); }
 
-void ChessAppGUI::start_arranging()
-	{ controller->start_edit_mode(); }
-
-void ChessAppGUI::end_arranging()
-	{ controller->end_edit_mode(); }
-
 std::string ChessAppGUI::open_filename( std::string filename, std::string working_dir )
 	{ return controller->open_filename( filename, working_dir ); }
 
 std::string ChessAppGUI::save_filename( std::string filename, std::string working_dir )
 	{ return controller->save_filename( filename, working_dir ); }
+
+TimeInputter* ChessAppGUI::get_time_inputter()
+	{ return controller->get_time_inputter(); }
+
+PieceValues* ChessAppGUI::get_piece_valuer()
+	{ return controller->get_piece_valuer(); }
 
 void ChessAppGUI::quit()
 	{ controller->quit(); }

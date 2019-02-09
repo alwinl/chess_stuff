@@ -27,8 +27,12 @@
 #include "chessengine.h"
 #include "appmodel.h"
 #include "chessappbase.h"
+#include "timeinputter.h"
+#include "piecevalues.h"
 
 #include "fentranslator.h"
+
+#include <iostream>
 
 using namespace std;
 
@@ -38,7 +42,6 @@ ChessEngine::ChessEngine()
     model = new AppModel;
 
     is_arranging = false;
-    //ctor
 }
 
 ChessEngine::~ChessEngine()
@@ -104,8 +107,6 @@ void ChessEngine::arranging_start()
 
     is_arranging = true;
 
-	app->start_arranging();
-
     app->set_piece_positions( arrange_state.piece_positions );
 }
 
@@ -142,8 +143,6 @@ void ChessEngine::arranging_end( bool canceled )
 {
 	is_arranging = false;
 
-	app->end_arranging();
-
 	app->set_piece_positions( model->get_piece_positions() );
 }
 
@@ -155,50 +154,48 @@ void ChessEngine::arranging_end( bool canceled )
 
 
 
-void ChessEngine::open_file( )
+std::string ChessEngine::open_file( )
 {
     string filename = app->open_filename( "", "~/" );
 
     if( filename.empty() )
-        return;
+        return "";
 
     if( model->load_game( filename ) == -1 ) {    // load the file and build the DS in the model_ member
-        app->message_dialog( "Error restoring game." );
-        return;
+        return "";
     }
 
-    app->push_statusbar_text( string("Opened ") + filename );
+    return filename;
 }
 
-void ChessEngine::save_file( )
+std::string ChessEngine::save_file( )
 {
-    if( filename.empty() ) {
-        save_as( );
-        return;
-    }
+    if( filename.empty() )
+        return save_as( );
 
     if( model->store_game( filename ) == -1 ) {
-        app->message_dialog( "Error saving game. Try Save As" );
-        return;
+        return "";
     }
 
-    app->push_statusbar_text( string( "Saved " ) + filename );
+    return filename;
 }
 
-void ChessEngine::save_as( )
+std::string ChessEngine::save_as( )
 {
     string temp_name = app->save_filename( filename, "~/" );
+
+    if( temp_name.empty() )
+        return "";
 
     if( temp_name.find( ".chess") == string::npos )     // no .chess added
         temp_name += string(".chess");
 
     if( model->store_game( temp_name ) == -1 ) {
-        app->message_dialog( "Error saving game." );
-        return;
+        return "";
     }
 
     filename = temp_name;
-    app->push_statusbar_text( string( "Saved " ) + filename );
+    return filename;
 }
 
 void ChessEngine::advance( )
@@ -218,15 +215,26 @@ void ChessEngine::new_game( )
     STInfo tmp = model->get_info();
     app->set_piece_positions( model->get_piece_positions() );
     app->set_info( tmp );
-
-    app->push_statusbar_text( string("New game") );
 }
 
 void ChessEngine::piece_value_changes( )
 {
-    STPieceValues current;
 
-    app->edit_piecevalues( current );
+    PieceValues * piece_values = app->get_piece_valuer();
+
+    if( piece_values->get_new_piece_values( current) ) {
+
+		cout << "Values have changed" << endl;
+		cout << "Queen: " << current.QueenValue << endl;
+		cout << "Rook: " << current.RookValue << endl;
+		cout << "Knight: " << current.KnightValue << endl;
+		cout << "Bishop: " << current.BishopValue << endl;
+		cout << "Pawn: " << current.PawnValue << endl;
+
+    } else
+		cout << "same old same old" << endl;
+
+    //app->edit_piecevalues( current );
 }
 
 void ChessEngine::quit( )
@@ -265,6 +273,30 @@ char ChessEngine::get_piece( STSquare square )
 void ChessEngine::change_level( eLevels new_level )
 {
 
+	if( new_level == TIMED ) {
+	    std::pair<bool,int> retval = app->get_time_inputter()->time_per_move( 120 );
+
+		if( ! retval.first )
+			return;
+
+		int sec_per_move = retval.second;
+		// now we need to do something with sec_per_move.
+
+		cout << "Got " << sec_per_move << " seconds per move" << endl;
+	}
+
+	if( new_level == TOTALTIME ) {
+	    std::pair<bool,int> retval = app->get_time_inputter()->total_game_time( 60 );
+
+		if( ! retval.first )
+			return;
+
+		int minutes_per_game = retval.second;
+		// now we need to do something with sec_per_move.
+
+		cout << "Got " << minutes_per_game << " minutes per game" << endl;
+
+	}
 }
 
 void ChessEngine::arrange_turn( eTurns new_turn )
