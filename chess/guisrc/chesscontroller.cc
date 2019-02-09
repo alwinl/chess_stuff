@@ -115,7 +115,7 @@ void ChessController::on_startup()
 	vector<string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
 		ui_model->get_widget( level_widgets[level], chkLevel[level] );
-		chkLevel[level]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_level_changed ) );
+		chkLevel[level]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level ) );
 	}
 
 	chkLevel[EASY]->set_active();
@@ -124,7 +124,7 @@ void ChessController::on_startup()
 	vector<string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
 	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
 		ui_model->get_widget( turn_widgets[turn], chkTurn[turn] );
-		chkTurn[turn]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_arrange_turn_changed ) );
+		chkTurn[turn]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ) );
 	}
 
 	chkTurn[TURNWHITE]->set_active();
@@ -153,6 +153,32 @@ void ChessController::on_activate()
     on_action_new();
 }
 
+bool ChessController::on_animate_timeout()
+{
+	if( ! --timeout_counter ) {
+		board->animate_stop();
+		return false;
+	}
+
+	board->animate_step();
+	return true;
+}
+
+bool ChessController::on_flash_timeout()
+{
+	static bool highlight_on = false;
+
+	if( ! --timeout_counter ) {
+		highlight_on = false;
+		board->highlight_flash( highlight_on );
+		return false;
+	}
+
+	highlight_on = !highlight_on;
+	board->highlight_flash( highlight_on );
+	return true;
+}
+
 
 /**-----------------------------------------------------------------------------
  * \brief Place holder for actions we have not programmed yet
@@ -163,7 +189,7 @@ void ChessController::on_action_not_implemented()
 }
 
 /**-----------------------------------------------------------------------------
- * \brief engine dispatchers
+ * \brief Menu actions
  */
 void ChessController::on_action_new() { director->new_game(  ); }
 void ChessController::on_action_open() { director->open_file(  ); }
@@ -172,62 +198,24 @@ void ChessController::on_action_save_as() { director->save_as(  ); }
 void ChessController::on_action_quit() { director->end_app(  ); }
 void ChessController::on_action_play() { director->advance(  ); }
 void ChessController::on_action_hint() { director->hint(); }
-void ChessController::on_action_undo() { }
-void ChessController::on_action_redo() { }
-void ChessController::on_action_piecevalues() { director->piece_value_changes(  ); }
+
+void ChessController::on_action_undo() { director->undo(); }
+void ChessController::on_action_redo() { director->redo(); }
 void ChessController::on_action_arrange() { director->arrange_start(); }
-void ChessController::on_action_thinking_stop() {}
-void ChessController::on_action_arrange_done() { director->arrange_end( false ); }
-void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
-void ChessController::on_action_arrange_cancel() { director->arrange_end( true ); }
 
-void ChessController::do_arrange_drop( STSquare square, char piece ) { director->arrange_drop( square, piece ); }
-void ChessController::make_move(  STSquare start_square, STSquare end_square ) { director->do_move( start_square, end_square ); }
-
-
-
-/**-----------------------------------------------------------------------------
- * \brief
- *
- * \return void
- *
- */
-void ChessController::on_level_changed()
+void ChessController::on_action_level()
 {
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
 		if( chkLevel[level]->get_active() ) {
 			if( current_level != level ) {
-				message_dialog( "level changed" );
+				director->change_level( (eLevels)level );
 				current_level = (eLevels)level;
 			}
 		}
 	}
 }
 
-
-
-/**-----------------------------------------------------------------------------
- * \brief
- *
- * \return void
- *
- */
-void ChessController::on_arrange_turn_changed()
-{
-	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
-		if( chkTurn[turn]->get_active() ) {
-			if( current_turn != turn ) {
-				message_dialog( "turn changed" );
-				current_turn = (eTurns)turn;
-			}
-		}
-	}
-}
-
-/*
- * The next couple of functions do not need to be dispatched up to the engine.
- * These are purely GUI matters.
- */
+void ChessController::on_action_piecevalues() { director->piece_value_changes(  ); }
 
 /**-----------------------------------------------------------------------------
  * \brief Run the Colours Dialog
@@ -245,17 +233,13 @@ void ChessController::on_action_colours()
  * \brief Tell the view to turn the board 180 degrees
  */
 void ChessController::on_action_reverse()
-{
-	board->toggle_reverse();
-}
+	{ board->toggle_reverse(); }
 
 /**-----------------------------------------------------------------------------
  * \brief Tell the view to toggle displaying the bestline information
  */
 void ChessController::on_action_showbestline()
-{
-    board->toggle_bestline();
-}
+	{ board->toggle_bestline(); }
 
 /**-----------------------------------------------------------------------------
  * \brief Show some application information
@@ -278,6 +262,34 @@ void ChessController::on_action_help_about()
 }
 
 
+
+
+void ChessController::on_action_arrange_done() { director->arrange_end( false ); }
+void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
+
+void ChessController::on_action_arrange_turn()
+{
+	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
+		if( chkTurn[turn]->get_active() ) {
+			if( current_turn != turn ) {
+				director->arrange_turn( (eTurns)turn );
+				current_turn = (eTurns)turn;
+			}
+		}
+	}
+}
+
+void ChessController::on_action_arrange_cancel() { director->arrange_end( true ); }
+
+void ChessController::on_action_thinking_stop() { director->stop_thinking(); }
+
+/**-----------------------------------------------------------------------------
+ *  The next functions are call backs from the board
+ */
+void ChessController::put_piece_on_square( STSquare square, char piece ) { director->put_piece_on_square( square, piece ); }
+void ChessController::make_move(  STSquare start_square, STSquare end_square ) { director->do_move( start_square, end_square ); }
+char ChessController::get_piece( STSquare square ) { return director->get_piece( square); };
+
 /*
  * The next functions are called from the engine
  */
@@ -298,25 +310,24 @@ STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
 
 void ChessController::start_edit_mode()
 {
-	view->set_edit_mode( true );
+	view->show_menu( ChessWindow::MENU_ARRANGE );
 	board->set_edit( true );
 }
 
 void ChessController::end_edit_mode()
 {
-	view->set_edit_mode( false );
+	view->show_menu( ChessWindow::MENU_GAME );
 	board->set_edit( false );
 }
 
-bool ChessController::on_animate_timeout()
+void ChessController::start_thinking()
 {
-	if( ! --timeout_counter ) {
-		board->animate_stop();
-		return false;
-	}
+	view->show_menu( ChessWindow::MENU_STOP );
+}
 
-	board->animate_step();
-	return true;
+void ChessController::stop_thinking()
+{
+	view->show_menu( ChessWindow::MENU_GAME );
 }
 
 void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
@@ -330,21 +341,6 @@ void ChessController::animate( STSquare start_square, STSquare end_square, char 
 		while( Gtk::Main::instance()->events_pending() )
 			Gtk::Main::instance()->iteration();
 	}
-}
-
-bool ChessController::on_flash_timeout()
-{
-	static bool highlight_on = false;
-
-	if( ! --timeout_counter ) {
-		highlight_on = false;
-		board->highlight_flash( highlight_on );
-		return false;
-	}
-
-	highlight_on = !highlight_on;
-	board->highlight_flash( highlight_on );
-	return true;
 }
 
 void ChessController::flash_square( STSquare square )

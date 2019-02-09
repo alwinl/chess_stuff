@@ -64,15 +64,18 @@ public:
     STPieceValues run_piece_value_dialog( STPieceValues current );
     void start_edit_mode();
     void end_edit_mode();
+    void start_thinking();
+    void stop_thinking();
 	void animate( STSquare start_square, STSquare end_square, char piece );
 	void flash_square( STSquare square );
     std::string open_filename( std::string filename, std::string working_dir );
     std::string save_filename( std::string filename, std::string working_dir );
 
-    // These three functions are call backs from the board
+    // These four functions are call backs from the board
     void set_board( ChessBoard * board_init ) { board = board_init; };
-	void do_arrange_drop( STSquare square, char piece );
+	void put_piece_on_square( STSquare square, char piece );
 	void make_move(  STSquare start_square, STSquare end_square );
+	char get_piece( STSquare square );
 
 private:
 	// Private construction to ensure only references can be obtained. Private as class is terminal
@@ -99,7 +102,7 @@ private:
 	void on_action_redo();
 	void on_action_arrange();
 
-	void on_level_changed();
+	void on_action_level();
 
     void on_action_piecevalues();
 
@@ -111,12 +114,10 @@ private:
 
 	void on_action_arrange_done();
 	void on_action_arrange_clear();
-	void on_arrange_turn_changed();
+	void on_action_arrange_turn();
 	void on_action_arrange_cancel();
 
 	void on_action_thinking_stop();
-
-	enum eTurns { TURNWHITE, TURNBLACK, TURNCOUNT };
 
 	STColours app_colours;
 	ChessAppBase* director;

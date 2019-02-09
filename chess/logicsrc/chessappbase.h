@@ -24,9 +24,10 @@
 
 #include <string>
 
-class STInfo;
-class STSquare;
-class STPieceValues;
+#include "../logicsrc/pods.h"
+//class STInfo;
+//class STSquare;
+//class STPieceValues;
 
 class ChessEngine;
 
@@ -61,6 +62,13 @@ public:
     virtual void quit() = 0;
 
     /* called from GUI */
+    void undo();
+    void redo();
+    void stop_thinking();
+    char get_piece( STSquare square );
+    void change_level( eLevels new_level );
+    void arrange_turn( eTurns new_turn );
+
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();
@@ -68,7 +76,8 @@ public:
 
     void arrange_start();
     void arrange_clear();
-    void arrange_drop( STSquare square, char piece );
+//    void remove_piece_from_square( STSquare square );
+    void put_piece_on_square( STSquare square, char piece );
     void arrange_end( bool canceled );
 
     void piece_value_changes();

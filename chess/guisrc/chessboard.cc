@@ -33,16 +33,16 @@ using namespace std;
  *
  */
 ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
-                            : Gtk::DrawingArea(cobject), floating_piece_code(' '), reversed(false), is_edit(false), controller(app)
+                            : Gtk::DrawingArea(cobject), controller(app)
 {
 	using namespace Cairo;
 
 	// create our image objects
-	background_image_ = ImageSurface::create( FORMAT_RGB24, 8*SQUARE_SIZE, 8*SQUARE_SIZE );
-	pieces_surface_   = ImageSurface::create( FORMAT_ARGB32, 6*SQUARE_SIZE, 2*SQUARE_SIZE );
+	background_image = ImageSurface::create( FORMAT_RGB24, 8*SQUARE_SIZE, 8*SQUARE_SIZE );
+	pieces_image   = ImageSurface::create( FORMAT_ARGB32, 6*SQUARE_SIZE, 2*SQUARE_SIZE );
 
 	// Create a context for the pieces bitmap so we can draw on it
-	RefPtr<Context> context = Context::create( pieces_surface_ );
+	RefPtr<Context> context = Context::create( pieces_image );
 
 	// load and draw the image onto the surface
 	Glib::RefPtr<Gdk::Pixbuf> pieces_pixbuf = Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/pieces.png");
@@ -50,19 +50,19 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
 	context->paint();
 
 	// The pieces bitmap contains king through to pawn, white pieces in top row and black pieces in bottom row
-    source_offsets['K'] = Gdk::Point( 0 * SQUARE_SIZE, 0 * SQUARE_SIZE );
-    source_offsets['Q'] = Gdk::Point( 1 * SQUARE_SIZE, 0 * SQUARE_SIZE );
-    source_offsets['R'] = Gdk::Point( 2 * SQUARE_SIZE, 0 * SQUARE_SIZE );
-    source_offsets['B'] = Gdk::Point( 3 * SQUARE_SIZE, 0 * SQUARE_SIZE );
-    source_offsets['N'] = Gdk::Point( 4 * SQUARE_SIZE, 0 * SQUARE_SIZE );
-	source_offsets['P'] = Gdk::Point( 5 * SQUARE_SIZE, 0 * SQUARE_SIZE );
+    pieces_image_offsets['K'] = Gdk::Point( 0 * SQUARE_SIZE, 0 * SQUARE_SIZE );
+    pieces_image_offsets['Q'] = Gdk::Point( 1 * SQUARE_SIZE, 0 * SQUARE_SIZE );
+    pieces_image_offsets['R'] = Gdk::Point( 2 * SQUARE_SIZE, 0 * SQUARE_SIZE );
+    pieces_image_offsets['B'] = Gdk::Point( 3 * SQUARE_SIZE, 0 * SQUARE_SIZE );
+    pieces_image_offsets['N'] = Gdk::Point( 4 * SQUARE_SIZE, 0 * SQUARE_SIZE );
+	pieces_image_offsets['P'] = Gdk::Point( 5 * SQUARE_SIZE, 0 * SQUARE_SIZE );
 
-    source_offsets['k'] = Gdk::Point( 0 * SQUARE_SIZE, 1 * SQUARE_SIZE );
-    source_offsets['q'] = Gdk::Point( 1 * SQUARE_SIZE, 1 * SQUARE_SIZE );
-    source_offsets['r'] = Gdk::Point( 2 * SQUARE_SIZE, 1 * SQUARE_SIZE );
-    source_offsets['b'] = Gdk::Point( 3 * SQUARE_SIZE, 1 * SQUARE_SIZE );
-    source_offsets['n'] = Gdk::Point( 4 * SQUARE_SIZE, 1 * SQUARE_SIZE );
-    source_offsets['p'] = Gdk::Point( 5 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+    pieces_image_offsets['k'] = Gdk::Point( 0 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+    pieces_image_offsets['q'] = Gdk::Point( 1 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+    pieces_image_offsets['r'] = Gdk::Point( 2 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+    pieces_image_offsets['b'] = Gdk::Point( 3 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+    pieces_image_offsets['n'] = Gdk::Point( 4 * SQUARE_SIZE, 1 * SQUARE_SIZE );
+    pieces_image_offsets['p'] = Gdk::Point( 5 * SQUARE_SIZE, 1 * SQUARE_SIZE );
 
     info_data.push_back( pair<string,string>("Turn", "empty") );
     info_data.push_back( pair<string,string>("White", "empty") );
@@ -76,9 +76,13 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
     info_data.push_back( pair<string,string>("Bestline", "empty") );
 
     show_bestline_info = true;
+	draw_highlight = false;
 	is_dragging = false;
 	is_animating = false;
-	draw_highlight = false;
+	is_reversed = false;
+	is_edit = false;
+
+	floating_piece_code = ' ';
 
     controller.set_board( this );
 }
@@ -105,21 +109,21 @@ bool ChessBoard::on_configure_event( GdkEventConfigure*event )
 	Gtk::Allocation allocation = get_allocation();
 
 	board_outline = Gdk::Rectangle(
-            (allocation.get_width() - 226)/2 - 4 * SQUARE_SIZE, /* the left side of the board is midway of our allocated width minus half the board */
+            (allocation.get_width() - INFO_WIDTH)/2 - 4 * SQUARE_SIZE, /* the left side of the board is midway of our allocated width minus half the board */
             allocation.get_height()/2 - 4 * SQUARE_SIZE,		/* the top side of the board is midway of the height minus half the board height */
             8 * SQUARE_SIZE,
             8 * SQUARE_SIZE
     );
 
 	info_outline = Gdk::Rectangle(
-			allocation.get_width() - 226, /* the info widow is placed in the right most 226 pixels of our window */
+			allocation.get_width() - INFO_WIDTH, /* the info widow is placed in the right most 226 pixels of our window */
 			0,
-			226,
+			INFO_WIDTH,
 			allocation.get_height()
 	);
 
 	edit_outline = Gdk::Rectangle(
-			allocation.get_width() - 113 - 3 * SQUARE_SIZE, /* the edit window is halfway of the rightmost 226 minus the width of half the pieces bitmap */
+			allocation.get_width() - INFO_WIDTH/2 - 3 * SQUARE_SIZE, /* the edit window is halfway of the rightmost 226 minus the width of half the pieces bitmap */
 			allocation.get_height()/2 - 1 * SQUARE_SIZE,
 			6 * SQUARE_SIZE,
 			2 * SQUARE_SIZE
@@ -129,15 +133,15 @@ bool ChessBoard::on_configure_event( GdkEventConfigure*event )
 }
 
 /**-----------------------------------------------------------------------------
- * \brief
+ * \brief Draw border and board
  */
 bool ChessBoard::draw_board( const Cairo::RefPtr<Cairo::Context>& cr )
 {
-	// Draw border and board
 	cr->rectangle( board_outline.get_x(), board_outline.get_y(), board_outline.get_width(), board_outline.get_height() );
 	cr->set_source_rgb( 0, 0, 0);								// border
 	cr->stroke_preserve();
-	cr->set_source( background_image_, board_outline.get_x(), board_outline.get_y());	// board
+
+	cr->set_source( background_image, board_outline.get_x(), board_outline.get_y());	// board
 	cr->fill();
 
     return false;
@@ -155,7 +159,7 @@ bool ChessBoard::draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr )
 		// If the board is reversed, the x-axis is reversed, not the y-axis
 		Gdk::Rectangle dest = Gdk::Rectangle( board_outline.get_x(), board_outline.get_y(), SQUARE_SIZE, SQUARE_SIZE );
 
-		if( reversed ) {
+		if( is_reversed ) {
 			dest.set_x( dest.get_x() + (7 - piece.first.file)  * SQUARE_SIZE );
 			dest.set_y( dest.get_y() +      piece.first.rank   * SQUARE_SIZE );
 		} else {
@@ -166,9 +170,9 @@ bool ChessBoard::draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr )
 		// To paint a particular piece we have to offset our source bitmap so that the correct bitmap
 		// overlays our square to be painted. The pieces are stored as two rows (a white and a black row)
 		// in six columns, calculable by type.
-		Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[piece.second].get_x(), dest.get_y() - source_offsets[piece.second].get_y() );
+		Gdk::Point source = Gdk::Point( dest.get_x() - pieces_image_offsets[piece.second].get_x(), dest.get_y() - pieces_image_offsets[piece.second].get_y() );
 
-		cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
+		cr->set_source( pieces_image, source.get_x(), source.get_y() );
 		cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
 		cr->fill();
 	}
@@ -232,15 +236,15 @@ bool ChessBoard::draw_info( const Cairo::RefPtr<Cairo::Context>& cr )
 }
 
 /**-----------------------------------------------------------------------------
- * \brief
+ * \brief Draw edit border and pieces bitmap
  */
 bool ChessBoard::draw_edit( const Cairo::RefPtr<Cairo::Context>& cr )
 {
-	// Draw border and pieces bitmap
 	cr->rectangle( edit_outline.get_x(), edit_outline.get_y(), edit_outline.get_width(), edit_outline.get_height() );
 	cr->set_source_rgb( 0, 0, 0);								// border
 	cr->stroke_preserve();
-	cr->set_source( pieces_surface_, edit_outline.get_x(), edit_outline.get_y());	// pieces bitmap
+
+	cr->set_source( pieces_image, edit_outline.get_x(), edit_outline.get_y());	// pieces bitmap
 	cr->fill();
 
 	return false;
@@ -252,16 +256,18 @@ bool ChessBoard::draw_edit( const Cairo::RefPtr<Cairo::Context>& cr )
 bool ChessBoard::draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr )
 {
 	Gdk::Rectangle dest = Gdk::Rectangle( floating_piece_position.get_x(), floating_piece_position.get_y(), SQUARE_SIZE, SQUARE_SIZE );
-	Gdk::Point source = Gdk::Point( dest.get_x() - source_offsets[floating_piece_code].get_x(), dest.get_y() - source_offsets[floating_piece_code].get_y() );
+	Gdk::Point source = Gdk::Point( dest.get_x() - pieces_image_offsets[floating_piece_code].get_x(), dest.get_y() - pieces_image_offsets[floating_piece_code].get_y() );
 
-	cr->set_source( pieces_surface_, source.get_x(), source.get_y() );
+	cr->set_source( pieces_image, source.get_x(), source.get_y() );
 	cr->rectangle( dest.get_x(), dest.get_y(), dest.get_width(), dest.get_height() );
-	cr->set_line_width( 2.0 );
 	cr->fill();
 
 	return false;
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 bool ChessBoard::draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr )
 {
     cr->set_source_rgb(  foreground_colour.get_red(), foreground_colour.get_green(), foreground_colour.get_blue() );
@@ -316,7 +322,7 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
 void ChessBoard::update()
 {
     Glib::RefPtr<Gdk::Window> win = get_window();
-    if( !win )      // window hqs not been realised yet
+    if( !win )      // window has not been realised yet
         return;
 
     win->invalidate( true);
@@ -328,7 +334,7 @@ void ChessBoard::update()
  * \return pair<int,int>
  *
  */
-STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
+STSquare ChessBoard::point_to_square( Gdk::Point point )
 {
 	STSquare square;
 
@@ -337,7 +343,7 @@ STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
         (point.get_y() - board_outline.get_y()) / SQUARE_SIZE
     );
 
-	if( reversed )
+	if( is_reversed )
 		square.file = 7 - square.file;
 	else
 		square.rank = 7 - square.rank;
@@ -356,7 +362,7 @@ STSquare ChessBoard::calc_square_from_point( Gdk::Point point )
  * \return char
  *
  */
-char ChessBoard::calc_piece_from_point( Gdk::Point point )
+char ChessBoard::select_edit_piece( Gdk::Point point )
 {
 	static string piece_chars = "KQRBNPkqrbnp";
 
@@ -365,19 +371,6 @@ char ChessBoard::calc_piece_from_point( Gdk::Point point )
 	int row = (point.get_y() - edit_outline.get_y()) / SQUARE_SIZE;
 
 	return piece_chars[ row * 6 + col ];
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- *
- * \return char
- *
- */
-char ChessBoard::calc_piece_from_square( STSquare square )
-{
-	typename map<STSquare,char>::iterator it = pieces.find( square );
-
-	return ( it != pieces.end() ) ? (*it).second : ' ';
 }
 
 /**-----------------------------------------------------------------------------
@@ -395,10 +388,12 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
     if( board_outline.intersects( mouse_pos ) ) {
 
-		drag_start_square = calc_square_from_point( Gdk::Point(button_event->x, button_event->y) );
+		drag_start_square = point_to_square( Gdk::Point(button_event->x, button_event->y) );
 
-		floating_piece_code = calc_piece_from_square( drag_start_square );
+		floating_piece_code = controller.get_piece( drag_start_square );
 		floating_piece_position = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
+
+		controller.put_piece_on_square( drag_start_square, ' ' );
 
 		is_dragging = true;
 
@@ -409,7 +404,7 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
     if( is_edit && edit_outline.intersects( mouse_pos ) ) {
 
-		floating_piece_code = calc_piece_from_point( Gdk::Point(button_event->x, button_event->y ) );
+		floating_piece_code = select_edit_piece( Gdk::Point(button_event->x, button_event->y ) );
 		floating_piece_position = Gdk::Point(button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE);
 
 		is_dragging = true;
@@ -440,26 +435,23 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
     if( is_edit ) {
 
 		if( intersecting ) {
-			STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
-			controller.do_arrange_drop( end_square, floating_piece_code );
-		} else
-			controller.do_arrange_drop( drag_start_square, ' ' ); /* dropping a space is removing the piece */
+			STSquare end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
+			controller.put_piece_on_square( end_square, floating_piece_code );
+		}
 
 		floating_piece_code = ' ';
 		update();
 
-		return true;
+    } else {
+
+		floating_piece_code = ' ';
+		update();
+
+		if( intersecting ) {
+			STSquare end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
+			controller.make_move( drag_start_square, end_square );
+		}
     }
-
-	floating_piece_code = ' ';
-	update();
-
-    if( intersecting ) {
-		// here we need to do the move
-		STSquare end_square = calc_square_from_point( Gdk::Point(release_event->x, release_event->y) );
-		controller.make_move( drag_start_square, end_square );
-    }
-
 
     return true;
 }
@@ -508,8 +500,6 @@ void ChessBoard::set_piece_positions( std::string FEN_string )
         }
     }
 
-//    animate_code = ' ';
-
     update();
 }
 
@@ -532,7 +522,7 @@ void ChessBoard::set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gd
 	foreground_colour = fg;
 
 	/* Create a context for the background image object so we can draw on it */
-	RefPtr<Context> context = Context::create( background_image_ );
+	RefPtr<Context> context = Context::create( background_image );
 
 	/* draw the board background */
 	for( int cell=0; cell<64; cell++ ) {
@@ -556,7 +546,7 @@ void ChessBoard::set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gd
  */
 void ChessBoard::toggle_reverse()
 {
-    reversed = !reversed;
+    is_reversed = !is_reversed;
     update();
 }
 
@@ -611,7 +601,7 @@ void ChessBoard::animate_start( STSquare start_square, STSquare end_square, char
 {
 	Gdk::Point end_point;
 
-	if( reversed ) {
+	if( is_reversed ) {
 		start_square.file = 7 - start_square.file;
 		end_square.file = 7 - end_square.file;
 	} else {
@@ -665,7 +655,7 @@ void ChessBoard::animate_stop()
 
 void ChessBoard::highlight_start( STSquare square )
 {
-	if( reversed ) {
+	if( is_reversed ) {
 		square.file = 7 - square.file;
 		square.file = 7 - square.file;
 	} else {

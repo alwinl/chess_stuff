@@ -25,6 +25,8 @@
 #include <string>
 
 enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLAYSEARCH, MATESEARCH, LEVELCOUNT };
+enum eTurns { TURNWHITE, TURNBLACK, TURNCOUNT };
+
 
 /**-----------------------------------------------------------------------------
  * \brief Struct to hold the colours we need in this application

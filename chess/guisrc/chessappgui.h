@@ -50,13 +50,10 @@ public:
     virtual STPieceValues edit_piecevalues( STPieceValues& current );
 	virtual void animate( STSquare start_square, STSquare end_square, char piece );
 	virtual void flash_square( STSquare square );
-
     virtual void start_arranging();
     virtual void end_arranging();
-
     virtual std::string open_filename( std::string filename, std::string working_dir );
     virtual std::string save_filename( std::string filename, std::string working_dir );
-
     virtual void quit();
 
 private:

@@ -46,7 +46,7 @@ public:
 
 	void arranging_start();
 	void arranging_clear();
-	void arranging_drop( STSquare square, char piece );
+	void put_piece_on_square( STSquare square, char piece );
 	void arranging_end( bool canceled );
 
 //	void select_edit_mode();
@@ -68,6 +68,14 @@ public:
     void save_file();
     void save_as();
 
+	void undo();
+	void redo();
+	void stop_thinking();
+	char get_piece( STSquare square );
+	void change_level( eLevels new_level );
+	void arrange_turn( eTurns new_turn );
+
+
 protected:
 
 private:
@@ -76,6 +84,7 @@ private:
     std::string filename;
 
     STGameState arrange_state;
+    bool is_arranging;
 };
 
 #endif // CHESSENGINE_H

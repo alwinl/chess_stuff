@@ -41,25 +41,24 @@ ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Build
 
 	ui_model->get_widget_derived("canvas", board_area, app );
 
-    ui_model->get_widget( "mnuGame", mnuGame );
-    ui_model->get_widget( "mnuArrange", mnuArrange );
-    ui_model->get_widget( "mnuStop", mnuStop );
+    ui_model->get_widget( "mnuGame", menus[MENU_GAME] );
+    ui_model->get_widget( "mnuArrange", menus[MENU_ARRANGE] );
+    ui_model->get_widget( "mnuStop", menus[MENU_STOP] );
 
 	show_all_children();
 
-	mnuArrange->hide();
-	mnuStop->hide();
+	menus[MENU_ARRANGE]->hide();
+	menus[MENU_STOP]->hide();
 }
 
-void ChessWindow::set_edit_mode( bool on )
+void ChessWindow::show_menu( eMENUS menu )
 {
-	mnuGame->hide();
-	mnuStop->hide();
-	mnuArrange->hide();
-
-	if( on )
-		mnuArrange->show();
-	else
-		mnuGame->show();
+	for( int i = 0; i< MENU_COUNT; ++i ) {
+		if( i == menu )
+			menus[i]->show();
+		else
+			menus[i]->hide();
+	}
 }
+
 

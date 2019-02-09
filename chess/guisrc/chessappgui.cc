@@ -52,12 +52,6 @@ void ChessAppGUI::push_statusbar_text( std::string message )
 void ChessAppGUI::message_dialog( std::string message )
 	{ controller->message_dialog( message ); }
 
-void ChessAppGUI::start_arranging()
-	{ controller->start_edit_mode(); }
-
-void ChessAppGUI::end_arranging()
-	{ controller->end_edit_mode(); }
-
 STPieceValues ChessAppGUI::edit_piecevalues( STPieceValues& current )
 	{ return controller->run_piece_value_dialog( current ); }
 
@@ -67,6 +61,11 @@ void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piec
 void ChessAppGUI::flash_square( STSquare square )
 	{ controller->flash_square( square ); }
 
+void ChessAppGUI::start_arranging()
+	{ controller->start_edit_mode(); }
+
+void ChessAppGUI::end_arranging()
+	{ controller->end_edit_mode(); }
 
 std::string ChessAppGUI::open_filename( std::string filename, std::string working_dir )
 	{ return controller->open_filename( filename, working_dir ); }

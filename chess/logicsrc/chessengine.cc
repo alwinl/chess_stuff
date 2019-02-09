@@ -36,6 +36,8 @@ using namespace std;
 ChessEngine::ChessEngine()
 {
     model = new AppModel;
+
+    is_arranging = false;
     //ctor
 }
 
@@ -48,6 +50,10 @@ void ChessEngine::set_application_pointer( ChessAppBase* app_init )
 {
     app = app_init;
 }
+
+
+
+
 
 void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 {
@@ -71,13 +77,11 @@ void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 
 	app->animate( start_square, end_square, piece );
 
-	//for( int i = 0; i < 10; i++ ) {
-	//	app->advance_piece();
-		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	//}
-
 	translator.add_to_square( end_square, piece );
     app->set_piece_positions( translator.to_FEN() );
+
+	model->set_piece_positions( translator.to_FEN() );
+
 }
 
 void ChessEngine::hint()
@@ -86,6 +90,7 @@ void ChessEngine::hint()
 
 	app->flash_square( square );
 }
+
 void ChessEngine::cancel_move( )
 {
 }
@@ -97,16 +102,21 @@ void ChessEngine::arranging_start()
     arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
     arrange_state.is_white_move = true;             // is it whites next move?
 
+    is_arranging = true;
+
 	app->start_arranging();
 
     app->set_piece_positions( arrange_state.piece_positions );
 }
 
-void ChessEngine::arranging_drop( STSquare square, char piece )
+void ChessEngine::put_piece_on_square( STSquare square, char piece )
 {
 	FENTranslator translator;
 
-	translator.from_FEN( arrange_state.piece_positions );
+	if( is_arranging )
+		translator.from_FEN( arrange_state.piece_positions );
+	else
+		translator.from_FEN( model->get_piece_positions() );
 
 	if( translator.query_square(square) != ' ' )
 		translator.remove_from_square( square );
@@ -114,9 +124,10 @@ void ChessEngine::arranging_drop( STSquare square, char piece )
 	if( piece != ' ' )
 		translator.add_to_square( square, piece );
 
-	arrange_state.piece_positions = translator.to_FEN();
+	if( is_arranging )
+		arrange_state.piece_positions = translator.to_FEN();
 
-    app->set_piece_positions( arrange_state.piece_positions );
+    app->set_piece_positions( translator.to_FEN() );
 }
 
 void ChessEngine::arranging_clear()
@@ -129,8 +140,18 @@ void ChessEngine::arranging_clear()
 
 void ChessEngine::arranging_end( bool canceled )
 {
+	is_arranging = false;
+
 	app->end_arranging();
+
+	app->set_piece_positions( model->get_piece_positions() );
 }
+
+
+
+
+
+
 
 
 
@@ -211,4 +232,42 @@ void ChessEngine::piece_value_changes( )
 void ChessEngine::quit( )
 {
     app->quit();
+}
+
+
+void ChessEngine::undo()
+{
+
+}
+
+void ChessEngine::redo()
+{
+
+}
+
+void ChessEngine::stop_thinking()
+{
+
+}
+
+char ChessEngine::get_piece( STSquare square )
+{
+	FENTranslator translator;
+
+	if( is_arranging)
+		translator.from_FEN( arrange_state.piece_positions );
+	else
+		translator.from_FEN( model->get_piece_positions() );
+
+	return translator.query_square(square);
+}
+
+void ChessEngine::change_level( eLevels new_level )
+{
+
+}
+
+void ChessEngine::arrange_turn( eTurns new_turn )
+{
+
 }

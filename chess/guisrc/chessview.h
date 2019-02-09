@@ -22,16 +22,10 @@
 #ifndef APPVIEW_H
 #define APPVIEW_H
 
-#include <string>
-
 #include <gtkmm.h>
 
 class ChessController;
 class ChessBoard;
-
-struct STColours;
-struct STInfo;
-struct STSquare;
 
 /**-----------------------------------------------------------------------------
  * \brief The main application window
@@ -41,16 +35,15 @@ struct STSquare;
 class ChessWindow : public Gtk::ApplicationWindow
 {
 public:
+	enum eMENUS { MENU_GAME, MENU_ARRANGE, MENU_STOP, MENU_COUNT };
+
 	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
-	void set_edit_mode( bool on );
+	void show_menu( eMENUS menu );
 
 private:
 	ChessBoard * board_area;
-
-    Gtk::MenuBar * mnuGame;
-    Gtk::MenuBar * mnuArrange;
-    Gtk::MenuBar * mnuStop;
+    Gtk::MenuBar * menus[MENU_COUNT];
 };
 
 #endif // APPVIEW_H
