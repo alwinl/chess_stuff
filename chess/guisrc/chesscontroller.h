@@ -64,7 +64,6 @@ public:
 	// These functions are called from the logic
 	void set_piece_positions( std::string FEN_string );
 	void set_info( STInfo info );
-    STPieceValues run_piece_value_dialog( STPieceValues current );
     void start_thinking();
     void stop_thinking();
 	void animate( STSquare start_square, STSquare end_square, char piece );

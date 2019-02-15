@@ -373,9 +373,6 @@ void ChessController::set_piece_positions( std::string FEN_string )
 void ChessController::set_info( STInfo info )
 	{ board->set_info( info ); }
 
-STPieceValues ChessController::run_piece_value_dialog( STPieceValues current )
-	{ dlgPieceValues->get_new_piece_values( current ); return current; }
-
 void ChessController::start_thinking()
 {
 	view->show_menu( ChessWindow::MENU_STOP );

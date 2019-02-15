@@ -47,9 +47,6 @@ void ChessAppGUI::set_piece_positions( std::string FEN_string )
 void ChessAppGUI::set_info( STInfo& info )
 	{ controller->set_info( info ); }
 
-STPieceValues ChessAppGUI::edit_piecevalues( STPieceValues& current )
-	{ return controller->run_piece_value_dialog( current ); }
-
 void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
 	{ controller->animate( start_square, end_square, piece ); }
 

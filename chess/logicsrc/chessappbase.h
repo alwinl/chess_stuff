@@ -50,7 +50,6 @@ public:
 	/* Called from logic */
     virtual void set_piece_positions( std::string FEN_string ) = 0;
     virtual void set_info(  STInfo& info ) = 0;
-    virtual STPieceValues edit_piecevalues( STPieceValues& current ) = 0;
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 	virtual void flash_square( STSquare square ) = 0;
 
