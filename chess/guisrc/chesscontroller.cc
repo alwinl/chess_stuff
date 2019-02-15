@@ -25,6 +25,7 @@
 #include "dlgcolours.h"
 #include "dlginput.h"
 #include "dlgpiecevalues.h"
+#include "dlgfilenamechooser.h"
 
 #include "../logicsrc/chessengine.h"
 #include "../logicsrc/appmodel.h"
@@ -52,7 +53,13 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 
 	dlgColourChooser = nullptr;
 	dlgTimeInputter = nullptr;
+	dlgPieceValues = nullptr;
+    dlgOpenFile = nullptr;
+    dlgSaveFile = nullptr;
+
+
 	board = nullptr;
+
 
     app_colours.bg = "rgb(78,154,6)";
     app_colours.fg = "rgb(0,0,0)";
@@ -67,6 +74,9 @@ ChessController::~ChessController( )
 {
 	delete dlgColourChooser;
 	delete dlgTimeInputter;
+	delete dlgPieceValues;
+    delete dlgOpenFile;
+    delete dlgSaveFile;
 }
 
 /**-----------------------------------------------------------------------------
@@ -133,6 +143,8 @@ void ChessController::on_startup()
 	dlgColourChooser = new GUIColourChooser( ui_model, *view );
 	dlgTimeInputter = new GUITimeInputter( ui_model, *view );
 	dlgPieceValues = new GUIPieceValues( ui_model, *view );
+	dlgOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
+	dlgSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
 }
 
 /**-----------------------------------------------------------------------------
@@ -352,7 +364,7 @@ void ChessController::make_move(  STSquare start_square, STSquare end_square )
 
 char ChessController::get_piece( STSquare square ) { return director->get_piece( square); };
 
-/*
+/**-----------------------------------------------------------------------------
  * The next functions are called from the engine
  */
 void ChessController::set_piece_positions( std::string FEN_string )
@@ -400,70 +412,14 @@ void ChessController::flash_square( STSquare square )
 	}
 }
 
-
-/**-----------------------------------------------------------------------------
- * \brief Ask the user for the name of a chess file
- *
- * \param filename string filename suggestion, could be the name of previous opened file
- * \param working_dir string
- * \return string blank if cancelled, filename if not blank
- */
-string ChessController::open_filename( string filename, string working_dir )
-{
-    Gtk::FileChooserDialog dlg( *view, "Restore chess game", Gtk::FILE_CHOOSER_ACTION_OPEN );
-
-    dlg.add_button( Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL );
-    dlg.add_button( Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT );
-
-    Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
-    filter_chess->set_name("Chess Files");
-    filter_chess->add_pattern("*.chess");
-    dlg.add_filter( filter_chess );
-
-    Glib::RefPtr<Gtk::FileFilter> filter_all = Gtk::FileFilter::create();
-    filter_all->set_name("All Files");
-    filter_all->add_pattern("*.*");
-    dlg.add_filter( filter_all );
-
-    dlg.set_filter( filter_chess );
-
-    dlg.set_current_folder( working_dir );
-    if( ! filename.empty() )
-		dlg.set_current_name( filename );
-
-    return ( dlg.run() != Gtk::RESPONSE_ACCEPT ) ? "" :  dlg.get_filename();
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- *
- * \param filename string
- * \param working_dir string
- * \return string
- *
- */
-string ChessController::save_filename( string filename, string working_dir )
-{
-    Gtk::FileChooserDialog dlg( *view, "Save chess game", Gtk::FILE_CHOOSER_ACTION_SAVE );
-
-    dlg.add_button( Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL );
-    dlg.add_button( Gtk::Stock::SAVE, Gtk::RESPONSE_OK );
-
-    Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
-    filter_chess->set_name("Chess Files");
-    filter_chess->add_pattern("*.chess");
-    dlg.add_filter( filter_chess );
-    dlg.set_filter( filter_chess );
-
-    dlg.set_current_folder( working_dir );
-    dlg.set_current_name( filename );
-
-    return ( dlg.run() != Gtk::RESPONSE_OK ) ? "" :  dlg.get_filename();
-}
-
 TimeInputter* ChessController::get_time_inputter()
 	{ return dlgTimeInputter; }
 
 PieceValues * ChessController::get_piece_valuer()
 	{ return dlgPieceValues; }
 
+FilenameChooser * ChessController::get_openfile_chooser()
+	{ return dlgOpenFile; }
+
+FilenameChooser * ChessController::get_savefile_chooser()
+	{ return dlgSaveFile; }

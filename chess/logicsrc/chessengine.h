@@ -28,6 +28,8 @@ class AppModel;
 class ChessAppBase;
 class STSquare;
 
+class FilenameChooser;
+
 #include "pods.h"
 
 /** \brief

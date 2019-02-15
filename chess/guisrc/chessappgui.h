@@ -48,11 +48,12 @@ public:
     virtual STPieceValues edit_piecevalues( STPieceValues& current );
 	virtual void animate( STSquare start_square, STSquare end_square, char piece );
 	virtual void flash_square( STSquare square );
-    virtual std::string open_filename( std::string filename, std::string working_dir );
-    virtual std::string save_filename( std::string filename, std::string working_dir );
 
 	virtual TimeInputter* get_time_inputter();
 	virtual PieceValues * get_piece_valuer();
+
+	virtual FilenameChooser * get_openfile_chooser();
+	virtual FilenameChooser * get_savefile_chooser();
 
     virtual void quit();
 

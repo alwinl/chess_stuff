@@ -30,6 +30,7 @@
 
 class TimeInputter;
 class PieceValues;
+class FilenameChooser;
 
 class ChessAppBase;
 
@@ -39,6 +40,7 @@ class ChessBoard;
 class GUIColourChooser;
 class GUITimeInputter;
 class GUIPieceValues;
+class GUIFilenameChooser;
 
 /**-----------------------------------------------------------------------------
  * \brief Main application object
@@ -67,11 +69,11 @@ public:
     void stop_thinking();
 	void animate( STSquare start_square, STSquare end_square, char piece );
 	void flash_square( STSquare square );
-    std::string open_filename( std::string filename, std::string working_dir );
-    std::string save_filename( std::string filename, std::string working_dir );
 
 	TimeInputter* get_time_inputter();
 	PieceValues * get_piece_valuer();
+	FilenameChooser * get_openfile_chooser();
+	FilenameChooser * get_savefile_chooser();
 
     // These four functions are call backs from the board
     void set_board( ChessBoard * board_init ) { board = board_init; };
@@ -137,6 +139,8 @@ private:
     GUIColourChooser * dlgColourChooser;
     GUITimeInputter * dlgTimeInputter;
     GUIPieceValues * dlgPieceValues;
+    GUIFilenameChooser * dlgOpenFile;
+    GUIFilenameChooser * dlgSaveFile;
 
     ChessBoard * board;
 };

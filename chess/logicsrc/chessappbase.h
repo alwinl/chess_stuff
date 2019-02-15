@@ -31,6 +31,7 @@
 
 class TimeInputter;
 class PieceValues;
+class FilenameChooser;
 
 class ChessEngine;
 
@@ -53,11 +54,12 @@ public:
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 	virtual void flash_square( STSquare square ) = 0;
 
-    virtual std::string open_filename( std::string filename, std::string working_dir ) = 0;
-    virtual std::string save_filename( std::string filename, std::string working_dir ) = 0;
-
 	virtual TimeInputter* get_time_inputter() = 0;
 	virtual PieceValues * get_piece_valuer() = 0;
+
+	virtual FilenameChooser * get_openfile_chooser() = 0;
+	virtual FilenameChooser * get_savefile_chooser() = 0;
+
     virtual void quit() = 0;
 
     /* called from GUI */

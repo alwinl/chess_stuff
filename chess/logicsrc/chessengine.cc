@@ -29,6 +29,7 @@
 #include "chessappbase.h"
 #include "timeinputter.h"
 #include "piecevalues.h"
+#include "filenamechooser.h"
 
 #include "fentranslator.h"
 
@@ -156,16 +157,18 @@ void ChessEngine::arranging_end( bool canceled )
 
 std::string ChessEngine::open_file( )
 {
-    string filename = app->open_filename( "", "~/" );
+	FilenameChooser * open_chooser = app->get_openfile_chooser();
 
-    if( filename.empty() )
-        return "";
+	pair<bool,string> result = open_chooser->get_filename( "", "~/" );
 
-    if( model->load_game( filename ) == -1 ) {    // load the file and build the DS in the model_ member
+	if( !result.first )
+		return "";
+
+    if( model->load_game( result.second ) == -1 ) {    // load the file and build the DS in the model_ member
         return "";
     }
 
-    return filename;
+    return result.second;
 }
 
 std::string ChessEngine::save_file( )
@@ -182,19 +185,21 @@ std::string ChessEngine::save_file( )
 
 std::string ChessEngine::save_as( )
 {
-    string temp_name = app->save_filename( filename, "~/" );
+	FilenameChooser * save_chooser = app->get_savefile_chooser();
 
-    if( temp_name.empty() )
-        return "";
+	pair<bool,string> result = save_chooser->get_filename( filename, "~/" );
 
-    if( temp_name.find( ".chess") == string::npos )     // no .chess added
-        temp_name += string(".chess");
+	if( !result.first )
+		return "";
 
-    if( model->store_game( temp_name ) == -1 ) {
+    if( result.second.find( ".chess") == string::npos )     // no .chess added
+        result.second += string(".chess");
+
+    if( model->store_game( result.second ) == -1 ) {
         return "";
     }
 
-    filename = temp_name;
+    filename = result.second;
     return filename;
 }
 

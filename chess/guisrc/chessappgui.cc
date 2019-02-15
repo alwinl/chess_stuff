@@ -56,17 +56,17 @@ void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piec
 void ChessAppGUI::flash_square( STSquare square )
 	{ controller->flash_square( square ); }
 
-std::string ChessAppGUI::open_filename( std::string filename, std::string working_dir )
-	{ return controller->open_filename( filename, working_dir ); }
-
-std::string ChessAppGUI::save_filename( std::string filename, std::string working_dir )
-	{ return controller->save_filename( filename, working_dir ); }
-
 TimeInputter* ChessAppGUI::get_time_inputter()
 	{ return controller->get_time_inputter(); }
 
 PieceValues* ChessAppGUI::get_piece_valuer()
 	{ return controller->get_piece_valuer(); }
+
+FilenameChooser * ChessAppGUI::get_openfile_chooser()
+	{ return controller->get_openfile_chooser(); }
+
+FilenameChooser * ChessAppGUI::get_savefile_chooser()
+	{ return controller->get_savefile_chooser(); }
 
 void ChessAppGUI::quit()
 	{ controller->quit(); }

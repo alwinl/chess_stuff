@@ -116,6 +116,8 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="guisrc/dlgfilenamechooser.cc" />
+		<Unit filename="guisrc/dlgfilenamechooser.h" />
 		<Unit filename="guisrc/dlginput.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -146,6 +148,8 @@
 		<Unit filename="logicsrc/colourchooser.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
+		<Unit filename="logicsrc/filenamechooser.cc" />
+		<Unit filename="logicsrc/filenamechooser.h" />
 		<Unit filename="logicsrc/piecevalues.cc" />
 		<Unit filename="logicsrc/piecevalues.h" />
 		<Unit filename="logicsrc/pods.cc" />
