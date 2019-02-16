@@ -22,15 +22,15 @@
 #include "piecevalues.h"
 #include "pods.h"
 
-bool PieceValues::get_new_piece_values( STPieceValues& values )
+std::pair<bool,STPieceValues> PieceValues::get_new_piece_values( STPieceValues values )
 {
-	bool changed;
+	std::pair<bool,STPieceValues> result;
 
 	set_values( values );
-	changed = manipulate_values( );
-	if( changed )
-		values = piece_values( );
+	result.first = manipulate_values( );
+	if( result.first )
+		result.second = piece_values( );
 
-	return changed;
+	return result;
 };
 

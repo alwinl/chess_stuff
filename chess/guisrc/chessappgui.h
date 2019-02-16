@@ -26,8 +26,13 @@
 
 #include <../logicsrc/chessappbase.h>
 
-class ChessApplication;
+class ChessController;
 
+/**-----------------------------------------------------------------------------
+ * \brief GUI Application entry
+ *
+ * This is a derived class to run the GUI application
+ */
 class ChessAppGUI : public ChessAppBase
 {
 public:
@@ -38,19 +43,12 @@ public:
 	virtual int run(  int argc, char *argv[] );
 
 	/* Called from logic */
-    virtual void set_piece_positions( std::string FEN_string, STInfo& info );
-    virtual void set_drag_piece( char piece );
-    virtual void push_statusbar_text( std::string message );
-    virtual void message_dialog( std::string message );
-    virtual STPieceValues run_piece_value_dialog( STPieceValues& current );
-
-    virtual std::string open_filename( std::string filename, std::string working_dir );
-    virtual std::string save_filename( std::string filename, std::string working_dir );
-
-    virtual void quit();
+    virtual void set_piece_positions( std::string FEN_string );
+    virtual void set_info( STInfo& info );
+	virtual void animate( STSquare start_square, STSquare end_square, char piece );
 
 private:
-	Glib::RefPtr<ChessApplication> controller;
+	Glib::RefPtr<ChessController> controller;
 };
 
 #endif // CHESSAPPGUI_H

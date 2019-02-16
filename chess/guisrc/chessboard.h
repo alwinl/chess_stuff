@@ -24,31 +24,41 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <utility>
 
 #include <gtkmm.h>
 
-class ChessApplication;
-class STSquare;
+#include "../logicsrc/pods.h"
 
+class ChessController;
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
  *
- * This class encapsulates the drawing of a complete chessboard with background
- * on a DrawingArea widget.
+ * This class encapsulates the drawing of a complete chessboard, info area and edit bitmap
+ * with background on a DrawingArea widget.
  */
 class ChessBoard : public Gtk::DrawingArea
 {
 private:
 	static const int SQUARE_SIZE = 36;
+	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
 
 public:
-	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app );
+	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
 
-    void set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black );
     void set_piece_positions( std::string FEN_string );
-    void set_drag_piece( char piece ) { drag_code = piece; update(); };
-    bool toggle_reverse();
+	void set_info( STInfo& info );
+    void set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg );
+	void set_edit( bool on );
+    void toggle_reverse();
+    void toggle_bestline();
+	void animate_start( STSquare start_square, STSquare end_square, char piece );
+	void animate_step();
+	void animate_stop();
+	void highlight_start( STSquare square );
+	void highlight_flash( bool on );
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
@@ -58,21 +68,49 @@ private:
     virtual bool on_motion_notify_event( GdkEventMotion* motion_event );
 
 	void update();
-	STSquare calc_square_from_point( Gdk::Point point );
 
-	Cairo::RefPtr<Cairo::ImageSurface> background_image_;
-	Cairo::RefPtr<Cairo::ImageSurface> pieces_surface_;
-	Gdk::Rectangle outline_in_pixels;
+	STSquare adjust_for_reverse( STSquare square );
+	STSquare point_to_square( Gdk::Point point );
+	char point_to_edit_piece( Gdk::Point point );
+	Gdk::Point square_to_point( STSquare square );
+
+	bool draw_board( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_info( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_edit( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
+	bool draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr );
+
+	Cairo::RefPtr<Cairo::ImageSurface> background_image;
+	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
+
+	Gdk::Rectangle board_outline;
+	Gdk::Rectangle info_outline;
+	Gdk::Rectangle edit_outline;
+
 	Gdk::RGBA background_colour;
 	Gdk::RGBA white_colour;
 	Gdk::RGBA black_colour;
-	Gdk::Point drag_point;
-	std::map< char, Gdk::Point > source_offsets;
-    std::string piece_positions;
-	bool reversed;
-	char drag_code;
+	Gdk::RGBA foreground_colour;
 
-	ChessApplication& controller;
+	std::map<char,Gdk::Point> pieces_image_offsets;
+	std::vector< std::pair<std::string,std::string> > info_data;
+	std::map<STSquare,char> pieces;
+
+	bool show_bestline_info;
+	bool draw_highlight;
+	bool is_dragging;
+	bool is_animating;
+	bool is_reversed;
+	bool is_edit;
+
+	Gdk::Point floating_piece_position;
+	Gdk::Point annimate_delta;
+	Gdk::Point highlight_pos;
+	char floating_piece_code;
+	STSquare drag_start_square;
+
+	ChessController& controller;
 };
 
 #endif // CHESSBOARD_H_INCLUDED

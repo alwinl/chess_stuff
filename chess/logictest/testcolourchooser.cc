@@ -22,6 +22,7 @@
 #include "testcolourchooser.h"
 
 #include "../logicsrc/colourchooser.h"
+#include "../logicsrc/pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestColourChooser );
 
@@ -66,79 +67,79 @@ private:
 
 void TestColourChooser::no_change_exit_ok()
 {
-    STColours input_colours = {
+    STColours colours = {
         .bg    = "rgb(192,0,0)",
         .fg    = "rgb(0,192,0)",
         .white = "rgb(0,0,192)",
         .black = "rgb(0,128,0)"
     };
-    STColours test_colours( input_colours );
-    STColours output_colours( input_colours );
 
-    MockColourChooserOk test_object( input_colours );
+    MockColourChooserOk test_object( colours );
 
-    CPPUNIT_ASSERT( test_object.choose_colours( test_colours ) == true );
-    CPPUNIT_ASSERT( test_colours == output_colours );
+    std::pair<bool,STColours> result = test_object.choose_colours( colours );
+
+    CPPUNIT_ASSERT( result.first == true );
+    CPPUNIT_ASSERT( result.second == colours );
 }
 
 void TestColourChooser::no_change_exit_cancel()
 {
-    STColours input_colours = {
+    STColours colours = {
         .bg    = "rgb(192,0,0)",
         .fg    = "rgb(0,192,0)",
         .white = "rgb(0,0,192)",
         .black = "rgb(0,128,0)"
     };
-    STColours test_colours( input_colours );
-    STColours output_colours( input_colours );
 
-    MockColourChooserCancel test_object( input_colours );
+    MockColourChooserCancel test_object( colours );
 
-    CPPUNIT_ASSERT( test_object.choose_colours( test_colours ) == false );
-    CPPUNIT_ASSERT( test_colours == output_colours );
+    std::pair<bool,STColours> result = test_object.choose_colours( colours );
+
+    CPPUNIT_ASSERT( result.first == false );
 }
 
 void TestColourChooser::change_exit_ok()
 {
-    STColours input_colours = {
-        .bg    = "rgb(192,0,0)",
-        .fg    = "rgb(0,192,0)",
-        .white = "rgb(0,0,192)",
-        .black = "rgb(0,128,0)"
-    };
-    STColours test_colours = {
+    STColours current_colours = {
         .bg    = "rgb(192,128,0)",
         .fg    = "rgb(128,192,0)",
         .white = "rgb(128,0,192)",
         .black = "rgb(192,128,0)"
     };
-    STColours output_colours( input_colours );
+    STColours new_colours = {
+        .bg    = "rgb(192,0,0)",
+        .fg    = "rgb(0,192,0)",
+        .white = "rgb(0,0,192)",
+        .black = "rgb(0,128,0)"
+    };
 
-    MockColourChooserOk test_object( input_colours );
+    MockColourChooserOk test_object( new_colours );
 
-    CPPUNIT_ASSERT( test_object.choose_colours( test_colours ) == true );
-    CPPUNIT_ASSERT( test_colours == output_colours );
+    std::pair<bool,STColours> result = test_object.choose_colours( current_colours );
+
+    CPPUNIT_ASSERT( result.first == true );
+    CPPUNIT_ASSERT( result.second == new_colours );
 }
 
 void TestColourChooser::change_exit_cancel()
 {
-    STColours input_colours = {
-        .bg    = "rgb(192,0,0)",
-        .fg    = "rgb(0,192,0)",
-        .white = "rgb(0,0,192)",
-        .black = "rgb(0,128,0)"
-    };
-    STColours test_colours = {
+    STColours current_colours = {
         .bg    = "rgb(192,128,0)",
         .fg    = "rgb(128,192,0)",
         .white = "rgb(128,0,192)",
         .black = "rgb(192,128,0)"
     };
-    STColours output_colours( test_colours );
+    STColours new_colours = {
+        .bg    = "rgb(192,0,0)",
+        .fg    = "rgb(0,192,0)",
+        .white = "rgb(0,0,192)",
+        .black = "rgb(0,128,0)"
+    };
 
-    MockColourChooserCancel test_object( input_colours );
+    MockColourChooserCancel test_object( new_colours );
 
-    CPPUNIT_ASSERT( test_object.choose_colours( test_colours ) == false );
-    CPPUNIT_ASSERT( test_colours == output_colours );
+    std::pair<bool,STColours> result = test_object.choose_colours( current_colours );
+
+    CPPUNIT_ASSERT( result.first == false );
 }
 

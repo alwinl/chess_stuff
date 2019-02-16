@@ -22,38 +22,28 @@
 #ifndef APPVIEW_H
 #define APPVIEW_H
 
-#include <string>
-
 #include <gtkmm.h>
 
-class ChessApplication;
-
+class ChessController;
 class ChessBoard;
-class ChessInfo;
-class ChessEdit;
 
-struct STColours;
-struct STInfo;
-
+/**-----------------------------------------------------------------------------
+ * \brief The main application window
+ *
+ * This class manages the top level window
+ */
 class ChessWindow : public Gtk::ApplicationWindow
 {
 public:
-	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessApplication& app );
+	enum eMENUS { MENU_GAME, MENU_ARRANGE, MENU_STOP, MENU_COUNT };
 
-	void set_piece_positions( std::string FEN_string );
-	void set_drag_piece( char piece );
-	void set_info( STInfo& info );
-	void set_colours( STColours& colours );
-	bool reverse_board();
-	bool toggle_bestline_display();
-    bool toggle_edit_area_display( );
+	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
+
+	void show_menu( eMENUS menu );
 
 private:
-	ChessInfo * info_area;
 	ChessBoard * board_area;
-	ChessEdit * edit_area;
-
-	bool edit_area_visible;
+    Gtk::MenuBar * menus[MENU_COUNT];
 };
 
 #endif // APPVIEW_H

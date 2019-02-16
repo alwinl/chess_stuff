@@ -22,6 +22,7 @@
 #include "testfentranslator.h"
 
 #include "../logicsrc/fentranslator.h"
+#include "../logicsrc/pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestFENTranslator );
 

@@ -19,9 +19,21 @@
  *
  */
 
+ //#include <unistd.h>
+
+ #include <chrono>
+ #include <thread>
+
 #include "chessengine.h"
 #include "appmodel.h"
 #include "chessappbase.h"
+#include "timeinputter.h"
+#include "piecevalues.h"
+#include "filenamechooser.h"
+
+#include "fentranslator.h"
+
+#include <iostream>
 
 using namespace std;
 
@@ -29,7 +41,8 @@ using namespace std;
 ChessEngine::ChessEngine()
 {
     model = new AppModel;
-    //ctor
+
+    is_arranging = false;
 }
 
 ChessEngine::~ChessEngine()
@@ -42,70 +55,123 @@ void ChessEngine::set_application_pointer( ChessAppBase* app_init )
     app = app_init;
 }
 
-void ChessEngine::start_move( STSquare square )
-{
-    char piece = model->get_piece( square );
 
-    // put in checking code, is there actually a piece on this square and is it the right colour
-    // if checking succeeds store the fact that the user has picked up a piece
-    app->set_drag_piece( piece );
+
+
+
+void ChessEngine::do_move( STSquare start_square, STSquare end_square )
+{
+	FENTranslator translator;
+	char piece;
+
+	translator.from_FEN( model->get_piece_positions() );
+
+	piece = translator.query_square( start_square );
+	if( piece == ' ' )
+		return;		/* invalid move */
+
+	/*
+	 *	We need to do a bunch more checking here
+	 */
+
+	translator.remove_from_square( start_square );
+
+    app->set_piece_positions( translator.to_FEN() );
+
+
+	app->animate( start_square, end_square, piece );
+
+	translator.add_to_square( end_square, piece );
+    app->set_piece_positions( translator.to_FEN() );
+
+	model->set_piece_positions( translator.to_FEN() );
+
 }
 
-void ChessEngine::do_move( STSquare square )
+STSquare ChessEngine::hint()
 {
-    app->set_drag_piece( ' ' );
+	STSquare square = make_square( 3, 3 );
+
+
+	return square;
 }
 
 void ChessEngine::cancel_move( )
 {
-    app->set_drag_piece( ' ' );
-
 }
 
-void ChessEngine::open_file( )
+void ChessEngine::arranging_start()
 {
-    string filename = app->open_filename( "", "~/" );
+	arrange_state = STGameState();
 
-    if( filename.empty() )
-        return;
+    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    arrange_state.is_white_move = true;             // is it whites next move?
 
-    if( model->load_game( filename ) == -1 ) {    // load the file and build the DS in the model_ member
-        app->message_dialog( "Error restoring game." );
-        return;
-    }
+    is_arranging = true;
 
-    app->push_statusbar_text( string("Opened ") + filename );
+    app->set_piece_positions( arrange_state.piece_positions );
 }
 
-void ChessEngine::save_file( )
+void ChessEngine::put_piece_on_square( STSquare square, char piece )
 {
-    if( filename.empty() ) {
-        save_as( );
-        return;
+	FENTranslator translator;
+
+	if( is_arranging )
+		translator.from_FEN( arrange_state.piece_positions );
+	else
+		translator.from_FEN( model->get_piece_positions() );
+
+	if( translator.query_square(square) != ' ' )
+		translator.remove_from_square( square );
+
+	if( piece != ' ' )
+		translator.add_to_square( square, piece );
+
+	if( is_arranging )
+		arrange_state.piece_positions = translator.to_FEN();
+
+    app->set_piece_positions( translator.to_FEN() );
+}
+
+void ChessEngine::arranging_clear()
+{
+    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    arrange_state.is_white_move = true;             // is it whites next move?
+
+    app->set_piece_positions( arrange_state.piece_positions );
+}
+
+void ChessEngine::arranging_end( bool canceled )
+{
+	is_arranging = false;
+
+	app->set_piece_positions( model->get_piece_positions() );
+}
+
+
+
+
+
+
+
+
+
+bool ChessEngine::open_file( std::string name )
+{
+    if( model->load_game( name ) == -1 ) {    // load the file and build the DS in the model_ member
+        return false;
     }
 
+    return true;
+}
+
+bool ChessEngine::save_file( std::string name )
+{
     if( model->store_game( filename ) == -1 ) {
-        app->message_dialog( "Error saving game. Try Save As" );
-        return;
+        return false;
     }
 
-    app->push_statusbar_text( string( "Saved " ) + filename );
-}
-
-void ChessEngine::save_as( )
-{
-    string temp_name = app->save_filename( filename, "~/" );
-
-    if( temp_name.find( ".chess") == string::npos )     // no .chess added
-        temp_name += string(".chess");
-
-    if( model->store_game( temp_name ) == -1 ) {
-        app->message_dialog( "Error saving game." );
-        return;
-    }
-
-    filename = temp_name;
-    app->push_statusbar_text( string( "Saved " ) + filename );
+    return true;
 }
 
 void ChessEngine::advance( )
@@ -113,7 +179,8 @@ void ChessEngine::advance( )
     model->advance();
 
     STInfo tmp = model->get_info();
-    app->set_piece_positions( model->get_piece_positions(), tmp );
+    app->set_piece_positions( model->get_piece_positions() );
+    app->set_info( tmp );
 }
 
 void ChessEngine::new_game( )
@@ -122,19 +189,69 @@ void ChessEngine::new_game( )
     model->initialise();
 
     STInfo tmp = model->get_info();
-    app->set_piece_positions( model->get_piece_positions(), tmp );
-
-    app->push_statusbar_text( string("New game") );
+    app->set_piece_positions( model->get_piece_positions() );
+    app->set_info( tmp );
 }
 
-void ChessEngine::piece_value_changes( )
+void ChessEngine::set_piece_values( STPieceValues piece_values )
 {
-    STPieceValues current;
+	current = piece_values;
 
-    app->run_piece_value_dialog( current );
+	cout << "Values have changed" << endl;
+	cout << "Queen: " << current.QueenValue << endl;
+	cout << "Rook: " << current.RookValue << endl;
+	cout << "Knight: " << current.KnightValue << endl;
+	cout << "Bishop: " << current.BishopValue << endl;
+	cout << "Pawn: " << current.PawnValue << endl;
 }
 
-void ChessEngine::quit( )
+
+bool ChessEngine::can_quit( )
 {
-    app->quit();
+    return false;
+}
+
+
+void ChessEngine::undo()
+{
+
+}
+
+void ChessEngine::redo()
+{
+
+}
+
+void ChessEngine::stop_thinking()
+{
+
+}
+
+char ChessEngine::get_piece( STSquare square )
+{
+	FENTranslator translator;
+
+	if( is_arranging)
+		translator.from_FEN( arrange_state.piece_positions );
+	else
+		translator.from_FEN( model->get_piece_positions() );
+
+	return translator.query_square(square);
+}
+
+void ChessEngine::change_level( eLevels new_level, int time_parameter )
+{
+
+	if( new_level == TIMED ) {
+		cout << "Got " << time_parameter << " seconds per move" << endl;
+	}
+
+	if( new_level == TOTALTIME ) {
+		cout << "Got " << time_parameter << " minutes per game" << endl;
+	}
+}
+
+void ChessEngine::arrange_turn( eTurns new_turn )
+{
+
 }

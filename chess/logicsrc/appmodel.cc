@@ -85,9 +85,3 @@ int AppModel::load_game( const std::string& file_name )
 }
 
 
-
-char AppModel::get_piece( STSquare square )
-{
-    return 'K';
-}
-

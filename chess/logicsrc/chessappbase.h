@@ -24,9 +24,11 @@
 
 #include <string>
 
-class STInfo;
-class STSquare;
-class STPieceValues;
+#include "pods.h"
+
+class TimeInputter;
+class PieceValues;
+class FilenameChooser;
 
 class ChessEngine;
 
@@ -43,29 +45,31 @@ public:
 	virtual int run(  int argc, char *argv[] ) = 0;
 
 	/* Called from logic */
-
-    virtual void set_piece_positions( std::string FEN_string, STInfo& info ) = 0;
-    virtual void set_drag_piece( char piece ) = 0;
-    virtual void push_statusbar_text( std::string message ) = 0;
-    virtual void message_dialog( std::string message ) = 0;
-    virtual STPieceValues run_piece_value_dialog( STPieceValues& current ) = 0;
-
-    virtual std::string open_filename( std::string filename, std::string working_dir ) = 0;
-    virtual std::string save_filename( std::string filename, std::string working_dir ) = 0;
-
-    virtual void quit() = 0;
+    virtual void set_piece_positions( std::string FEN_string ) = 0;
+    virtual void set_info(  STInfo& info ) = 0;
+	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 
     /* called from GUI */
-    void start_move( STSquare square );
-    void do_move( STSquare square );
+    void undo();
+    void redo();
+    void stop_thinking();
+    char get_piece( STSquare square );
+    void change_level( eLevels new_level, int time_parameter );
+    void arrange_turn( eTurns new_turn );
+    void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();
-    void piece_value_changes();
+    STSquare hint();
+    void arrange_start();
+    void arrange_clear();
+    void put_piece_on_square( STSquare square, char piece );
+    void arrange_end( bool canceled );
     void new_game();
-    void end_app();
-    void open_file();
-    void save_file();
-    void save_as();
+    bool can_quit();
+    bool open_file( std::string name );
+    bool save_file( std::string name );
+	STPieceValues get_piece_values();
+	void set_piece_values( STPieceValues piece_values );
 
 private:
 	ChessEngine* engine;

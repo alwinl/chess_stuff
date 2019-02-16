@@ -15,6 +15,7 @@
 					<Add option="-g" />
 					<Add directory="logicsrc/" />
 					<Add directory="guisrc/" />
+					<Add directory="./" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -26,6 +27,7 @@
 					<Add option="-O2" />
 					<Add directory="logicsrc/" />
 					<Add directory="guisrc/" />
+					<Add directory="./" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -40,6 +42,7 @@
 					<Add option="-g" />
 					<Add option="-DTESTING" />
 					<Add directory="logicsrc/" />
+					<Add directory="./" />
 				</Compiler>
 				<Linker>
 					<Add library="cppunit" />
@@ -81,14 +84,6 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessapplication.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessapplication.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
 		<Unit filename="guisrc/chessboard.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -97,19 +92,11 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessedit.cc">
+		<Unit filename="guisrc/chesscontroller.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessedit.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessinfo.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessinfo.h">
+		<Unit filename="guisrc/chesscontroller.h">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
@@ -129,6 +116,8 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="guisrc/dlgfilenamechooser.cc" />
+		<Unit filename="guisrc/dlgfilenamechooser.h" />
 		<Unit filename="guisrc/dlginput.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -159,6 +148,8 @@
 		<Unit filename="logicsrc/colourchooser.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
+		<Unit filename="logicsrc/filenamechooser.cc" />
+		<Unit filename="logicsrc/filenamechooser.h" />
 		<Unit filename="logicsrc/piecevalues.cc" />
 		<Unit filename="logicsrc/piecevalues.h" />
 		<Unit filename="logicsrc/pods.cc" />

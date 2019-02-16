@@ -19,33 +19,27 @@
  *
  */
 
-#include "chessappgui.h"
-#include "chesscontroller.h"
+#ifndef GUIFILENAMECHOOSER_H
+#define GUIFILENAMECHOOSER_H
 
-#include "../logicsrc/pods.h"
-#include "../logicsrc/timeinputter.h"
+#include <../logicsrc/filenamechooser.h>
 
-ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
+#include <gtkmm.h>
+
+class GUIFilenameChooser : public FilenameChooser
 {
-}
+public:
+	GUIFilenameChooser( Gtk::Window& parent, Gtk::FileChooserAction action );
+	virtual ~GUIFilenameChooser() { delete dlg; }
 
-ChessAppGUI::~ChessAppGUI()
-{
-}
+protected:
+	virtual void set_working_dir( std::string working_dir );
+	virtual bool query_file();
+	virtual void set_filename( std::string filename );
+	virtual std::string	get_filename( );
 
-/* called from main function */;
-int ChessAppGUI::run(  int argc, char *argv[] )
-{
-	controller = ChessController::create( this );
-	return controller->run( argc, argv );
-}
+private:
+	Gtk::FileChooserDialog * dlg;
+};
 
-/* Called from logic */
-void ChessAppGUI::set_piece_positions( std::string FEN_string )
-	{ controller->set_piece_positions( FEN_string ); }
-
-void ChessAppGUI::set_info( STInfo& info )
-	{ controller->set_info( info ); }
-
-void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
-	{ controller->animate( start_square, end_square, piece ); }
+#endif // GUIFILENAMECHOOSER_H

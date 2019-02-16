@@ -66,7 +66,7 @@ public:
 
     void initialise();
     void insert_piece( STSquare square, char piece );
-    void remove_piece( STSquare square, char piece );       // piece used for checking, not necessary for operation
+    void remove_piece( STSquare square );       // piece used for checking, not necessary for operation
 
     void add_move( );
     void remove_move();
@@ -75,7 +75,7 @@ public:
 
     std::string get_working_folder() { return "~/Documents"; };
     std::string get_piece_positions() { return game_states[current].piece_positions; };
-    char get_piece( STSquare square );
+    void set_piece_positions( std::string positions ) { game_states[current].piece_positions = positions; };
     STInfo get_info() { return info; };
 
 private:

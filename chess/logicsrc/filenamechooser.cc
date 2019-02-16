@@ -19,33 +19,17 @@
  *
  */
 
-#include "chessappgui.h"
-#include "chesscontroller.h"
+#include "filenamechooser.h"
 
-#include "../logicsrc/pods.h"
-#include "../logicsrc/timeinputter.h"
-
-ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
+std::pair<bool,std::string> FilenameChooser::get_filename( std::string filename, std::string working_dir )
 {
+	set_working_dir( working_dir );
+	set_filename( filename );
+
+	bool do_it = query_file();
+	if( do_it )
+		filename = get_filename( );
+
+	return std::pair<bool,std::string>( do_it, filename );
 }
 
-ChessAppGUI::~ChessAppGUI()
-{
-}
-
-/* called from main function */;
-int ChessAppGUI::run(  int argc, char *argv[] )
-{
-	controller = ChessController::create( this );
-	return controller->run( argc, argv );
-}
-
-/* Called from logic */
-void ChessAppGUI::set_piece_positions( std::string FEN_string )
-	{ controller->set_piece_positions( FEN_string ); }
-
-void ChessAppGUI::set_info( STInfo& info )
-	{ controller->set_info( info ); }
-
-void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
-	{ controller->animate( start_square, end_square, piece ); }
