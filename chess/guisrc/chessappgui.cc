@@ -49,21 +49,3 @@ void ChessAppGUI::set_info( STInfo& info )
 
 void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
 	{ controller->animate( start_square, end_square, piece ); }
-
-void ChessAppGUI::flash_square( STSquare square )
-	{ controller->flash_square( square ); }
-
-TimeInputter* ChessAppGUI::get_time_inputter()
-	{ return controller->get_time_inputter(); }
-
-PieceValues* ChessAppGUI::get_piece_valuer()
-	{ return controller->get_piece_valuer(); }
-
-FilenameChooser * ChessAppGUI::get_openfile_chooser()
-	{ return controller->get_openfile_chooser(); }
-
-FilenameChooser * ChessAppGUI::get_savefile_chooser()
-	{ return controller->get_savefile_chooser(); }
-
-void ChessAppGUI::quit()
-	{ controller->quit(); }

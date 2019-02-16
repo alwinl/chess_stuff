@@ -51,6 +51,9 @@ ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Build
 	menus[MENU_STOP]->hide();
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Switches between the available menus
+ */
 void ChessWindow::show_menu( eMENUS menu )
 {
 	for( int i = 0; i< MENU_COUNT; ++i ) {

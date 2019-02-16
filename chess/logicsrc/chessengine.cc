@@ -88,11 +88,12 @@ void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 
 }
 
-void ChessEngine::hint()
+STSquare ChessEngine::hint()
 {
 	STSquare square = make_square( 3, 3 );
 
-	app->flash_square( square );
+
+	return square;
 }
 
 void ChessEngine::cancel_move( )
@@ -155,52 +156,22 @@ void ChessEngine::arranging_end( bool canceled )
 
 
 
-std::string ChessEngine::open_file( )
+bool ChessEngine::open_file( std::string name )
 {
-	FilenameChooser * open_chooser = app->get_openfile_chooser();
-
-	pair<bool,string> result = open_chooser->get_filename( "", "~/" );
-
-	if( !result.first )
-		return "";
-
-    if( model->load_game( result.second ) == -1 ) {    // load the file and build the DS in the model_ member
-        return "";
+    if( model->load_game( name ) == -1 ) {    // load the file and build the DS in the model_ member
+        return false;
     }
 
-    return result.second;
+    return true;
 }
 
-std::string ChessEngine::save_file( )
+bool ChessEngine::save_file( std::string name )
 {
-    if( filename.empty() )
-        return save_as( );
-
     if( model->store_game( filename ) == -1 ) {
-        return "";
+        return false;
     }
 
-    return filename;
-}
-
-std::string ChessEngine::save_as( )
-{
-	FilenameChooser * save_chooser = app->get_savefile_chooser();
-
-	pair<bool,string> result = save_chooser->get_filename( filename, "~/" );
-
-	if( !result.first )
-		return "";
-
-    if( result.second.find( ".chess") == string::npos )     // no .chess added
-        result.second += string(".chess");
-
-    if( model->store_game( result.second ) == -1 ) {
-        return "";
-    }
-
-    filename = result.second;
-    return filename;
+    return true;
 }
 
 void ChessEngine::advance( )
@@ -222,29 +193,22 @@ void ChessEngine::new_game( )
     app->set_info( tmp );
 }
 
-void ChessEngine::piece_value_changes( )
+void ChessEngine::set_piece_values( STPieceValues piece_values )
 {
+	current = piece_values;
 
-    PieceValues * piece_values = app->get_piece_valuer();
-
-    if( piece_values->get_new_piece_values( current) ) {
-
-		cout << "Values have changed" << endl;
-		cout << "Queen: " << current.QueenValue << endl;
-		cout << "Rook: " << current.RookValue << endl;
-		cout << "Knight: " << current.KnightValue << endl;
-		cout << "Bishop: " << current.BishopValue << endl;
-		cout << "Pawn: " << current.PawnValue << endl;
-
-    } else
-		cout << "same old same old" << endl;
-
-    //app->edit_piecevalues( current );
+	cout << "Values have changed" << endl;
+	cout << "Queen: " << current.QueenValue << endl;
+	cout << "Rook: " << current.RookValue << endl;
+	cout << "Knight: " << current.KnightValue << endl;
+	cout << "Bishop: " << current.BishopValue << endl;
+	cout << "Pawn: " << current.PawnValue << endl;
 }
 
-void ChessEngine::quit( )
+
+bool ChessEngine::can_quit( )
 {
-    app->quit();
+    return false;
 }
 
 
@@ -275,32 +239,15 @@ char ChessEngine::get_piece( STSquare square )
 	return translator.query_square(square);
 }
 
-void ChessEngine::change_level( eLevels new_level )
+void ChessEngine::change_level( eLevels new_level, int time_parameter )
 {
 
 	if( new_level == TIMED ) {
-	    std::pair<bool,int> retval = app->get_time_inputter()->time_per_move( 120 );
-
-		if( ! retval.first )
-			return;
-
-		int sec_per_move = retval.second;
-		// now we need to do something with sec_per_move.
-
-		cout << "Got " << sec_per_move << " seconds per move" << endl;
+		cout << "Got " << time_parameter << " seconds per move" << endl;
 	}
 
 	if( new_level == TOTALTIME ) {
-	    std::pair<bool,int> retval = app->get_time_inputter()->total_game_time( 60 );
-
-		if( ! retval.first )
-			return;
-
-		int minutes_per_game = retval.second;
-		// now we need to do something with sec_per_move.
-
-		cout << "Got " << minutes_per_game << " minutes per game" << endl;
-
+		cout << "Got " << time_parameter << " minutes per game" << endl;
 	}
 }
 

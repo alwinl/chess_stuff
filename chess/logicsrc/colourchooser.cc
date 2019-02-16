@@ -22,15 +22,15 @@
 #include "colourchooser.h"
 #include "pods.h"
 
-bool ColourChooser::choose_colours( STColours& local_colours )
+std::pair<bool,STColours> ColourChooser::choose_colours( STColours local_colours )
 {
-	bool changed;
+	std::pair<bool,STColours> result;
 
 	set_colours( local_colours );
-	changed = manipulate_colours( );
-	if( changed )
-		local_colours = colours( );
+	result.first = manipulate_colours( );
+	if( result.first )
+		result.second = colours( );
 
-	return changed;
+	return result;
 };
 

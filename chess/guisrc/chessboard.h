@@ -43,7 +43,7 @@ class ChessBoard : public Gtk::DrawingArea
 {
 private:
 	static const int SQUARE_SIZE = 36;
-	static const int INFO_WIDTH = 226;
+	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
 
 public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
@@ -69,8 +69,10 @@ private:
 
 	void update();
 
+	STSquare adjust_for_reverse( STSquare square );
 	STSquare point_to_square( Gdk::Point point );
-	char select_edit_piece( Gdk::Point point );
+	char point_to_edit_piece( Gdk::Point point );
+	Gdk::Point square_to_point( STSquare square );
 
 	bool draw_board( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr );
@@ -91,7 +93,7 @@ private:
 	Gdk::RGBA black_colour;
 	Gdk::RGBA foreground_colour;
 
-	std::map< char, Gdk::Point > pieces_image_offsets;
+	std::map<char,Gdk::Point> pieces_image_offsets;
 	std::vector< std::pair<std::string,std::string> > info_data;
 	std::map<STSquare,char> pieces;
 

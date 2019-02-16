@@ -28,7 +28,7 @@ class AppModel;
 class ChessAppBase;
 class STSquare;
 
-class FilenameChooser;
+//class FilenameChooser;
 
 #include "pods.h"
 
@@ -51,31 +51,25 @@ public:
 	void put_piece_on_square( STSquare square, char piece );
 	void arranging_end( bool canceled );
 
-//	void select_edit_mode();
-//	void leave_edit_mode();
-
     void advance();
 
-    void hint();
-
-    void piece_value_changes();
-
-    //int store_game( const std::string& file_name );
-    //int load_game( const std::string& file_name );
+    STSquare hint();
 
     void new_game();
-    void quit();
+    bool can_quit();
 
-    std::string open_file();
-    std::string save_file();
-    std::string save_as();
+    bool open_file( std::string name );
+    bool save_file( std::string name );
 
 	void undo();
 	void redo();
 	void stop_thinking();
 	char get_piece( STSquare square );
-	void change_level( eLevels new_level );
+	void change_level( eLevels new_level, int time_parameter );
 	void arrange_turn( eTurns new_turn );
+
+	STPieceValues get_piece_values() { return current; };
+	void set_piece_values( STPieceValues piece_values );
 
 
 protected:

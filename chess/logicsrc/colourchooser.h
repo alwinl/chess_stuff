@@ -22,6 +22,8 @@
 #ifndef COLOURCHOOSER_H
 #define COLOURCHOOSER_H
 
+#include <utility>
+
 class STColours;
 
 /** \brief
@@ -32,7 +34,7 @@ public:
     ColourChooser() {};
     virtual ~ColourChooser() {};
 
-    bool choose_colours( STColours& local_colours );
+    std::pair<bool,STColours> choose_colours( STColours local_colours );
 
 protected:
     virtual void set_colours( STColours& colours ) = 0;

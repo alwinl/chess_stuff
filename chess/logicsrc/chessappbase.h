@@ -24,10 +24,7 @@
 
 #include <string>
 
-#include "../logicsrc/pods.h"
-//class STInfo;
-//class STSquare;
-//class STPieceValues;
+#include "pods.h"
 
 class TimeInputter;
 class PieceValues;
@@ -51,42 +48,28 @@ public:
     virtual void set_piece_positions( std::string FEN_string ) = 0;
     virtual void set_info(  STInfo& info ) = 0;
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
-	virtual void flash_square( STSquare square ) = 0;
-
-	virtual TimeInputter* get_time_inputter() = 0;
-	virtual PieceValues * get_piece_valuer() = 0;
-
-	virtual FilenameChooser * get_openfile_chooser() = 0;
-	virtual FilenameChooser * get_savefile_chooser() = 0;
-
-    virtual void quit() = 0;
 
     /* called from GUI */
     void undo();
     void redo();
     void stop_thinking();
     char get_piece( STSquare square );
-    void change_level( eLevels new_level );
+    void change_level( eLevels new_level, int time_parameter );
     void arrange_turn( eTurns new_turn );
-
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();
-    void hint();
-
+    STSquare hint();
     void arrange_start();
     void arrange_clear();
-//    void remove_piece_from_square( STSquare square );
     void put_piece_on_square( STSquare square, char piece );
     void arrange_end( bool canceled );
-
-    void piece_value_changes();
     void new_game();
-    void end_app();
-
-    std::string open_file();
-    std::string save_file();
-    std::string save_as();
+    bool can_quit();
+    bool open_file( std::string name );
+    bool save_file( std::string name );
+	STPieceValues get_piece_values();
+	void set_piece_values( STPieceValues piece_values );
 
 private:
 	ChessEngine* engine;

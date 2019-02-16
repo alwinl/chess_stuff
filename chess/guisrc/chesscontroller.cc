@@ -51,15 +51,13 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 {
 	Glib::set_application_name("GTKmm Chess");
 
-	dlgColourChooser = nullptr;
-	dlgTimeInputter = nullptr;
-	dlgPieceValues = nullptr;
-    dlgOpenFile = nullptr;
-    dlgSaveFile = nullptr;
-
+	guiColourChooser = nullptr;
+	guiTimeInputter = nullptr;
+	guiPieceValues = nullptr;
+    guiOpenFile = nullptr;
+    guiSaveFile = nullptr;
 
 	board = nullptr;
-
 
     app_colours.bg = "rgb(78,154,6)";
     app_colours.fg = "rgb(0,0,0)";
@@ -72,11 +70,11 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
  */
 ChessController::~ChessController( )
 {
-	delete dlgColourChooser;
-	delete dlgTimeInputter;
-	delete dlgPieceValues;
-    delete dlgOpenFile;
-    delete dlgSaveFile;
+	delete guiColourChooser;
+	delete guiTimeInputter;
+	delete guiPieceValues;
+    delete guiOpenFile;
+    delete guiSaveFile;
 }
 
 /**-----------------------------------------------------------------------------
@@ -125,7 +123,7 @@ void ChessController::on_startup()
 	vector<string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
 		ui_model->get_widget( level_widgets[level], chkLevel[level] );
-		chkLevel[level]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level ) );
+		chkLevel[level]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_level ), level) );
 	}
 
 	chkLevel[EASY]->set_active();
@@ -134,17 +132,17 @@ void ChessController::on_startup()
 	vector<string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
 	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
 		ui_model->get_widget( turn_widgets[turn], chkTurn[turn] );
-		chkTurn[turn]->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ) );
+		chkTurn[turn]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ), turn) );
 	}
 
 	chkTurn[TURNWHITE]->set_active();
 	current_turn = TURNWHITE;
 
-	dlgColourChooser = new GUIColourChooser( ui_model, *view );
-	dlgTimeInputter = new GUITimeInputter( ui_model, *view );
-	dlgPieceValues = new GUIPieceValues( ui_model, *view );
-	dlgOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
-	dlgSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
+	guiColourChooser = new GUIColourChooser( ui_model, *view );
+	guiTimeInputter = new GUITimeInputter( ui_model, *view );
+	guiPieceValues = new GUIPieceValues( ui_model, *view );
+	guiOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
+	guiSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
 }
 
 /**-----------------------------------------------------------------------------
@@ -159,12 +157,14 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-    if( board )
-		board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
+	board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
 
     on_action_new();
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 bool ChessController::on_animate_timeout()
 {
 	if( ! --timeout_counter ) {
@@ -176,6 +176,9 @@ bool ChessController::on_animate_timeout()
 	return true;
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 bool ChessController::on_flash_timeout()
 {
 	static bool highlight_on = false;
@@ -210,44 +213,99 @@ void ChessController::on_action_new()
 	status_bar->push( string("New game") );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_open()
 {
-	std::string name = director->open_file(  );
+	pair<bool,string> result = guiOpenFile->get_filename( "", "~/" );
 
-	if( name.empty() )
+	if( ! result.first )
+		return;
+
+	if( ! director->open_file( result.second ) )
 		Gtk::MessageDialog( *view, "Error restoring game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
 	else
-		status_bar->push( string("Opened ") + name );
+		status_bar->push( string("Opened ") + result.second );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_save()
 {
-	std::string name = director->save_file(  );
+	if( filename.empty() )
+		on_action_save_as();
 
-	if( name.empty() )
+	if( ! director->save_file( filename ) )
 		Gtk::MessageDialog( *view, "Error saving game. Try Save As", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
 	else
-		status_bar->push( string("Saved ") + name );
+		status_bar->push( string("Saved ") + filename );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_save_as()
 {
-	std::string name = director->save_as(  );
+	pair<bool,string> result = guiSaveFile->get_filename( filename, "~/" );
 
-	if( name.empty() )
+	if( !result.first )
+		return;
+
+	if( result.second.find( ".chess") == string::npos )     // no .chess added
+		result.second += string(".chess");
+
+	if( ! director->save_file( result.second ) ) {
 		Gtk::MessageDialog( *view, "Error saving game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-	else
-		status_bar->push( string("Saved ") + name );
+		return;
+	}
+
+	filename = result.second;
+	status_bar->push( string("Saved ") + filename );
 }
 
 
-void ChessController::on_action_quit() { director->end_app(  ); }
+/**-----------------------------------------------------------------------------
+ * \brief Handle a user request to end the program
+ *
+ * We first ask the director if we need to save data.
+ * If not we can quit right away.
+ * If we have unsaved data, pop up a box to confirm to lose the data
+ */
+void ChessController::on_action_quit()
+{
+	if( director->can_quit() )
+		quit();
+
+	Gtk::MessageDialog dlg( *view, "Unsaved game. You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
+	if( dlg.run() == Gtk::RESPONSE_OK)
+		quit();
+}
+
 void ChessController::on_action_play() { director->advance(  ); }
-void ChessController::on_action_hint() { director->hint(); }
+
+void ChessController::on_action_hint()
+{
+	STSquare square = director->hint();
+
+	board->highlight_start( square );
+
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_flash_timeout), 100 );
+
+	while( timeout_counter ) {
+		while( Gtk::Main::instance()->events_pending() )
+			Gtk::Main::instance()->iteration();
+	}
+}
 
 void ChessController::on_action_undo() { director->undo(); }
 void ChessController::on_action_redo() { director->redo(); }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_arrange()
 {
 	director->arrange_start();
@@ -256,19 +314,53 @@ void ChessController::on_action_arrange()
 	board->set_edit( true );
 }
 
-void ChessController::on_action_level()
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_level( unsigned int level)
 {
-	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
-		if( chkLevel[level]->get_active() ) {
-			if( current_level != level ) {
-				director->change_level( (eLevels)level );
-				current_level = (eLevels)level;
-			}
-		}
+	if( current_level == level )
+		return;
+
+	int time_parameter = 0;
+
+	if( (eLevels)level == TIMED ) {
+	    std::pair<bool,int> retval = guiTimeInputter->time_per_move( 120 );
+
+		if( ! retval.first )
+			return;
+
+		time_parameter = retval.second;
 	}
+
+	if( (eLevels)level == TOTALTIME ) {
+	    std::pair<bool,int> retval = guiTimeInputter->total_game_time( 60 );
+
+		if( ! retval.first )
+			return;
+
+		time_parameter = retval.second;
+	}
+
+	director->change_level( (eLevels)level, time_parameter );
+
+	current_level = (eLevels)level;
 }
 
-void ChessController::on_action_piecevalues() { director->piece_value_changes(  ); }
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_piecevalues()
+{
+	STPieceValues current = director->get_piece_values();
+
+    pair<bool,STPieceValues> result = guiPieceValues->get_new_piece_values( current);
+
+    if( !result.first )
+		return;
+
+	director->set_piece_values( result.second );
+}
 
 /**-----------------------------------------------------------------------------
  * \brief Run the Colours Dialog
@@ -277,7 +369,12 @@ void ChessController::on_action_piecevalues() { director->piece_value_changes(  
  */
 void ChessController::on_action_colours()
 {
-    dlgColourChooser->choose_colours( app_colours );
+    pair<bool, STColours> result = guiColourChooser->choose_colours( app_colours );
+
+    if( !result.first )
+		return;
+
+	app_colours = result.second;
 
     board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
 }
@@ -314,9 +411,9 @@ void ChessController::on_action_help_about()
     dlg.run();
 }
 
-
-
-
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_arrange_done()
 {
 	director->arrange_end( false );
@@ -325,20 +422,26 @@ void ChessController::on_action_arrange_done()
 	board->set_edit( false );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
 
-void ChessController::on_action_arrange_turn()
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_arrange_turn( unsigned int turn )
 {
-	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
-		if( chkTurn[turn]->get_active() ) {
-			if( current_turn != turn ) {
-				director->arrange_turn( (eTurns)turn );
-				current_turn = (eTurns)turn;
-			}
-		}
-	}
+	if( current_turn == turn )
+		return;
+
+	director->arrange_turn( (eTurns)turn );
+	current_turn = (eTurns)turn;
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_arrange_cancel()
 {
 	director->arrange_end( true );
@@ -347,42 +450,74 @@ void ChessController::on_action_arrange_cancel()
 	board->set_edit( false );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_thinking_stop() { director->stop_thinking(); }
 
-/**-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *  The next functions are call backs from the board
+ */
+
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 void ChessController::put_piece_on_square( STSquare square, char piece )
 {
 	director->put_piece_on_square( square, piece );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 void ChessController::make_move(  STSquare start_square, STSquare end_square )
 {
 	director->do_move( start_square, end_square );
 }
 
-char ChessController::get_piece( STSquare square ) { return director->get_piece( square); };
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
+char ChessController::get_piece( STSquare square )
+{
+	return director->get_piece( square);
+}
+
+/*-----------------------------------------------------------------------------
+ * The next functions are called from the engine
+ */
 
 /**-----------------------------------------------------------------------------
- * The next functions are called from the engine
+ * \brief
  */
 void ChessController::set_piece_positions( std::string FEN_string )
 	{ board->set_piece_positions( FEN_string ); }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 void ChessController::set_info( STInfo info )
 	{ board->set_info( info ); }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 void ChessController::start_thinking()
 {
 	view->show_menu( ChessWindow::MENU_STOP );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 void ChessController::stop_thinking()
 {
 	view->show_menu( ChessWindow::MENU_GAME );
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
 {
 	board->animate_start( start_square, end_square, piece );
@@ -396,27 +531,3 @@ void ChessController::animate( STSquare start_square, STSquare end_square, char 
 	}
 }
 
-void ChessController::flash_square( STSquare square )
-{
-	board->highlight_start( square );
-
-	timeout_counter = 10;
-	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_flash_timeout), 100 );
-
-	while( timeout_counter ) {
-		while( Gtk::Main::instance()->events_pending() )
-			Gtk::Main::instance()->iteration();
-	}
-}
-
-TimeInputter* ChessController::get_time_inputter()
-	{ return dlgTimeInputter; }
-
-PieceValues * ChessController::get_piece_valuer()
-	{ return dlgPieceValues; }
-
-FilenameChooser * ChessController::get_openfile_chooser()
-	{ return dlgOpenFile; }
-
-FilenameChooser * ChessController::get_savefile_chooser()
-	{ return dlgSaveFile; }

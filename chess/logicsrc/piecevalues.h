@@ -22,6 +22,8 @@
 #ifndef PIECEVALUES_H
 #define PIECEVALUES_H
 
+#include <utility>
+
 class STPieceValues;
 
 /** \brief
@@ -32,7 +34,7 @@ public:
     PieceValues() {};
     virtual ~PieceValues() {};
 
-    bool get_new_piece_values( STPieceValues& values );
+    std::pair<bool,STPieceValues> get_new_piece_values( STPieceValues values );
 
 protected:
     virtual void set_values( STPieceValues& values ) = 0;

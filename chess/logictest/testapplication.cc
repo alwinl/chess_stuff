@@ -51,11 +51,6 @@ int TestApplication::run( int argc, char *argv[] )
 	return runner.run() ? 0 : 1;		// Return error code 1 if the one of test failed.
 }
 
-void TestApplication::set_piece_positions( std::string FEN_string ) {}
-void TestApplication::set_info( STInfo& info ) {}
-void TestApplication::animate( STSquare start_square, STSquare end_square, char piece ) {}
-void TestApplication::flash_square( STSquare square ) {}
-std::string TestApplication::open_filename( std::string filename, std::string working_dir ) { return "open_name.chess"; }
-std::string TestApplication::save_filename( std::string filename, std::string working_dir ) { return "save_name.chess"; }
-
-void TestApplication::quit() {}
+void TestApplication::set_piece_positions( std::string FEN_string ) {};
+void TestApplication::set_info(  STInfo& info ) {};
+void TestApplication::animate( STSquare start_square, STSquare end_square, char piece ) {};

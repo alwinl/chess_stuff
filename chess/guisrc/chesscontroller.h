@@ -31,16 +31,12 @@
 class TimeInputter;
 class PieceValues;
 class FilenameChooser;
+class ColourChooser;
 
 class ChessAppBase;
 
 class ChessWindow;
 class ChessBoard;
-
-class GUIColourChooser;
-class GUITimeInputter;
-class GUIPieceValues;
-class GUIFilenameChooser;
 
 /**-----------------------------------------------------------------------------
  * \brief Main application object
@@ -67,12 +63,6 @@ public:
     void start_thinking();
     void stop_thinking();
 	void animate( STSquare start_square, STSquare end_square, char piece );
-	void flash_square( STSquare square );
-
-	TimeInputter* get_time_inputter();
-	PieceValues * get_piece_valuer();
-	FilenameChooser * get_openfile_chooser();
-	FilenameChooser * get_savefile_chooser();
 
     // These four functions are call backs from the board
     void set_board( ChessBoard * board_init ) { board = board_init; };
@@ -105,7 +95,7 @@ private:
 	void on_action_redo();
 	void on_action_arrange();
 
-	void on_action_level();
+	void on_action_level( unsigned int level );
 
     void on_action_piecevalues();
 
@@ -117,7 +107,7 @@ private:
 
 	void on_action_arrange_done();
 	void on_action_arrange_clear();
-	void on_action_arrange_turn();
+	void on_action_arrange_turn( unsigned int turn );
 	void on_action_arrange_cancel();
 
 	void on_action_thinking_stop();
@@ -128,20 +118,22 @@ private:
 	eTurns current_turn;
 	int timeout_counter;
 
+	std::string filename;
+
 
 	// Widgets
 	ChessWindow * view;
     Gtk::Statusbar * status_bar;
 	Gtk::RadioMenuItem * chkLevel[LEVELCOUNT];
 	Gtk::RadioMenuItem * chkTurn[TURNCOUNT];
-
-    GUIColourChooser * dlgColourChooser;
-    GUITimeInputter * dlgTimeInputter;
-    GUIPieceValues * dlgPieceValues;
-    GUIFilenameChooser * dlgOpenFile;
-    GUIFilenameChooser * dlgSaveFile;
-
     ChessBoard * board;
+
+    ColourChooser * guiColourChooser;
+    TimeInputter * guiTimeInputter;
+    PieceValues * guiPieceValues;
+    FilenameChooser * guiOpenFile;
+    FilenameChooser * guiSaveFile;
+
 };
 
 #endif // APPCONTROLLER_H
