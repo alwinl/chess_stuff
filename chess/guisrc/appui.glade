@@ -516,7 +516,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkMenuItem">
+                          <object class="GtkMenuItem" id="mnuTwoplayer">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="action_name">app.twoplayer</property>
@@ -546,38 +546,6 @@
                           <object class="GtkSeparatorMenuItem">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Movement</property>
-                            <property name="use_underline">True</property>
-                            <child type="submenu">
-                              <object class="GtkMenu" id="mnuMovement">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <child>
-                                  <object class="GtkMenuItem">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="action_name">app.drag</property>
-                                    <property name="label" translatable="yes">_Drag</property>
-                                    <property name="use_underline">True</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkMenuItem">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="action_name">app.select</property>
-                                    <property name="label" translatable="yes">_Select</property>
-                                    <property name="use_underline">True</property>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
                           </object>
                         </child>
                         <child>

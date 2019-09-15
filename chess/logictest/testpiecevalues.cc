@@ -81,7 +81,10 @@ void TestPieceValues::no_change_exit_ok()
 
     MockPieceValuesOk test_object( current_values );
 
-    std::pair<bool,STPieceValues> result = test_object.get_new_piece_values( current_values );
+	std::pair<bool,STPieceValues> result;
+    test_object.push_stpiece_values( current_values );
+    result.first = test_object.get_new_piece_values( );
+	result.second = test_object.pull_stpiece_values();
 
     CPPUNIT_ASSERT( result.first == true );
     CPPUNIT_ASSERT( result.second == current_values );
@@ -93,7 +96,10 @@ void TestPieceValues::no_change_exit_cancel()
 
     MockPieceValuesCancel test_object( current_values );
 
-    std::pair<bool,STPieceValues> result = test_object.get_new_piece_values( current_values );
+	std::pair<bool,STPieceValues> result;
+    test_object.push_stpiece_values( current_values );
+    result.first = test_object.get_new_piece_values( );
+	result.second = test_object.pull_stpiece_values();
 
     CPPUNIT_ASSERT( result.first == false );
 }
@@ -105,7 +111,10 @@ void TestPieceValues::change_exit_ok()
 
     MockPieceValuesOk test_object( new_values );
 
-    std::pair<bool,STPieceValues> result = test_object.get_new_piece_values( current_values );
+    std::pair<bool,STPieceValues> result;
+    test_object.push_stpiece_values( current_values );
+    result.first = test_object.get_new_piece_values( );
+	result.second = test_object.pull_stpiece_values();
 
     CPPUNIT_ASSERT( result.first == true );
     CPPUNIT_ASSERT( result.second == new_values );
@@ -118,7 +127,10 @@ void TestPieceValues::change_exit_cancel()
 
     MockPieceValuesCancel test_object( new_values );
 
-    std::pair<bool,STPieceValues> result = test_object.get_new_piece_values( current_values );
+	std::pair<bool,STPieceValues> result;
+    test_object.push_stpiece_values( current_values );
+    result.first = test_object.get_new_piece_values( );
+	result.second = test_object.pull_stpiece_values();
 
     CPPUNIT_ASSERT( result.first == false );
 }

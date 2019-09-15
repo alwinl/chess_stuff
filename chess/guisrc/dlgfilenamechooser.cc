@@ -48,10 +48,10 @@ void GUIFilenameChooser::set_working_dir( std::string working_dir )
     dlg->set_current_folder( working_dir );
 }
 
-void GUIFilenameChooser::set_filename( std::string filename )
+void GUIFilenameChooser::set_filename( std::string aname )
 {
 	if( dlg->get_action() == Gtk::FILE_CHOOSER_ACTION_SAVE )
-		dlg->set_current_name( filename );
+		dlg->set_current_name( aname );
 }
 
 bool GUIFilenameChooser::query_file()

@@ -46,7 +46,7 @@ private:
 	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
 
 public:
-	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
+	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& acontroller );
 
     void set_piece_positions( std::string FEN_string );
 	void set_info( STInfo& info );

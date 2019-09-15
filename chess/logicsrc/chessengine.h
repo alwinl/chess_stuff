@@ -23,12 +23,15 @@
 #define CHESSENGINE_H
 
 #include <string>
+#include <map>
 
-class AppModel;
+class ChessGame;
 class ChessAppBase;
 class STSquare;
 
 //class FilenameChooser;
+
+class PieceValues;
 
 #include "pods.h"
 
@@ -46,10 +49,14 @@ public:
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
 
+	bool toggle_multiplayer();
+	void do_demo();
+
 	void arranging_start();
 	void arranging_clear();
 	void put_piece_on_square( STSquare square, char piece );
-	void arranging_end( bool canceled );
+	void arrange_turn( eTurns new_turn );
+	bool arranging_end( bool canceled );
 
     void advance();
 
@@ -64,23 +71,23 @@ public:
 	void undo();
 	void redo();
 	void stop_thinking();
-	char get_piece( STSquare square );
 	void change_level( eLevels new_level, int time_parameter );
-	void arrange_turn( eTurns new_turn );
 
-	STPieceValues get_piece_values() { return current; };
-	void set_piece_values( STPieceValues piece_values );
+	void init_piece_values();
+
+	void change_piece_values( PieceValues* piece_value );
 
 
-protected:
+	void CalculatePawnTable();
+	void CalcMaterial();
 
 private:
-	AppModel * model;
+	ChessGame * model;
 	ChessAppBase * app;
-    std::string filename;
 
-    STPieceValues current;
+	std::map<char,int> piece_values;
 
+    STGameState current_state;
     STGameState arrange_state;
     bool is_arranging;
 };

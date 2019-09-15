@@ -27,8 +27,6 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
-#include "../logicsrc/chessengine.h"
-#include "../logicsrc/appmodel.h"
 #include "../logicsrc/chessappbase.h"
 
 
@@ -63,6 +61,8 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
     app_colours.fg = "rgb(0,0,0)";
     app_colours.black = "rgb(85,87,83)";
     app_colours.white = "rgb(238,238,236)";
+
+    sound_on = false;
 }
 
 /**-----------------------------------------------------------------------------
@@ -96,12 +96,10 @@ void ChessController::on_startup()
     add_action("redo",    sigc::mem_fun( *this, &ChessController::on_action_redo ) );
     add_action("arrange", sigc::mem_fun( *this, &ChessController::on_action_arrange ) );
 
-    add_action("twoplayer",   sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
-    add_action("demomode",    sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
+    add_action("twoplayer",   sigc::mem_fun( *this, &ChessController::on_action_twoplayer ) );
+    add_action("demomode",    sigc::mem_fun( *this, &ChessController::on_action_demomode ) );
     add_action("piecevalues", sigc::mem_fun( *this, &ChessController::on_action_piecevalues ) );
-    add_action("drag",        sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
-    add_action("select",      sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
-    add_action("sound",       sigc::mem_fun( *this, &ChessController::on_action_not_implemented ) );
+    add_action("sound",       sigc::mem_fun( *this, &ChessController::on_action_sound ) );
 
     add_action("colours",      sigc::mem_fun( *this, &ChessController::on_action_colours ) );
     add_action("reverse",      sigc::mem_fun( *this, &ChessController::on_action_reverse ) );
@@ -127,7 +125,6 @@ void ChessController::on_startup()
 	}
 
 	chkLevel[EASY]->set_active();
-	current_level = EASY;
 
 	vector<string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
 	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
@@ -136,7 +133,6 @@ void ChessController::on_startup()
 	}
 
 	chkTurn[TURNWHITE]->set_active();
-	current_turn = TURNWHITE;
 
 	guiColourChooser = new GUIColourChooser( ui_model, *view );
 	guiTimeInputter = new GUITimeInputter( ui_model, *view );
@@ -196,14 +192,6 @@ bool ChessController::on_flash_timeout()
 
 
 /**-----------------------------------------------------------------------------
- * \brief Place holder for actions we have not programmed yet
- */
-void ChessController::on_action_not_implemented()
-{
-	Gtk::MessageDialog( *view, "not implemented yet", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-}
-
-/**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
 void ChessController::on_action_new()
@@ -223,10 +211,15 @@ void ChessController::on_action_open()
 	if( ! result.first )
 		return;
 
-	if( ! director->open_file( result.second ) )
+	if( ! director->open_file( result.second ) ) {
+		if( sound_on )
+			Gdk::Display::get_default()->beep();
+
 		Gtk::MessageDialog( *view, "Error restoring game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-	else
-		status_bar->push( string("Opened ") + result.second );
+		return;
+	}
+
+	status_bar->push( string("Opened ") + result.second );
 }
 
 /**-----------------------------------------------------------------------------
@@ -237,10 +230,15 @@ void ChessController::on_action_save()
 	if( filename.empty() )
 		on_action_save_as();
 
-	if( ! director->save_file( filename ) )
+	if( ! director->save_file( filename ) ) {
+		if( sound_on )
+			Gdk::Display::get_default()->beep();
+
 		Gtk::MessageDialog( *view, "Error saving game. Try Save As", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-	else
-		status_bar->push( string("Saved ") + filename );
+		return;
+	}
+
+	status_bar->push( string("Saved ") + filename );
 }
 
 /**-----------------------------------------------------------------------------
@@ -257,6 +255,9 @@ void ChessController::on_action_save_as()
 		result.second += string(".chess");
 
 	if( ! director->save_file( result.second ) ) {
+		if( sound_on )
+			Gdk::Display::get_default()->beep();
+
 		Gtk::MessageDialog( *view, "Error saving game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
 		return;
 	}
@@ -283,8 +284,17 @@ void ChessController::on_action_quit()
 		quit();
 }
 
-void ChessController::on_action_play() { director->advance(  ); }
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_play()
+{
+	director->advance(  );
+}
 
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_hint()
 {
 	STSquare square = director->hint();
@@ -300,8 +310,21 @@ void ChessController::on_action_hint()
 	}
 }
 
-void ChessController::on_action_undo() { director->undo(); }
-void ChessController::on_action_redo() { director->redo(); }
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_undo()
+{
+	director->undo();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_redo()
+{
+	director->redo();
+}
 
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
@@ -317,11 +340,40 @@ void ChessController::on_action_arrange()
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
+void ChessController::on_action_twoplayer()
+{
+	view->show_player_option( director->toggle_multiplayer() );
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_demomode()
+{
+	director->do_demo();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_piecevalues()
+{
+	director->change_piece_values( guiPieceValues );
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
+void ChessController::on_action_sound()
+{
+	sound_on = !sound_on;
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Menu actions
+ */
 void ChessController::on_action_level( unsigned int level)
 {
-	if( current_level == level )
-		return;
-
 	int time_parameter = 0;
 
 	if( (eLevels)level == TIMED ) {
@@ -343,23 +395,6 @@ void ChessController::on_action_level( unsigned int level)
 	}
 
 	director->change_level( (eLevels)level, time_parameter );
-
-	current_level = (eLevels)level;
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
-void ChessController::on_action_piecevalues()
-{
-	STPieceValues current = director->get_piece_values();
-
-    pair<bool,STPieceValues> result = guiPieceValues->get_new_piece_values( current);
-
-    if( !result.first )
-		return;
-
-	director->set_piece_values( result.second );
 }
 
 /**-----------------------------------------------------------------------------
@@ -416,7 +451,13 @@ void ChessController::on_action_help_about()
  */
 void ChessController::on_action_arrange_done()
 {
-	director->arrange_end( false );
+	if( ! director->arrange_end( false ) ) {
+		if( sound_on )
+			Gdk::Display::get_default()->beep();
+
+		Gtk::MessageDialog( *view, "This is not a valid board. Please fix.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true ).run();
+		return;
+	}
 
 	view->show_menu( ChessWindow::MENU_GAME );
 	board->set_edit( false );
@@ -432,11 +473,7 @@ void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
  */
 void ChessController::on_action_arrange_turn( unsigned int turn )
 {
-	if( current_turn == turn )
-		return;
-
 	director->arrange_turn( (eTurns)turn );
-	current_turn = (eTurns)turn;
 }
 
 /**-----------------------------------------------------------------------------
@@ -453,7 +490,8 @@ void ChessController::on_action_arrange_cancel()
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
-void ChessController::on_action_thinking_stop() { director->stop_thinking(); }
+void ChessController::on_action_thinking_stop()
+	{ director->stop_thinking(); }
 
 /*-----------------------------------------------------------------------------
  *  The next functions are call backs from the board
@@ -475,14 +513,6 @@ void ChessController::make_move(  STSquare start_square, STSquare end_square )
 	director->do_move( start_square, end_square );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief
- */
-char ChessController::get_piece( STSquare square )
-{
-	return director->get_piece( square);
-}
-
 /*-----------------------------------------------------------------------------
  * The next functions are called from the engine
  */
@@ -502,17 +532,9 @@ void ChessController::set_info( STInfo info )
 /**-----------------------------------------------------------------------------
  * \brief
  */
-void ChessController::start_thinking()
+void ChessController::set_thinking( bool on )
 {
-	view->show_menu( ChessWindow::MENU_STOP );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::stop_thinking()
-{
-	view->show_menu( ChessWindow::MENU_GAME );
+	view->show_menu( on ? ChessWindow::MENU_STOP : ChessWindow::MENU_GAME );
 }
 
 /**-----------------------------------------------------------------------------

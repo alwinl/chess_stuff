@@ -24,7 +24,19 @@
 
 #include <utility>
 
-class STPieceValues;
+/**-----------------------------------------------------------------------------
+ * \brief Struct to hold
+ *
+ */
+struct STPieceValues
+{
+    int QueenValue;
+    int RookValue;
+    int BishopValue;
+    int KnightValue;
+    int PawnValue;
+};
+
 
 /** \brief
  */
@@ -34,12 +46,19 @@ public:
     PieceValues() {};
     virtual ~PieceValues() {};
 
-    std::pair<bool,STPieceValues> get_new_piece_values( STPieceValues values );
+    //void push_map( std::map<char,int> new_map );
+    //std::map<char,int> pull_map( );
+
+    void push_stpiece_values( STPieceValues values );
+    bool get_new_piece_values( );
+    STPieceValues pull_stpiece_values();
 
 protected:
     virtual void set_values( STPieceValues& values ) = 0;
     virtual bool manipulate_values() = 0;
     virtual STPieceValues piece_values( ) = 0;
+
+    STPieceValues save_values;
 };
 
 #endif // PIECEVALUES_H

@@ -30,20 +30,22 @@
  *
  * \param cobject BaseObjectType*
  * \param ui_model const Glib::RefPtr<Gtk::Builder>&
- * \param model_init AppModel&
+ * \param controller ChessController&
  *
  */
-ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
+ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& controller )
 			: Gtk::ApplicationWindow(cobject)
 {
 	set_default_size( 640,480 );
 	set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
 
-	ui_model->get_widget_derived("canvas", board_area, app );
+	ui_model->get_widget_derived("canvas", board_area, controller );
 
     ui_model->get_widget( "mnuGame", menus[MENU_GAME] );
     ui_model->get_widget( "mnuArrange", menus[MENU_ARRANGE] );
     ui_model->get_widget( "mnuStop", menus[MENU_STOP] );
+
+    ui_model->get_widget( "mnuTwoplayer", mnuTwoplayer );
 
 	show_all_children();
 
@@ -62,6 +64,14 @@ void ChessWindow::show_menu( eMENUS menu )
 		else
 			menus[i]->hide();
 	}
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Switches between single player and multi player label
+ */
+void ChessWindow::show_player_option( bool multi_player )
+{
+	mnuTwoplayer->set_label( multi_player ? "_Single Player" : "_Two Player" );
 }
 
 

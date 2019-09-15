@@ -53,23 +53,27 @@ public:
     void undo();
     void redo();
     void stop_thinking();
-    char get_piece( STSquare square );
     void change_level( eLevels new_level, int time_parameter );
-    void arrange_turn( eTurns new_turn );
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
     void advance();
     STSquare hint();
+
+    bool toggle_multiplayer();
+    void do_demo();
+
     void arrange_start();
     void arrange_clear();
     void put_piece_on_square( STSquare square, char piece );
-    void arrange_end( bool canceled );
+    void arrange_turn( eTurns new_turn );
+    bool arrange_end( bool canceled );
+
     void new_game();
     bool can_quit();
     bool open_file( std::string name );
     bool save_file( std::string name );
-	STPieceValues get_piece_values();
-	void set_piece_values( STPieceValues piece_values );
+
+    void change_piece_values( PieceValues * piece_values );
 
 private:
 	ChessEngine* engine;

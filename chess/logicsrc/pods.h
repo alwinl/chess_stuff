@@ -71,20 +71,6 @@ struct STInfo
     std::string bestline;
 };
 
-/**-----------------------------------------------------------------------------
- * \brief Struct to hold
- *
- */
-struct STPieceValues
-{
-    int QueenValue;
-    int RookValue;
-    int BishopValue;
-    int KnightValue;
-    int PawnValue;
-};
-
-
 
 /**-----------------------------------------------------------------------------
  * \brief Struct to hold
@@ -94,6 +80,12 @@ struct STSquare
 {
     int file;
     int rank;
+};
+
+struct STPiece
+{
+	char code;
+	bool is_white;
 };
 
 /**-----------------------------------------------------------------------------
@@ -129,7 +121,7 @@ struct STGameState
     bool white_can_castle_queenside;
     bool black_can_castle_kingside;
     bool black_can_castle_queenside;
-    STSquare ep_square;
+    STSquare en_passant_target;		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
     int halfmove_clock;             // Number of half moves since last capture or pawn advance
     int fullmove_number;             // The number of the move, start at one increment after black move
 };

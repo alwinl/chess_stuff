@@ -37,13 +37,15 @@ class ChessWindow : public Gtk::ApplicationWindow
 public:
 	enum eMENUS { MENU_GAME, MENU_ARRANGE, MENU_STOP, MENU_COUNT };
 
-	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app );
+	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& controller );
 
 	void show_menu( eMENUS menu );
+	void show_player_option( bool multi_player );
 
 private:
 	ChessBoard * board_area;
     Gtk::MenuBar * menus[MENU_COUNT];
+    Gtk::MenuItem * mnuTwoplayer;
 };
 
 #endif // APPVIEW_H

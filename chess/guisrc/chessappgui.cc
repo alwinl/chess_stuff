@@ -23,7 +23,6 @@
 #include "chesscontroller.h"
 
 #include "../logicsrc/pods.h"
-#include "../logicsrc/timeinputter.h"
 
 ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
 {

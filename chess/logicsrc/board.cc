@@ -19,17 +19,9 @@
  *
  */
 
-#include "filenamechooser.h"
+#include "board.h"
 
-std::pair<bool,std::string> FilenameChooser::get_filename( std::string aname, std::string working_dir )
+Board::Board()
 {
-	set_working_dir( working_dir );
-	set_filename( aname );
-
-	bool do_it = query_file();
-	if( do_it )
-		aname = get_filename( );
-
-	return std::pair<bool,std::string>( do_it, aname );
+	//ctor
 }
-

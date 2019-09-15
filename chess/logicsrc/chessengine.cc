@@ -21,11 +21,12 @@
 
  //#include <unistd.h>
 
- #include <chrono>
- #include <thread>
+#include <chrono>
+#include <thread>
+#include <regex>
 
 #include "chessengine.h"
-#include "appmodel.h"
+#include "chessgame.h"
 #include "chessappbase.h"
 #include "timeinputter.h"
 #include "piecevalues.h"
@@ -40,9 +41,12 @@ using namespace std;
 
 ChessEngine::ChessEngine()
 {
-    model = new AppModel;
+    model = new ChessGame;
 
     is_arranging = false;
+
+    init_piece_values();
+
 }
 
 ChessEngine::~ChessEngine()
@@ -56,6 +60,19 @@ void ChessEngine::set_application_pointer( ChessAppBase* app_init )
 }
 
 
+void ChessEngine::new_game( )
+{
+	current_state = make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+    model->initialise();
+
+    STInfo tmp = model->get_info();
+
+
+    app->set_piece_positions( current_state.piece_positions );
+    app->set_info( tmp );
+}
+
 
 
 
@@ -64,7 +81,7 @@ void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 	FENTranslator translator;
 	char piece;
 
-	translator.from_FEN( model->get_piece_positions() );
+	translator.from_FEN( current_state.piece_positions );
 
 	piece = translator.query_square( start_square );
 	if( piece == ' ' )
@@ -84,8 +101,10 @@ void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 	translator.add_to_square( end_square, piece );
     app->set_piece_positions( translator.to_FEN() );
 
-	model->set_piece_positions( translator.to_FEN() );
+	current_state.piece_positions = translator.to_FEN();
+	current_state.is_white_move = ! current_state.is_white_move;
 
+	//model->push_state( current_state );
 }
 
 STSquare ChessEngine::hint()
@@ -100,6 +119,8 @@ void ChessEngine::cancel_move( )
 {
 }
 
+
+
 void ChessEngine::arranging_start()
 {
 	arrange_state = STGameState();
@@ -112,6 +133,14 @@ void ChessEngine::arranging_start()
     app->set_piece_positions( arrange_state.piece_positions );
 }
 
+void ChessEngine::arranging_clear()
+{
+    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    arrange_state.is_white_move = true;             // is it whites next move?
+
+    app->set_piece_positions( arrange_state.piece_positions );
+}
+
 void ChessEngine::put_piece_on_square( STSquare square, char piece )
 {
 	FENTranslator translator;
@@ -119,7 +148,7 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
 	if( is_arranging )
 		translator.from_FEN( arrange_state.piece_positions );
 	else
-		translator.from_FEN( model->get_piece_positions() );
+		translator.from_FEN( current_state.piece_positions );
 
 	if( translator.query_square(square) != ' ' )
 		translator.remove_from_square( square );
@@ -133,19 +162,49 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
     app->set_piece_positions( translator.to_FEN() );
 }
 
-void ChessEngine::arranging_clear()
+void ChessEngine::arrange_turn( eTurns new_turn )
 {
-    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
-    arrange_state.is_white_move = true;             // is it whites next move?
-
-    app->set_piece_positions( arrange_state.piece_positions );
+	arrange_state.is_white_move = ( new_turn == TURNWHITE );
 }
 
-void ChessEngine::arranging_end( bool canceled )
+bool ChessEngine::arranging_end( bool canceled )
 {
-	is_arranging = false;
+	if( canceled ) {
+		is_arranging = false;
+		app->set_piece_positions( current_state.piece_positions );
+		return true;
+	}
 
-	app->set_piece_positions( model->get_piece_positions() );
+	/* check if the board is valid */
+	FENTranslator translator;
+
+	map<STSquare,STPiece> pieces = translator.from_FEN( arrange_state.piece_positions );
+
+    int KingCount[2]  = { 0, 0 };
+    int TotalCount[2] = { 0, 0 };
+
+    for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
+
+		int colour_idx = (*it).second.is_white ? 0 : 1;
+
+		TotalCount[ colour_idx ]++;
+
+		if( string("Kk").find( (*it).second.code ) != std::string::npos )
+			KingCount[ colour_idx ]++;
+    }
+
+    bool valid = ( TotalCount[ 0 ] <= 16 ) && ( KingCount[ 0 ] == 1 )
+			&& ( TotalCount[ 1 ] <= 16 ) && ( KingCount[ 1 ] == 1 );
+
+	if( !valid )
+		return false;
+
+	current_state.piece_positions = arrange_state.piece_positions;
+	current_state.is_white_move = arrange_state.is_white_move;
+
+	is_arranging = false;
+	app->set_piece_positions( current_state.piece_positions );
+	return true;
 }
 
 
@@ -167,7 +226,7 @@ bool ChessEngine::open_file( std::string name )
 
 bool ChessEngine::save_file( std::string name )
 {
-    if( model->store_game( filename ) == -1 ) {
+    if( model->store_game( name ) == -1 ) {
         return false;
     }
 
@@ -183,26 +242,62 @@ void ChessEngine::advance( )
     app->set_info( tmp );
 }
 
-void ChessEngine::new_game( )
-{
-    filename.clear();
-    model->initialise();
 
-    STInfo tmp = model->get_info();
-    app->set_piece_positions( model->get_piece_positions() );
-    app->set_info( tmp );
+void ChessEngine::init_piece_values()
+{
+	piece_values.insert( pair<char,int>( 'Q',  2304 ) );		// 9 << 8
+	piece_values.insert( pair<char,int>( 'R',  1280 ) );		// 5 << 8
+	piece_values.insert( pair<char,int>( 'B',   768 ) );		// 3 << 8
+	piece_values.insert( pair<char,int>( 'N',   768 ) );		// 3 << 8
+	piece_values.insert( pair<char,int>( 'P',   256 ) );		// 1 << 8
+	piece_values.insert( pair<char,int>( 'K',     0 ) );
+	piece_values.insert( pair<char,int>( 'q', -2304 ) );
+	piece_values.insert( pair<char,int>( 'r', -1280 ) );
+	piece_values.insert( pair<char,int>( 'b',  -768 ) );
+	piece_values.insert( pair<char,int>( 'n',  -768 ) );
+	piece_values.insert( pair<char,int>( 'p',  -256 ) );
+	piece_values.insert( pair<char,int>( 'k',    0  ) );
 }
 
-void ChessEngine::set_piece_values( STPieceValues piece_values )
+void ChessEngine::change_piece_values( PieceValues* piece_value )
 {
-	current = piece_values;
+	STPieceValues current;
 
-	cout << "Values have changed" << endl;
-	cout << "Queen: " << current.QueenValue << endl;
-	cout << "Rook: " << current.RookValue << endl;
-	cout << "Knight: " << current.KnightValue << endl;
-	cout << "Bishop: " << current.BishopValue << endl;
-	cout << "Pawn: " << current.PawnValue << endl;
+    current.QueenValue  = piece_values['Q'] >> 4;
+    current.RookValue   = piece_values['R'] >> 4;
+    current.BishopValue = piece_values['B'] >> 4;
+    current.KnightValue = piece_values['N'] >> 4;
+    current.PawnValue   = piece_values['P'] >> 4;
+
+#if 0
+    pair<bool,STPieceValues> result = piece_value->get_new_piece_values( current);
+
+    if( !result.first )
+		return;
+#else
+	pair<bool,STPieceValues> result;
+
+    piece_value->push_stpiece_values( current );
+
+    result.first = piece_value->get_new_piece_values( );
+
+    if( !result.first )
+		return;
+
+	result.second = piece_value->pull_stpiece_values();
+#endif
+	piece_values['Q'] = result.second.QueenValue << 4;
+	piece_values['R'] = result.second.RookValue << 4;
+	piece_values['B'] = result.second.BishopValue << 4;
+	piece_values['N'] = result.second.KnightValue << 4;
+	piece_values['P'] = result.second.PawnValue << 4;
+
+	piece_values['q'] = -result.second.QueenValue << 4;
+	piece_values['r'] = -result.second.RookValue << 4;
+	piece_values['b'] = -result.second.BishopValue << 4;
+	piece_values['n'] = -result.second.KnightValue << 4;
+	piece_values['p'] = -result.second.PawnValue << 4;
+
 }
 
 
@@ -227,18 +322,6 @@ void ChessEngine::stop_thinking()
 
 }
 
-char ChessEngine::get_piece( STSquare square )
-{
-	FENTranslator translator;
-
-	if( is_arranging)
-		translator.from_FEN( arrange_state.piece_positions );
-	else
-		translator.from_FEN( model->get_piece_positions() );
-
-	return translator.query_square(square);
-}
-
 void ChessEngine::change_level( eLevels new_level, int time_parameter )
 {
 
@@ -251,7 +334,93 @@ void ChessEngine::change_level( eLevels new_level, int time_parameter )
 	}
 }
 
-void ChessEngine::arrange_turn( eTurns new_turn )
+
+void ChessEngine::CalculatePawnTable()
+{
+    unsigned char PawnTable[2][8];
+
+    /*  Calculate PawnTable (indicates which squares contain pawns )  */
+    for( unsigned char rank = 0; rank < 8; rank++ ) {
+        PawnTable[ 0 ][ rank ] = 0;
+        PawnTable[ 1 ][ rank ] = 0;
+    }
+
+	FENTranslator translator;
+
+	map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
+
+    for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
+
+    	STSquare square = (*it).first;
+		STPiece piece = (*it).second;
+
+    	if( piece.code == 'P' ) {		// white pawn
+    		PawnTable[0][square.rank] |= (1 << square.file);
+    	} else if( piece.code == 'p' ) {		// black pawn
+    		PawnTable[1][7- square.rank] |= (1 << square.file);
+    	}
+    }
+
+}
+
+void ChessEngine::CalcMaterial()
+{
+
+
+	FENTranslator translator;
+
+	map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
+
+	int material = 0;
+	int totalMaterial = 0;
+
+    for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
+
+		STPiece piece = (*it).second;
+
+		material += piece_values[piece.code];
+		totalMaterial += abs( piece_values[piece.code] );
+
+    }
+}
+
+
+bool ChessEngine::toggle_multiplayer()
+{
+	static bool multi_player = false;
+
+	multi_player = !multi_player;
+
+	return multi_player;
+}
+
+void ChessEngine::do_demo()
 {
 
 }
+
+#if 0
+/*  Calculate attack values of a square (importance of a square)  */
+int ChessEngine::calc_attack_value( STSquare square )
+{
+	const unsigned char squarerankvalue[8]     = { 0, 0, 0, 0, 3, 6, 12, 12 };
+	const char    distan[8] = { 3, 2, 1, 0, 0, 1, 2, 3 };
+
+    return ( ( squarerankvalue[ square.rank ] * ( materiallevel + 8 ) ) >> 5 ) /*  Rank importance  */
+			+ max( 0, 8 - 3 * ( distan[ square.rank ] + distan[ square.file ] ) ); /*  centre importance */
+}
+
+
+
+
+int bit_count( unsigned char n )
+{
+	static const char split_lookup[] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4 };
+
+    return split_lookup[n&0xF] + split_lookup[n>>4];
+}
+
+
+
+#endif // 0
+

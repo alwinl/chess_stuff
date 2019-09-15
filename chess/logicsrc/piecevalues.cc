@@ -20,17 +20,24 @@
  */
 
 #include "piecevalues.h"
-#include "pods.h"
+//#include "pods.h"
 
-std::pair<bool,STPieceValues> PieceValues::get_new_piece_values( STPieceValues values )
+void PieceValues::push_stpiece_values( STPieceValues values )
 {
-	std::pair<bool,STPieceValues> result;
+	save_values = values;
+}
 
-	set_values( values );
-	result.first = manipulate_values( );
-	if( result.first )
-		result.second = piece_values( );
+bool PieceValues::get_new_piece_values( )
+{
+	set_values( save_values );
+	bool first = manipulate_values( );
+	if( first )
+		save_values = piece_values( );
 
-	return result;
-};
+	return first;
+}
 
+STPieceValues PieceValues::pull_stpiece_values()
+{
+	return save_values;
+}
