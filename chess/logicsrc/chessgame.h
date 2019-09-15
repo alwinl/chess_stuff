@@ -55,10 +55,10 @@
  * Return info/state information
  *
  */
-class AppModel
+class ChessGame
 {
 public:
-	AppModel( );
+	ChessGame( );
 
     int new_game();
     int store_game( const std::string& file_name );

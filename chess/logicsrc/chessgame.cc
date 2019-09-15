@@ -19,7 +19,7 @@
  *
  */
 
-#include "appmodel.h"
+#include "chessgame.h"
 
 //#include <sstream>
 //#include <vector>
@@ -33,7 +33,7 @@ using namespace std;
  * \param
  *
  */
-AppModel::AppModel( )
+ChessGame::ChessGame( )
 {
     initialise();
 }
@@ -43,7 +43,7 @@ AppModel::AppModel( )
  * \return void
  *
  */
-void AppModel::initialise()
+void ChessGame::initialise()
 {
     moves.clear();
     game_states.push_back( make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") );
@@ -67,12 +67,12 @@ void AppModel::initialise()
  * \return int
  *
  */
-int AppModel::store_game( const std::string& file_name )
+int ChessGame::store_game( const std::string& file_name )
 {
     return 0;
 }
 
-int AppModel::load_game( const std::string& file_name )
+int ChessGame::load_game( const std::string& file_name )
 {
     initialise();
 
