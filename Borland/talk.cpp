@@ -37,7 +37,6 @@ MOVESTRUCT    PlayerMove;
 bool        Logging;
 double     Nodes;      // Number of analysed nodes
 extern int  LegalMoves;
-MOVESTRUCT[MAXPLY]    HintLine;   /* suggested hint line */
 int     HintEvalu;  /* Evaluation for hintline */
 
 const UNPLAYMARK = 0x3f;
@@ -48,6 +47,7 @@ int OpCount, LibNo;
 static short LibDepth;
 static bool Found;
 static short dep;
+static MOVESTRUCT[MAXPLY]    HintLine;   /* suggested hint line */
 
 ofstream *OutputFile;
 
@@ -74,7 +74,7 @@ void ResetGame()
 
     ClearDisplay();
     InitDisplay();
-    ColorToPlay( Player );
+    TInfo_SetTurnText( Player );
 }
 
 void NewGame()
@@ -84,7 +84,7 @@ void NewGame()
     GameOver   = false;
 
     ResetGame();
-    PrintCurLevel();
+    TInfo_PrintCurLevel();
     ResetMoves();
 
     UseLib = ( ( !*Openings ) ? 0 : 200 );
@@ -205,7 +205,6 @@ static void StartUp()
     if( !SoundOn )  // defaults to checked at startup
         CheckMenuItem( MainMenu, IDM_SOUND, MF_UNCHECKED );
 
-    CalcAttackTab();
     MultiMove = false;
     AutoPlay  = false;
     Turned    = false;
@@ -290,12 +289,13 @@ static void FindNode( void )
     OpCount = -1;
     InitMovGen();
 
+    MOVESTRUCT test_move;
     do {
         OpCount++;
-        MovGen();
-    } while( Next.movpiece != no_piece && !EqMove( &Next, &MovTab[ Depth ] ) );
+        test_move = MovGen();
+    } while( test_move.movpiece != no_piece && !EqMove( &test_move, &MovTab[ Depth ] ) );
 
-    if( Next.movpiece != no_piece ) {
+    if( test_move.movpiece != no_piece ) {
         while( ( ( Openings[ LibNo ] & 63 ) != OpCount ) && ( Openings[ LibNo ] < 128 ) )
             NextLibNo( 0 );
 
@@ -362,9 +362,8 @@ static void FindOpeningMove( void )
 
     InitMovGen();
     for( cnt = 0; cnt <= OpCount; cnt++ )
-        MovGen();
+        MainLine[0] = MovGen();
 
-    MainLine[0] = Next;					/* store the move in mainline  */
     MainLine[1] = ZeroMove;
     MainEvalu   = 0;
     MaxDepth    = 0;
@@ -431,7 +430,7 @@ void ReturnAnalysis()
         *OutputFile << buf;
     }
     PlayerMove = ZeroMove;
-    ColorToPlay( Player );
+    TInfo_SetTurnText( Player );
     if( AutoPlay ) {
         if( ( MoveNo >= 120 ) || ( FiftyMoveCnt() >= 100 ) ||
                 ( Repetition( 0 ) >= 3 ) || ( MainEvalu <= -0x880 ) ) {
@@ -452,11 +451,9 @@ void ReturnAnalysis()
  */
 static void ThinkAwhile()
 {
-    extern HCURSOR hArrowCursor;
+    set_arrow_cursor();
 
-    ::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hArrowCursor ) );
-    ::SetCursor( hArrowCursor );
-    ::SetMenu( hWndMain, MainMenu );
+    main_window->set_main_menu();
 
     if( ( HintLine[0].movpiece == no_piece ) || MultiMove )
         return;
@@ -490,9 +487,10 @@ static void ThinkAwhile()
         AdjustMoves();
         EnterKeyMove();
         StoreMoves();
-        ::SetMenu( hWndMain, ThinkMenu );
-        ::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hWaitCursor ) );
-        ::SetCursor( hWaitCursor );
+
+        main_window->set_think_menu();
+
+        set_wait_cursor();
     }
     return;
 }
@@ -501,8 +499,7 @@ void StartMove()
 {
     MSG msg;
 
-    ::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hWaitCursor ) );
-    ::SetCursor( hWaitCursor );
+    set_wait_cursor();
 
     StartAnalysis();
     AdjustMoves();
@@ -524,7 +521,7 @@ void StartMove()
     } else {
         if( InLibrary ) {
             InLibrary = false;
-            Message( "" );
+            TInfo_SetMessageText( "" );
         }
         FindMove( MaxLevel );
     }
@@ -537,7 +534,7 @@ void ProgramMove()
 {
     do {
         GotValidMove = false;
-        ColorToPlay( Player );
+        TInfo_SetTurnText( Player );
         StartMove();
     } while( GotValidMove );
 }
@@ -552,8 +549,8 @@ bool Redo()
 {
     EnterMove( &MovTab[Depth+1] );
     ClearHint();
-    ClearBestLine();
-    ColorToPlay( Player );
+    TInfo_ClearBestLine();
+    TInfo_SetTurnText( Player );
 
     return Depth < -1;
 }
@@ -563,8 +560,8 @@ bool Undo()
     RemoveMove( &MovTab[ Depth ] );
 
     ClearHint();
-    ClearBestLine();
-    ColorToPlay( Player );
+    TInfo_ClearBestLine();
+    TInfo_SetTurnText( Player );
 
     if( MovTab[Depth].movpiece == no_piece )
         return false;  // Can't undo anymore
@@ -606,5 +603,33 @@ void FindHintMove()
     HintEvalu   = -MainEvalu;
 
     return;
+}
+
+void ShowHint()
+{
+    short dep = 0;
+
+    buf[0] = '\0';
+    TInfo_SetMessageText( "" );
+
+    while( HintLine[dep].movpiece != no_piece ) {
+
+        strcat( buf, MoveStr( &HintLine[dep] ) );
+        strcat( buf, " " );
+        TInfo_SetMessageText( buf );
+
+        MakeMove( &HintLine[dep] );
+        UpdateBoard();
+
+        Wait( 6 );
+        dep++;
+    }
+
+    while( dep > 0 ) {
+        dep--;
+        TakeBackMove( &HintLine[dep] );
+    }
+
+    UpdateBoard();
 }
 

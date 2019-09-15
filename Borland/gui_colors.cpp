@@ -9,11 +9,7 @@
 #include <stdio.h>
 
 #include "wcdefs.h"
-#include "info.h"
 #include "wchess.h"
-#include "edit.h"
-#include "colors.h"
-#include "externs.h"
 
 #define min(x, y)   (((x) < (y)) ? (x) : (y))
 #define max(x, y)   (((x) > (y)) ? (x) : (y))

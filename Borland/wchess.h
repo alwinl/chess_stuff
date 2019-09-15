@@ -1,4 +1,23 @@
-// ObjectWindows - (C) Copyright 1992 by Borland International
+/*
+ * Copyright 2017 Alwin Leerling <alwin@jambo>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ *
+ *
+ */
 
 #ifndef __WCHESS_H
 #define __WCHESS_H
@@ -66,18 +85,173 @@
 #define IDD_EPAWN       24877
 #define IDD_DEFAULT     201
 
+#define CL_KILLFOCUS    (WM_USER + 101)
+#define PV_KILLFOCUS     (WM_USER + 100)
+
 #define TIMEID          202
 
-/**
- * --------------- TChessWindow ----------------------
- */
+
+_CLASSDEF( TNoEraseBkGndStatic )
+_CLASSDEF( TColorsDialog )
+_CLASSDEF( TPieceValueDialog )
+_CLASSDEF( TEditBarWindow )
+_CLASSDEF( TInfoWindow )
 _CLASSDEF( TChessWindow )
+
+class TNoEraseBkGndStatic : public TStatic
+{
+public:
+    TNoEraseBkGndStatic( PTWindows AParent, int AnId, LPSTR ATitle, int X,
+                         int Y, int W, int H, WORD ATextLen, PTModule AModule = NULL );
+
+    void SetText( LPSTR text );
+
+private:
+    virtual void WMEraseBkGnd( RTMessage msg ) = [ WM_FIRST + WM_ERASEBKGND ];
+
+    bool    DoErase;
+    int     LastLen;
+};
+
+class TColorsDialog : public TDialog
+{
+public:
+    TColorsDialog( PTWindowsObject AParent, LPSTR AName );
+    ~TColorsDialog();
+
+    virtual void SetupWindow();
+    virtual void WMControlColor( RTMessage ) = [WM_FIRST + WM_CTLCOLOR];
+    virtual void WMVScroll( RTMessage );
+    virtual void WMCommand( RTMessage );
+    virtual void WMDrawItem( RTMessage ) = [WM_FIRST + WM_DRAWITEM];
+    virtual void Ok( RTMessage );
+    virtual void CLKillFocus( RTMessage ) = [WM_FIRST + CL_KILLFOCUS];
+    virtual void CLSetFocus( HWND hWnd );
+
+private:
+    enum ScrollBarColors { Red, Green, Blue };
+
+    HBRUSH hWStatic;
+    HBRUSH hBStatic;
+    HBRUSH hSBBrush[3];
+    int RWID;
+    int GWID;
+    int BWID;
+    int RBID;
+    int GBID;
+    int BBID;
+    int WStatic;
+    int BStatic;
+    HWND BlackSq;
+    HWND WhiteSq;
+    char WSqColors[3];
+    char BSqColors[3];
+
+    void CLSetFocus( HWND );
+    bool GetColorValue( WORD );
+};
+
+class TPieceValueDialog : public TDialog
+{
+public:
+    TPieceValueDialog( PTWindowsObject AParent, LPSTR AName );
+
+    virtual void SetupWindow();
+
+    virtual void Ok( RTMessage );
+    virtual void WMHScroll( RTMessage );
+    virtual void WMCommand( RTMessage );
+
+    virtual void PVKillFocus( RTMessage ) = [WM_FIRST + PV_KILLFOCUS];
+    virtual void IDDDefault( RTMessage ) = [ID_FIRST + IDD_DEFAULT];
+
+private:
+    enum ePIECES { pvqueen, pvrook, pvbishop, pvknight, pvpawn };
+
+    int Values[5];
+    HWND hScroller[5];
+    unsigned int ScollerIDs[5];
+
+    void PVSetFocus( HWND );
+    bool GetColorValue( WORD );
+};
+
+class TEditBarWindow: public TWindow
+{
+public:
+    TEditBarWindow( PTWindowsObject AParent, LPSTR ATitle );
+
+    virtual void Paint( HDC PaintDC, PAINTSTRUCT _FAR & PaintInfo );
+    virtual void WMLButtonUp( TMessage& ) = [WM_FIRST + WM_LBUTTONUP];
+    virtual void GetWindowClass( WNDCLASS& WndClass )
+
+    int GetSelectedItem()
+    {
+        return SelectedItem;
+    }
+
+private:
+    int SelectedItem;
+    RECT EditBarRect;
+};
+
+class TInfoWindow: public TWindow
+{
+public:
+    TInfoWindow( PTWindowsObject AParent, LPSTR ATitle );
+
+    void SetTurnText( LPSTR text ) { Color->SetText( text ); }
+    void SetWhiteInfoText( LPSTR text ) { WhiteInfo->SetText( text ); }
+    void SetBlackInfoText( LPSTR text ) { BlackInfo->SetText( text ); }
+    void SetTimerText( LPSTR text ) { Timer->SetText( text ); }
+    void SetLevelText( LPSTR text ) { txtLevel->SetText( text ); }
+    void SetIterationText( LPSTR text ) { Iteration->SetText( text ); }
+    void SetValueText( LPSTR text ) { Value->SetText( text ); }
+    void SetNodeText( LPSTR text ) { txtNodes->SetText( text ); }
+    void SetSecondsText( LPSTR text ) { Seconds->SetText( text ); }
+    void SetDepthText( LPSTR text ) { Depth->SetText( text ); }
+    void SetBestLineText( LPSTR text ) { BestLine->SetText( text ); }
+    void SetMessageText( LPSTR text ) { txtMessage->SetText( text ); }
+
+    void Reset( void );
+
+protected:
+    virtual void Paint( HDC PaintDC, PAINTSTRUCT _FAR &PaintInfo );
+    virtual void WMControlColor( TMessage & Msg ) = [WM_FIRST + WM_CTLCOLOR];
+
+    PTStatic                Color;
+    PTStatic                WhiteInfo;
+    PTStatic                BlackInfo;
+    PTNoEraseBkGndStatic    Timer;
+    PTStatic                txtLevel;
+    PTStatic                Iteration;
+    PTStatic                Value;
+    PTStatic                txtNodes;
+    PTStatic                Seconds;
+    PTNoEraseBkGndStatic    Depth;
+    PTStatic                BestLine;
+    PTStatic                txtMessage;
+    RECT                    InfoRect;
+
+    void DrawSFrame( HDC, RECT * );
+    void DrawStaticFrames( HDC );
+
+    void IterReset( void );
+};
+
 class TChessWindow : public TWindow
 {
 public:
     TChessWindow( PTWindowsObject AParent, LPSTR ATitle );
     ~TChessWindow();
 
+
+    void set_menu() { SetMenu( hMenu); };
+    void set_edit_menu() { SetMenu( hEditMenu); };
+    void set_think_menu() { SetMenu( ThinkMenu); };
+    void set_main_menu() { SetMenu( MainMenu); };
+
+private:
     virtual void SetupWindow();
     virtual void GetWindowClass( WNDCLASS& WndClass );
     virtual bool CanClose();

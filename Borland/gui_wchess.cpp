@@ -262,9 +262,9 @@ void TChessWindow::WMMouseMove( RTMessage msg )
 
 void TChessWindow::WMTimer( RTMessage )
 {
-    char buf[255];
+    char time_string[255];
 
-    TInfo->SetTimerText( DisplayTime( &ChessTime[RunColor], buf, 255 ) );
+    TInfo->SetTimerText( DisplayTime( &ChessTime[RunColor], time_string, 255 ) );
 }
 
 void TChessWindow::CMNewGame()
@@ -291,7 +291,7 @@ void TChessWindow::CMRestoreGame()
 
     if( ::RestoreGame( FileName ) != 0 ) {
         sprintf( buf, "Cannot open %s for reading", file_name );
-        ::MessageBox( hWndMain, buf, "Chess", MB_OK | MB_ICONHAND );
+        ::MessageBox( HWindow, buf, "Chess", MB_OK | MB_ICONHAND );
         return;
     }
 
@@ -310,11 +310,11 @@ void TChessWindow::CMSaveGame()
     else {
         switch( ::SaveGame( FileName ) ) {
         case -1:
-            ::MessageBox( hWndMain, "Not enough memory to perform operation", "Chess", MB_OK | MB_ICONHAND );
+            ::MessageBox( HWindow, "Not enough memory to perform operation", "Chess", MB_OK | MB_ICONHAND );
             break;
         case -2:
             sprintf( buf, "Cannot open %s for writing", savefile );
-            ::MessageBox( hWndMain, buf, "Chess", MB_OK | MB_ICONHAND );
+            ::MessageBox( HWindow, buf, "Chess", MB_OK | MB_ICONHAND );
             break;
         default:
             break;
@@ -388,7 +388,7 @@ void TChessWindow::IDMMovePieces()
     EditingBoard = true;
 
     TInfo->Show( SW_HIDE );
-    ::SetMenu( HWindow, hEditMenu );
+    set_edit_menu();
 
     Modified = false;
 
@@ -408,7 +408,7 @@ void TChessWindow::IDMEasy( RTMessage )
     ::Level = easygame;
     ::AverageTime = 5.0;
     ::MaxLevel = MAXPLY;
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 }
 
 void TChessWindow::IDMMoveTime( RTMessage )
@@ -438,7 +438,7 @@ void TChessWindow::IDMMoveTime( RTMessage )
     setTotalTime( &ChessTime[black], ( ::MoveNo / 2 ) * NewMoveTime );
     ::MaxLevel = MAXPLY;
 
-    PrintCurLevel();
+    TInfo_PrintCurLevel();
 }
 
 void TChessWindow::IDMTotalTime( RTMessage )
@@ -469,7 +469,7 @@ void TChessWindow::IDMTotalTime( RTMessage )
     setTotalTime( &ChessTime[black], ( ::MoveNo / 2 ) * NewMoveTime );
     ::MaxLevel = MAXPLY;
 
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 
     delete TotalMoveTime;
 }
@@ -483,7 +483,7 @@ void TChessWindow::IDMMatching( RTMessage )
 
     ::Level = matching;
 
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 }
 
 void TChessWindow::IDMInfiniteSearch( RTMessage )
@@ -496,7 +496,7 @@ void TChessWindow::IDMInfiniteSearch( RTMessage )
     ::Level = infinite;
     ::MaxLevel = MAXPLY;
 
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 }
 
 void TChessWindow::IDMPlySearch( RTMessage )
@@ -525,7 +525,7 @@ void TChessWindow::IDMPlySearch( RTMessage )
     ::MaxLevel = ( char )( ( NewPlyDepth > MAXPLY ) ? MAXPLY : NewPlyDepth );
     ::Level = plysearch;
 
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 
     delete PlySearchDepth;
 }
@@ -538,7 +538,7 @@ void TChessWindow::IDMMateSearch( RTMessage )
     }
 
     ::Level = matesearch;
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 
     ComputersTurn();
 }
@@ -561,7 +561,7 @@ void TChessWindow::IDMTwoPlayer( RTMessage )
     }
 
     DrawMenuBar( HWindow );
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 }
 
 void TChessWindow::IDMDemo( RTMessage )
@@ -585,7 +585,7 @@ void TChessWindow::IDMDemo( RTMessage )
 
     CurPlayer = Player;
     ComputerColor = Opponent;
-    ::PrintCurLevel();
+    ::TInfo_PrintCurLevel();
 }
 
 void TChessWindow::IDMPieceValues( RTMessage )
@@ -732,20 +732,20 @@ void TChessWindow::OnEMCancel()
 
 void TChessWindow::EMError()
 {
-    ::MessageBox( hWndMain, ( LPSTR )buf, "OWL Chess Error", MB_OK | MB_ICONHAND );
+    ::MessageBox( HWindow, ( LPSTR )error_message_buffer, "OWL Chess Error", MB_OK | MB_ICONHAND );
 }
 
 
 
 void TChessWindow::EndGame()
 {
-    if( ::MessageBox( hWndMain, (LPSTR) EndGameMessage, "OWL Chess", MB_YESNO ) == IDNO ) {
-        PostMessage( hWndMain, WM_COMMAND, CM_EXIT, 0L );
+    if( ::MessageBox( HWindow, (LPSTR) EndGameMessage, "OWL Chess", MB_YESNO ) == IDNO ) {
+        PostMessage( HWindow, WM_COMMAND, CM_EXIT, 0L );
         return;
     }
 
     GameOver = false;
-    PostMessage( hWndMain, WM_COMMAND, CM_FILENEW, 0L );
+    PostMessage( HWindow, WM_COMMAND, CM_FILENEW, 0L );
 
     return;
 }
@@ -784,11 +784,11 @@ void TChessWindow::SaveGameAs()
         NewGame = false;
         switch( ::SaveGame( FileName ) ) {
         case -1:
-            ::MessageBox( hWndMain, "Not enough memory to perform operation", "Chess", MB_OK | MB_ICONHAND );
+            ::MessageBox( HWindow, "Not enough memory to perform operation", "Chess", MB_OK | MB_ICONHAND );
             break;
         case -2:
             sprintf( buf, "Cannot open %s for writing", savefile );
-            ::MessageBox( hWndMain, buf, "Chess", MB_OK | MB_ICONHAND );
+            ::MessageBox( HWindow, buf, "Chess", MB_OK | MB_ICONHAND );
             break;
         default:
             break;
@@ -801,7 +801,7 @@ void TChessWindow::ComputersTurn()
 {
     SetClassWord( HWindow, GCW_HCURSOR, WORD( ::hWaitCursor ) );
     SetCursor( ::hWaitCursor );
-    SetMenu( HWindow, hThinkMenu );
+    set_think_menu();
 
     WhoseTurn = computer;
 
@@ -873,7 +873,8 @@ bool TChessWindow::CanClose()
 
 void TChess::InitMainWindow()
 {
-    MainWindow = new TChessWindow( NULL, "OWL Chess" );
+    ::main_window = MainWindow = new TChessWindow( NULL, "OWL Chess" );
+
 }
 
 void TChess::InitInstance()

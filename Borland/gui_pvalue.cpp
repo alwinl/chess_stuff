@@ -4,18 +4,24 @@
 #include <filedial.h>
 #include <inputdia.h>
 #include <bwcc.h>
+
 #include <string.h>
 #include <stdio.h>
+
+
 #include "wcdefs.h"
-#include "info.h"
 #include "wchess.h"
-#include "pvalue.h"
 #include "externs.h"
 
 const int DefaultValues[5] = {0x90, 0x4c, 0x30, 0x30, 0x10};
 
 TPieceValueDialog::TPieceValueDialog( PTWindowsObject AParent, LPSTR AName ) : TDialog( AParent, AName )
 {
+    ScollerIDs[pvqueen]  = IDD_QUEEN;
+    ScollerIDs[pvrook]   = IDD_ROOK;
+    ScollerIDs[pvbishop] = IDD_BISHOP;
+    ScollerIDs[pvknight] = IDD_KNIGHT;
+    ScollerIDs[pvpawn]   = IDD_PAWN;
 }
 
 void TPieceValueDialog::PVSetFocus( HWND hWnd )
@@ -32,7 +38,7 @@ void TPieceValueDialog::PVKillFocus( RTMessage msg )
     if( GetDlgItem( HWindow, IDCANCEL    ) == GetFocus() ) return;
     if( GetDlgItem( HWindow, IDD_DEFAULT ) == GetFocus() ) return;
 
-    GetColorValue( Id );
+    GetColorValue( msg.WParam );
 }
 
 void TPieceValueDialog::WMCommand( RTMessage msg )
@@ -89,13 +95,7 @@ void TPieceValueDialog::Ok( RTMessage /*unused*/ )
     if( GetColorValue( IDD_EQUEEN ) && GetColorValue( IDD_EROOK ) &&
             GetColorValue( IDD_EBISHOP ) && GetColorValue( IDD_EKNIGHT ) && GetColorValue( IDD_EPAWN ) ) {
 
-        Values[pvqueen]  *= 16;
-        Values[pvrook]   *= 16;
-        Values[pvbishop] *= 16;
-        Values[pvknight] *= 16;
-        Values[pvpawn]   *= 16;
-
-        setPieceValues( Values );
+        SetPieceValues( Values );
 
         CloseWindow( IDOK );
     }
@@ -105,19 +105,7 @@ void TPieceValueDialog::SetupWindow()
 {
     TDialog::SetupWindow();
 
-    getPieceValues( Values );
-
-    Values[pvqueen ] /= 16;
-    Values[pvrook  ] /= 16;
-    Values[pvbishop] /= 16;
-    Values[pvknight] /= 16;
-    Values[pvpawn  ] /= 16;
-
-    ScollerIDs[pvqueen]  = IDD_QUEEN;
-    ScollerIDs[pvrook]   = IDD_ROOK;
-    ScollerIDs[pvbishop] = IDD_BISHOP;
-    ScollerIDs[pvknight] = IDD_KNIGHT;
-    ScollerIDs[pvpawn]   = IDD_PAWN;
+    GetPieceValues( Values );
 
     for( ePIECES piece = pvqueen; piece <= pvpawn; piece++ ) {
 

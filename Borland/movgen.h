@@ -19,21 +19,14 @@
  *
  */
 
-#ifndef BOARD_H_INCLUDED
-#define BOARD_H_INCLUDED
+#ifndef MOVGEN_H_INCLUDED
+#define MOVGEN_H_INCLUDED
 
-extern int OfficerNo[];
-extern int PawnNo[];
+bool PieceAttacks( ENUMPIECE apiece, ENUMCOLOR acolor, int asquare, int square );
+bool Attacks( ENUMCOLOR acolor, int square );
+unsigned int FiftyMoveCnt( void );
+unsigned int Repetition( short immediate );
+void InitMovGen( void );
+MOVESTRUCT MovGen( void );
 
-void ClearBoard( void );
-void CalcPieceTab( void );
-void GenCastSquare( int newSquare, int *castsquare, int *cornersquare );
-
-void InsertPiece( ENUMPIECE p, ENUMCOLOR c, int sq );
-
-void SetMove( MOVESTRUCT *amove );
-void ResetMove( MOVESTRUCT *amove );
-bool EqMove( MOVESTRUCT *a, MOVESTRUCT *b );
-
-
-#endif // BOARD_H_INCLUDED
+#endif // MOVGEN_H_INCLUDED

@@ -19,21 +19,9 @@
  *
  */
 
-#ifndef BOARD_H_INCLUDED
-#define BOARD_H_INCLUDED
+#ifndef SEARCH_H_INCLUDED
+#define SEARCH_H_INCLUDED
 
-extern int OfficerNo[];
-extern int PawnNo[];
+void FindMove( int maxlevel );
 
-void ClearBoard( void );
-void CalcPieceTab( void );
-void GenCastSquare( int newSquare, int *castsquare, int *cornersquare );
-
-void InsertPiece( ENUMPIECE p, ENUMCOLOR c, int sq );
-
-void SetMove( MOVESTRUCT *amove );
-void ResetMove( MOVESTRUCT *amove );
-bool EqMove( MOVESTRUCT *a, MOVESTRUCT *b );
-
-
-#endif // BOARD_H_INCLUDED
+#endif // SEARCH_H_INCLUDED
