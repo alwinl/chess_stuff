@@ -19,21 +19,10 @@
  *
  */
 
-#ifndef BOARD_H_INCLUDED
-#define BOARD_H_INCLUDED
+#ifndef SAVEREST_H_INCLUDED
+#define SAVEREST_H_INCLUDED
 
-extern int OfficerNo[];
-extern int PawnNo[];
+int SaveGame( char *savefile );
+int RestoreGame( char * );
 
-void ClearBoard( void );
-void CalcPieceTab( void );
-void GenCastSquare( int newSquare, int *castsquare, int *cornersquare );
-
-void InsertPiece( ENUMPIECE p, ENUMCOLOR c, int sq );
-
-void SetMove( MOVESTRUCT *amove );
-void ResetMove( MOVESTRUCT *amove );
-bool EqMove( MOVESTRUCT *a, MOVESTRUCT *b );
-
-
-#endif // BOARD_H_INCLUDED
+#endif // SAVEREST_H_INCLUDED

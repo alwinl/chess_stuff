@@ -19,21 +19,20 @@
  *
  */
 
-#ifndef BOARD_H_INCLUDED
-#define BOARD_H_INCLUDED
+#ifndef SMALL_H_INCLUDED
+#define SMALL_H_INCLUDED
 
-extern int OfficerNo[];
-extern int PawnNo[];
+void TakeBackMove( MOVESTRUCT *amove );
+void MakeMove( MOVESTRUCT * );
+void EnterKeyMove( void );
+void StartAnalysis( void );
+void ResetMoves( void );
+void InitChessTime( void );
+void AdjustMoves( void );
+void EnterMove( MOVESTRUCT *amove );
+void FlashMove( MOVESTRUCT *amove );
+void StoreMoves( void );
+bool MoveCheck( int, int );
+void DoSlideMove( MOVESTRUCT & );
 
-void ClearBoard( void );
-void CalcPieceTab( void );
-void GenCastSquare( int newSquare, int *castsquare, int *cornersquare );
-
-void InsertPiece( ENUMPIECE p, ENUMCOLOR c, int sq );
-
-void SetMove( MOVESTRUCT *amove );
-void ResetMove( MOVESTRUCT *amove );
-bool EqMove( MOVESTRUCT *a, MOVESTRUCT *b );
-
-
-#endif // BOARD_H_INCLUDED
+#endif // SMALL_H_INCLUDED

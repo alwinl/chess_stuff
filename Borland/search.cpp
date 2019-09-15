@@ -12,12 +12,7 @@
 #include "wchess.h"
 #include "externs.h"
 
-#undef max
-#undef min
-#define max(a, b)  (((a) > (b)) ? (a) : (b))
-#define min(a, b)  (((a) < (b)) ? (a) : (b))
 
-extern double   WantedTime;
 
 bool       ComputerThinking = false;
 bool       GotValidMove = false;
@@ -30,21 +25,11 @@ int        LegalMoves;
 PIECETAB   PieceTab[2][16];
 WORD       MessageToPost;
 bool       NoComputerMove = false;
-
 static MOVESTRUCT movetemp[MAXPLY - BACK + 2];
-
 MOVESTRUCT *MovTab = &movetemp[-BACK];
 
-#define TOLERANCE   8
-#define IF_EQMOVE( a, b ) \
-    if \
-    ( \
-        (a.movpiece == b.movpiece) \
-    &&  (a.new1 == b.new1) \
-    &&  (a.old == b.old) \
-    &&  (a.content == b.content) \
-    &&  (a.spe == b.spe) \
-    )
+
+
 
 struct INFTYPE {
     short   principvar; /* Principal variation search */
@@ -52,14 +37,14 @@ struct INFTYPE {
     int evaluation; /* Evaluation of position */
 };
 
-enum ENUMMOVGEN { mane, specialcap, kill, norml } ;  /* move type */
+enum ENUMMOVGEN { main_variation, specialcap, kill, norml } ;  /* move type */
 
 struct SEARCHTYPE {
     MOVESTRUCT[MAXPLY]    line;           /* best line at next ply */
     short       capturesearch;  /* indicates capture search */
     int     maxval;         /* maximal evaluation returned in search */
     int         nextply;        /* Depth of search at next ply */
-    INFTYPE     next;           /* information at Next ply */
+    INFTYPE     next;           /* information at next ply */
     short       zerowindow;     /* Zero-width alpha-beta-window */
     ENUMMOVGEN  movgentype;
 };
@@ -72,6 +57,11 @@ struct PARAMTYPE {
     SEARCHTYPE  *S;
 };
 
+
+
+
+#define TOLERANCE   8
+
 static INFTYPE    startinf;       /* Inf at first ply */
 static int        alphawindow;    /* alpha window value */
 static int        repeatevalu;    /* MainEvalu at ply one */
@@ -82,16 +72,6 @@ static bool       SkipSearch;
 static short      searchstatedepth;
 
 
-
-static void DisplayMove()
-{
-    if( !Depth ) {
-        char depth_message[40];
-
-        sprintf( depth_message, "%-7d%7s", MaxDepth, MoveStr( &MovTab[0] ) );
-        TInfo->SetDepthText( depth_message );
-    }
-}
 
 /*
  *  Initialize killingmove, checktab and passedpawn
@@ -163,144 +143,51 @@ static void getsearchstate( void )
     }
 }
 
-static void MessageScan()
-{
-    MSG msg;
-    extern HCURSOR hWaitCursor;
-    extern HMENU ThinkMenu;
-    extern HANDLE hAccel;
-
-    if( !PeekMessage( &msg, hWndMain, 0, 0, PM_REMOVE ) )
-        return;
-
-    if( TranslateAccelerator( hWndMain, HACCEL( hAccel ), &msg ) ) {
-        ::PostMessage( hWndMain, WM_COMMAND, MessageToPost, 0L );
-        MessageToPost = 0;
-        SkipSearch = false;
-        return;
-    }
-
-    if( Analysis ) {
-        switch( msg.message ) {
-        case WM_SETCURSOR :
-            DispatchMessage( &msg );
-            break;
-
-        case WM_COMMAND :
-            switch( msg.wParam ) {
-            case CM_STOP :
-                SkipSearch = true;
-                AutoPlay = false;
-                break;
-            }
-            break;
-
-        default:
-            TranslateMessage( &msg );
-            DispatchMessage( &msg );
-            break;
-        }
-
-    } else {
-        switch( msg.message ) {
-        case WM_LBUTTONDOWN :
-            getprogramstate();
-            NoComputerMove = true;
-            GotValidMove = false;
-            DispatchMessage( &msg );
-            NoComputerMove = false;
-
-            if( Opan && !MultiMove && GotValidMove ) {
-                IF_EQMOVE( KeyMove, MovTab[Depth + 1] ) {
-                    SkipSearch = false;
-                    GotValidMove = false;
-                    EnterKeyMove();
-
-                    ::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hWaitCursor ) );
-                    ::SetCursor( hWaitCursor );
-
-                    StartAnalysis();
-                    PrintBestMove( &MainLine[0], MainEvalu );
-                    ::SetMenu( hWndMain, ThinkMenu );
-                    ::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hWaitCursor ) );
-                    ::SetCursor( hWaitCursor );
-                } else
-                    SkipSearch = true;
-            }
-            getsearchstate();
-            break;
-
-        default:
-            if( ( msg.hwnd != hWndMain || msg.message != WM_COMMAND ) ) {
-                TranslateMessage( &msg );
-                DispatchMessage( &msg );
-            } else {
-                SkipSearch = true;
-                if( msg.message != WM_PAINT )
-                    ::PostMessage( msg.hwnd, msg.message, msg.wParam, msg.lParam );
-            }
-            break;
-        }
-    }
-}
-
 /*
  *  Update killingmove using bestmove
  */
 static void updatekill( MOVESTRUCT *bestmove )
 {
-    if( bestmove->movpiece != no_piece ) {
-        /*  Update killingmove unless the move is a capture of last piece moved  */
-        if( ( MovTab[Depth - 1].movpiece == no_piece ) || ( bestmove->new1 != MovTab[Depth-1].new1 ) )
-            if( ( killingmove[Depth][0].movpiece == no_piece ) || ( EqMove( bestmove, &killingmove[Depth][1] ) ) ) {
-                killingmove[Depth][1] = killingmove[Depth][0];
-                killingmove[Depth][0] = *bestmove;
-            } else if( !EqMove( bestmove, &killingmove[Depth][0] ) )
-                killingmove[Depth][1] = *bestmove;
-    }
+	/*  Update killingmove unless the move is a capture of last piece moved  */
+	if( ( MovTab[Depth - 1].movpiece != no_piece ) && ( bestmove->new1 == MovTab[Depth-1].new1 ) )
+		return;
+
+	if( ( killingmove[Depth][0].movpiece == no_piece ) || ( EqMove( bestmove, &killingmove[Depth][1] ) ) ) {
+		killingmove[Depth][1] = killingmove[Depth][0];
+		killingmove[Depth][0] = *bestmove;
+		return;
+	}
+
+	if( !EqMove( bestmove, &killingmove[Depth][0] ) )
+		killingmove[Depth][1] = *bestmove;
+
+	return;
 }
 
 /*
  *  Test if move has been generated before
  */
-static short generatedbefore( PARAMTYPE *P )
+static bool generatedbefore( PARAMTYPE *P )
 {
-    char i;
+    if( P->S->movgentype == main_variation )
+		return false;
 
-    if( P->S->movgentype != mane ) {
-        IF_EQMOVE( MovTab[Depth], P->bestline[Depth] )
-        return 1;
+	if( EqMove( &MovTab[Depth], &P->bestline[Depth] ) )
+		return true;
 
-        if( !P->S->capturesearch )
-            if( P->S->movgentype != kill )
-                for( i = 0; i < 2; i++ )
-                    IF_EQMOVE( MovTab[Depth], killingmove[Depth][i] )
-                    return 1;
-    }
+	if( (P->S->capturesearch) || (P->S->movgentype == kill) )
+		return false;
 
-    return 0;
-}
+	if( (EqMove( &MovTab[Depth], &killingmove[Depth][0] )) || (EqMove( &MovTab[Depth], &killingmove[Depth][1] )) )
+		return true;
 
-/*
- *  Test cut-off.  Cutval cantains the maximal possible evaluation
- */
-static short cut( int cutval, PARAMTYPE *P )
-{
-    short ct = 0;
-
-    if( cutval <= P->alpha ) {
-        ct = 1;
-        if( P->S->maxval < cutval )
-            P->S->maxval = cutval;
-    }
-
-    return ct;
+    return false;
 }
 
 /*
  *  Perform move, calculate evaluation, test cut-off, etc
  */
-static short update( PARAMTYPE *P )
+static bool update( PARAMTYPE *P )
 {
     short selection;
 
@@ -312,10 +199,9 @@ static short update( PARAMTYPE *P )
 
         if( Attacks( Opponent, PieceTab[ Player ][ 0 ].isquare ) ) {		/*  Check if Move is legal  */
             ResetMove( &MovTab[ Depth ] );	// take back the move
-            if( Analysis )
-                DisplayMove();
-
-            return 1;
+			if( Analysis || !Depth )
+				TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
+            return true;
         }
 
         if( !Depth )
@@ -325,24 +211,30 @@ static short update( PARAMTYPE *P )
         passdpawn[ Depth + 2 ]   = -1;
         P->S->next.value      = P->S->next.evaluation = 0;
 
-        if( P->S->nextply <= 0 ) { /*  Calculate chech and perform evt. cut-off  */
+        if( P->S->nextply <= 0 ) { /*  Calculate check and perform evt. cut-off  */
             if( !P->S->nextply )
                 checktable[ Depth + 1 ] = Attacks( Player, PieceTab[ Opponent ][ 0 ].isquare );
 
-            if( !checktable[ Depth + 1 ] )
-                if( cut( P->S->next.value, P ) ) {
-                    ResetMove( &MovTab[ Depth ] );	// take back the move
-                    if( Analysis )
-                        DisplayMove();
+            if( !checktable[ Depth + 1 ] ) {
+				// test cut_off
+                if( P->S->next.value <= P->alpha ) ) {
 
-                    return 1;
+                	if( (P->S->maxval < P->S->next.value) )
+						P->S->maxval = P->S->next.value;
+
+                    ResetMove( &MovTab[ Depth ] );	// take back the move
+					if( Analysis || !Depth )
+						TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
+
+                    return true;
                 }
+            }
         }
 
-        if( Analysis )
-            DisplayMove();
+		if( Analysis || !Depth )
+			TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
 
-        return 0;					// Accept the move
+        return false;					// Accept the move
     }
 
     /* Make special limited capturesearch at first iteration */
@@ -355,10 +247,10 @@ static short update( PARAMTYPE *P )
                    || ( MovTab[Depth].old == MovTab[Depth - 2].new1 )
                  )
             ) {
-                if( Analysis )          // cut the move
-                    DisplayMove();
+				if( Analysis || !Depth )
+					TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
 
-                return( 1 );
+                return true;
             }
         }
     }
@@ -387,23 +279,28 @@ static short update( PARAMTYPE *P )
 
     /* Perform selection at last ply and in capture search */
     selection = ( ( P->S->nextply <= 0 ) && !checktable[Depth + 1] && ( Depth > 0 ) );
-    if( selection )                     /* check evaluation */
-        if( cut( P->S->next.value + 0, P ) ) {
-            if( Analysis )
-                DisplayMove();
+    if( selection ) {                     /* check evaluation */
+		/* check cut off */
+        if( P->S->next.value <= P->alpha ) {
 
-            return( 1 );                // cut the move
+			if( P->S->maxval < P->S->next.value )
+				P->S->maxval = cutval;
+
+			if( Analysis || !Depth )
+				TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
+
+            return true;                // cut the move
         }
+    }
 
     SetMove( &MovTab[Depth] );       /* perform move on the board */
 
     /* check if move is legal */
     if( Attacks( Opponent, PieceTab[Player][0].isquare ) ) {
         ResetMove( &MovTab[Depth] );   // take back the move
-        if( Analysis )
-            DisplayMove();
-
-        return( 1 );
+		if( Analysis || !Depth )
+			TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
+        return true;
     }
 
     if( passdpawn[Depth+2] >= 0 ) {      /* check passedpawn */
@@ -418,51 +315,160 @@ static short update( PARAMTYPE *P )
 
     P->S->next.evaluation = P->S->next.value;
 
-    if( Analysis )
-        DisplayMove();
+    if( Analysis || !Depth )
+		TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
 
-    return( 0 );
+    return false;
+}
+
+/**
+ * return true if the move is either a pawn move or a capture move
+ */
+static bool isPawnOrCapture( MOVESTRUCT *amove )
+{
+	return ( (amove->movpiece == no_piece) || (amove->movpiece == pawn) || (amove->content != no_piece) || (amove->spe) )
+}
+
+/**
+ *  Count the number of moves since last capture or pawn move
+ *  The game is a draw when fiftymovecnt = 100
+ */
+unsigned int FiftyMoveCnt( void )
+{
+    unsigned int cnt = 0;
+
+    while( !isPawnOrCapture( &MovTab[Depth - cnt] ) )
+        cnt++;
+
+    return cnt;
+}
+
+
+/*
+ *  Calculate how many times the position has occurred before
+ *  The game is a draw when repetition = 3;
+ *  movetab[back..Depth] contains the previous moves
+ *  When immediate is set, only immediate repetition is checked
+ */
+unsigned int Repetition( short immediate )
+{
+    short lastdep, compdep, tracedep, checkdep, samedepth;
+    int tracesq, checksq;
+    unsigned int repeatcount;
+
+    repeatcount = 1;
+    lastdep = samedepth = Depth + 1;    /*  current position  */
+    compdep = samedepth - 4;            /*  First position to compare  */
+
+    /*  MovTab[lastdep..Depth] contains previous relevant moves  */
+    while( !isPawnOrCapture( &MovTab[lastdep - 1] ) && ( (compdep < lastdep) || !immediate ) )
+        lastdep--;
+
+    if( compdep < lastdep )
+        return repeatcount;
+
+    checkdep = samedepth;
+
+    do {
+        checkdep--;
+        checksq = MovTab[checkdep].new1;
+
+        for( tracedep = checkdep + 2; (tracedep < samedepth) && ( MovTab[tracedep].old != checksq ); tracedep += 2 )
+			;
+
+		if( MovTab[tracedep].old != checksq ) {
+
+			/*  Trace the move backward to see if it has been 'undone' earlier  */
+			tracedep = checkdep;
+			tracesq = MovTab[tracedep].old;
+			do {
+				if( tracedep-2 < lastdep )
+					return repeatcount;
+
+				tracedep -= 2;
+
+				if( tracesq == MovTab[tracedep].new1 )			/*  Check if piece has been moved before  */
+					tracesq = MovTab[tracedep].old;
+
+			} while( (tracesq != checksq) || (tracedep > compdep + 1) );
+
+			if( tracedep < compdep ) { /*  Adjust evt. compdep  */
+				compdep = tracedep;
+
+				if( ( samedepth - compdep ) % 2 == 1 ) {
+					if( compdep == lastdep )
+						return repeatcount;
+
+					compdep --;
+				}
+				checkdep = samedepth;
+			}
+		}
+
+        /*  All moves between SAMEDEP and compdep have been checked, so a repetition is found  */
+        if( checkdep <= compdep ) {
+
+            repeatcount++;
+            if( compdep - 2 < lastdep )
+                return repeatcount;
+
+            checkdep = samedepth = compdep;
+            compdep -= 2;
+        }
+
+    } while( 1 );
 }
 
 /*
  *  Calculate draw bonus/penalty, and set draw if the game is a draw
  */
-static short drawgame( SEARCHTYPE *S )
+static bool drawgame( SEARCHTYPE *S, short depth, int adjustment )
 {
-    int drawcount;
-    unsigned int searchrepeat;
-    unsigned int searchfifty;
+	switch( depth ) {
+	case 0:
+	case 2:
+		break;
 
-    if( Depth == 1 ) {
-        searchfifty = FiftyMoveCnt();
-        searchrepeat = Repetition( 0 );
-        if( searchrepeat >= 3 ) {
-            S->next.evaluation = 0;
-            return 1;
-        }
+	case 1:
+		{
+			unsigned int searchfifty = FiftyMoveCnt();
+			unsigned int searchrepeat = Repetition( 0 );
 
-        drawcount = 0;
-        if( searchfifty >= 96 )  /*  48 moves without pawn moves or captures */
-            drawcount = 3;
-        else {
-            if( searchrepeat >= 2 )  /*  2nd repetition  */
-                drawcount = 2;
-            else if( searchfifty >= 20 )  /*  10 moves without pawn moves or  */
-                drawcount = 1;        /*  captures  */
-        }
-        S->next.value += ( repeatevalu / 4 ) * drawcount;
-        S->next.evaluation += ( repeatevalu / 4 ) * drawcount;
-    }
+			if( searchrepeat >= 3 ) {
+				S->next.evaluation = 0;
+				return true;
+			}
 
-    if( Depth >= 3 ) {
-        searchrepeat = Repetition( 1 );
-        if( searchrepeat >= 2 ) {       /*  Immediate repetition counts as a draw */
-            S->next.evaluation = 0;
-            return 1;
-        }
-    }
+			if( searchfifty >= 96 ) {  /*  48 moves without pawn moves or captures */
+				S->next.value += ( adjustment / 4 ) * 3;
+				S->next.evaluation += ( adjustment / 4 ) * 3;
+				break;
+			}
 
-    return 0;
+			if( searchrepeat >= 2 ) {  /*  2nd repetition  */
+				S->next.value += ( adjustment / 4 ) * 2;
+				S->next.evaluation += ( adjustment / 4 ) * 2;
+				break;
+			}
+
+			if( searchfifty >= 20 ) {  /*  10 moves without pawn moves or captures */
+				S->next.value += ( adjustment / 4 );
+				S->next.evaluation += ( adjustment / 4 );
+				break;
+			}
+		}
+		break;
+
+	default:
+		if( Repetition( 1 ) < 3 )
+			break;
+
+		/*  Immediate repetition counts as a draw */
+		S->next.evaluation = 0;
+		return true;
+	}
+
+	return false;
 }
 
 /*
@@ -473,14 +479,121 @@ static void updatebestline( PARAMTYPE *P )
     memcpy( P->bestline, &P->S->line[ 0 ], sizeof( MOVESTRUCT ) * 23 );
 
     P->bestline[ Depth ] = MovTab[ Depth ];
-    if( !Depth ) {
-        MainEvalu = P->S->maxval;
-        if( Level == matesearch )
-            P->S->maxval = alphawindow;
+    if( Depth )
+		return;
 
-        if( Analysis )
-            PrintBestMove( &MainLine[ 0 ], MainEvalu );
+	MainEvalu = P->S->maxval;
+
+	if( Level == matesearch )
+		P->S->maxval = alphawindow;
+
+	if( Analysis )
+		TInfo_PrintBestMove( &MainLine[ 0 ], MainEvalu );
+}
+
+/*
+ *  The inner loop of the search procedure.  MovTab[Depth] contains the move.
+ */
+static bool loopbody( PARAMTYPE *P )
+{
+    ENUMCOLOR oldplayer;
+    short lastanalysis;
+
+    if( generatedbefore( P ) )
+        return false;
+
+    if( Depth < MAXPLY ) {
+        P->S->line[Depth + 1] = ZeroMove;
+        if( P->S->movgentype == main_variation )
+            memmove( &P->S->line[0], P->bestline, sizeof( MOVESTRUCT ) * MAXPLY );
     }
+
+    /*  Principvar indicates principal variation search  */
+    /*  Zerowindow indicates zero - width alpha - beta window  */
+    P->S->next.principvar = 0;
+    P->S->zerowindow = 0;
+
+    if( P->inf->principvar ) {
+        if( P->S->movgentype == main_variation )
+            P->S->next.principvar = ( P->bestline[ Depth+1 ].movpiece != no_piece );
+        else
+            P->S->zerowindow = ( P->S->maxval >= P->alpha );
+    }
+
+	while( 1 ) {
+		if( update( P ) )
+			return false;
+
+		bool skip_next = false;
+
+		if( (Level == matesearch) && (P->S->nextply <= 0) && !checktable[Depth + 1] )  /*  stop evt. search  */
+			skip_next = true;
+
+		if( drawgame( P->S, Depth, repeatevalu ) || (Depth >= 23) )
+			skip_next = true;
+
+		if( ! skip_next ) {
+
+			/*  Analyse nextply using a recursive call to search  */
+			oldplayer = Player;
+			Player    = Opponent;
+			Opponent  = oldplayer;
+			Depth++;
+
+			if( P->S->zerowindow )
+				P->S->next.evaluation = -search( -P->alpha-1, -P->alpha, P->S->nextply, &P->S->next, &P->S->line[0] );
+			else
+				P->S->next.evaluation = -search( -P->beta,    -P->alpha, P->S->nextply, &P->S->next, &P->S->line[0] );
+
+			Depth--;
+			oldplayer = Opponent;
+			Opponent  = Player;
+			Player    = oldplayer;
+		}
+
+		ResetMove( &MovTab[ Depth ] );  /*  take back move  */
+		if( SkipSearch )
+			return true;
+
+		lastanalysis = Analysis;  /*  scan messages and test SkipSearch  */
+
+		MessageScan();
+
+		if( !SkipSearch )
+			if( Analysis && !SingleStep && ( ( !Depth ) || !lastanalysis ) ) {
+				StopTime( &ChessClock );
+				if( MainEvalu > alphawindow )
+					SkipSearch = ( getTotalTime( &ChessClock ) >= ( WantedTime * 1.5 ) );
+			}
+
+		if( Analysis && ( MaxDepth <= 1 ) )
+			SkipSearch = 0;
+
+		P->S->maxval = max( P->S->maxval, P->S->next.evaluation );  /*  Update Maxval  */
+		if( EqMove( &P->bestline[ Depth ], &MovTab[ Depth ] ) /*  Update evt. bestline  */
+			updatebestline( P );
+
+		if( P->alpha >= P->S->maxval )     /*  update alpha and test cutoff */
+			return SkipSearch;
+
+		updatebestline( P );
+
+		if( P->S->maxval >= P->beta )
+			return true;
+
+		/*  Adjust maxval (tolerance search)  */
+		if( P->ply >= 2  && P->inf->principvar && !P->S->zerowindow )
+			P->S->maxval = min( P->S->maxval + TOLERANCE, P->beta - 1 );
+
+		P->alpha = P->S->maxval;
+
+		if( ! (P->S->zerowindow && ! SkipSearch ) ) {
+			return SkipSearch;
+
+		P->S->zerowindow = 0;			/*  repeat search with full window  */
+	}
+
+    return SkipSearch;
 }
 
 /*
@@ -490,7 +603,7 @@ static short pawnpromotiongen( PARAMTYPE *P )
 {
     ENUMPIECE promote;
 
-    MovTab[ Depth ].spe = 1;
+    MovTab[Depth].spe = 1;
 
     for( promote = queen; promote <= knight; ( ( int ) promote )++ ) {
         MovTab[ Depth ].movpiece = promote;
@@ -626,9 +739,99 @@ static short noncapmovgen( int oldsq, PARAMTYPE *P )
     return 0;
 }
 
+/** \brief Test whether a move is possible
+ *
+ *	Move contains a full description of a move, which
+ * 	has been legally generated in a different position.
+ *	MovTab[Depth - 1] contains last performed move.
+ *
+ * \param amove MOVESTRUCT* The move to be examined
+ * \return bool True if move is possible
+ *
+ */
+static bool IsValidMove( MOVESTRUCT *amove, MOVESTRUCT *last_move )
+{
+    if( amove->spe && ( amove->movpiece == king ) ) {		/* its a castling move */
+
+        ENUMCASTDIR castdir = ( amove->new1 > amove->old ) ? shrt : lng;	/* which way are we castling */
+		int cast_square = ( Player == black ) ? 0x74 : 0x04;				/* get the king position, e-file */
+
+		if( ! is_piece_at_origin( cast_square, king, Player ) ) /*  check king  */
+			return false;		/* king has moved */
+
+		/* now find the rook position, long castle is a-file and short castle is h-file */
+		cast_square += ( castdir == lng ) ? -4 : 3;
+
+		if( !is_piece_at_origin( cast_square, rook, Player ) )	 /*  check rook  */
+			return false;	/* rook has moved */
+
+		cast_square = ( int )( ( amove->new1 + amove->old ) / 2 );
+
+		/*  make sure there are no pieces on the squares we want to move too  */
+		if( Board[amove->new1].piece != no_piece || Board[cast_square].piece != no_piece )
+			return false;
+
+		/* On a long castle we have an extra square that needs to be empty */
+		if( ( castdir == lng ) && ( Board[amove->new1-1].piece != no_piece ) )
+			return false;
+
+		/* No castle allowed if any of the squares are being attacked */
+		if( Attacks( Opponent, amove->old ) || Attacks( Opponent, amove->new1 ) || Attacks( Opponent, cast_square ) )
+			return false;
+
+		return true;	/* move is allowed */
+    }
+
+	if( amove->spe && ( amove->movpiece == pawn ) ) {			/*  It's an en passant capture capture move */
+
+		/* Can't do ep capture if the opponents last move was not a pawn move */
+		if( last_move->movpiece != pawn )
+			return false;
+
+		/*  Last opponents move has to be a 2 square move  */
+		if( abs( last_move->new1 - last_move->old ) < 0x20 )
+			return false;
+
+		/* If the square we are attacking from does not even have one of our pawns, this move makes no sense */
+		if( ( Board[amove->old].piece != pawn ) || ( Board[amove->old].color != Player ) )
+			return false;
+
+		/* The ep square is in the middle of the opponents last moves pawn path */
+		if( amove->new1 != ( ( last_move->new1 + last_move->old ) / 2 ) )
+			return false;
+
+		return true;	/* move is allowed */
+	}
+
+	/* On pawn promotion we change the moving piece. So to test for attacks we need signal that it was a pawn*/
+	ENUMPIECE test_piece = ( amove->spe ) ? pawn : amove->movpiece;
+
+	/*  Test if the moves starting position actually has the piece on the square  */
+	if( (Board[amove->old].piece != test_piece) || ( Board[amove->old].color != Player ) )
+		return false;
+
+	if( Board[amove->new1].piece != amove->content )
+		return false;
+
+	/* if the square we are moving to is occupied by one of our pieces, we cannot move there */
+	if( amove->content != no_piece && Board[amove->new1].color != Opponent )
+		return false;
+
+	if( amove->movpiece != pawn ) { /*  Is the move possible?  */
+		return PieceAttacks( test_piece, Player, amove->old, amove->new1 );
+
+	/* if the pawn wants to move 2 squares, the middle square better be empty */
+	if( ( abs( amove->new1 - amove->old ) == 0x20 ) && Board[( amove->new1 + amove->old ) / 2].piece != no_piece )
+		return false;
+
+    return true;	/* move is allowed */
+}
+
 /*
  *  castling moves
  */
+static CASTMOVETYPE  CastMove[2][2] = { {{0x02, 0x04}, {0x06, 0x04}}, {{0x72, 0x74}, {0x76, 0x74}} };
+
 static short castlingmovgen( PARAMTYPE *P )
 {
     ENUMCASTDIR castdir;
@@ -642,7 +845,7 @@ static short castlingmovgen( PARAMTYPE *P )
         MovTab[ Depth ].new1 = CastMove[ Player ][ castdir ].castnew;
         MovTab[ Depth ].old  = CastMove[ Player ][ castdir ].castold;
 
-        if( KillMovGen( &MovTab[ Depth ] ) )
+        if( IsValidMove( &MovTab[ Depth ], &MoveTab[ Depth - 1 ] ) )
             if( loopbody( P ) )
                 return 1;
     }
@@ -669,7 +872,7 @@ static short epcapmovgen( PARAMTYPE *P )
     if( VALIDSQUARE( MovTab[ Depth - 1 ].new1 - 1 ) ) {
 
         MovTab[ Depth ].old = MovTab[ Depth - 1 ].new1 - 1;
-        if( KillMovGen( &MovTab[ Depth ] ) )
+        if( IsValidMove( &MovTab[ Depth ], &MoveTab[ Depth - 1 ] ) )
             if( loopbody( P ) )
                 return 1;										// Yes, kill it
     }
@@ -678,7 +881,7 @@ static short epcapmovgen( PARAMTYPE *P )
     if( VALIDSQUARE( MovTab[ Depth - 1 ].new1 + 1 ) ) {
 
         MovTab[ Depth ].old = MovTab[ Depth - 1 ].new1 + 1;
-        if( KillMovGen( &MovTab[ Depth ] ) )
+        if( IsValidMove( &MovTab[ Depth ], &MoveTab[ Depth - 1 ] ) )
             if( loopbody( P ) )
                 return 1;										// Yes, kill it
     }
@@ -707,7 +910,7 @@ static void searchmovgen( PARAMTYPE *P )
     /*  generate move from main variation  */
     if( P->bestline[ Depth ].movpiece != no_piece ) {
         MovTab[ Depth ] = P->bestline[ Depth ];
-        P->S->movgentype = mane;
+        P->S->movgentype = main_variation;
         if( loopbody( P ) )
             return;
     }
@@ -723,7 +926,7 @@ static void searchmovgen( PARAMTYPE *P )
         for( killno = 0; killno <= 1; killno++ ) {
             MovTab[ Depth ] = killingmove[ Depth ][ killno ];
             if( MovTab[ Depth - 1 ].movpiece != no_piece )
-                if( KillMovGen( &MovTab[ Depth ] ) )
+                if( IsValidMove( &MovTab[ Depth ], &MoveTab[ Depth - 1 ] ) )
                     if( loopbody( P ) )
                         return;
         }
@@ -774,15 +977,15 @@ static int search( int alpha, int beta, int ply, INFTYPE *inf, MOVESTRUCT *bestl
 
     S.capturesearch = ( ( ply <= 0 ) && !checktable[ Depth ] );		/*  Perform capturesearch if ply <= 0 and !check  */
 
-    if( S.capturesearch ) {											/*  initialize maxval  */
-        S.maxval = -inf->evaluation;
-        if( alpha < S.maxval ) {
-            alpha = S.maxval;
-            if( S.maxval >= beta )
-                return S.maxval;
-        }
-    } else
-        S.maxval = -( LOSEVALUE - Depth * DEPTHFACTOR );
+	S.maxval = S.capturesearch ? -inf->evaluation : -( LOSEVALUE - Depth * DEPTHFACTOR );
+
+    if( S.capturesearch && (alpha < S.maxval) ) {											/*  initialize maxval  */
+
+		alpha = S.maxval;
+
+		if( S.maxval >= beta )
+			return S.maxval;
+    }
 
     P.alpha = alpha;
     P.beta = beta;
@@ -790,117 +993,20 @@ static int search( int alpha, int beta, int ply, INFTYPE *inf, MOVESTRUCT *bestl
     P.inf = inf;
     P.bestline = bestline;
     P.S = &S;
+
     searchmovgen( &P );   /*  The search loop  */
 
-    if( !SkipSearch ) {
+    if( SkipSearch )
+		return S.maxval;
 
-        if( S.maxval == -( LOSEVALUE - Depth * DEPTHFACTOR ) )   /*  Test stalemate  */
-            if( !Attacks( Opponent, PieceTab[ Player ][ 0 ].isquare ) )
-                return 0;
+	/*  Test stalemate  */
+	if( (S.maxval == -( LOSEVALUE - Depth * DEPTHFACTOR ) ) && ( !Attacks( Opponent, PieceTab[ Player ][ 0 ].isquare ) ) )
+		return 0;
 
-        updatekill( &bestline[ Depth ] );
-    }
+	if( bestline[ Depth ].movpiece != no_piece )
+		updatekill( &bestline[ Depth ] );
 
     return S.maxval;
-}
-
-/*
- *  The inner loop of the search procedure.  MovTab[Depth] contains the move.
- */
-static short loopbody( PARAMTYPE *P )
-{
-    ENUMCOLOR oldplayer;
-    short lastanalysis;
-
-    if( generatedbefore( P ) )
-        return 0;
-
-    if( Depth < MAXPLY ) {
-        P->S->line[Depth + 1] = ZeroMove;
-        if( P->S->movgentype == mane )
-            memmove( &P->S->line[0], P->bestline, sizeof( MOVESTRUCT ) * MAXPLY );
-        /* P->S->line = *bestline; */
-    }
-
-    /*  Principvar indicates principal variation search  */
-    /*  Zerowindow indicates zero - width alpha - beta window  */
-    P->S->next.principvar = 0;
-    P->S->zerowindow = 0;
-    if( P->inf->principvar )
-        if( P->S->movgentype == mane )
-            P->S->next.principvar = ( P->bestline[ Depth+1 ].movpiece != no_piece );
-        else
-            P->S->zerowindow = ( P->S->maxval >= P->alpha );
-
-REPEATSEARCH:
-    if( update( P ) )
-        return 0;
-
-    if( Level == matesearch )  /*  stop evt. search  */
-        if( ( P->S->nextply <= 0 ) && !checktable[ Depth + 1 ] )
-            goto NOTSEARCH;
-
-    if( drawgame( P->S ) )
-        goto NOTSEARCH;
-
-    if( Depth >= 23 )
-        goto NOTSEARCH;
-
-    /*  Analyse nextply using a recursive call to search  */
-    oldplayer = Player;
-    Player    = Opponent;
-    Opponent  = oldplayer;
-    Depth++;
-
-    if( P->S->zerowindow )
-        P->S->next.evaluation = -search( -P->alpha - 1, -P->alpha, P->S->nextply, &P->S->next, &P->S->line[ 0 ] );
-    else
-        P->S->next.evaluation = -search( -P->beta, -P->alpha, P->S->nextply, &P->S->next, &P->S->line[ 0 ] );
-
-    Depth--;
-    oldplayer = Opponent;
-    Opponent  = Player;
-    Player    = oldplayer;
-
-NOTSEARCH:
-    ResetMove( &MovTab[ Depth ] );  /*  take back move  */
-    if( SkipSearch )
-        return 1;
-
-    lastanalysis = Analysis;  /*  scan messages and test SkipSearch  */
-    MessageScan();
-    if( !SkipSearch )
-        if( Analysis && !SingleStep && ( ( !Depth ) || !lastanalysis ) ) {
-            StopTime( &ChessClock );
-            if( MainEvalu > alphawindow )
-                SkipSearch = ( getTotalTime( &ChessClock ) >= ( WantedTime * 1.5 ) );
-        }
-
-    if( Analysis && ( MaxDepth <= 1 ) )
-        SkipSearch = 0;
-
-    P->S->maxval = max( P->S->maxval, P->S->next.evaluation );  /*  Update Maxval  */
-    IF_EQMOVE( P->bestline[ Depth ], MovTab[ Depth ] ) /*  Update evt. bestline  */
-    updatebestline( P );
-
-    if( P->alpha < P->S->maxval ) {     /*  update alpha and test cutoff */
-        updatebestline( P );
-        if( P->S->maxval >= P->beta )
-            return 1;
-
-        /*  Adjust maxval (tolerance search)  */
-        if( P->ply >= 2  && P->inf->principvar && !P->S->zerowindow )
-            P->S->maxval = min( P->S->maxval + TOLERANCE, P->beta - 1 );
-
-        P->alpha = P->S->maxval;
-
-        if( P->S->zerowindow && ! SkipSearch ) {
-            P->S->zerowindow = 0;			/*  repeat search with full window  */
-            goto REPEATSEARCH;
-        }
-    }
-
-    return SkipSearch;
 }
 
 /*
@@ -988,6 +1094,6 @@ void FindMove( int maxlevel )
     StopTime( &ChessClock );
 
     if( Analysis )
-        PrintNodes( Nodes, ( getTotalTime( &ChessClock ) - calcpvtime ) );
+        TInfo_PrintNodes( Nodes, ( getTotalTime( &ChessClock ) - calcpvtime ) );
 }
 

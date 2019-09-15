@@ -39,7 +39,7 @@ void StopChessTime()
 {
     if( Running ) {
         StopTime( &ChessTime[RunColor] );
-        ::KillTimer( hWndMain, TIMEID );
+        stop_timer();
         Running = false;
     }
 }
@@ -52,7 +52,7 @@ void StartChessTime( ENUMCOLOR color )
     RunColor = color;
     Running = true;
     StartTime( &ChessTime[RunColor] );
-    ::SetTimer( hWndMain, TIMEID, 1000, NULL );
+    start_timer();
 }
 
 /*
@@ -64,14 +64,6 @@ void ResetMoves()
     MovTab[-1] = ZeroMove;
 }
 
-/*
- *  Clear HintLine
- */
-void ClearHint()
-{
-    HintLine[0] = ZeroMove;
-    HintEvalu = 0;
-}
 
 /*
  *  Test if the move is legal for Programcolor == player in the
@@ -110,17 +102,19 @@ void PrintComment( void )
     short check, possiblemove, checkmate;
     int nummoves;
 
-    Message( "" );
+    TInfo_SetMessageText( "" );
     checkmate = 0;
     Depth++;
     possiblemove = 0;
     InitMovGen();
+
+    MOVESTRUCT test_move;
     do {
-        MovGen();
-        if( Next.movpiece != no_piece )
-            if( !IllegalMove( &Next ) )
+        test_move = MovGen();
+        if( test_move.movpiece != no_piece )
+            if( !IllegalMove( &test_move ) )
                 possiblemove = 1;
-    } while( Next.movpiece != no_piece && !possiblemove );
+    } while( test_move.movpiece != no_piece && !possiblemove );
 
     Depth--;
     check = Attacks( Opponent, PieceTab[Player][0].isquare ); /* calculate check */
@@ -136,11 +130,11 @@ void PrintComment( void )
         nummoves = ( MATEVALUE - HintEvalu + 0x40 ) / ( DEPTHFACTOR * 2 );
         char mate_message[40];
         sprintf( mate_message, "Mate in %d Move%c", nummoves, ( nummoves > 1 ) ? 's!':'!' );
-        Message( mate_message );
+        TInfo_SetMessageText( mate_message );
     }
 
     if( check && !checkmate )
-        Message( "Check!" );
+        TInfo_SetMessageText( "Check!" );
     else { /*  test 50 move rule and repetition of moves  */
         if( FiftyMoveCnt() >= 100 ) {
             EndMessage( "50 Move rule" );
@@ -162,7 +156,7 @@ void PrintComment( void )
 void EnterMove( MOVESTRUCT *amove )
 {
     StopChessTime();
-    PrintMove( MoveNo, ProgramColor, amove, getTotalTime( &ChessTime[RunColor] ) );
+    TInfo_PrintMove( MoveNo, ProgramColor, amove, getTotalTime( &ChessTime[RunColor] ) );
 
     MakeMove( amove );
 
@@ -174,13 +168,22 @@ void EnterMove( MOVESTRUCT *amove )
 void RemoveMove( MOVESTRUCT *amove )
 {
     StopChessTime();
-    PrintMove( MoveNo, ProgramColor, amove, getTotalTime( &ChessTime[RunColor] ) );
+    TInfo_PrintMove( MoveNo, ProgramColor, amove, getTotalTime( &ChessTime[RunColor] ) );
 
     TakeBackMove( amove );
 
     UpdateBoard();
     PrintComment();
     StartChessTime( ProgramColor );
+}
+
+/*
+ *  Clear HintLine
+ */
+static void ClearHint()
+{
+    HintLine[0] = ZeroMove;
+    HintEvalu = 0;
 }
 
 /*
@@ -229,13 +232,14 @@ bool MoveCheck( int startsq, int endsq )
     KeyMove = ZeroMove;
     InitMovGen();
 
+    MOVESTRUCT test_move;
     do {
-        MovGen();
-        if( Next.new1 == endsq && Next.old == startsq ) {
-            KeyMove = Next;
+        test_move = MovGen();
+        if( test_move.new1 == endsq && test_move.old == startsq ) {
+            KeyMove = test_move;
             break;
         }
-    } while( Next.movpiece != no_piece );
+    } while( test_move.movpiece != no_piece );
 
     if( KeyMove.movpiece == no_piece ) {
         Warning( "Impossible move" );
@@ -371,30 +375,3 @@ void EndMessage( char *message )
     GameOver = true;
 }
 
-void ShowHint()
-{
-    short dep = 0;
-
-    buf[0] = '\0';
-    Message( "" );
-
-    while( HintLine[dep].movpiece != no_piece ) {
-
-        strcat( buf, MoveStr( &HintLine[dep] ) );
-        strcat( buf, " " );
-        Message( buf );
-
-        MakeMove( &HintLine[dep] );
-        UpdateBoard();
-
-        Wait( 6 );
-        dep++;
-    }
-
-    while( dep > 0 ) {
-        dep--;
-        TakeBackMove( &HintLine[dep] );
-    }
-
-    UpdateBoard();
-}

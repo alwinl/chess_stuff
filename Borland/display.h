@@ -19,20 +19,26 @@
  *
  */
 
-
 #ifndef DISPLAY_H_INCLUDED
 #define DISPLAY_H_INCLUDED
 
-HBITMAP GetBitmapHandle( ENUMPIECE piece, ENUMCOLOR pcolor );
-void ClearInfoWindow();
-void ColorToPlay( ENUMCOLOR color );
-void Message( char *str );
+void TInfo_ClearWindow();
+void TInfo_SetTurnText( ENUMCOLOR color );
+void TInfo_SetMessageText( char *str );
+void TInfo_PrintCurLevel();
+void TInfo_PrintMove( int moveno, ENUMCOLOR acolour, MOVESTRUCT *amove, double time );
+void TInfo_PrintNodes( double nodes, double time );
+void TInfo_PrintBestMove( MOVESTRUCT *mainline, int mainvalue );
+void TInfo_ClearBestLine();
+
 void Error( char *str );
+
+void set_wait_cursor();
+void set_arrow_cursor();
+
 void Warning( char *str );
 char *MoveStr( MOVESTRUCT *amove );
-void PrintMove( int moveno, ENUMCOLOR programcolor, MOVESTRUCT *amove, double time );
 void DrawFrame( HDC hDC, RECT& frame_area, bool DrawBackground );
-void PrintCurLevel();
 POINT GetSquareXY( int square );
 void ClearSquare( int square );
 void ClearDisplay();
@@ -45,9 +51,6 @@ int GetValidSquare( POINT p );
 void DrawNormalBitmap( int square );
 void DrawInvertedBitmap( int square );
 void OpeningLibMsg();
-void PrintNodes( double nodes, double time );
-void PrintBestMove( MOVESTRUCT *mainline, int mainvalue );
-void ClearBestLine();
 
 
 #endif // DISPLAY_H_INCLUDED

@@ -1,25 +1,28 @@
 // ObjectWindows - (C) Copyright 1992 by Borland International
 
 #include <windows.h>
+
 #include <stdio.h>
 #include <string.h>
+
 #include <static.h>
 #include <filedial.h>
 #include <inputdia.h>
 #include <bwcc.h>
 
 #include "wcdefs.h"
-#include "wchess.h"
-#include "info.h"
 #include "externs.h"
+
+#include "wchess.h"
 
 
 /*
  *  Global variables
  */
 
-BOARDTYPE Display[0x78];
+static BOARDTYPE Display[0x78];
 char buf[280];   //  general string buffer, used in several modules
+char error_message_buffer[280];
 
 
 /*
@@ -151,7 +154,7 @@ void ClearSquare( int square )
 {
     HDC hDC = GetDC( hWndMain );
 
-    HANDLE  hOldBrush = SelectObject( hDC, (( square % 8 + square /16 ) % 2) ? hWhiteBrush : hBlackBrush );
+    HANDLE  hOldBrush = SelectObject( hDC, (( (square & 0x0F) + (square >> 4) ) % 2) ? hWhiteBrush : hBlackBrush );
 
     POINT p = GetSquareXY( square );
 
@@ -185,6 +188,9 @@ static void DrawBoard()
 
 static void PrintPiece( int square, ENUMPIECE piece, ENUMCOLOR color, DWORD Rop )
 {
+	if( piece == no_piece )
+		return;
+
     HDC hDC = GetDC( hWndMain );
     HDC hMemoryDC = CreateCompatibleDC( hDC );
 
@@ -193,7 +199,7 @@ static void PrintPiece( int square, ENUMPIECE piece, ENUMCOLOR color, DWORD Rop 
     HBITMAP hOldBmp = ( HBITMAP )SelectObject( hMemoryDC, MaskArray[piece-1] );
     BitBlt( hDC, p.x, p.y, SQUARE_SIZE, SQUARE_SIZE, hMemoryDC, 0, 0, SRCAND );
 
-    SelectObject( hMemoryDC, GetBitmapHandle( piece, color ) );
+    SelectObject( hMemoryDC, PieceBmpArray[piece - 1][color] );
     BitBlt( hDC, p.x, p.y, SQUARE_SIZE, SQUARE_SIZE, hMemoryDC, 0, 0, Rop );
 
     SelectObject( hMemoryDC, hOldBmp );     /* restore */
@@ -202,13 +208,241 @@ static void PrintPiece( int square, ENUMPIECE piece, ENUMCOLOR color, DWORD Rop 
     ReleaseDC( hWndMain, hDC );
 }
 
+void Error( char *str )
+{
+    if( SoundOn )
+        MessageBeep( 0 );
+
+    strcpy( error_message_buffer, str );
+    ::SendMessage( hWndMain, WM_COMMAND, EM_ERROR, 0L );
+}
+
+
+void set_wait_cursor()
+{
+	::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hWaitCursor ) );
+	::SetCursor( hWaitCursor );
+}
+
+void set_arrow_cursor()
+{
+    ::SetClassWord( hWndMain, GCW_HCURSOR, WORD( hArrowCursor ) );
+    ::SetCursor( hArrowCursor );
+}
+
+//void set_save_cursor()
+void start_timer()
+{
+	::SetTimer( hWndMain, TIMEID, 1000, NULL );
+}
+
+void stop_timer()
+{
+	::KillTimer( hWndMain, TIMEID );
+}
+
+
+static void MessageScan()
+{
+    MSG msg;
+    extern HCURSOR hWaitCursor;
+    extern HMENU ThinkMenu;
+    extern HANDLE hAccel;
+
+    if( !PeekMessage( &msg, hWndMain, 0, 0, PM_REMOVE ) )
+        return;
+
+    if( TranslateAccelerator( hWndMain, HACCEL( hAccel ), &msg ) ) {
+        ::PostMessage( hWndMain, WM_COMMAND, MessageToPost, 0L );
+        MessageToPost = 0;
+        SkipSearch = false;
+        return;
+    }
+
+    if( Analysis ) {
+        switch( msg.message ) {
+        case WM_SETCURSOR :
+            DispatchMessage( &msg );
+            break;
+
+        case WM_COMMAND :
+            switch( msg.wParam ) {
+            case CM_STOP :
+                SkipSearch = true;
+                AutoPlay = false;
+                break;
+            }
+            break;
+
+        default:
+            TranslateMessage( &msg );
+            DispatchMessage( &msg );
+            break;
+        }
+
+    } else {
+        switch( msg.message ) {
+        case WM_LBUTTONDOWN :
+            getprogramstate();
+            NoComputerMove = true;
+            GotValidMove = false;
+            DispatchMessage( &msg );
+            NoComputerMove = false;
+
+            if( Opan && !MultiMove && GotValidMove ) {
+                if( EqMove( &KeyMove, &MovTab[Depth + 1] ) ) {
+                    SkipSearch = false;
+                    GotValidMove = false;
+                    EnterKeyMove();
+
+                    set_wait_cursor();
+
+                    StartAnalysis();
+
+                    TInfo_PrintBestMove( &MainLine[0], MainEvalu );
+                    main_window->set_think_menu();
+                    set_wait_cursor();
+                } else
+                    SkipSearch = true;
+            }
+            getsearchstate();
+            break;
+
+        default:
+            if( ( msg.hwnd != hWndMain || msg.message != WM_COMMAND ) ) {
+                TranslateMessage( &msg );
+                DispatchMessage( &msg );
+            } else {
+                SkipSearch = true;
+                if( msg.message != WM_PAINT )
+                    ::PostMessage( msg.hwnd, msg.message, msg.wParam, msg.lParam );
+            }
+            break;
+        }
+    }
+}
+
+
 
 /*
- *  get handle to bitmap of current piece
+ *  Clear all information from Info window
  */
-HBITMAP GetBitmapHandle( ENUMPIECE piece, ENUMCOLOR pcolor )
+void TInfo_ClearWindow()
 {
-    return ( piece == no_piece ) ? 0 : PieceBmpArray[piece - 1][pcolor];
+    TInfo->Reset();
+}
+
+void TInfo_SetTurnText( ENUMCOLOR color )
+{
+    TInfo->SetTurnText( ( color == white ) ? "White" : "Black" );
+}
+
+void TInfo_SetMessageText( char *str )
+{
+    TInfo->SetMessageText( str );
+}
+
+void TInfo_PrintMove( int moveno, ENUMCOLOR acolour, MOVESTRUCT *amove, double time )
+{
+    char info_string[80];
+
+    int minutes = ( int )( time / 60.0 );
+
+    sprintf( info_string, "%2.2d:%#04.1f %3.3d. %s", minutes, time - minutes * 60.0, moveno / 2 + 1, MoveStr( amove ) );
+
+    if( acolour == white )
+        TInfo->SetWhiteInfoText( info_string );
+    else
+        TInfo->SetBlackInfoText( info_string );
+}
+
+/*
+ *  Display the current level indicator
+ */
+void TInfo_PrintCurLevel()
+{
+    if( MultiMove ) {
+        TInfo->SetLevelText( "Two Player" );
+        return;
+    }
+
+    char info_string[80];
+
+    switch( Level ) {
+    case normal       : sprintf( info_string, "%1.0f sec / move", AverageTime ); break;
+    case fullgametime : sprintf( info_string, "%2.2f min / game", AverageTime ); break;
+    case easygame     : strcpy( info_string, "Easy" );                           break;
+    case infinite     : strcpy( info_string, "Infinite" );                       break;
+    case plysearch    : sprintf( info_string, "Ply-Depth = %d", MaxLevel );      break;
+    case matesearch   : strcpy( info_string, "MateSearch" );                     break;
+    case matching     : strcpy( info_string, "Match users time" );               break;
+    }
+
+    TInfo->SetLevelText( info_string );
+}
+
+void TInfo_PrintNodes( double nodes, double time )
+{
+    char info_string[80];
+
+    if( time ) {
+        sprintf( info_string, "%7.1f", nodes/time );
+        TInfo->SetSecondsText( info_string );
+    }
+
+    sprintf( info_string, "%7.0f ", nodes );
+    TInfo->SetNodeText( info_string );
+}
+
+/*
+ *  Print bestline on screen
+ */
+void TInfo_PrintBestMove( MOVESTRUCT *mainline, int mainvalue )
+{
+    char info_string[280];
+
+    if( ! ShowBestLine )
+        return;
+
+    short dep = 0;
+
+    *info_string = 0;
+
+    while( dep < 7 && ( mainline[dep].movpiece != no_piece ) ) {
+        strcat( info_string, MoveStr( &mainline[dep++] ) );
+        strcat( info_string, " " );
+    }
+
+    TInfo->SetBestLineText( info_string );
+
+    sprintf( info_string, "%7.2f", mainvalue / 256.0 );
+    TInfo->SetValueText( info_string );
+}
+
+void TInfo_PrintDepthMessage( int max_depth, MOVESTRUCT * amove )
+{
+	char depth_message[40];
+
+	sprintf( depth_message, "%-7d%7s", max_depth, MoveStr( amove ) );
+	TInfo->SetDepthText( depth_message );
+}
+
+void TInfo_ClearBestLine()
+{
+    TInfo->SetBestLineText( "" );
+}
+
+
+
+
+
+
+void Warning( char *str )
+{
+    if( SoundOn )
+        MessageBeep( 0 );
+
+    TInfo_SetMessageText( str );
 }
 
 /*
@@ -243,84 +477,6 @@ char *MoveStr( MOVESTRUCT *amove )
     return str;
 }
 
-
-/*
- *  Clear all information from Info window
- */
-void ClearInfoWindow()
-{
-    TInfo->Reset();
-}
-
-/*
- *  Prints current color to play
- */
-void ColorToPlay( ENUMCOLOR color )
-{
-    TInfo->SetTurnText( ( color == white ) ? "White" : "Black" );
-}
-
-void Message( char *str )
-{
-    TInfo->SetMessageText( str );
-}
-
-void Error( char *str )
-{
-    if( SoundOn )
-        MessageBeep( 0 );
-
-    strcpy( buf, str );
-    ::SendMessage( hWndMain, WM_COMMAND, EM_ERROR, 0L );
-}
-
-void Warning( char *str )
-{
-    if( SoundOn )
-        MessageBeep( 0 );
-
-    TInfo->SetMessageText( str );
-}
-
-void PrintMove( int moveno, ENUMCOLOR programcolor, MOVESTRUCT *amove, double time )
-{
-    char info_string[80];
-
-    int minutes = ( int )( time / 60.0 );
-
-    sprintf( info_string, "%2.2d:%#04.1f %3.3d. %s", minutes, time - minutes * 60.0, moveno / 2 + 1, MoveStr( amove ) );
-
-    if( programcolor == white )
-        TInfo->SetWhiteInfoText( info_string );
-    else
-        TInfo->SetBlackInfoText( info_string );
-}
-
-/*
- *  Display the current level indicator
- */
-void PrintCurLevel()
-{
-    if( MultiMove ) {
-        TInfo->SetLevelText( "Two Player" );
-        return;
-    }
-
-    char info_string[80];
-
-    switch( Level ) {
-    case normal       : sprintf( info_string, "%1.0f sec / move", AverageTime ); break;
-    case fullgametime : sprintf( info_string, "%2.2f min / game", AverageTime ); break;
-    case easygame     : strcpy( info_string, "Easy" );                           break;
-    case infinite     : strcpy( info_string, "Infinite" );                       break;
-    case plysearch    : sprintf( info_string, "Ply-Depth = %d", MaxLevel );      break;
-    case matesearch   : strcpy( info_string, "MateSearch" );                     break;
-    case matching     : strcpy( info_string, "Match users time" );               break;
-    }
-
-    TInfo->SetLevelText( info_string );
-}
-
 POINT GetSquareXY( int square )
 {
     POINT p;
@@ -336,7 +492,7 @@ POINT GetSquareXY( int square )
 
 void ClearDisplay()
 {
-    ClearInfoWindow();
+    TInfo_ClearWindow();
 
     for( int square = 0; square <= 0x77; square++ )
         Display[square].piece = no_piece;
@@ -471,52 +627,6 @@ void DrawInvertedBitmap( int square )
 
 void OpeningLibMsg()
 {
-    Message( "Using opening library" );
-}
-
-void PrintNodes( double nodes, double time )
-{
-    double nodereal;
-    char info_string[80];
-
-    nodereal = nodes;
-
-    if( time ) {
-        sprintf( info_string, "%7.1f", nodereal/time );
-        TInfo->SetSecondsText( info_string );
-    }
-
-    sprintf( info_string, "%7.0f ", nodereal );
-    TInfo->SetNodeText( info_string );
-}
-
-/*
- *  Print bestline on screen
- */
-void PrintBestMove( MOVESTRUCT *mainline, int mainvalue )
-{
-    char info_string[280];
-
-    if( ! ShowBestLine )
-        return;
-
-    short dep = 0;
-
-    *info_string = 0;
-
-    while( dep < 7 && ( mainline[dep].movpiece != no_piece ) ) {
-        strcat( info_string, MoveStr( &mainline[dep++] ) );
-        strcat( info_string, " " );
-    }
-
-    TInfo->SetBestLineText( info_string );
-
-    sprintf( info_string, "%7.2f", mainvalue / 256.0 );
-    TInfo->SetValueText( info_string );
-}
-
-void ClearBestLine()
-{
-    TInfo->SetBestLineText( "" );
+    TInfo_SetMessageText( "Using opening library" );
 }
 

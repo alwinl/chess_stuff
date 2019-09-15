@@ -214,39 +214,17 @@ void TInfoWindow::DrawStaticFrames( HDC hDC )
     rect.left = LEFTMARGIN - 1;
     rect.right = MAXLINE + 1;
 
-    rect.top = COLORY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = WHITEINFOY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = BLACKINFOY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = TIMERY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = LEVELY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = VALUEY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = NODEY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = SECY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = DEPTHY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = BESTY - 1;
-    rect.bottom = rect.top + BESTH + 2;
-    DrawSFrame( hDC, &rect );
-    rect.top = MESSY - 1;
-    rect.bottom = rect.top + LINESIZE + 2;
-    DrawSFrame( hDC, &rect );
+    rect.top = COLORY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = WHITEINFOY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = BLACKINFOY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = TIMERY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = LEVELY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = VALUEY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = NODEY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = SECY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = DEPTHY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
+    rect.top = BESTY - 1; rect.bottom = rect.top + BESTH + 2; DrawSFrame( hDC, &rect );
+    rect.top = MESSY - 1; rect.bottom = rect.top + LINESIZE + 2; DrawSFrame( hDC, &rect );
 }
 
 

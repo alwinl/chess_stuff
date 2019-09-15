@@ -1,11 +1,28 @@
-// ObjectWindows - (C) Copyright 1992 by Borland International
+/*
+ * Copyright 2017 Alwin Leerling <alwin@jambo>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ *
+ *
+ */
 
 #ifndef __EXTERNS_H
 #define __EXTERNS_H
 
-#ifndef __WCDEFS_H
 #include "wcdefs.h"
-#endif
 
 extern ENUMCOLOR     Opponent;
 extern PIECETAB      PieceTab[][16];
@@ -15,6 +32,7 @@ extern char          BlackSquareColors[];
 extern char          buf[];
 
 /*
+extern TChessWindow * main_window;
 extern PTInfoWindow  TInfo;
 extern HBRUSH        hBlackBrush;
 extern HBRUSH        hWhiteBrush;
@@ -44,6 +62,7 @@ extern short         LINESIZE;
 extern short         INFOXSIZE;
 extern short         INFOYSIZE;
 
+extern WORD         MessageToPost;
 
 
 extern ENUMCOLOR     RunColor;
@@ -54,20 +73,16 @@ extern ENUMLEVEL     Level;
 extern MOVESTRUCT *  MovTab;
 extern MOVESTRUCT    ZeroMove;
 extern MOVESTRUCT    KeyMove;
-extern MOVESTRUCT    HintLine[MAXPLY];
-extern MOVESTRUCT    Next;
 extern MOVESTRUCT    PlayerMove;
 extern MOVESTRUCT    MainLine[MAXPLY];
-extern CASTMOVETYPE  CastMove[2][2];
 extern double        Nodes;
 extern double        AverageTime;
+extern double		 WantedTime;
 extern char          MaxLevel;
 extern int           MainEvalu;
 extern int           DirTab[];
 extern int           KnightDir[];
 extern short         Depth;
-extern int           OfficerNo[];
-extern int           PawnNo[];
 extern int           MoveNo;
 extern int           RootValue;
 extern int           HintEvalu;
@@ -75,80 +90,7 @@ extern int           MaxDepth;
 extern char          EndGameMessage[];
 
 
-/* board.cpp */
 
-/* display.cpp */
-
-/* drag.cpp */
-/* movgen.cpp */
-void CalcAttackTab( void );
-short PieceAttacks( ENUMPIECE apiece, ENUMCOLOR acolor, int asquare, int square );
-short Attacks( ENUMCOLOR acolor, int square );
-void CalcCastling( ENUMCOLOR incolor,  ENUMCASTDIR *cast );
-unsigned int FiftyMoveCnt( void );
-unsigned int Repetition( short immediate );
-short KillMovGen( MOVESTRUCT *amove );
-void InitMovGen( void );
-void MovGen( void );
-
-
-
-
-extern POINT        GetSquareXY( int );
-extern void         ClearSquare( int square );
-extern void         DrawFrame( HDC, RECT &, bool = false );
-extern void         ResetNewPos( void );
-extern void         Error( char * );
-extern void         ColorToPlay( ENUMCOLOR );
-extern void         InitDisplay( void );
-extern void         ClearDisplay( void );
-extern void         ClearInfoWindow( void );
-extern void         NewGame( void );
-//extern void         InsertPiece( ENUMPIECE p, ENUMCOLOR c, int sq );
-extern void         PrintCurLevel( void );
-extern void         TakeBackMove( MOVESTRUCT *amove );
-extern void         MakeMove( MOVESTRUCT * );
-extern short        PieceAttacks( ENUMPIECE, ENUMCOLOR, int, int );
-extern void         PrintBestMove( MOVESTRUCT *mainline, int mainevalu );
-extern int          StatEvalu( MOVESTRUCT *amove );
-extern void         CalcPVTable( void );
-extern void         EnterKeyMove( void );
-extern void         StartAnalysis( void );
-extern void         Warning( char * );
-extern void         PrintMove( int, ENUMCOLOR, MOVESTRUCT *, double );
-extern void         UpdateBoard( void );
-extern void         Message( char * );
-extern void         ClearBestLine( void );
-extern void         ResetMoves( void );
-extern void         InitChessTime( void );
-extern void         ClearHint( void );
-extern void         ClearPVTable( void );
-extern void         AdjustMoves( void );
-extern void         FindMove( int maxlevel );
-extern void         OpeningLibMsg( void );
-extern char         *MoveStr( MOVESTRUCT * );
-extern void         EnterMove( MOVESTRUCT *amove );
-extern void         FlashMove( MOVESTRUCT *amove );
-extern void         StoreMoves( void );
-extern void         CalcAttackTab( void );
-extern int          SaveGame( char *savefile );
-extern int          RestoreGame( char * );
-extern bool         Undo( void );
-extern bool         Redo( void );
-extern void         PrintBoard( void );
-extern void         FindHintMove( void );
-extern void         ShowHint( void );
-extern void         Talk( void );
-extern int   GetValidSquare( POINT );
-extern void         DrawInvertedBitmap( int );
-extern void         DrawNormalBitmap( int );
-extern void         InitCommStuff( void );
-extern bool         MoveCheck( int, int );
-extern void         ProgramMove( void );
-extern WORD         MessageToPost;
-extern void         QuitProgram( void );
-extern void         HideAttacks( void );
-void                DoSlideMove( MOVESTRUCT & );
-void                GenCastSquare( int, int *, int * );
+/* timelib.cpp */
 
 #endif // __EXTERNS_H
