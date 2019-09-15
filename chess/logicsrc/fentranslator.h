@@ -26,6 +26,7 @@
 #include <map>
 
 class STSquare;
+class STPiece;
 
 /** \brief
  */
@@ -34,15 +35,15 @@ class FENTranslator
 public:
     FENTranslator();
 
-    bool from_FEN( std::string FENstring );
+    std::map<STSquare,STPiece> from_FEN( std::string FENstring );
     std::string to_FEN();
 
     bool remove_from_square( STSquare square );
-    bool add_to_square( STSquare square, char piece );
+    bool add_to_square( STSquare square, char code );
     char query_square( STSquare square );
 
 private:
-    std::map<STSquare, char> content;
+    std::map<STSquare, STPiece> content;
 };
 
 #endif // FENTRANSLATOR_H

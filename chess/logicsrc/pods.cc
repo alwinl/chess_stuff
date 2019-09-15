@@ -109,8 +109,8 @@ int parse_ForsythEdwards( STGameState& game_state, string layout )
     game_state.white_can_castle_queenside =
     game_state.black_can_castle_kingside =
     game_state.black_can_castle_queenside = false;
-    game_state.ep_square.file =
-    game_state.ep_square.rank = -1;
+    game_state.en_passant_target.file =
+    game_state.en_passant_target.rank = -1;
 
     // Extract information
     game_state.piece_positions = fields[0];
@@ -128,8 +128,8 @@ int parse_ForsythEdwards( STGameState& game_state, string layout )
     }
 
     if( fields[3] != "-" ) {
-        game_state.ep_square.file = fields[3].at(0) - 'a';
-        game_state.ep_square.rank = fields[3].at(1) - '0';
+        game_state.en_passant_target.file = fields[3].at(0) - 'a';
+        game_state.en_passant_target.rank = fields[3].at(1) - '0';
     }
 
     game_state.halfmove_clock = std::stoi( fields[4] );
@@ -165,8 +165,8 @@ string gamestate_to_ForsythEdwards( STGameState& game_state )
     ss << ( castle.empty() ? "-" : castle );
     ss << " ";              // field separator
 
-    if( game_state.ep_square.file != -1 ) {
-        ss << ( 'a' +  game_state.ep_square.file ) << ( '0' +  game_state.ep_square.rank );
+    if( game_state.en_passant_target.file != -1 ) {
+        ss << ( 'a' +  game_state.en_passant_target.file ) << ( '0' +  game_state.en_passant_target.rank );
     } else
         ss << '-';
 

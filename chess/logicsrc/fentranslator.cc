@@ -32,7 +32,7 @@ FENTranslator::FENTranslator()
     //ctor
 }
 
-bool FENTranslator::from_FEN( std::string FENstring )
+map<STSquare,STPiece> FENTranslator::from_FEN( std::string FENstring )
 {
     STSquare square = make_square(0,7);         // first = file, second is rank
 
@@ -43,13 +43,18 @@ bool FENTranslator::from_FEN( std::string FENstring )
         } else if( code == '/' ) {                      // ... or an end of rank indicator
             --square.rank;
             square.file = 0;
-        } else {                                    // or an piece designator
-            content.insert( std::pair<STSquare, char>( square, code) );
+        } else {								  // or an piece designator
+        	STPiece piece;
+
+        	piece.code = code;
+			piece.is_white = ( string("KQRBNP").find( code ) != std::string::npos );
+
+            content.insert( std::pair<STSquare, STPiece>( square, piece) );
             ++square.file;
         }
     }
 
-    return true;
+    return content;
 }
 
 std::string FENTranslator::to_FEN()
@@ -80,7 +85,7 @@ std::string FENTranslator::to_FEN()
 
 bool FENTranslator::remove_from_square( STSquare square )
 {
-    map<STSquare, char>::iterator it = content.find( square );
+    map<STSquare, STPiece>::iterator it = content.find( square );
     if( it == content.end() )
         return false;
 
@@ -88,21 +93,26 @@ bool FENTranslator::remove_from_square( STSquare square )
     return true;
 }
 
-bool FENTranslator::add_to_square( STSquare square, char piece )
+bool FENTranslator::add_to_square( STSquare square, char code )
 {
-    map<STSquare, char>::iterator it = content.find( square );
-    if( it != content.end() )
-        return false;
+    map<STSquare, STPiece>::iterator it = content.find( square );
+	if( it != content.end() )
+		return false;
 
-    content.insert( std::pair<STSquare, char>( square, piece) );
+	STPiece piece;
+
+	piece.code = code;
+	piece.is_white = ( string("KQRBNP").find( code ) != std::string::npos );
+
+    content.insert( std::pair<STSquare, STPiece>( square, piece) );
     return true;
 }
 
 char FENTranslator::query_square( STSquare square )
 {
-    map<STSquare, char>::iterator it = content.find( square );
+    map<STSquare, STPiece>::iterator it = content.find( square );
     if( it != content.end() )
-        return (*it).second;
+        return (*it).second.code;
 
     return ' ';
 }

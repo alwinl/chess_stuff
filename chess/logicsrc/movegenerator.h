@@ -19,17 +19,24 @@
  *
  */
 
-#include "filenamechooser.h"
+#ifndef MOVEGENERATOR_H
+#define MOVEGENERATOR_H
 
-std::pair<bool,std::string> FilenameChooser::get_filename( std::string aname, std::string working_dir )
+
+class MoveGenerator
 {
-	set_working_dir( working_dir );
-	set_filename( aname );
+public:
+	/** Default constructor */
+	MoveGenerator();
+	/** Default destructor */
+	virtual ~MoveGenerator();
 
-	bool do_it = query_file();
-	if( do_it )
-		aname = get_filename( );
+	void InitMoves();
 
-	return std::pair<bool,std::string>( do_it, aname );
-}
+protected:
 
+private:
+	//list<STMove> move_list;
+};
+
+#endif // MOVEGENERATOR_H

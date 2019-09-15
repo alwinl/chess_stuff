@@ -29,11 +29,11 @@ using namespace std;
  *
  * \param cobject BaseObjectType*
  * \param ui_model const Glib::RefPtr<Gtk::Builder>&
- * \param model_init AppModel&
+ * \param acontroller ChessController&
  *
  */
-ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& app )
-                            : Gtk::DrawingArea(cobject), controller(app)
+ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& acontroller )
+                            : Gtk::DrawingArea(cobject), controller(acontroller)
 {
 	using namespace Cairo;
 
@@ -406,14 +406,17 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
 		drag_start_square = point_to_square( Gdk::Point(button_event->x, button_event->y) );
 
-		floating_piece_code = controller.get_piece( drag_start_square );
-		floating_piece_position = Gdk::Point( button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE );
+		typename map<STSquare,char>::iterator it = pieces.find(drag_start_square);
+		if( it != pieces.end() ) {
+			floating_piece_code = (*it).second;
+			floating_piece_position = Gdk::Point( button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE );
 
-		controller.put_piece_on_square( drag_start_square, ' ' ); // Putting a space is removing the piece
+			controller.put_piece_on_square( drag_start_square, ' ' ); // Putting a space is removing the piece
 
-		is_dragging = true;
+			is_dragging = true;
 
-		update();
+			update();
+		}
 
         return true;
     }

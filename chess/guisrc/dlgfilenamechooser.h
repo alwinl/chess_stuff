@@ -35,7 +35,7 @@ public:
 protected:
 	virtual void set_working_dir( std::string working_dir );
 	virtual bool query_file();
-	virtual void set_filename( std::string filename );
+	virtual void set_filename( std::string aname );
 	virtual std::string	get_filename( );
 
 private:

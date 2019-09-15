@@ -19,17 +19,18 @@
  *
  */
 
-#include "filenamechooser.h"
+#ifndef BOARD_H
+#define BOARD_H
 
-std::pair<bool,std::string> FilenameChooser::get_filename( std::string aname, std::string working_dir )
+
+class Board
 {
-	set_working_dir( working_dir );
-	set_filename( aname );
+public:
+	Board();
 
-	bool do_it = query_file();
-	if( do_it )
-		aname = get_filename( );
+protected:
 
-	return std::pair<bool,std::string>( do_it, aname );
-}
+private:
+};
 
+#endif // BOARD_H
