@@ -47,18 +47,11 @@
 					<Add directory="./" />
 					<Add directory="logicsrc" />
 				</Compiler>
-				<Linker>
-					<Add library="cppunit" />
-				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="`pkg-config gtkmm-3.0 --cflags`" />
 		</Compiler>
-		<Linker>
-			<Add option="`pkg-config gtkmm-3.0 --libs`" />
-		</Linker>
 		<ExtraCommands>
 			<Add before="glib-compile-resources --target=resources.c --sourcedir=guisrc --generate-source guisrc/chess.gresource.xml" />
 		</ExtraCommands>
@@ -206,7 +199,10 @@
 		<Extensions>
 			<code_completion />
 			<envvars />
-			<lib_finder disable_auto="1" />
+			<lib_finder disable_auto="0">
+				<lib name="gtkmm-3.0" />
+				<lib name="cppunit" />
+			</lib_finder>
 			<debugger />
 		</Extensions>
 	</Project>
