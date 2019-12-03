@@ -117,7 +117,6 @@ private:
 
     // Data
 	ChessAppBase* director;
-	STColours app_colours;
 	bool sound_on;
 	int timeout_counter;
 	std::string filename;

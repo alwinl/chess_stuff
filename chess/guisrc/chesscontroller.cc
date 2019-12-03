@@ -57,11 +57,6 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 
 	board = nullptr;
 
-    app_colours.bg = "rgb(78,154,6)";
-    app_colours.fg = "rgb(0,0,0)";
-    app_colours.black = "rgb(85,87,83)";
-    app_colours.white = "rgb(238,238,236)";
-
     sound_on = false;
 }
 
@@ -139,6 +134,15 @@ void ChessController::on_startup()
 	guiPieceValues = new GUIPieceValues( ui_model, *view );
 	guiOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
 	guiSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
+
+	ColourChooser::STColours default_colours;
+    default_colours.bg = "rgb(78,154,6)";
+    default_colours.fg = "rgb(0,0,0)";
+    default_colours.black = "rgb(85,87,83)";
+    default_colours.white = "rgb(238,238,236)";
+
+	guiColourChooser->init_colours( default_colours );
+
 }
 
 /**-----------------------------------------------------------------------------
@@ -153,7 +157,12 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-	board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
+	board->set_colours(
+		Gdk::RGBA(guiColourChooser->get_background()),
+		Gdk::RGBA(guiColourChooser->get_white()),
+		Gdk::RGBA(guiColourChooser->get_black()),
+		Gdk::RGBA(guiColourChooser->get_foreground())
+	);
 
     on_action_new();
 }
@@ -404,14 +413,16 @@ void ChessController::on_action_level( unsigned int level)
  */
 void ChessController::on_action_colours()
 {
-    pair<bool, STColours> result = guiColourChooser->choose_colours( app_colours );
-
-    if( !result.first )
+    if( !guiColourChooser->choose_colours( ) )
 		return;
 
-	app_colours = result.second;
+	board->set_colours(
+		Gdk::RGBA(guiColourChooser->get_background()),
+		Gdk::RGBA(guiColourChooser->get_white()),
+		Gdk::RGBA(guiColourChooser->get_black()),
+		Gdk::RGBA(guiColourChooser->get_foreground())
+	);
 
-    board->set_colours( Gdk::RGBA(app_colours.bg), Gdk::RGBA(app_colours.white), Gdk::RGBA(app_colours.black), Gdk::RGBA(app_colours.fg) );
 }
 
 /**-----------------------------------------------------------------------------

@@ -23,23 +23,55 @@
 #define COLOURCHOOSER_H
 
 #include <utility>
-
-class STColours;
+#include <string>
 
 /** \brief
  */
 class ColourChooser
 {
 public:
-    ColourChooser() {};
+	/**-----------------------------------------------------------------------------
+	 * \brief Struct to hold the colours we need in this application
+	 *
+	 * Note: each string holds a colour in the notation: rgb(r,g,b) where each colour
+	 * component is in the range 0..255
+	 */
+	struct STColours
+	{
+		std::string bg;
+		std::string fg;
+		std::string white;
+		std::string black;
+	};
+
+    ColourChooser();
     virtual ~ColourChooser() {};
 
-    std::pair<bool,STColours> choose_colours( STColours local_colours );
+    void init_colours( STColours& init ) { colors = init; };
+
+    bool choose_colours();
+
+	bool is_colour( STColours& rhs ) const
+	{
+		if( colors.bg != rhs.bg ) return false;
+		if( colors.fg != rhs.fg ) return false;
+		if( colors.white != rhs.white ) return false;
+		if( colors.black != rhs.black ) return false;
+
+		return true;
+	}
+
+	std::string get_background() const { return colors.bg; };
+	std::string get_foreground() const { return colors.fg; };
+	std::string get_white() const { return colors.white; };
+	std::string get_black() const { return colors.black; };
 
 protected:
     virtual void set_colours( STColours& colours ) = 0;
     virtual bool manipulate_colours( ) = 0;
     virtual STColours colours( ) = 0;
+
+	STColours colors;
 };
 
 

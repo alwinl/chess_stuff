@@ -41,20 +41,6 @@ STSquare make_square( int file_in, int rank_in )
     return square;
 }
 
-
-bool operator==( STColours& lhs, STColours& rhs )
-{
-    if( lhs.bg != rhs.bg ) return false;
-    if( lhs.fg != rhs.fg ) return false;
-    if( lhs.white != rhs.white ) return false;
-    if( lhs.black != rhs.black ) return false;
-
-    return true;
-}
-
-
-
-
 string move_to_LAN( STMove& move_in )
 {
     if( move_in.castling != '-' )

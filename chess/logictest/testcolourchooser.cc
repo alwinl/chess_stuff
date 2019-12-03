@@ -38,11 +38,10 @@ public:
 
 private:
     STColours new_colours;
-    STColours the_colours;
 
-    virtual void set_colours( STColours& colours )  { the_colours = colours; };
-    virtual bool manipulate_colours( )              { the_colours = new_colours; return true; };
-    virtual STColours colours( ) { return the_colours; };
+    virtual void set_colours( STColours& colours )  { colors = colours; };
+    virtual bool manipulate_colours( )              { colors = new_colours; return true; };
+    virtual STColours colours( ) { return colors; };
 };
 
 class MockColourChooserCancel : public ColourChooser
@@ -52,11 +51,10 @@ public:
 
 private:
     STColours new_colours;
-    STColours the_colours;
 
-    virtual void set_colours( STColours& colours )  { the_colours = colours; };
+    virtual void set_colours( STColours& colours )  { colors = colours; };
     virtual bool manipulate_colours( )              { return false; };
-    virtual STColours colours( ) { return the_colours; };
+    virtual STColours colours( ) { return colors; };
 };
 
 
@@ -67,7 +65,7 @@ private:
 
 void TestColourChooser::no_change_exit_ok()
 {
-    STColours colours = {
+    ColourChooser::STColours colours = {
         .bg    = "rgb(192,0,0)",
         .fg    = "rgb(0,192,0)",
         .white = "rgb(0,0,192)",
@@ -76,15 +74,16 @@ void TestColourChooser::no_change_exit_ok()
 
     MockColourChooserOk test_object( colours );
 
-    std::pair<bool,STColours> result = test_object.choose_colours( colours );
+    test_object.init_colours( colours );
+    bool result = test_object.choose_colours( );
 
-    CPPUNIT_ASSERT( result.first == true );
-    CPPUNIT_ASSERT( result.second == colours );
+    CPPUNIT_ASSERT( result == true );
+    CPPUNIT_ASSERT( test_object.is_colour(colours) );
 }
 
 void TestColourChooser::no_change_exit_cancel()
 {
-    STColours colours = {
+    ColourChooser::STColours colours = {
         .bg    = "rgb(192,0,0)",
         .fg    = "rgb(0,192,0)",
         .white = "rgb(0,0,192)",
@@ -93,20 +92,21 @@ void TestColourChooser::no_change_exit_cancel()
 
     MockColourChooserCancel test_object( colours );
 
-    std::pair<bool,STColours> result = test_object.choose_colours( colours );
+    test_object.init_colours( colours );
+    bool result = test_object.choose_colours( );
 
-    CPPUNIT_ASSERT( result.first == false );
+    CPPUNIT_ASSERT( result == false );
 }
 
 void TestColourChooser::change_exit_ok()
 {
-    STColours current_colours = {
+    ColourChooser::STColours current_colours = {
         .bg    = "rgb(192,128,0)",
         .fg    = "rgb(128,192,0)",
         .white = "rgb(128,0,192)",
         .black = "rgb(192,128,0)"
     };
-    STColours new_colours = {
+    ColourChooser::STColours new_colours = {
         .bg    = "rgb(192,0,0)",
         .fg    = "rgb(0,192,0)",
         .white = "rgb(0,0,192)",
@@ -115,21 +115,23 @@ void TestColourChooser::change_exit_ok()
 
     MockColourChooserOk test_object( new_colours );
 
-    std::pair<bool,STColours> result = test_object.choose_colours( current_colours );
+    test_object.init_colours( current_colours );
 
-    CPPUNIT_ASSERT( result.first == true );
-    CPPUNIT_ASSERT( result.second == new_colours );
+    bool result = test_object.choose_colours( );
+
+    CPPUNIT_ASSERT( result == true );
+    CPPUNIT_ASSERT( test_object.is_colour(new_colours) );
 }
 
 void TestColourChooser::change_exit_cancel()
 {
-    STColours current_colours = {
+    ColourChooser::STColours current_colours = {
         .bg    = "rgb(192,128,0)",
         .fg    = "rgb(128,192,0)",
         .white = "rgb(128,0,192)",
         .black = "rgb(192,128,0)"
     };
-    STColours new_colours = {
+    ColourChooser::STColours new_colours = {
         .bg    = "rgb(192,0,0)",
         .fg    = "rgb(0,192,0)",
         .white = "rgb(0,0,192)",
@@ -138,8 +140,11 @@ void TestColourChooser::change_exit_cancel()
 
     MockColourChooserCancel test_object( new_colours );
 
-    std::pair<bool,STColours> result = test_object.choose_colours( current_colours );
+    test_object.init_colours( current_colours );
 
-    CPPUNIT_ASSERT( result.first == false );
+    bool result = test_object.choose_colours( );
+
+
+    CPPUNIT_ASSERT( result == false );
 }
 

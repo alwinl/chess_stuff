@@ -21,8 +21,6 @@
 
 #include "dlgcolours.h"
 
-#include "../logicsrc/pods.h"
-
 /** \brief
  */
 class DialogColours : public Gtk::Dialog
@@ -30,8 +28,8 @@ class DialogColours : public Gtk::Dialog
 public:
     DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
-    void set_colours( STColours& colours );
-    void get_colours( STColours& colours );
+    void set_colours( ColourChooser::STColours& colours );
+    ColourChooser::STColours get_colours( );
 
 private:
     Gtk::ColorButton * btnBackground;
@@ -58,7 +56,7 @@ DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::B
 	ui_model->get_widget( "btnBlackColour", btnBlackColour );
 }
 
-void DialogColours::set_colours( STColours& colours )
+void DialogColours::set_colours( ColourChooser::STColours& colours )
 {
     btnBackground->set_rgba( Gdk::RGBA(colours.bg) );
     btnForeground->set_rgba( Gdk::RGBA(colours.fg) );
@@ -66,12 +64,16 @@ void DialogColours::set_colours( STColours& colours )
     btnBlackColour->set_rgba( Gdk::RGBA(colours.black) );
 }
 
-void DialogColours::get_colours( STColours& colours )
+ColourChooser::STColours DialogColours::get_colours( )
 {
-    colours.bg    = btnBackground->get_rgba().to_string();
-    colours.fg    = btnForeground->get_rgba().to_string();
-    colours.white = btnWhiteColour->get_rgba().to_string();
-    colours.black = btnBlackColour->get_rgba().to_string();
+	ColourChooser::STColours colors;
+
+    colors.bg    = btnBackground->get_rgba().to_string();
+    colors.fg    = btnForeground->get_rgba().to_string();
+    colors.white = btnWhiteColour->get_rgba().to_string();
+    colors.black = btnBlackColour->get_rgba().to_string();
+
+    return colors;
 }
 
 
@@ -102,11 +104,11 @@ bool GUIColourChooser::manipulate_colours( )
     return response == Gtk::RESPONSE_OK;
 }
 
-STColours GUIColourChooser::colours( )
+ColourChooser::STColours GUIColourChooser::colours( )
 {
     STColours colours;
 
-    dlg->get_colours( colours );
+    colours = dlg->get_colours(  );
 
     return colours;
 }
