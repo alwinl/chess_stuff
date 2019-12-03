@@ -90,12 +90,12 @@ GUIColourChooser::GUIColourChooser( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::W
     ui_model->get_widget_derived( "dlgColours", dlg, parent );
 }
 
-void GUIColourChooser::set_colours( STColours& colours )
+void GUIColourChooser::setup( )
 {
-    dlg->set_colours( colours );
+    dlg->set_colours( colors );
 }
 
-bool GUIColourChooser::manipulate_colours( )
+bool GUIColourChooser::manipulate( )
 {
     int response = dlg->run();
 
@@ -104,11 +104,7 @@ bool GUIColourChooser::manipulate_colours( )
     return response == Gtk::RESPONSE_OK;
 }
 
-ColourChooser::STColours GUIColourChooser::colours( )
+ColourChooser::STColours GUIColourChooser::result( )
 {
-    STColours colours;
-
-    colours = dlg->get_colours(  );
-
-    return colours;
+    return dlg->get_colours(  );
 }

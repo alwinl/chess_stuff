@@ -52,9 +52,9 @@ public:
 	STColours get_colours() const { return colors; };
 
 protected:
-    virtual void set_colours( STColours& colours ) = 0;
-    virtual bool manipulate_colours( ) = 0;
-    virtual STColours colours( ) = 0;
+    virtual void setup( ) = 0;
+    virtual bool manipulate( ) = 0;
+    virtual STColours result( ) = 0;
 
 	STColours colors;
 };

@@ -38,22 +38,20 @@ public:
 private:
     STColours new_colours;
 
-    virtual void set_colours( STColours& colours )  { colors = colours; };
-    virtual bool manipulate_colours( )              { colors = new_colours; return true; };
-    virtual STColours colours( ) { return colors; };
+    virtual void setup( )  { };
+    virtual bool manipulate( ) { return true; };
+    virtual STColours result( ) { return new_colours; };
 };
 
 class MockColourChooserCancel : public ColourChooser
 {
 public:
-    MockColourChooserCancel( STColours& init_colours, STColours& test_colours ) : ColourChooser(init_colours), new_colours(test_colours) {};
+    MockColourChooserCancel( STColours& init_colours ) : ColourChooser(init_colours) {};
 
 private:
-    STColours new_colours;
-
-    virtual void set_colours( STColours& colours )  { colors = colours; };
-    virtual bool manipulate_colours( )              { return false; };
-    virtual STColours colours( ) { return colors; };
+    virtual void setup( )  { };
+    virtual bool manipulate( ) { return false; };
+    virtual STColours result( ) { return colors; };	/* does not really matter what is returned, in this context it will never be called */
 };
 
 
@@ -88,7 +86,7 @@ void TestColourChooser::no_change_exit_cancel()
         .black = "rgb(0,128,0)"
     };
 
-    MockColourChooserCancel test_object( colours, colours );
+    MockColourChooserCancel test_object( colours );
 
     bool result = test_object.choose_colours( );
 
@@ -133,7 +131,7 @@ void TestColourChooser::change_exit_cancel()
         .black = "rgb(0,128,0)"
     };
 
-    MockColourChooserCancel test_object( current_colours, new_colours );
+    MockColourChooserCancel test_object( current_colours );
 
     bool result = test_object.choose_colours( );
 

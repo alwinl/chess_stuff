@@ -24,14 +24,14 @@
 
 bool ColourChooser::choose_colours()
 {
-	set_colours( colors );
+	setup( );
 
-	bool result = manipulate_colours();
+	bool ret = manipulate();
 
-	if( result )
-		colors = colours();
+	if( ret )
+		colors = result();
 
-	return result;
+	return ret;
 
 }
 
