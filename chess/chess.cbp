@@ -49,6 +49,9 @@
 				</Compiler>
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="test_debug" targets="Debug;Test;" />
+		</VirtualTargets>
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
