@@ -31,6 +31,8 @@
 
 #include "../logicsrc/pods.h"
 
+#include "../logicsrc/colourchooser.h"
+
 class ChessController;
 
 /**-----------------------------------------------------------------------------
@@ -50,7 +52,7 @@ public:
 
     void set_piece_positions( std::string FEN_string );
 	void set_info( STInfo& info );
-    void set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg );
+    void set_colours( ColourChooser::STColours new_colours );
 	void set_edit( bool on );
     void toggle_reverse();
     void toggle_bestline();
@@ -89,8 +91,6 @@ private:
 	Gdk::Rectangle edit_outline;
 
 	Gdk::RGBA background_colour;
-	Gdk::RGBA white_colour;
-	Gdk::RGBA black_colour;
 	Gdk::RGBA foreground_colour;
 
 	std::map<char,Gdk::Point> pieces_image_offsets;

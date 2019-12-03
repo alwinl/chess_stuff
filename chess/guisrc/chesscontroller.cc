@@ -157,12 +157,7 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-	board->set_colours(
-		Gdk::RGBA(guiColourChooser->get_background()),
-		Gdk::RGBA(guiColourChooser->get_white()),
-		Gdk::RGBA(guiColourChooser->get_black()),
-		Gdk::RGBA(guiColourChooser->get_foreground())
-	);
+	board->set_colours( guiColourChooser->get_colours() );
 
     on_action_new();
 }
@@ -416,13 +411,7 @@ void ChessController::on_action_colours()
     if( !guiColourChooser->choose_colours( ) )
 		return;
 
-	board->set_colours(
-		Gdk::RGBA(guiColourChooser->get_background()),
-		Gdk::RGBA(guiColourChooser->get_white()),
-		Gdk::RGBA(guiColourChooser->get_black()),
-		Gdk::RGBA(guiColourChooser->get_foreground())
-	);
-
+	board->set_colours( guiColourChooser->get_colours() );
 }
 
 /**-----------------------------------------------------------------------------

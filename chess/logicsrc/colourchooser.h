@@ -61,10 +61,7 @@ public:
 		return true;
 	}
 
-	std::string get_background() const { return colors.bg; };
-	std::string get_foreground() const { return colors.fg; };
-	std::string get_white() const { return colors.white; };
-	std::string get_black() const { return colors.black; };
+	STColours get_colours() const { return colors; };
 
 protected:
     virtual void set_colours( STColours& colours ) = 0;
