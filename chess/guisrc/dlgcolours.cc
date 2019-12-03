@@ -85,7 +85,7 @@ ColourChooser::STColours DialogColours::get_colours( )
  * \param parent Gtk::Window&
  *
  */
-GUIColourChooser::GUIColourChooser( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
+GUIColourChooser::GUIColourChooser( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent, STColours& init_colours ) : ColourChooser( init_colours )
 {
     ui_model->get_widget_derived( "dlgColours", dlg, parent );
 }

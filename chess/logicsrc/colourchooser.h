@@ -44,23 +44,11 @@ public:
 		std::string black;
 	};
 
-    ColourChooser();
+	ColourChooser( STColours& init ) : colors( init ) { };
     virtual ~ColourChooser() {};
 
-    void init_colours( STColours& init ) { colors = init; };
-
     bool choose_colours();
-
-	bool is_colour( STColours& rhs ) const
-	{
-		if( colors.bg != rhs.bg ) return false;
-		if( colors.fg != rhs.fg ) return false;
-		if( colors.white != rhs.white ) return false;
-		if( colors.black != rhs.black ) return false;
-
-		return true;
-	}
-
+	bool is_colour( STColours& rhs ) const;
 	STColours get_colours() const { return colors; };
 
 protected:

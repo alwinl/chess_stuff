@@ -22,14 +22,6 @@
 #include "colourchooser.h"
 #include "pods.h"
 
-ColourChooser::ColourChooser()
-{
-    colors.bg = "rgb(78,154,6)";
-    colors.fg = "rgb(0,0,0)";
-    colors.black = "rgb(85,87,83)";
-    colors.white = "rgb(238,238,236)";
-}
-
 bool ColourChooser::choose_colours()
 {
 	set_colours( colors );
@@ -41,6 +33,16 @@ bool ColourChooser::choose_colours()
 
 	return result;
 
+}
+
+bool ColourChooser::is_colour( STColours& rhs ) const
+{
+	if( colors.bg != rhs.bg ) return false;
+	if( colors.fg != rhs.fg ) return false;
+	if( colors.white != rhs.white ) return false;
+	if( colors.black != rhs.black ) return false;
+
+	return true;
 }
 
 

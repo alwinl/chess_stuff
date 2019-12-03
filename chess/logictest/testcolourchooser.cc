@@ -22,7 +22,6 @@
 #include "testcolourchooser.h"
 
 #include "../logicsrc/colourchooser.h"
-#include "../logicsrc/pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestColourChooser );
 
@@ -34,7 +33,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestColourChooser );
 class MockColourChooserOk : public ColourChooser
 {
 public:
-    MockColourChooserOk( STColours& test_colours ) : ColourChooser(), new_colours(test_colours) {};
+    MockColourChooserOk( STColours& init_colours, STColours& test_colours ) : ColourChooser(init_colours), new_colours(test_colours) {};
 
 private:
     STColours new_colours;
@@ -47,7 +46,7 @@ private:
 class MockColourChooserCancel : public ColourChooser
 {
 public:
-    MockColourChooserCancel( STColours& test_colours ) : ColourChooser(), new_colours(test_colours) {};
+    MockColourChooserCancel( STColours& init_colours, STColours& test_colours ) : ColourChooser(init_colours), new_colours(test_colours) {};
 
 private:
     STColours new_colours;
@@ -72,9 +71,8 @@ void TestColourChooser::no_change_exit_ok()
         .black = "rgb(0,128,0)"
     };
 
-    MockColourChooserOk test_object( colours );
+    MockColourChooserOk test_object( colours, colours );
 
-    test_object.init_colours( colours );
     bool result = test_object.choose_colours( );
 
     CPPUNIT_ASSERT( result == true );
@@ -90,9 +88,8 @@ void TestColourChooser::no_change_exit_cancel()
         .black = "rgb(0,128,0)"
     };
 
-    MockColourChooserCancel test_object( colours );
+    MockColourChooserCancel test_object( colours, colours );
 
-    test_object.init_colours( colours );
     bool result = test_object.choose_colours( );
 
     CPPUNIT_ASSERT( result == false );
@@ -113,9 +110,7 @@ void TestColourChooser::change_exit_ok()
         .black = "rgb(0,128,0)"
     };
 
-    MockColourChooserOk test_object( new_colours );
-
-    test_object.init_colours( current_colours );
+    MockColourChooserOk test_object( current_colours, new_colours );
 
     bool result = test_object.choose_colours( );
 
@@ -138,12 +133,9 @@ void TestColourChooser::change_exit_cancel()
         .black = "rgb(0,128,0)"
     };
 
-    MockColourChooserCancel test_object( new_colours );
-
-    test_object.init_colours( current_colours );
+    MockColourChooserCancel test_object( current_colours, new_colours );
 
     bool result = test_object.choose_colours( );
-
 
     CPPUNIT_ASSERT( result == false );
 }

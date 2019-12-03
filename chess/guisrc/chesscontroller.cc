@@ -129,20 +129,17 @@ void ChessController::on_startup()
 
 	chkTurn[TURNWHITE]->set_active();
 
-	guiColourChooser = new GUIColourChooser( ui_model, *view );
-	guiTimeInputter = new GUITimeInputter( ui_model, *view );
-	guiPieceValues = new GUIPieceValues( ui_model, *view );
-	guiOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
-	guiSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
-
 	ColourChooser::STColours default_colours;
     default_colours.bg = "rgb(78,154,6)";
     default_colours.fg = "rgb(0,0,0)";
     default_colours.black = "rgb(85,87,83)";
     default_colours.white = "rgb(238,238,236)";
 
-	guiColourChooser->init_colours( default_colours );
-
+	guiColourChooser = new GUIColourChooser( ui_model, *view, default_colours );
+	guiTimeInputter = new GUITimeInputter( ui_model, *view );
+	guiPieceValues = new GUIPieceValues( ui_model, *view );
+	guiOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
+	guiSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
 }
 
 /**-----------------------------------------------------------------------------
