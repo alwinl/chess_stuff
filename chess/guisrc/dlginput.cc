@@ -78,12 +78,12 @@ GUITimeInputter::GUITimeInputter( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Win
 	ui_model->get_widget_derived("dlgInput", dlg, parent );
 }
 
-void GUITimeInputter::set_up( const std::string& title, const std::string& prompt, int& value )
+void GUITimeInputter::setup( const std::string& title, const std::string& prompt, int& value )
 {
     dlg->dlg_setup( title, prompt, std::to_string( value) );
 }
 
-bool GUITimeInputter::manipulate_data( )
+bool GUITimeInputter::manipulate( )
 {
     int response = dlg->run();
 
@@ -92,7 +92,7 @@ bool GUITimeInputter::manipulate_data( )
     return response == Gtk::RESPONSE_OK;
 }
 
-int GUITimeInputter::new_time( )
+int GUITimeInputter::result( )
 {
     return std::stoi( dlg->get_input() );
 }

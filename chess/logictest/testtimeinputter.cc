@@ -30,15 +30,28 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestTimeInputter );
  * Helper class to test the colour chooser logic
  */
 
-class MockTimeInputter : public TimeInputter
+class MockTimeInputterOk : public TimeInputter
 {
 public:
-    MockTimeInputter( ) : TimeInputter() {};
+    MockTimeInputterOk( int return_value ) : TimeInputter(), save_value(return_value) {};
 
 private:
-    virtual void set_up( const std::string& title, const std::string& prompt, int& value );
-    virtual bool manipulate_data( );
-    virtual int new_time( );
+    virtual void setup( const std::string& title, const std::string& prompt, int& value ) { };
+    virtual bool manipulate( ) { return true; };
+    virtual int result( ) { return save_value; };	/* return whatever this object is initialised with */
+
+	int save_value;
+};
+
+class MockTimeInputterCancel : public TimeInputter
+{
+public:
+    MockTimeInputterCancel( ) : TimeInputter() {};
+
+private:
+    virtual void setup( const std::string& title, const std::string& prompt, int& value ) {};
+    virtual bool manipulate( ) { return false; };
+    virtual int result( ) { return -1; };		/* this should not be called, so give it an invalid value */
 };
 
 
@@ -49,20 +62,36 @@ private:
 
 void TestTimeInputter::no_change_exit_ok()
 {
+	MockTimeInputterOk test_object( 60 );
 
+	test_object.time_per_move( 60 );
+
+	CPPUNIT_ASSERT_EQUAL( 60, test_object.get_time() );
 }
 
 void TestTimeInputter::no_change_exit_cancel()
 {
+	MockTimeInputterCancel test_object;
 
+	test_object.time_per_move( 60 );
+
+	CPPUNIT_ASSERT_EQUAL( 60, test_object.get_time() );
 }
 
 void TestTimeInputter::change_exit_ok()
 {
+	MockTimeInputterOk test_object( 40 );
 
+	test_object.time_per_move( 60 );
+
+	CPPUNIT_ASSERT_EQUAL( 40, test_object.get_time() );
 }
 
 void TestTimeInputter::change_exit_cancel()
 {
+	MockTimeInputterCancel test_object;
 
+	test_object.time_per_move( 60 );
+
+	CPPUNIT_ASSERT_EQUAL( 60, test_object.get_time() );
 }

@@ -38,9 +38,9 @@ public:
     GUITimeInputter( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
 protected:
-    virtual void set_up( const std::string& title, const std::string& prompt, int& value );
-    virtual bool manipulate_data( );
-    virtual int new_time( );
+    virtual void setup( const std::string& title, const std::string& prompt, int& value );
+    virtual bool manipulate( );
+    virtual int result( );
 
 private:
     DialogInput * dlg;

@@ -375,27 +375,19 @@ void ChessController::on_action_sound()
  */
 void ChessController::on_action_level( unsigned int level)
 {
-	int time_parameter = 0;
-
 	if( (eLevels)level == TIMED ) {
-	    std::pair<bool,int> retval = guiTimeInputter->time_per_move( 120 );
-
-		if( ! retval.first )
+		if( ! guiTimeInputter->time_per_move( 120 ) )
 			return;
 
-		time_parameter = retval.second;
+		director->change_level( (eLevels)level, guiTimeInputter->get_time() );
 	}
 
 	if( (eLevels)level == TOTALTIME ) {
-	    std::pair<bool,int> retval = guiTimeInputter->total_game_time( 60 );
-
-		if( ! retval.first )
+	    if( ! guiTimeInputter->total_game_time( 60 ) )
 			return;
 
-		time_parameter = retval.second;
+		director->change_level( (eLevels)level, guiTimeInputter->get_time() );
 	}
-
-	director->change_level( (eLevels)level, time_parameter );
 }
 
 /**-----------------------------------------------------------------------------
