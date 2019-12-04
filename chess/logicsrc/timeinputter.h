@@ -46,7 +46,6 @@ protected:
     virtual bool manipulate( ) = 0;
     virtual int result( ) = 0;
 
-    int value;
 
 private:
     bool get_input( const std::string& title, const std::string& prompt, int current_value )
@@ -61,6 +60,8 @@ private:
 
         return retval;
     };
+
+    int value;
 };
 
 #endif // TIMEINPUTTER_H
