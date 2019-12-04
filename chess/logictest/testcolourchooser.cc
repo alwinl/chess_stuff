@@ -51,7 +51,7 @@ public:
 private:
     virtual void setup( )  { };
     virtual bool manipulate( ) { return false; };
-    virtual STColours result( ) { return colors; };	/* does not really matter what is returned, in this context it will never be called */
+    virtual STColours result( ) { return STColours(); };	/* does not really matter what is returned, in this context it will never be called */
 };
 
 

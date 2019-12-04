@@ -56,6 +56,7 @@ protected:
     virtual bool manipulate( ) = 0;
     virtual STColours result( ) = 0;
 
+private:
 	STColours colors;
 };
 
