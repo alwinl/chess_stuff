@@ -26,7 +26,6 @@
 
 #include "pods.h"
 
-class TimeInputter;
 class PieceValues;
 class FilenameChooser;
 

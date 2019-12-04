@@ -39,7 +39,7 @@ public:
     bool total_game_time( int current_value )
         { return get_input( "Total Time Level", "Minutes per game:", current_value ); };
 
-	int get_time() { return value; };
+	int get_time() const { return value; };
 
 protected:
     virtual void setup( const std::string& title, const std::string& prompt, int& value ) = 0;
