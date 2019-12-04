@@ -27,21 +27,6 @@
 enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLAYSEARCH, MATESEARCH, LEVELCOUNT };
 enum eTurns { TURNWHITE, TURNBLACK, TURNCOUNT };
 
-
-/**-----------------------------------------------------------------------------
- * \brief Struct to hold the colours we need in this application
- *
- * Note: each string holds a colour in the notation: rgb(r,g,b) where each colour
- * component is in the range 0..255
- */
-struct STColours
-{
-    std::string bg;
-    std::string fg;
-    std::string white;
-    std::string black;
-};
-
 /**-----------------------------------------------------------------------------
  * \brief Struct to hold
  *
@@ -135,8 +120,5 @@ std::string move_to_LAN( STMove& move_in );
 int parse_ForsythEdwards( STGameState& game_state, std::string layout);
 std::string gamestate_to_ForsythEdwards( STGameState& game_state );
 STGameState make_game_state( std::string layout );
-
-bool operator==( STColours& lhs, STColours& rhs );
-
 
 #endif // PODS_H_INCLUDED

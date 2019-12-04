@@ -33,12 +33,12 @@ class DialogColours;
 class GUIColourChooser : public ColourChooser
 {
 public:
-    GUIColourChooser( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
+    GUIColourChooser( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent, STColours& init_colours );
 
 protected:
-    virtual void set_colours( STColours& colours );
-    virtual bool manipulate_colours( );
-    virtual STColours colours( );
+    virtual void setup( );
+    virtual bool manipulate( );
+    virtual STColours result( );
 
 private:
 	DialogColours * dlg;

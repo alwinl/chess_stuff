@@ -533,14 +533,15 @@ void ChessBoard::set_piece_positions( std::string FEN_string )
  * \return void
  *
  */
-void ChessBoard::set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gdk::RGBA fg )
+void ChessBoard::set_colours( ColourChooser::STColours new_colours )
 {
 	using namespace Cairo;
 
-    background_colour = bg;
-    white_colour = white;
-    black_colour = black;
-	foreground_colour = fg;
+    background_colour = Gdk::RGBA(new_colours.bg);
+	foreground_colour = Gdk::RGBA(new_colours.fg);
+
+    Gdk::RGBA white_colour = Gdk::RGBA(new_colours.white);
+    Gdk::RGBA black_colour = Gdk::RGBA(new_colours.black);
 
 	/* Create a context for the background image object so we can draw on it */
 	RefPtr<Context> context = Context::create( background_image );
@@ -548,9 +549,9 @@ void ChessBoard::set_colours( Gdk::RGBA bg, Gdk::RGBA white, Gdk::RGBA black, Gd
 	/* draw the board background */
 	for( int cell=0; cell<64; cell++ ) {
 		if( (cell + (cell/8)) % 2 )
-			context->set_source_rgb( white.get_red(), white.get_green(), white.get_blue() );
+			context->set_source_rgb( white_colour.get_red(), white_colour.get_green(), white_colour.get_blue() );
 		else
-			context->set_source_rgb( black.get_red(), black.get_green(), black.get_blue() );
+			context->set_source_rgb( black_colour.get_red(), black_colour.get_green(), black_colour.get_blue() );
 
 		context->rectangle( (cell%8) * SQUARE_SIZE, (cell/8) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE );
 		context->fill();
