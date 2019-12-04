@@ -28,7 +28,7 @@ class DialogColours : public Gtk::Dialog
 public:
     DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
-    void set_colours( ColourChooser::STColours& colours );
+    void set_colours( ColourChooser::STColours colours );
     ColourChooser::STColours get_colours( );
 
 private:
@@ -56,7 +56,7 @@ DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::B
 	ui_model->get_widget( "btnBlackColour", btnBlackColour );
 }
 
-void DialogColours::set_colours( ColourChooser::STColours& colours )
+void DialogColours::set_colours( ColourChooser::STColours colours )
 {
     btnBackground->set_rgba( Gdk::RGBA(colours.bg) );
     btnForeground->set_rgba( Gdk::RGBA(colours.fg) );
@@ -92,7 +92,7 @@ GUIColourChooser::GUIColourChooser( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::W
 
 void GUIColourChooser::setup( )
 {
-    dlg->set_colours( colors );
+    dlg->set_colours( get_colours() );
 }
 
 bool GUIColourChooser::manipulate( )
