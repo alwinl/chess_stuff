@@ -210,8 +210,10 @@ void ChessController::on_action_open()
  */
 void ChessController::on_action_save()
 {
-	if( filename.empty() )
+	if( filename.empty() ) {
 		on_action_save_as();
+		return;
+	}
 
 	if( ! director->save_file( filename ) ) {
 		if( chkSound->get_active() )
