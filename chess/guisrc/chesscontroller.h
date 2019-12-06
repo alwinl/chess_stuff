@@ -72,8 +72,6 @@ private:
 	virtual void on_startup();
 	virtual void on_activate();
 
-	bool on_animate_timeout();
-
 	// actions
 	void on_action_new();			// initialise the model to the empty condition
 	void on_action_open();			// load the model from a file
@@ -116,7 +114,6 @@ private:
     // Data
 	ChessAppBase* director;
 	bool sound_on;
-	int timeout_counter;
 	std::string filename;
 };
 

@@ -56,9 +56,7 @@ public:
 	void set_edit( bool on );
     void toggle_reverse();
     void toggle_bestline();
-	void animate_start( STSquare start_square, STSquare end_square, char piece );
-	void animate_step();
-	void animate_stop();
+	void animate( STSquare start_square, STSquare end_square, char piece );
 	void highlight( STSquare square );
 
 private:
@@ -82,6 +80,7 @@ private:
 	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr );
 
+	bool on_animate_timeout();
 	bool on_highlight_timeout();
 	void start_dragging( char piece, Gdk::Point start_point );
 	void stop_dragging();

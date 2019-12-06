@@ -161,20 +161,6 @@ void ChessController::on_activate()
 }
 
 /**-----------------------------------------------------------------------------
- * \brief
- */
-bool ChessController::on_animate_timeout()
-{
-	if( ! --timeout_counter ) {
-		board->animate_stop();
-		return false;
-	}
-
-	board->animate_step();
-	return true;
-}
-
-/**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
 void ChessController::on_action_new()
@@ -503,15 +489,5 @@ void ChessController::set_thinking( bool on )
  * \brief
  */
 void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
-{
-	board->animate_start( start_square, end_square, piece );
-
-	timeout_counter = 10;
-	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
-
-	while( timeout_counter ) {
-		while( Gtk::Main::instance()->events_pending() )
-			Gtk::Main::instance()->iteration();
-	}
-}
+	{ board->animate( start_square, end_square, piece ); }
 

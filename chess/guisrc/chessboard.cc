@@ -640,9 +640,30 @@ void ChessBoard::set_info( STInfo& info )
 
 /**-----------------------------------------------------------------------------
  * \brief
+ */
+bool ChessBoard::on_animate_timeout()
+{
+	if( ! --timeout_counter ) {
+		floating_piece_code = ' ';
+		is_animating = false;
+
+		update();
+		return false;
+	}
+
+	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
+	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
+
+	update();
+	return true;
+}
+
+
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  */
-void ChessBoard::animate_start( STSquare start_square, STSquare end_square, char piece )
+void ChessBoard::animate( STSquare start_square, STSquare end_square, char piece )
 {
 	Gdk::Point end_point = square_to_point( end_square );
 
@@ -659,30 +680,14 @@ void ChessBoard::animate_start( STSquare start_square, STSquare end_square, char
 	is_animating = true;
 
 	update();
-}
 
-/**-----------------------------------------------------------------------------
- * \brief
- *
- */
-void ChessBoard::animate_step( )
-{
-	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
-	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessBoard::on_animate_timeout), 100 );
 
-	update();
-}
-
-/**-----------------------------------------------------------------------------
- * \brief
- *
- */
-void ChessBoard::animate_stop()
-{
-	floating_piece_code = ' ';
-	is_animating = false;
-
-	update();
+	while( timeout_counter ) {
+		while( Gtk::Main::instance()->events_pending() )
+			Gtk::Main::instance()->iteration();
+	}
 }
 
 /**-----------------------------------------------------------------------------
