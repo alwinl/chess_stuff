@@ -75,10 +75,8 @@ ChessController::~ChessController( )
 /**-----------------------------------------------------------------------------
  * \brief Startup code
  */
-void ChessController::on_startup()
+void ChessController::bind_actions()
 {
-    Gtk::Application::on_startup();
-
     add_action("new",     sigc::mem_fun( *this, &ChessController::on_action_new ) );
     add_action("restore", sigc::mem_fun( *this, &ChessController::on_action_open ) );
     add_action("save",    sigc::mem_fun( *this, &ChessController::on_action_save ) );
@@ -107,7 +105,13 @@ void ChessController::on_startup()
     add_action("arrange_cancel",  sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
 
     add_action("thinking_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
+}
 
+/**-----------------------------------------------------------------------------
+ * \brief Startup code
+ */
+void ChessController::get_widgets()
+{
     Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
 
 	ui_model->get_widget_derived("main_view", view );
@@ -141,6 +145,17 @@ void ChessController::on_startup()
 	guiPieceValues = new GUIPieceValues( ui_model, *view );
 	guiOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
 	guiSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Startup code
+ */
+void ChessController::on_startup()
+{
+    Gtk::Application::on_startup();
+
+	bind_actions();
+	get_widgets();
 }
 
 /**-----------------------------------------------------------------------------

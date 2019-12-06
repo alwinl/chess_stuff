@@ -66,18 +66,19 @@ public:
 	void make_move(  STSquare start_square, STSquare end_square );
 
 private:
-	// Private construction to ensure only references can be obtained. Private as class is terminal
+	// Non public construction to ensure only references can be obtained. Private as class is terminal
 	ChessController( ChessAppBase* director_init );
 
+	// Initialisation
 	virtual void on_startup();
 	virtual void on_activate();
 
-	// actions
-	void on_action_new();			// initialise the model to the empty condition
-	void on_action_open();			// load the model from a file
-	void on_action_save();			// save the model to a file
-	void on_action_save_as();		// save the model to a new file
-	void on_action_quit();			// quit application
+	// Actions
+	void on_action_new();
+	void on_action_open();
+	void on_action_save();
+	void on_action_save_as();
+	void on_action_quit();
 	void on_action_play();
 	void on_action_hint();
 	void on_action_undo();
@@ -98,18 +99,21 @@ private:
 	void on_action_arrange_cancel();
 	void on_action_thinking_stop();
 
+	void bind_actions();
+
 	// Widgets
 	ChessWindow * view;
     Gtk::Statusbar * status_bar;
 	Gtk::RadioMenuItem * chkLevel[LEVELCOUNT];
 	Gtk::RadioMenuItem * chkTurn[TURNCOUNT];
     ChessBoard * board;
-
     ColourChooser * guiColourChooser;
     TimeInputter * guiTimeInputter;
     PieceValues * guiPieceValues;
     FilenameChooser * guiOpenFile;
     FilenameChooser * guiSaveFile;
+
+	void get_widgets();
 
     // Data
 	ChessAppBase* director;
