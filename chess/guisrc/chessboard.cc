@@ -393,42 +393,57 @@ void ChessBoard::update()
  * \return void
  *
  */
+void ChessBoard::start_dragging( char piece, Gdk::Point start_point )
+{
+	floating_piece_code = piece;
+	floating_piece_position = Gdk::Point( start_point.get_x() - .5 * SQUARE_SIZE, start_point.get_y() - .5 * SQUARE_SIZE );
+	is_dragging = true;
+
+	update();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * \return void
+ *
+ */
+void ChessBoard::stop_dragging()
+{
+	is_dragging = false;
+	floating_piece_code = ' ';
+	update();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * \return void
+ *
+ */
 bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 {
 	if( is_animating )
 		return true;
 
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( button_event->x, button_event->y, 1, 1 );
+    Gdk::Point mouse_point = Gdk::Point(button_event->x, button_event->y);
 
     if( board_outline.intersects( mouse_pos ) ) {
 
-		drag_start_square = point_to_square( Gdk::Point(button_event->x, button_event->y) );
+		drag_start_square = point_to_square( mouse_point );
 
 		typename map<STSquare,char>::iterator it = pieces.find(drag_start_square);
 		if( it != pieces.end() ) {
-			floating_piece_code = (*it).second;
-			floating_piece_position = Gdk::Point( button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE );
+
+			start_dragging( (*it).second, mouse_point );
 
 			controller.put_piece_on_square( drag_start_square, ' ' ); // Putting a space is removing the piece
-
-			is_dragging = true;
-
-			update();
 		}
 
-        return true;
-    }
+    } else if( is_edit && edit_outline.intersects( mouse_pos ) ) {
 
-    if( is_edit && edit_outline.intersects( mouse_pos ) ) {
-
-		floating_piece_code = point_to_edit_piece( Gdk::Point(button_event->x, button_event->y ) );
-		floating_piece_position = Gdk::Point( button_event->x - .5 * SQUARE_SIZE, button_event->y - .5 * SQUARE_SIZE );
-
-		is_dragging = true;
-
-		update();
-
-		return true;
+		start_dragging( point_to_edit_piece( mouse_point ), mouse_point );
     }
 
     return true;
@@ -445,31 +460,18 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 	if( !is_dragging )
 		return true;
 
-	is_dragging = false;
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( release_event->x, release_event->y, 1, 1 );
-    bool intersecting = board_outline.intersects( mouse_pos );
+    char piece_code = floating_piece_code;
 
-    if( is_edit ) {
+    stop_dragging();
 
-		if( intersecting ) {
-			STSquare end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
-			controller.put_piece_on_square( end_square, floating_piece_code );
-		}
+	STSquare end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
 
-		floating_piece_code = ' ';
-
-		update();
-
-    } else {
-
-		floating_piece_code = ' ';
-
-		update();
-
-		if( intersecting ) {
-			STSquare end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
+	if( board_outline.intersects( mouse_pos ) ) {
+		if( is_edit )
+			controller.put_piece_on_square( end_square, piece_code );
+		else
 			controller.make_move( drag_start_square, end_square );
-		}
     }
 
     return true;

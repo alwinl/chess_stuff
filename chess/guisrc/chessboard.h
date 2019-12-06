@@ -83,6 +83,9 @@ private:
 	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr );
 
+	void start_dragging( char piece, Gdk::Point start_point );
+	void stop_dragging();
+
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
 
