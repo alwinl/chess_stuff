@@ -117,19 +117,19 @@
 		</Unit>
 		<Unit filename="guisrc/dlgfilenamechooser.cc" />
 		<Unit filename="guisrc/dlgfilenamechooser.h" />
-		<Unit filename="guisrc/dlginput.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlginput.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
 		<Unit filename="guisrc/dlgpiecevalues.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
 		<Unit filename="guisrc/dlgpiecevalues.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="guisrc/dlgtimeinputter.cc">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="guisrc/dlgtimeinputter.h">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>

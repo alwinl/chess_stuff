@@ -58,7 +58,6 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 	board = nullptr;
 
     sound_on = false;
-    current_level = EASY;
 }
 
 /**-----------------------------------------------------------------------------
@@ -349,24 +348,24 @@ void ChessController::on_action_sound()
  */
 void ChessController::on_action_level( unsigned int level)
 {
-	if( (current_level != TIMED) && (eLevels)level == TIMED ) {
+	if( ! chkLevel[level]->get_active() )
+		return;
+
+	if( (eLevels)level == TIMED ) {
 
 		if( guiTimeInputter->time_per_move( 120 ) ) {
 			director->change_level( (eLevels)level, guiTimeInputter->get_time() );
-			current_level = TIMED;
 		}
 
-	} else if( (current_level != TOTALTIME) && (eLevels)level == TOTALTIME ) {
+	} else if( (eLevels)level == TOTALTIME ) {
 
 	    if( guiTimeInputter->total_game_time( 60 ) ) {
 			director->change_level( (eLevels)level, guiTimeInputter->get_time() );
-			current_level = TOTALTIME;
 	    }
 
-	} else if( current_level != (eLevels)level ) {
+	} else {
 
 		director->change_level( (eLevels)level, 0 );
-		current_level = (eLevels)level;
 	}
 }
 

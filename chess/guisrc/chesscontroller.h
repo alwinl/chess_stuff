@@ -119,7 +119,6 @@ private:
 	ChessAppBase* director;
 	bool sound_on;
 	std::string filename;
-	eLevels current_level;
 };
 
 #endif // APPCONTROLLER_H
