@@ -398,23 +398,25 @@ void ChessController::on_action_level( unsigned int level)
  */
 void ChessController::on_action_colours()
 {
-    if( !guiColourChooser->choose_colours( ) )
-		return;
-
-	board->set_colours( guiColourChooser->get_colours() );
+    if( guiColourChooser->choose_colours( ) )
+		board->set_colours( guiColourChooser->get_colours() );
 }
 
 /**-----------------------------------------------------------------------------
  * \brief Tell the view to turn the board 180 degrees
  */
 void ChessController::on_action_reverse()
-	{ board->toggle_reverse(); }
+{
+	board->toggle_reverse();
+}
 
 /**-----------------------------------------------------------------------------
  * \brief Tell the view to toggle displaying the bestline information
  */
 void ChessController::on_action_showbestline()
-	{ board->toggle_bestline(); }
+{
+	board->toggle_bestline();
+}
 
 /**-----------------------------------------------------------------------------
  * \brief Show some application information
@@ -456,7 +458,10 @@ void ChessController::on_action_arrange_done()
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
-void ChessController::on_action_arrange_clear() { director->arrange_clear(); }
+void ChessController::on_action_arrange_clear()
+{
+	director->arrange_clear();
+}
 
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
@@ -481,7 +486,9 @@ void ChessController::on_action_arrange_cancel()
  * \brief Menu actions
  */
 void ChessController::on_action_thinking_stop()
-	{ director->stop_thinking(); }
+{
+	director->stop_thinking();
+}
 
 /*-----------------------------------------------------------------------------
  *  The next functions are call backs from the board
@@ -491,17 +498,13 @@ void ChessController::on_action_thinking_stop()
  * \brief
  */
 void ChessController::put_piece_on_square( STSquare square, char piece )
-{
-	director->put_piece_on_square( square, piece );
-}
+	{ director->put_piece_on_square( square, piece ); }
 
 /**-----------------------------------------------------------------------------
  * \brief
  */
 void ChessController::make_move(  STSquare start_square, STSquare end_square )
-{
-	director->do_move( start_square, end_square );
-}
+	{ director->do_move( start_square, end_square ); }
 
 /*-----------------------------------------------------------------------------
  * The next functions are called from the engine
@@ -523,9 +526,7 @@ void ChessController::set_info( STInfo info )
  * \brief
  */
 void ChessController::set_thinking( bool on )
-{
-	view->show_menu( on ? ChessWindow::MENU_STOP : ChessWindow::MENU_GAME );
-}
+	{ view->show_menu( on ? ChessWindow::MENU_STOP : ChessWindow::MENU_GAME ); }
 
 /**-----------------------------------------------------------------------------
  * \brief
