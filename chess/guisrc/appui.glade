@@ -549,7 +549,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkMenuItem">
+                          <object class="GtkCheckMenuItem" id="chkOptionSound">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="action_name">app.sound</property>

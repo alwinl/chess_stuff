@@ -56,8 +56,6 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
     guiSaveFile = nullptr;
 
 	board = nullptr;
-
-    sound_on = false;
 }
 
 /**-----------------------------------------------------------------------------
@@ -134,6 +132,8 @@ void ChessController::get_widgets()
 
 	chkTurn[TURNWHITE]->set_active();
 
+	ui_model->get_widget( "chkOptionSound", chkSound );
+
 	ColourChooser::STColours default_colours;
     default_colours.bg = "rgb(78,154,6)";
     default_colours.fg = "rgb(0,0,0)";
@@ -196,7 +196,7 @@ void ChessController::on_action_open()
 		return;
 
 	if( ! director->open_file( result.second ) ) {
-		if( sound_on )
+		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
 		Gtk::MessageDialog( *view, "Error restoring game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
@@ -215,7 +215,7 @@ void ChessController::on_action_save()
 		on_action_save_as();
 
 	if( ! director->save_file( filename ) ) {
-		if( sound_on )
+		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
 		Gtk::MessageDialog( *view, "Error saving game. Try Save As", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
@@ -239,7 +239,7 @@ void ChessController::on_action_save_as()
 		result.second += string(".chess");
 
 	if( ! director->save_file( result.second ) ) {
-		if( sound_on )
+		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
 		Gtk::MessageDialog( *view, "Error saving game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
@@ -340,7 +340,6 @@ void ChessController::on_action_piecevalues()
  */
 void ChessController::on_action_sound()
 {
-	sound_on = !sound_on;
 }
 
 /**-----------------------------------------------------------------------------
@@ -422,7 +421,7 @@ void ChessController::on_action_help_about()
 void ChessController::on_action_arrange_done()
 {
 	if( ! director->arrange_end( false ) ) {
-		if( sound_on )
+		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
 		Gtk::MessageDialog( *view, "This is not a valid board. Please fix.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true ).run();

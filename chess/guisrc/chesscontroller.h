@@ -106,6 +106,7 @@ private:
     Gtk::Statusbar * status_bar;
 	Gtk::RadioMenuItem * chkLevel[LEVELCOUNT];
 	Gtk::RadioMenuItem * chkTurn[TURNCOUNT];
+	Gtk::CheckMenuItem * chkSound;
     ChessBoard * board;
     ColourChooser * guiColourChooser;
     TimeInputter * guiTimeInputter;
@@ -117,7 +118,6 @@ private:
 
     // Data
 	ChessAppBase* director;
-	bool sound_on;
 	std::string filename;
 };
 
