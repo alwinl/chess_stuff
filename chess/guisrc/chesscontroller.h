@@ -88,7 +88,6 @@ private:
 	void on_action_twoplayer();
 	void on_action_demomode();
     void on_action_piecevalues();
-	void on_action_sound();
 	void on_action_colours();
     void on_action_reverse();
     void on_action_showbestline();

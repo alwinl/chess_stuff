@@ -90,7 +90,6 @@ void ChessController::bind_actions()
     add_action("twoplayer",   sigc::mem_fun( *this, &ChessController::on_action_twoplayer ) );
     add_action("demomode",    sigc::mem_fun( *this, &ChessController::on_action_demomode ) );
     add_action("piecevalues", sigc::mem_fun( *this, &ChessController::on_action_piecevalues ) );
-    add_action("sound",       sigc::mem_fun( *this, &ChessController::on_action_sound ) );
 
     add_action("colours",      sigc::mem_fun( *this, &ChessController::on_action_colours ) );
     add_action("reverse",      sigc::mem_fun( *this, &ChessController::on_action_reverse ) );
@@ -333,13 +332,6 @@ void ChessController::on_action_demomode()
 void ChessController::on_action_piecevalues()
 {
 	director->change_piece_values( guiPieceValues );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
-void ChessController::on_action_sound()
-{
 }
 
 /**-----------------------------------------------------------------------------
