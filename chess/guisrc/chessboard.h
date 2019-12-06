@@ -59,8 +59,7 @@ public:
 	void animate_start( STSquare start_square, STSquare end_square, char piece );
 	void animate_step();
 	void animate_stop();
-	void highlight_start( STSquare square );
-	void highlight_flash( bool on );
+	void highlight( STSquare square );
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
@@ -83,6 +82,7 @@ private:
 	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
 	bool draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr );
 
+	bool on_highlight_timeout();
 	void start_dragging( char piece, Gdk::Point start_point );
 	void stop_dragging();
 
@@ -112,6 +112,8 @@ private:
 	Gdk::Point highlight_pos;
 	char floating_piece_code;
 	STSquare drag_start_square;
+
+	int timeout_counter;
 
 	ChessController& controller;
 };

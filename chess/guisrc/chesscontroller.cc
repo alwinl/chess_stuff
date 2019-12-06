@@ -175,25 +175,6 @@ bool ChessController::on_animate_timeout()
 }
 
 /**-----------------------------------------------------------------------------
- * \brief
- */
-bool ChessController::on_flash_timeout()
-{
-	static bool highlight_on = false;
-
-	if( ! --timeout_counter ) {
-		highlight_on = false;
-		board->highlight_flash( highlight_on );
-		return false;
-	}
-
-	highlight_on = !highlight_on;
-	board->highlight_flash( highlight_on );
-	return true;
-}
-
-
-/**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
 void ChessController::on_action_new()
@@ -299,17 +280,7 @@ void ChessController::on_action_play()
  */
 void ChessController::on_action_hint()
 {
-	STSquare square = director->hint();
-
-	board->highlight_start( square );
-
-	timeout_counter = 10;
-	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_flash_timeout), 100 );
-
-	while( timeout_counter ) {
-		while( Gtk::Main::instance()->events_pending() )
-			Gtk::Main::instance()->iteration();
-	}
+	board->highlight( director->hint() );
 }
 
 /**-----------------------------------------------------------------------------

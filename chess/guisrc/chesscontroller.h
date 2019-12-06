@@ -73,7 +73,6 @@ private:
 	virtual void on_activate();
 
 	bool on_animate_timeout();
-	bool on_flash_timeout();
 
 	// actions
 	void on_action_new();			// initialise the model to the empty condition

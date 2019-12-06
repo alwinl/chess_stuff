@@ -389,6 +389,26 @@ void ChessBoard::update()
 
 /**-----------------------------------------------------------------------------
  * \brief
+ */
+bool ChessBoard::on_highlight_timeout()
+{
+	static bool highlight_on = false;
+
+	if( ! --timeout_counter ) {
+		highlight_on = false;
+		draw_highlight = highlight_on;
+		update();
+		return false;
+	}
+
+	highlight_on = !highlight_on;
+	draw_highlight = highlight_on;
+	update();
+	return true;
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * \return void
  *
@@ -669,21 +689,20 @@ void ChessBoard::animate_stop()
  * \brief
  *
  */
-void ChessBoard::highlight_start( STSquare square )
+void ChessBoard::highlight( STSquare square )
 {
 	highlight_pos = square_to_point( square );
 	draw_highlight = true;
 
 	update();
+
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessBoard::on_highlight_timeout), 100 );
+
+	while( timeout_counter ) {
+		while( Gtk::Main::instance()->events_pending() )
+			Gtk::Main::instance()->iteration();
+	}
+
 }
 
-/**-----------------------------------------------------------------------------
- * \brief
- *
- */
-void ChessBoard::highlight_flash( bool on )
-{
-	draw_highlight = on;
-
-	update();
-}
