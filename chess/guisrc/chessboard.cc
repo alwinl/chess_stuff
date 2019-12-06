@@ -83,8 +83,6 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
 	is_edit = false;
 
 	floating_piece_code = ' ';
-
-    controller.set_board( this );
 }
 
 /**-----------------------------------------------------------------------------

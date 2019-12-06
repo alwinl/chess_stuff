@@ -33,13 +33,11 @@
  * \param controller ChessController&
  *
  */
-ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& controller )
+ChessWindow::ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
 			: Gtk::ApplicationWindow(cobject)
 {
 	set_default_size( 640,480 );
 	set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
-
-	ui_model->get_widget_derived("canvas", board_area, controller );
 
     ui_model->get_widget( "mnuGame", menus[MENU_GAME] );
     ui_model->get_widget( "mnuArrange", menus[MENU_ARRANGE] );

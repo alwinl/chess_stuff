@@ -110,8 +110,9 @@ void ChessController::on_startup()
 
     Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
 
-	ui_model->get_widget_derived("main_view", view, *this );
+	ui_model->get_widget_derived("main_view", view );
     ui_model->get_widget( "widStatusBar", status_bar );
+	ui_model->get_widget_derived("canvas", board, *this );
 
 	vector<string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {

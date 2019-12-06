@@ -61,8 +61,7 @@ public:
 	void set_thinking( bool on );
 	void animate( STSquare start_square, STSquare end_square, char piece );
 
-    // These three functions are call backs from the board
-    void set_board( ChessBoard * board_init ) { board = board_init; };
+    // These two functions are call backs from the board
 	void put_piece_on_square( STSquare square, char piece );
 	void make_move(  STSquare start_square, STSquare end_square );
 
