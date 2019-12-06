@@ -447,7 +447,8 @@ void ChessController::on_action_arrange_clear()
  */
 void ChessController::on_action_arrange_turn( unsigned int turn )
 {
-	director->arrange_turn( (eTurns)turn );
+	if( chkTurn[turn]->get_active() )
+		director->arrange_turn( (eTurns)turn );
 }
 
 /**-----------------------------------------------------------------------------

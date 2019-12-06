@@ -164,7 +164,11 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
 
 void ChessEngine::arrange_turn( eTurns new_turn )
 {
-	cout << "processing turn message" << endl;
+	if( new_turn == TURNWHITE )
+		cout << "processing turn message: it's now whites turn" << endl;
+	else
+		cout << "processing turn message: it's now black turn" << endl;
+
 	arrange_state.is_white_move = ( new_turn == TURNWHITE );
 }
 
