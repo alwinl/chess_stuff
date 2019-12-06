@@ -23,7 +23,7 @@
 #include "chessview.h"
 #include "chessboard.h"
 #include "dlgcolours.h"
-#include "dlginput.h"
+#include "dlgtimeinputter.h"
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
@@ -58,6 +58,7 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 	board = nullptr;
 
     sound_on = false;
+    current_level = EASY;
 }
 
 /**-----------------------------------------------------------------------------
@@ -348,18 +349,24 @@ void ChessController::on_action_sound()
  */
 void ChessController::on_action_level( unsigned int level)
 {
-	if( (eLevels)level == TIMED ) {
-		if( ! guiTimeInputter->time_per_move( 120 ) )
-			return;
+	if( (current_level != TIMED) && (eLevels)level == TIMED ) {
 
-		director->change_level( (eLevels)level, guiTimeInputter->get_time() );
-	}
+		if( guiTimeInputter->time_per_move( 120 ) ) {
+			director->change_level( (eLevels)level, guiTimeInputter->get_time() );
+			current_level = TIMED;
+		}
 
-	if( (eLevels)level == TOTALTIME ) {
-	    if( ! guiTimeInputter->total_game_time( 60 ) )
-			return;
+	} else if( (current_level != TOTALTIME) && (eLevels)level == TOTALTIME ) {
 
-		director->change_level( (eLevels)level, guiTimeInputter->get_time() );
+	    if( guiTimeInputter->total_game_time( 60 ) ) {
+			director->change_level( (eLevels)level, guiTimeInputter->get_time() );
+			current_level = TOTALTIME;
+	    }
+
+	} else if( current_level != (eLevels)level ) {
+
+		director->change_level( (eLevels)level, 0 );
+		current_level = (eLevels)level;
 	}
 }
 

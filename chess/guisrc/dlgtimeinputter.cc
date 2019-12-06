@@ -19,7 +19,7 @@
  *
  */
 
-#include "dlginput.h"
+#include "dlgtimeinputter.h"
 
 class DialogInput : public Gtk::Dialog
 {
