@@ -21,22 +21,30 @@
 
 #include "piecevalues.h"
 
-void PieceValues::push_stpiece_values( STPieceValues values )
+
+void PieceValues::init_piece_values( PieceValues::STPieceValues values )
 {
 	save_values = values;
 }
 
-bool PieceValues::get_new_piece_values( )
+bool PieceValues::choose_piece_values( )
 {
-	set_values( save_values );
-	bool first = manipulate_values( );
+	setup();
+	bool first = manipulate( );
 	if( first )
-		save_values = piece_values( );
+		save_values = result( );
 
 	return first;
 }
 
-STPieceValues PieceValues::pull_stpiece_values()
+bool PieceValues::operator==( PieceValues::STPieceValues& rhs )
 {
-	return save_values;
+    if( save_values.QueenValue != rhs.QueenValue ) return false;
+    if( save_values.RookValue != rhs.RookValue ) return false;
+    if( save_values.BishopValue != rhs.BishopValue ) return false;
+    if( save_values.KnightValue != rhs.KnightValue ) return false;
+    if( save_values.PawnValue != rhs.PawnValue ) return false;
+
+    return true;
 }
+

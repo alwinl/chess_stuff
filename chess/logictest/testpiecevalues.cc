@@ -32,29 +32,27 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestPieceValues );
 class MockPieceValuesOk : public PieceValues
 {
 public:
-    MockPieceValuesOk(  STPieceValues& values ) : PieceValues(), new_values(values) {};
+    MockPieceValuesOk( STPieceValues& values ) : PieceValues(), new_values(values) {};
 
 private:
     STPieceValues new_values;
-    STPieceValues the_values;
 
-    virtual void set_values( STPieceValues& values ) { the_values = values; };
-    virtual bool manipulate_values() { the_values = new_values; return true; };
-    virtual STPieceValues piece_values( ) { return the_values; };
+    virtual void setup( ) { };
+    virtual bool manipulate() { return true; };
+    virtual STPieceValues result( ) { return new_values; };
 };
 
 class MockPieceValuesCancel : public PieceValues
 {
 public:
-    MockPieceValuesCancel(  STPieceValues& values ) : PieceValues(), new_values(values) {};
+    MockPieceValuesCancel(  STPieceValues& values ) : PieceValues(), the_values(values) {};
 
 private:
-    STPieceValues new_values;
     STPieceValues the_values;
 
-    virtual void set_values( STPieceValues& values ) { the_values = values; };
-    virtual bool manipulate_values() { return false; };
-    virtual STPieceValues piece_values( ) { return the_values; };
+    virtual void setup( ) { };
+    virtual bool manipulate() { return false; };
+    virtual STPieceValues result( ) { return the_values; };
 };
 
 
@@ -63,7 +61,7 @@ private:
  * TestColourChooser class implementation
  */
 
-bool operator==( STPieceValues& lhs, STPieceValues& rhs )
+bool operator==( PieceValues::STPieceValues& lhs, PieceValues::STPieceValues& rhs )
 {
     if( lhs.QueenValue != rhs.QueenValue ) return false;
     if( lhs.RookValue != rhs.RookValue ) return false;
@@ -77,61 +75,49 @@ bool operator==( STPieceValues& lhs, STPieceValues& rhs )
 
 void TestPieceValues::no_change_exit_ok()
 {
-    STPieceValues current_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
+    PieceValues::STPieceValues current_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
 
     MockPieceValuesOk test_object( current_values );
 
-	std::pair<bool,STPieceValues> result;
-    test_object.push_stpiece_values( current_values );
-    result.first = test_object.get_new_piece_values( );
-	result.second = test_object.pull_stpiece_values();
+    test_object.init_piece_values( current_values );
 
-    CPPUNIT_ASSERT( result.first == true );
-    CPPUNIT_ASSERT( result.second == current_values );
+    CPPUNIT_ASSERT_EQUAL( true, test_object.choose_piece_values( ) );
+    CPPUNIT_ASSERT( test_object == current_values );
 }
 
 void TestPieceValues::no_change_exit_cancel()
 {
-    STPieceValues current_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
+    PieceValues::STPieceValues current_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
 
     MockPieceValuesCancel test_object( current_values );
 
-	std::pair<bool,STPieceValues> result;
-    test_object.push_stpiece_values( current_values );
-    result.first = test_object.get_new_piece_values( );
-	result.second = test_object.pull_stpiece_values();
+    test_object.init_piece_values( current_values );
 
-    CPPUNIT_ASSERT( result.first == false );
+    CPPUNIT_ASSERT_EQUAL( false, test_object.choose_piece_values( ) );
 }
 
 void TestPieceValues::change_exit_ok()
 {
-    STPieceValues new_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
-    STPieceValues current_values = { .QueenValue = 6, .RookValue = 7, .BishopValue = 8, .KnightValue = 9, .PawnValue = 10 };
+    PieceValues::STPieceValues new_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
+    PieceValues::STPieceValues current_values = { .QueenValue = 6, .RookValue = 7, .BishopValue = 8, .KnightValue = 9, .PawnValue = 10 };
 
     MockPieceValuesOk test_object( new_values );
 
-    std::pair<bool,STPieceValues> result;
-    test_object.push_stpiece_values( current_values );
-    result.first = test_object.get_new_piece_values( );
-	result.second = test_object.pull_stpiece_values();
+    test_object.init_piece_values( current_values );
 
-    CPPUNIT_ASSERT( result.first == true );
-    CPPUNIT_ASSERT( result.second == new_values );
+    CPPUNIT_ASSERT_EQUAL( true, test_object.choose_piece_values( ) );
+    CPPUNIT_ASSERT( test_object == new_values );
 }
 
 void TestPieceValues::change_exit_cancel()
 {
-    STPieceValues new_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
-    STPieceValues current_values = { .QueenValue = 6, .RookValue = 7, .BishopValue = 8, .KnightValue = 9, .PawnValue = 10 };
+    PieceValues::STPieceValues new_values = { .QueenValue = 1, .RookValue = 2, .BishopValue = 3, .KnightValue = 4, .PawnValue = 5 };
+    PieceValues::STPieceValues current_values = { .QueenValue = 6, .RookValue = 7, .BishopValue = 8, .KnightValue = 9, .PawnValue = 10 };
 
     MockPieceValuesCancel test_object( new_values );
 
-	std::pair<bool,STPieceValues> result;
-    test_object.push_stpiece_values( current_values );
-    result.first = test_object.get_new_piece_values( );
-	result.second = test_object.pull_stpiece_values();
+    test_object.init_piece_values( current_values );
 
-    CPPUNIT_ASSERT( result.first == false );
+    CPPUNIT_ASSERT_EQUAL( false, test_object.choose_piece_values( ) );
 }
 

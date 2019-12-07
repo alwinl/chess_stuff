@@ -266,7 +266,7 @@ void ChessEngine::init_piece_values()
 
 void ChessEngine::change_piece_values( PieceValues* piece_value )
 {
-	STPieceValues current;
+	PieceValues::STPieceValues current;
 
     current.QueenValue  = piece_values['Q'] >> 4;
     current.RookValue   = piece_values['R'] >> 4;
@@ -275,21 +275,21 @@ void ChessEngine::change_piece_values( PieceValues* piece_value )
     current.PawnValue   = piece_values['P'] >> 4;
 
 #if 0
-    pair<bool,STPieceValues> result = piece_value->get_new_piece_values( current);
+    pair<bool,PieceValues::STPieceValues> result = piece_value->choose_piece_values( current);
 
     if( !result.first )
 		return;
 #else
-	pair<bool,STPieceValues> result;
+	pair<bool,PieceValues::STPieceValues> result;
 
-    piece_value->push_stpiece_values( current );
+    piece_value->init_piece_values( current );
 
-    result.first = piece_value->get_new_piece_values( );
+    result.first = piece_value->choose_piece_values( );
 
     if( !result.first )
 		return;
 
-	result.second = piece_value->pull_stpiece_values();
+	result.second = piece_value->get_piece_values();
 #endif
 	piece_values['Q'] = result.second.QueenValue << 4;
 	piece_values['R'] = result.second.RookValue << 4;
