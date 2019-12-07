@@ -30,7 +30,6 @@
 #include <gtkmm.h>
 
 #include "../logicsrc/pods.h"
-
 #include "../logicsrc/colourchooser.h"
 
 class ChessController;

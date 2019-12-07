@@ -23,8 +23,6 @@
 #include "chesscontroller.h"
 #include "chessboard.h"
 
-#include "../logicsrc/pods.h"
-
 /**-----------------------------------------------------------------------------
  * \brief Director of all screen real estate supplied to the application
  *

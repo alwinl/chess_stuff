@@ -20,17 +20,13 @@
  */
 
 #include "chesscontroller.h"
+#include "chessappbase.h"
 #include "chessview.h"
 #include "chessboard.h"
 #include "dlgcolours.h"
 #include "dlgtimeinputter.h"
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
-
-#include "../logicsrc/chessappbase.h"
-
-
-using namespace std;
 
 /**-----------------------------------------------------------------------------
  * \brief Create an instance of the application
@@ -113,7 +109,7 @@ void ChessController::get_widgets()
     ui_model->get_widget( "widStatusBar", status_bar );
 	ui_model->get_widget_derived("canvas", board, *this );
 
-	vector<string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
+	std::vector<std::string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
 		ui_model->get_widget( level_widgets[level], chkLevel[level] );
 		chkLevel[level]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_level ), level) );
@@ -121,7 +117,7 @@ void ChessController::get_widgets()
 
 	chkLevel[EASY]->set_active();
 
-	vector<string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
+	std::vector<std::string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
 	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
 		ui_model->get_widget( turn_widgets[turn], chkTurn[turn] );
 		chkTurn[turn]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ), turn) );
@@ -176,13 +172,13 @@ void ChessController::on_activate()
  */
 void ChessController::on_action_new()
 {
-	status_bar->push( string("") );
+	status_bar->push( std::string("") );
 
 	guiFilenameChooser->new_file();
 
 	director->new_game(  );
 
-	status_bar->push( string("New game") );
+	status_bar->push( std::string("New game") );
 }
 
 /**-----------------------------------------------------------------------------
@@ -190,7 +186,7 @@ void ChessController::on_action_new()
  */
 void ChessController::on_action_open()
 {
-	status_bar->push( string("") );
+	status_bar->push( std::string("") );
 
 	std::string open_name = guiFilenameChooser->load_file();
 
@@ -205,7 +201,7 @@ void ChessController::on_action_open()
 		return;
 	}
 
-	status_bar->push( string("Opened ") + open_name );
+	status_bar->push( std::string("Opened ") + open_name );
 }
 
 /**-----------------------------------------------------------------------------
@@ -213,7 +209,7 @@ void ChessController::on_action_open()
  */
 void ChessController::on_action_save()
 {
-	status_bar->push( string("") );
+	status_bar->push( std::string("") );
 
 	std::string save_name = guiFilenameChooser->save_file();
 
@@ -228,7 +224,7 @@ void ChessController::on_action_save()
 		return;
 	}
 
-	status_bar->push( string("Saved ") + save_name );
+	status_bar->push( std::string("Saved ") + save_name );
 }
 
 /**-----------------------------------------------------------------------------
@@ -236,7 +232,7 @@ void ChessController::on_action_save()
  */
 void ChessController::on_action_save_as()
 {
-	status_bar->push( string("") );
+	status_bar->push( std::string("") );
 
 	std::string save_name = guiFilenameChooser->save_file_as();
 
@@ -251,7 +247,7 @@ void ChessController::on_action_save_as()
 		return;
 	}
 
-	status_bar->push( string("Saved ") + save_name );
+	status_bar->push( std::string("Saved ") + save_name );
 }
 
 
