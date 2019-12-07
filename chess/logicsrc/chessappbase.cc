@@ -19,35 +19,7 @@
  *
  */
 
-#include "chessappbase.h"
-#include "chessengine.h"
+//#include "chessappbase.h"
+//#include "chessengine.h"
 
-ChessAppBase::ChessAppBase( ChessEngine* engine_init ) :  engine(engine_init)  { }
 
-ChessAppBase::~ChessAppBase() { }
-
-void ChessAppBase::do_move( STSquare start_square, STSquare end_square ){ engine->do_move( start_square, end_square ); };
-void ChessAppBase::cancel_move() { engine->cancel_move(); };
-void ChessAppBase::advance() { engine->advance(); };
-STSquare ChessAppBase::hint() { return engine->hint(); };
-
-bool ChessAppBase::toggle_multiplayer() { return engine->toggle_multiplayer(); };
-void ChessAppBase::do_demo() { engine->do_demo(); };
-
-void ChessAppBase::arrange_start() { engine->arranging_start(); };
-void ChessAppBase::arrange_clear() { engine->arranging_clear(); };
-void ChessAppBase::put_piece_on_square( STSquare square, char piece ) { engine->put_piece_on_square( square, piece ); };
-void ChessAppBase::arrange_turn( eTurns new_turn ) { engine->arrange_turn( new_turn ); }
-bool ChessAppBase::arrange_end( bool canceled ) { return engine->arranging_end(canceled); };
-
-void ChessAppBase::new_game() { engine->new_game(); };
-bool ChessAppBase::can_quit() { return engine->can_quit(); };
-bool ChessAppBase::open_file( std::string name ) { return engine->open_file( name ); };
-bool ChessAppBase::save_file( std::string name ) { return engine->save_file( name ); };
-
-void ChessAppBase::change_piece_values( PieceValues * piece_values ) { engine->change_piece_values( piece_values); };
-
-void ChessAppBase::undo() { engine->undo(); }
-void ChessAppBase::redo() { engine->redo(); }
-void ChessAppBase::stop_thinking() { engine->stop_thinking(); }
-void ChessAppBase::change_level( eLevels new_level, int time_parameter ) { engine->change_level( new_level, time_parameter ); }

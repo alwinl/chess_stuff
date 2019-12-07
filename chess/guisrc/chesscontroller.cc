@@ -28,20 +28,22 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
+#include "../logicsrc/chessengine.h"
+
 /**-----------------------------------------------------------------------------
  * \brief Create an instance of the application
  *
  * \return Glib::RefPtr<ChessController>
  */
-Glib::RefPtr<ChessController> ChessController::create( ChessAppBase* director_init )
+Glib::RefPtr<ChessController> ChessController::create( ChessEngine* engine_init )
 {
-    return Glib::RefPtr<ChessController>( new ChessController( director_init ) );
+    return Glib::RefPtr<ChessController>( new ChessController( engine_init ) );
 }
 
 /**-----------------------------------------------------------------------------
  * \brief Application class constructor
  */
-ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Application( "net.dnatechnologies.chess" ), director( director_init )
+ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application( "net.dnatechnologies.chess" ), engine( engine_init )
 {
 	Glib::set_application_name("GTKmm Chess");
 
@@ -176,7 +178,7 @@ void ChessController::on_action_new()
 
 	guiFilenameChooser->new_file();
 
-	director->new_game(  );
+	engine->new_game(  );
 
 	status_bar->push( std::string("New game") );
 }
@@ -193,7 +195,7 @@ void ChessController::on_action_open()
 	if( open_name.empty() )
 		return;
 
-	if( ! director->open_file( open_name ) ) {
+	if( ! engine->open_file( open_name ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -216,7 +218,7 @@ void ChessController::on_action_save()
 	if( save_name.empty() )
 		return;
 
-	if( ! director->save_file( save_name ) ) {
+	if( ! engine->save_file( save_name ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -239,7 +241,7 @@ void ChessController::on_action_save_as()
 	if( save_name.empty() )
 		return;
 
-	if( ! director->save_file( save_name ) ) {
+	if( ! engine->save_file( save_name ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -254,13 +256,13 @@ void ChessController::on_action_save_as()
 /**-----------------------------------------------------------------------------
  * \brief Handle a user request to end the program
  *
- * We first ask the director if we need to save data.
+ * We first ask the engine if we need to save data.
  * If not we can quit right away.
  * If we have unsaved data, pop up a box to confirm to lose the data
  */
 void ChessController::on_action_quit()
 {
-	if( director->can_quit() )
+	if( engine->can_quit() )
 		quit();
 
 	Gtk::MessageDialog dlg( *view, "Unsaved game. You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
@@ -273,7 +275,7 @@ void ChessController::on_action_quit()
  */
 void ChessController::on_action_play()
 {
-	director->advance(  );
+	engine->advance(  );
 }
 
 /**-----------------------------------------------------------------------------
@@ -281,7 +283,7 @@ void ChessController::on_action_play()
  */
 void ChessController::on_action_hint()
 {
-	board->highlight( director->hint() );
+	board->highlight( engine->hint() );
 }
 
 /**-----------------------------------------------------------------------------
@@ -289,7 +291,7 @@ void ChessController::on_action_hint()
  */
 void ChessController::on_action_undo()
 {
-	director->undo();
+	engine->undo();
 }
 
 /**-----------------------------------------------------------------------------
@@ -297,7 +299,7 @@ void ChessController::on_action_undo()
  */
 void ChessController::on_action_redo()
 {
-	director->redo();
+	engine->redo();
 }
 
 /**-----------------------------------------------------------------------------
@@ -305,7 +307,7 @@ void ChessController::on_action_redo()
  */
 void ChessController::on_action_arrange()
 {
-	director->arrange_start();
+	engine->arranging_start();
 
 	view->show_menu( ChessWindow::MENU_ARRANGE );
 	board->set_edit( true );
@@ -316,7 +318,7 @@ void ChessController::on_action_arrange()
  */
 void ChessController::on_action_twoplayer()
 {
-	view->show_player_option( director->toggle_multiplayer() );
+	view->show_player_option( engine->toggle_multiplayer() );
 }
 
 /**-----------------------------------------------------------------------------
@@ -324,7 +326,7 @@ void ChessController::on_action_twoplayer()
  */
 void ChessController::on_action_demomode()
 {
-	director->do_demo();
+	engine->do_demo();
 }
 
 /**-----------------------------------------------------------------------------
@@ -332,7 +334,7 @@ void ChessController::on_action_demomode()
  */
 void ChessController::on_action_piecevalues()
 {
-	director->change_piece_values( guiPieceValues );
+	engine->change_piece_values( guiPieceValues );
 }
 
 /**-----------------------------------------------------------------------------
@@ -345,19 +347,17 @@ void ChessController::on_action_level( unsigned int level)
 
 	if( (eLevels)level == TIMED ) {
 
-		if( guiTimeInputter->time_per_move( 120 ) ) {
-			director->change_level( (eLevels)level, guiTimeInputter->get_time() );
-		}
+		if( guiTimeInputter->time_per_move( 120 ) )
+			engine->change_level( (eLevels)level, guiTimeInputter->get_time() );
 
 	} else if( (eLevels)level == TOTALTIME ) {
 
-	    if( guiTimeInputter->total_game_time( 60 ) ) {
-			director->change_level( (eLevels)level, guiTimeInputter->get_time() );
-	    }
+	    if( guiTimeInputter->total_game_time( 60 ) )
+			engine->change_level( (eLevels)level, guiTimeInputter->get_time() );
 
 	} else {
 
-		director->change_level( (eLevels)level, 0 );
+		engine->change_level( (eLevels)level, 0 );
 	}
 }
 
@@ -413,7 +413,7 @@ void ChessController::on_action_help_about()
  */
 void ChessController::on_action_arrange_done()
 {
-	if( ! director->arrange_end( false ) ) {
+	if( ! engine->arranging_end( false ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -430,7 +430,7 @@ void ChessController::on_action_arrange_done()
  */
 void ChessController::on_action_arrange_clear()
 {
-	director->arrange_clear();
+	engine->arranging_clear();
 }
 
 /**-----------------------------------------------------------------------------
@@ -439,7 +439,7 @@ void ChessController::on_action_arrange_clear()
 void ChessController::on_action_arrange_turn( unsigned int turn )
 {
 	if( chkTurn[turn]->get_active() )
-		director->arrange_turn( (eTurns)turn );
+		engine->arrange_turn( (eTurns)turn );
 }
 
 /**-----------------------------------------------------------------------------
@@ -447,7 +447,7 @@ void ChessController::on_action_arrange_turn( unsigned int turn )
  */
 void ChessController::on_action_arrange_cancel()
 {
-	director->arrange_end( true );
+	engine->arranging_end( true );
 
 	view->show_menu( ChessWindow::MENU_GAME );
 	board->set_edit( false );
@@ -458,7 +458,7 @@ void ChessController::on_action_arrange_cancel()
  */
 void ChessController::on_action_thinking_stop()
 {
-	director->stop_thinking();
+	engine->stop_thinking();
 }
 
 /*-----------------------------------------------------------------------------
@@ -469,13 +469,13 @@ void ChessController::on_action_thinking_stop()
  * \brief
  */
 void ChessController::put_piece_on_square( STSquare square, char piece )
-	{ director->put_piece_on_square( square, piece ); }
+	{ engine->put_piece_on_square( square, piece ); }
 
 /**-----------------------------------------------------------------------------
  * \brief
  */
 void ChessController::make_move(  STSquare start_square, STSquare end_square )
-	{ director->do_move( start_square, end_square ); }
+	{ engine->do_move( start_square, end_square ); }
 
 /*-----------------------------------------------------------------------------
  * The next functions are called from the engine

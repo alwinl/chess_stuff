@@ -34,6 +34,7 @@ class FilenameChooser;
 class ColourChooser;
 
 class ChessAppBase;
+class ChessEngine;
 
 class ChessWindow;
 class ChessBoard;
@@ -52,7 +53,7 @@ class ChessController : public Gtk::Application
 {
 public:
 	// Instance creator as constructor is private
-	static Glib::RefPtr<ChessController> create( ChessAppBase* director_init );
+	static Glib::RefPtr<ChessController> create( ChessEngine* engine_init );
 	virtual ~ChessController();
 
 	// These functions are called from the logic
@@ -67,7 +68,7 @@ public:
 
 private:
 	// Non public construction to ensure only references can be obtained. Private as class is terminal
-	ChessController( ChessAppBase* director_init );
+	ChessController( ChessEngine* engine_init );
 
 	// Initialisation
 	virtual void on_startup();
@@ -115,7 +116,7 @@ private:
 	void get_widgets();
 
     // Data
-	ChessAppBase* director;
+    ChessEngine* engine;
 };
 
 #endif // APPCONTROLLER_H

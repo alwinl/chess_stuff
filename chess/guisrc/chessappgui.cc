@@ -33,7 +33,7 @@ ChessAppGUI::~ChessAppGUI()
 /* called from main function */;
 int ChessAppGUI::run(  int argc, char *argv[] )
 {
-	controller = ChessController::create( this );
+	controller = ChessController::create( get_engine() );
 	return controller->run( argc, argv );
 }
 

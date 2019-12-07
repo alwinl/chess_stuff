@@ -37,8 +37,8 @@ class ChessEngine;
 class ChessAppBase
 {
 public:
-	ChessAppBase( ChessEngine* engine_init );
-	virtual ~ChessAppBase();
+	ChessAppBase( ChessEngine* engine_init ) :  engine(engine_init)  { };
+	virtual ~ChessAppBase() { };
 
 	/* called from main function */;
 	virtual int run(  int argc, char *argv[] ) = 0;
@@ -48,31 +48,7 @@ public:
     virtual void set_info(  STInfo& info ) = 0;
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 
-    /* called from GUI */
-    void undo();
-    void redo();
-    void stop_thinking();
-    void change_level( eLevels new_level, int time_parameter );
-    void do_move( STSquare start_square, STSquare end_square );
-    void cancel_move();
-    void advance();
-    STSquare hint();
-
-    bool toggle_multiplayer();
-    void do_demo();
-
-    void arrange_start();
-    void arrange_clear();
-    void put_piece_on_square( STSquare square, char piece );
-    void arrange_turn( eTurns new_turn );
-    bool arrange_end( bool canceled );
-
-    void new_game();
-    bool can_quit();
-    bool open_file( std::string name );
-    bool save_file( std::string name );
-
-    void change_piece_values( PieceValues * piece_values );
+    ChessEngine* get_engine() const { return engine; };
 
 private:
 	ChessEngine* engine;
