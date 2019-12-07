@@ -189,7 +189,7 @@ void ChessController::on_action_new()
  */
 void ChessController::on_action_open()
 {
-	pair<bool,string> result = guiOpenFile->get_filename( "", "~/" );
+	pair<bool,string> result = guiOpenFile->choose_filename( "", "~/" );
 
 	if( ! result.first )
 		return;
@@ -231,7 +231,7 @@ void ChessController::on_action_save()
  */
 void ChessController::on_action_save_as()
 {
-	pair<bool,string> result = guiSaveFile->get_filename( filename, "~/" );
+	pair<bool,string> result = guiSaveFile->choose_filename( filename, "~/" );
 
 	if( !result.first )
 		return;

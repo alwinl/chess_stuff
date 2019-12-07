@@ -63,7 +63,7 @@ bool GUIFilenameChooser::query_file()
     return response == Gtk::RESPONSE_OK;
 }
 
-std::string	GUIFilenameChooser::get_filename( )
+std::string	GUIFilenameChooser::result( )
 {
     return dlg->get_filename( );
 }

@@ -21,15 +21,15 @@
 
 #include "filenamechooser.h"
 
-std::pair<bool,std::string> FilenameChooser::get_filename( std::string aname, std::string working_dir )
+std::pair<bool,std::string> FilenameChooser::choose_filename( std::string aname, std::string working_dir )
 {
 	set_working_dir( working_dir );
 	set_filename( aname );
 
-	bool do_it = query_file();
-	if( do_it )
-		aname = get_filename( );
+	bool ret = query_file();
+	if( ret )
+		filename = result( );
 
-	return std::pair<bool,std::string>( do_it, aname );
+	return std::pair<bool,std::string>( ret, filename );
 }
 

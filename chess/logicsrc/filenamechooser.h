@@ -31,13 +31,17 @@ public:
 	FilenameChooser() {};
 	virtual ~FilenameChooser() {};
 
-    std::pair<bool,std::string> get_filename( std::string aname, std::string working_dir );
+    std::pair<bool,std::string> choose_filename( std::string aname, std::string working_dir );
+    std::string get_filename() const { return filename; };
 
 protected:
 	virtual void set_working_dir( std::string working_dir ) = 0;
 	virtual void set_filename( std::string aname ) = 0;
 	virtual bool query_file() = 0;
-	virtual std::string	get_filename( ) = 0;
+	virtual std::string	result( ) = 0;
+
+private:
+	std::string filename;
 };
 
 #endif // FILENAMECHOOSER_H
