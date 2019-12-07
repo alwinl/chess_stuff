@@ -21,49 +21,51 @@
 
 #include "dlgfilenamechooser.h"
 
-GUIFilenameChooser::GUIFilenameChooser( Gtk::Window& parent, Gtk::FileChooserAction action ) : FilenameChooser()
+std::string GUIFilenameChooser::get_load_name()
 {
-	std::string title = ( action == Gtk::FILE_CHOOSER_ACTION_OPEN ) ? "Restore chess game" : "Save chess game";
-
-    dlg = new Gtk::FileChooserDialog( parent, title, action );
+	Gtk::FileChooserDialog * dlg = new Gtk::FileChooserDialog( parent, "Restore chess game", Gtk::FILE_CHOOSER_ACTION_OPEN );
 
 	dlg->add_button( Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL );
-	dlg->add_button( ( action == Gtk::FILE_CHOOSER_ACTION_OPEN ) ? Gtk::Stock::OPEN : Gtk::Stock::SAVE, Gtk::RESPONSE_OK );
+	dlg->add_button( Gtk::Stock::OPEN, Gtk::RESPONSE_OK );
 
 	Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
 	filter_chess->set_name( "Chess Files" );
 	filter_chess->add_pattern( "*.chess" );
 	dlg->add_filter( filter_chess );
 
-	if( action == Gtk::FILE_CHOOSER_ACTION_OPEN ) {
-		Glib::RefPtr<Gtk::FileFilter> filter_all = Gtk::FileFilter::create();
-		filter_all->set_name( "All Files" );
-		filter_all->add_pattern( "*.*" );
-		dlg->add_filter( filter_all );
-	}
+	Glib::RefPtr<Gtk::FileFilter> filter_all = Gtk::FileFilter::create();
+	filter_all->set_name( "All Files" );
+	filter_all->add_pattern( "*.*" );
+	dlg->add_filter( filter_all );
+
+	std::string ret;
+
+	if( dlg->run() == Gtk::RESPONSE_OK )
+		ret = dlg->get_filename( );
+
+	delete dlg;
+
+	return ret;
 }
 
-void GUIFilenameChooser::set_working_dir( std::string working_dir )
+std::string GUIFilenameChooser::get_save_name()
 {
-    dlg->set_current_folder( working_dir );
-}
+    Gtk::FileChooserDialog * dlg = new Gtk::FileChooserDialog( parent, "Save chess game", Gtk::FILE_CHOOSER_ACTION_SAVE );
 
-void GUIFilenameChooser::set_filename( std::string aname )
-{
-	if( dlg->get_action() == Gtk::FILE_CHOOSER_ACTION_SAVE )
-		dlg->set_current_name( aname );
-}
+	dlg->add_button( Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL );
+	dlg->add_button( Gtk::Stock::SAVE, Gtk::RESPONSE_OK );
 
-bool GUIFilenameChooser::query_file()
-{
-    int response = dlg->run();
+	Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
+	filter_chess->set_name( "Chess Files" );
+	filter_chess->add_pattern( "*.chess" );
+	dlg->add_filter( filter_chess );
 
-    dlg->hide();
+	std::string ret;
 
-    return response == Gtk::RESPONSE_OK;
-}
+	if( dlg->run() == Gtk::RESPONSE_OK )
+		ret = dlg->get_filename( );
 
-std::string	GUIFilenameChooser::result( )
-{
-    return dlg->get_filename( );
+	delete dlg;
+
+	return ret;
 }

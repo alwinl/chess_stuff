@@ -29,17 +29,15 @@
 class GUIFilenameChooser : public FilenameChooser
 {
 public:
-	GUIFilenameChooser( Gtk::Window& parent, Gtk::FileChooserAction action );
-	virtual ~GUIFilenameChooser() { delete dlg; }
+	GUIFilenameChooser( Gtk::Window& aParent ) : FilenameChooser(), parent(aParent) {};
+	virtual ~GUIFilenameChooser() {};
 
 protected:
-	virtual void set_working_dir( std::string working_dir );
-	virtual bool query_file();
-	virtual void set_filename( std::string aname );
-	virtual std::string	result( );
+	virtual std::string get_load_name();
+	virtual std::string get_save_name();
 
 private:
-	Gtk::FileChooserDialog * dlg;
+	Gtk::Window& parent;
 };
 
 #endif // GUIFILENAMECHOOSER_H

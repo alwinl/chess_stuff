@@ -25,20 +25,27 @@
 #include <string>
 #include <utility>
 
+/** \brief Encapsulation of filename
+ *
+ * This class is the interface to filename encapsulation
+ * The idea is that an implementation class actually interacts
+ * with either a user (through a GUI or a CLI) or a system
+ * to manipulate the filename entity.
+ */
 class FilenameChooser
 {
 public:
 	FilenameChooser() {};
 	virtual ~FilenameChooser() {};
 
-    std::pair<bool,std::string> choose_filename( std::string aname, std::string working_dir );
-    std::string get_filename() const { return filename; };
+	bool new_file();
+	std::string load_file();
+	std::string save_file();
+	std::string save_file_as();
 
 protected:
-	virtual void set_working_dir( std::string working_dir ) = 0;
-	virtual void set_filename( std::string aname ) = 0;
-	virtual bool query_file() = 0;
-	virtual std::string	result( ) = 0;
+	virtual std::string get_load_name() = 0;
+	virtual std::string get_save_name() = 0;
 
 private:
 	std::string filename;

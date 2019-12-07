@@ -52,8 +52,7 @@ ChessController::ChessController( ChessAppBase* director_init ) : Gtk::Applicati
 	guiColourChooser = nullptr;
 	guiTimeInputter = nullptr;
 	guiPieceValues = nullptr;
-    guiOpenFile = nullptr;
-    guiSaveFile = nullptr;
+    guiFilenameChooser = nullptr;
 
 	board = nullptr;
 }
@@ -66,8 +65,7 @@ ChessController::~ChessController( )
 	delete guiColourChooser;
 	delete guiTimeInputter;
 	delete guiPieceValues;
-    delete guiOpenFile;
-    delete guiSaveFile;
+    delete guiFilenameChooser;
 }
 
 /**-----------------------------------------------------------------------------
@@ -142,8 +140,7 @@ void ChessController::get_widgets()
 	guiColourChooser = new GUIColourChooser( ui_model, *view, default_colours );
 	guiTimeInputter = new GUITimeInputter( ui_model, *view );
 	guiPieceValues = new GUIPieceValues( ui_model, *view );
-	guiOpenFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_OPEN );
-	guiSaveFile = new GUIFilenameChooser( *view, Gtk::FILE_CHOOSER_ACTION_SAVE );
+	guiFilenameChooser = new GUIFilenameChooser( *view );
 }
 
 /**-----------------------------------------------------------------------------
@@ -179,6 +176,10 @@ void ChessController::on_activate()
  */
 void ChessController::on_action_new()
 {
+	status_bar->push( string("") );
+
+	guiFilenameChooser->new_file();
+
 	director->new_game(  );
 
 	status_bar->push( string("New game") );
@@ -189,12 +190,14 @@ void ChessController::on_action_new()
  */
 void ChessController::on_action_open()
 {
-	pair<bool,string> result = guiOpenFile->choose_filename( "", "~/" );
+	status_bar->push( string("") );
 
-	if( ! result.first )
+	std::string open_name = guiFilenameChooser->load_file();
+
+	if( open_name.empty() )
 		return;
 
-	if( ! director->open_file( result.second ) ) {
+	if( ! director->open_file( open_name ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -202,7 +205,7 @@ void ChessController::on_action_open()
 		return;
 	}
 
-	status_bar->push( string("Opened ") + result.second );
+	status_bar->push( string("Opened ") + open_name );
 }
 
 /**-----------------------------------------------------------------------------
@@ -210,12 +213,14 @@ void ChessController::on_action_open()
  */
 void ChessController::on_action_save()
 {
-	if( filename.empty() ) {
-		on_action_save_as();
-		return;
-	}
+	status_bar->push( string("") );
 
-	if( ! director->save_file( filename ) ) {
+	std::string save_name = guiFilenameChooser->save_file();
+
+	if( save_name.empty() )
+		return;
+
+	if( ! director->save_file( save_name ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -223,7 +228,7 @@ void ChessController::on_action_save()
 		return;
 	}
 
-	status_bar->push( string("Saved ") + filename );
+	status_bar->push( string("Saved ") + save_name );
 }
 
 /**-----------------------------------------------------------------------------
@@ -231,15 +236,14 @@ void ChessController::on_action_save()
  */
 void ChessController::on_action_save_as()
 {
-	pair<bool,string> result = guiSaveFile->choose_filename( filename, "~/" );
+	status_bar->push( string("") );
 
-	if( !result.first )
+	std::string save_name = guiFilenameChooser->save_file_as();
+
+	if( save_name.empty() )
 		return;
 
-	if( result.second.find( ".chess") == string::npos )     // no .chess added
-		result.second += string(".chess");
-
-	if( ! director->save_file( result.second ) ) {
+	if( ! director->save_file( save_name ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -247,8 +251,7 @@ void ChessController::on_action_save_as()
 		return;
 	}
 
-	filename = result.second;
-	status_bar->push( string("Saved ") + filename );
+	status_bar->push( string("Saved ") + save_name );
 }
 
 

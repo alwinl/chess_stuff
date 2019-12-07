@@ -46,6 +46,7 @@
 					<Add directory="logicsrc/" />
 					<Add directory="./" />
 					<Add directory="logicsrc" />
+					<Add directory="logictest" />
 				</Compiler>
 			</Target>
 		</Build>
@@ -174,6 +175,12 @@
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testfentranslator.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testfilenamechooser.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testfilenamechooser.h">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testpiecevalues.cc">

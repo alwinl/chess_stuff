@@ -33,12 +33,22 @@ public:
 
 	CPPUNIT_TEST_SUITE( TestFilenameChooser );
 
-	CPPUNIT_TEST( get_new_filename );
+	CPPUNIT_TEST( test_new_file );
+	CPPUNIT_TEST( test_load_file );
+	CPPUNIT_TEST( test_save_file );
+	CPPUNIT_TEST( test_save_file_as );
+	CPPUNIT_TEST( test_save_file_empty );
+	CPPUNIT_TEST( test_load_file_empty );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
-	void get_new_filename();
+	void test_new_file();
+	void test_load_file();
+	void test_save_file();
+	void test_save_file_as();
+	void test_save_file_empty();
+	void test_load_file_empty();
 };
 
 #endif // TESTFILENAMECHOOSER_H

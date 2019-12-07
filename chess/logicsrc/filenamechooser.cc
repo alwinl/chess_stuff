@@ -21,15 +21,42 @@
 
 #include "filenamechooser.h"
 
-std::pair<bool,std::string> FilenameChooser::choose_filename( std::string aname, std::string working_dir )
+bool FilenameChooser::new_file()
 {
-	set_working_dir( working_dir );
-	set_filename( aname );
+	// Check if dirty and ask to save
 
-	bool ret = query_file();
-	if( ret )
-		filename = result( );
-
-	return std::pair<bool,std::string>( ret, filename );
+	filename.clear();
+	return true;
 }
 
+std::string FilenameChooser::load_file()
+{
+	// Check if dirty and ask to save
+
+	filename = get_load_name();
+
+	return filename;
+}
+
+std::string FilenameChooser::save_file()
+{
+	if( filename.empty() )
+		filename = get_save_name();
+
+	if( ! filename.empty() )
+		if( filename.find( ".chess") == std::string::npos )     // no .chess added
+			filename += std::string(".chess");
+
+	return filename;
+}
+
+std::string FilenameChooser::save_file_as()
+{
+	filename = get_save_name();
+
+	if( ! filename.empty() )
+		if( filename.find( ".chess") == std::string::npos )     // no .chess added
+			filename += std::string(".chess");
+
+	return filename;
+}

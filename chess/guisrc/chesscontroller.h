@@ -110,14 +110,12 @@ private:
     ColourChooser * guiColourChooser;
     TimeInputter * guiTimeInputter;
     PieceValues * guiPieceValues;
-    FilenameChooser * guiOpenFile;
-    FilenameChooser * guiSaveFile;
+    FilenameChooser * guiFilenameChooser;
 
 	void get_widgets();
 
     // Data
 	ChessAppBase* director;
-	std::string filename;
 };
 
 #endif // APPCONTROLLER_H
