@@ -134,6 +134,10 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="guisrc/engineinterface.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="guisrc/pieces.png">
 			<Option target="Debug" />
 			<Option target="Release" />

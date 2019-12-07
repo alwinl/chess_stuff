@@ -28,7 +28,7 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
-#include "../logicsrc/chessengine.h"
+#include "engineinterface.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Create an instance of the application
@@ -109,7 +109,7 @@ void ChessController::get_widgets()
 
 	ui_model->get_widget_derived("main_view", view );
     ui_model->get_widget( "widStatusBar", status_bar );
-	ui_model->get_widget_derived("canvas", board, *this );
+	ui_model->get_widget_derived("canvas", board, EngineInterface(*engine) );
 
 	std::vector<std::string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
@@ -460,22 +460,6 @@ void ChessController::on_action_thinking_stop()
 {
 	engine->stop_thinking();
 }
-
-/*-----------------------------------------------------------------------------
- *  The next functions are call backs from the board
- */
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::put_piece_on_square( STSquare square, char piece )
-	{ engine->put_piece_on_square( square, piece ); }
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::make_move(  STSquare start_square, STSquare end_square )
-	{ engine->do_move( start_square, end_square ); }
 
 /*-----------------------------------------------------------------------------
  * The next functions are called from the engine

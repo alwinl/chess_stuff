@@ -32,7 +32,7 @@
 #include "../logicsrc/pods.h"
 #include "../logicsrc/colourchooser.h"
 
-class ChessController;
+#include "engineinterface.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
@@ -47,7 +47,7 @@ private:
 	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
 
 public:
-	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& acontroller );
+	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, EngineInterface anEngine );
 
     void set_piece_positions( std::string FEN_string );
 	void set_info( STInfo& info );
@@ -113,7 +113,7 @@ private:
 
 	int timeout_counter;
 
-	ChessController& controller;
+	EngineInterface engine;
 };
 
 #endif // CHESSBOARD_H_INCLUDED

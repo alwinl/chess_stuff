@@ -33,7 +33,6 @@ class PieceValues;
 class FilenameChooser;
 class ColourChooser;
 
-class ChessAppBase;
 class ChessEngine;
 
 class ChessWindow;
@@ -61,10 +60,6 @@ public:
 	void set_info( STInfo info );
 	void set_thinking( bool on );
 	void animate( STSquare start_square, STSquare end_square, char piece );
-
-    // These two functions are call backs from the board
-	void put_piece_on_square( STSquare square, char piece );
-	void make_move(  STSquare start_square, STSquare end_square );
 
 private:
 	// Non public construction to ensure only references can be obtained. Private as class is terminal

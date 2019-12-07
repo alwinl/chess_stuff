@@ -20,7 +20,6 @@
  */
 
 #include "chessboard.h"
-#include "chesscontroller.h"
 
 /**-----------------------------------------------------------------------------
  * \brief ChessBoard constructor
@@ -30,8 +29,8 @@
  * \param acontroller ChessController&
  *
  */
-ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, ChessController& acontroller )
-                            : Gtk::DrawingArea(cobject), controller(acontroller)
+ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, EngineInterface anEngine )
+                            : Gtk::DrawingArea(cobject), engine(anEngine)
 {
 	using namespace Cairo;
 
@@ -456,7 +455,7 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
 			start_dragging( (*it).second, mouse_point );
 
-			controller.put_piece_on_square( drag_start_square, ' ' ); // Putting a space is removing the piece
+			engine.put_piece_on_square( drag_start_square, ' ' ); // Putting a space is removing the piece
 		}
 
     } else if( is_edit && edit_outline.intersects( mouse_pos ) ) {
@@ -487,9 +486,9 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 
 	if( board_outline.intersects( mouse_pos ) ) {
 		if( is_edit )
-			controller.put_piece_on_square( end_square, piece_code );
+			engine.put_piece_on_square( end_square, piece_code );
 		else
-			controller.make_move( drag_start_square, end_square );
+			engine.make_move( drag_start_square, end_square );
     }
 
     return true;
