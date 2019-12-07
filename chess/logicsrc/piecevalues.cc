@@ -20,7 +20,6 @@
  */
 
 #include "piecevalues.h"
-//#include "pods.h"
 
 void PieceValues::push_stpiece_values( STPieceValues values )
 {

@@ -22,8 +22,6 @@
 #include "chessappgui.h"
 #include "chesscontroller.h"
 
-#include "../logicsrc/pods.h"
-
 ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
 {
 }

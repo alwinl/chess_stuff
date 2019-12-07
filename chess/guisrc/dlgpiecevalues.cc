@@ -21,10 +21,7 @@
 
 #include "dlgpiecevalues.h"
 
-#include "../logicsrc/pods.h"
-
 #include <vector>
-using namespace std;
 
 /** \brief
  */
@@ -35,15 +32,15 @@ public:
 
     DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
-	void set_piece_values( vector<int> new_values );
-	vector<int> piece_values( );
+	void set_piece_values( std::vector<int> new_values );
+	std::vector<int> piece_values( );
 
 private:
     void on_revert_clicked();
 
 	static std::string spinNames[PIECECOUNT];
     Gtk::SpinButton * spnBtns[PIECECOUNT];
-    vector<int> orig_values;
+    std::vector<int> orig_values;
 };
 
 std::string DialogPieceValues::spinNames[] = { "spnQueen", "spnRook", "spnBishop", "spnKnight", "spnPawn" };
@@ -68,7 +65,7 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
     btnRevert->signal_clicked().connect( sigc::mem_fun( *this, &DialogPieceValues::on_revert_clicked ));
 }
 
-void DialogPieceValues::set_piece_values( vector<int> new_values )
+void DialogPieceValues::set_piece_values( std::vector<int> new_values )
 {
 	orig_values.clear();
 
@@ -78,9 +75,9 @@ void DialogPieceValues::set_piece_values( vector<int> new_values )
     }
 }
 
-vector<int> DialogPieceValues::piece_values( )
+std::vector<int> DialogPieceValues::piece_values( )
 {
-	vector<int> new_values;
+	std::vector<int> new_values;
 
     for( int idx = 0; idx < PIECECOUNT; ++idx )
 		new_values.push_back( int( spnBtns[idx]->get_value() ) );
@@ -107,7 +104,7 @@ GUIPieceValues::GUIPieceValues( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Windo
 
 void GUIPieceValues::set_values( STPieceValues& values )
 {
-	vector<int> new_values = { values.QueenValue, values.RookValue, values.BishopValue, values.KnightValue, values.PawnValue };
+	std::vector<int> new_values = { values.QueenValue, values.RookValue, values.BishopValue, values.KnightValue, values.PawnValue };
 
     dlg->set_piece_values( new_values );
 }
@@ -124,7 +121,7 @@ bool GUIPieceValues::manipulate_values()
 STPieceValues GUIPieceValues::piece_values( )
 {
 	STPieceValues values;
-	vector<int> new_values;
+	std::vector<int> new_values;
 
 	new_values = dlg->piece_values( );
 

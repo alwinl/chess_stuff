@@ -22,8 +22,6 @@
 #include "chessboard.h"
 #include "chesscontroller.h"
 
-using namespace std;
-
 /**-----------------------------------------------------------------------------
  * \brief ChessBoard constructor
  *
@@ -64,16 +62,16 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
     pieces_image_offsets['n'] = Gdk::Point( 4 * SQUARE_SIZE, 1 * SQUARE_SIZE );
     pieces_image_offsets['p'] = Gdk::Point( 5 * SQUARE_SIZE, 1 * SQUARE_SIZE );
 
-    info_data.push_back( pair<string,string>("Turn", "empty") );
-    info_data.push_back( pair<string,string>("White", "empty") );
-    info_data.push_back( pair<string,string>("Black", "empty") );
-    info_data.push_back( pair<string,string>("Time", "empty") );
-    info_data.push_back( pair<string,string>("Level", "empty") );
-    info_data.push_back( pair<string,string>("Value", "empty") );
-    info_data.push_back( pair<string,string>("Nodes", "empty") );
-    info_data.push_back( pair<string,string>("N/Sec", "empty") );
-    info_data.push_back( pair<string,string>("Depth", "empty") );
-    info_data.push_back( pair<string,string>("Bestline", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Turn", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("White", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Black", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Time", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Level", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Value", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Nodes", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("N/Sec", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Depth", "empty") );
+    info_data.push_back( std::pair<std::string,std::string>("Bestline", "empty") );
 
     show_bestline_info = true;
 	draw_highlight = false;
@@ -190,7 +188,7 @@ Gdk::Point ChessBoard::square_to_point( STSquare square )
  */
 char ChessBoard::point_to_edit_piece( Gdk::Point point )
 {
-	static string piece_chars = "KQRBNPkqrbnp";
+	static std::string piece_chars = "KQRBNPkqrbnp";
 
 	// to find out which piece we got, we need to calculate how many squares in and down the point falls
 	int col = (point.get_x() - edit_outline.get_x()) / SQUARE_SIZE;
@@ -274,12 +272,12 @@ bool ChessBoard::draw_info( const Cairo::RefPtr<Cairo::Context>& cr )
     double label_offset_x = info_outline.get_x() + 10;
     double info_offset_x = info_outline.get_x() + 10 + extents.width + 10;
 
-    vector< pair<string,string> >::iterator last_item = info_data.end();
+    std::vector< std::pair<std::string,std::string> >::iterator last_item = info_data.end();
 
     if( ! show_bestline_info )
         --last_item;
 
-    for( vector< pair<string,string> >::iterator it = info_data.begin(); it != last_item; ++it ) {
+    for( std::vector< std::pair<std::string,std::string> >::iterator it = info_data.begin(); it != last_item; ++it ) {
 
         cr->move_to( label_offset_x, offset_y );
         cr->show_text( (*it).first );
@@ -453,7 +451,7 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
 		drag_start_square = point_to_square( mouse_point );
 
-		typename map<STSquare,char>::iterator it = pieces.find(drag_start_square);
+		typename std::map<STSquare,char>::iterator it = pieces.find(drag_start_square);
 		if( it != pieces.end() ) {
 
 			start_dragging( (*it).second, mouse_point );

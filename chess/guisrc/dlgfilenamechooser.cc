@@ -21,6 +21,11 @@
 
 #include "dlgfilenamechooser.h"
 
+/** \brief
+ *
+ * \return std::string
+ *
+ */
 std::string GUIFilenameChooser::get_load_name()
 {
 	Gtk::FileChooserDialog * dlg = new Gtk::FileChooserDialog( parent, "Restore chess game", Gtk::FILE_CHOOSER_ACTION_OPEN );
@@ -48,6 +53,11 @@ std::string GUIFilenameChooser::get_load_name()
 	return ret;
 }
 
+/** \brief
+ *
+ * \return std::string
+ *
+ */
 std::string GUIFilenameChooser::get_save_name()
 {
     Gtk::FileChooserDialog * dlg = new Gtk::FileChooserDialog( parent, "Save chess game", Gtk::FILE_CHOOSER_ACTION_SAVE );
