@@ -26,18 +26,14 @@
 
 #include "pods.h"
 
-class PieceValues;
-class FilenameChooser;
-
 class ChessEngine;
 
-
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 class ChessAppBase
 {
 public:
-	ChessAppBase( ChessEngine* engine_init ) :  engine(engine_init)  { };
 	virtual ~ChessAppBase() { };
 
 	/* called from main function */;
@@ -49,6 +45,9 @@ public:
 	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
 
     ChessEngine* get_engine() const { return engine; };
+
+protected:
+	ChessAppBase( ChessEngine* engine_init ) :  engine(engine_init)  { };
 
 private:
 	ChessEngine* engine;

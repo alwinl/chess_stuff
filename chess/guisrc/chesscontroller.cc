@@ -51,8 +51,6 @@ ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application(
 	guiTimeInputter = nullptr;
 	guiPieceValues = nullptr;
     guiFilenameChooser = nullptr;
-
-	board = nullptr;
 }
 
 /**-----------------------------------------------------------------------------

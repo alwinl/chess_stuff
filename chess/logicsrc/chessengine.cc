@@ -266,43 +266,32 @@ void ChessEngine::init_piece_values()
 
 void ChessEngine::change_piece_values( PieceValues* piece_value )
 {
-	PieceValues::STPieceValues current;
+	PieceValues::STPieceValues values;
 
-    current.QueenValue  = piece_values['Q'] >> 4;
-    current.RookValue   = piece_values['R'] >> 4;
-    current.BishopValue = piece_values['B'] >> 4;
-    current.KnightValue = piece_values['N'] >> 4;
-    current.PawnValue   = piece_values['P'] >> 4;
+    values.QueenValue  = piece_values['Q'] >> 4;
+    values.RookValue   = piece_values['R'] >> 4;
+    values.BishopValue = piece_values['B'] >> 4;
+    values.KnightValue = piece_values['N'] >> 4;
+    values.PawnValue   = piece_values['P'] >> 4;
 
-#if 0
-    pair<bool,PieceValues::STPieceValues> result = piece_value->choose_piece_values( current);
+    piece_value->init_piece_values( values );
 
-    if( !result.first )
-		return;
-#else
-	pair<bool,PieceValues::STPieceValues> result;
-
-    piece_value->init_piece_values( current );
-
-    result.first = piece_value->choose_piece_values( );
-
-    if( !result.first )
+    if( !piece_value->choose_piece_values( ) )
 		return;
 
-	result.second = piece_value->get_piece_values();
-#endif
-	piece_values['Q'] = result.second.QueenValue << 4;
-	piece_values['R'] = result.second.RookValue << 4;
-	piece_values['B'] = result.second.BishopValue << 4;
-	piece_values['N'] = result.second.KnightValue << 4;
-	piece_values['P'] = result.second.PawnValue << 4;
+	values = piece_value->get_piece_values();
 
-	piece_values['q'] = -result.second.QueenValue << 4;
-	piece_values['r'] = -result.second.RookValue << 4;
-	piece_values['b'] = -result.second.BishopValue << 4;
-	piece_values['n'] = -result.second.KnightValue << 4;
-	piece_values['p'] = -result.second.PawnValue << 4;
+	piece_values['Q'] = values.QueenValue << 4;
+	piece_values['R'] = values.RookValue << 4;
+	piece_values['B'] = values.BishopValue << 4;
+	piece_values['N'] = values.KnightValue << 4;
+	piece_values['P'] = values.PawnValue << 4;
 
+	piece_values['q'] = -values.QueenValue << 4;
+	piece_values['r'] = -values.RookValue << 4;
+	piece_values['b'] = -values.BishopValue << 4;
+	piece_values['n'] = -values.KnightValue << 4;
+	piece_values['p'] = -values.PawnValue << 4;
 }
 
 
