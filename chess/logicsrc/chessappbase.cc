@@ -19,7 +19,6 @@
  *
  */
 
-//#include "chessappbase.h"
-//#include "chessengine.h"
+#include "chessappbase.h"
 
 

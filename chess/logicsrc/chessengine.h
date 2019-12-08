@@ -27,9 +27,8 @@
 
 class ChessGame;
 class ChessAppBase;
+class PresentationInterface;
 class STSquare;
-
-//class FilenameChooser;
 
 class PieceValues;
 
@@ -44,7 +43,7 @@ public:
     ChessEngine();
     ~ChessEngine();
 
-    void set_application_pointer( ChessAppBase* app );
+    void set_presentation_pointer( PresentationInterface* presentation_init );
 
     void do_move( STSquare start_square, STSquare end_square );
     void cancel_move();
@@ -83,7 +82,7 @@ public:
 
 private:
 	ChessGame * model;
-	ChessAppBase * app;
+	PresentationInterface* presenter;
 
 	std::map<char,int> piece_values;
 

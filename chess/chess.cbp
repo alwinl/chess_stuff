@@ -134,10 +134,6 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/engineinterface.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
 		<Unit filename="guisrc/pieces.png">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -152,6 +148,7 @@
 		<Unit filename="logicsrc/chessgame.h" />
 		<Unit filename="logicsrc/colourchooser.cc" />
 		<Unit filename="logicsrc/colourchooser.h" />
+		<Unit filename="logicsrc/engineinterface.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
 		<Unit filename="logicsrc/filenamechooser.cc" />
@@ -162,6 +159,7 @@
 		<Unit filename="logicsrc/piecevalues.h" />
 		<Unit filename="logicsrc/pods.cc" />
 		<Unit filename="logicsrc/pods.h" />
+		<Unit filename="logicsrc/presentationinterface.h" />
 		<Unit filename="logicsrc/timeinputter.h" />
 		<Unit filename="logictest/testapplication.cc">
 			<Option target="Test" />

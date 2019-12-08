@@ -20,15 +20,6 @@
  */
 
 #include "chessappgui.h"
-#include "chesscontroller.h"
-
-ChessAppGUI::ChessAppGUI( ChessEngine* engine_init ) : ChessAppBase(engine_init)
-{
-}
-
-ChessAppGUI::~ChessAppGUI()
-{
-}
 
 /* called from main function */;
 int ChessAppGUI::run(  int argc, char *argv[] )
@@ -36,13 +27,3 @@ int ChessAppGUI::run(  int argc, char *argv[] )
 	controller = ChessController::create( get_engine() );
 	return controller->run( argc, argv );
 }
-
-/* Called from logic */
-void ChessAppGUI::set_piece_positions( std::string FEN_string )
-	{ controller->set_piece_positions( FEN_string ); }
-
-void ChessAppGUI::set_info( STInfo& info )
-	{ controller->set_info( info ); }
-
-void ChessAppGUI::animate( STSquare start_square, STSquare end_square, char piece )
-	{ controller->animate( start_square, end_square, piece ); }

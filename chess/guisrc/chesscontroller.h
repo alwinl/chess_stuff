@@ -55,12 +55,6 @@ public:
 	static Glib::RefPtr<ChessController> create( ChessEngine* engine_init );
 	virtual ~ChessController();
 
-	// These functions are called from the logic
-	void set_piece_positions( std::string FEN_string );
-	void set_info( STInfo info );
-	void set_thinking( bool on );
-	void animate( STSquare start_square, STSquare end_square, char piece );
-
 private:
 	// Non public construction to ensure only references can be obtained. Private as class is terminal
 	ChessController( ChessEngine* engine_init );

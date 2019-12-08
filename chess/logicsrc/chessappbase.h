@@ -39,11 +39,6 @@ public:
 	/* called from main function */;
 	virtual int run(  int argc, char *argv[] ) = 0;
 
-	/* Called from logic */
-    virtual void set_piece_positions( std::string FEN_string ) = 0;
-    virtual void set_info(  STInfo& info ) = 0;
-	virtual void animate( STSquare start_square, STSquare end_square, char piece ) = 0;
-
     ChessEngine* get_engine() const { return engine; };
 
 protected:

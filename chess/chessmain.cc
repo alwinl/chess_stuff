@@ -24,25 +24,15 @@
 
 #ifdef TESTING
 #include "logictest/testapplication.h"
+#define AppClass TestApplication
 #else
 #include "guisrc/chessappgui.h"
+#define AppClass ChessAppGUI
 #endif
 
 int main( int argc, char *argv[] )
 {
     ChessEngine engine;
 
-#ifdef TESTING
-	ChessAppBase * application = new TestApplication( &engine );
-#else
-    ChessAppBase * application = new ChessAppGUI( &engine );
-#endif // TESTING
-
-    engine.set_application_pointer( application );
-
-    int result = application->run( argc, argv );
-
-    delete application;
-
-    return result;
+    return AppClass( &engine ).run( argc, argv );
 }

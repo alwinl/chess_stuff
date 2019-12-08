@@ -32,7 +32,7 @@
 #include "../logicsrc/pods.h"
 #include "../logicsrc/colourchooser.h"
 
-#include "engineinterface.h"
+#include "../logicsrc/engineinterface.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area

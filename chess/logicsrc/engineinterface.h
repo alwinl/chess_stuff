@@ -22,7 +22,7 @@
 #ifndef ENGINEINTERFACE_H_INCLUDED
 #define ENGINEINTERFACE_H_INCLUDED
 
-#include "../logicsrc/chessengine.h"
+#include "chessengine.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Simplified look of the engine for the ChessBoard class

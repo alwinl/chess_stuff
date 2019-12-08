@@ -34,6 +34,8 @@
 
 #include "fentranslator.h"
 
+#include "presentationinterface.h"
+
 #include <iostream>
 
 using namespace std;
@@ -41,22 +43,27 @@ using namespace std;
 
 ChessEngine::ChessEngine()
 {
+	presenter = new NullPresentation;
+
     model = new ChessGame;
 
     is_arranging = false;
 
     init_piece_values();
-
 }
 
 ChessEngine::~ChessEngine()
 {
     delete model;
+
+    delete presenter;
 }
 
-void ChessEngine::set_application_pointer( ChessAppBase* app_init )
+void ChessEngine::set_presentation_pointer( PresentationInterface* presentation_init )
 {
-    app = app_init;
+	delete presenter;
+
+	presenter = presentation_init;
 }
 
 
@@ -69,8 +76,8 @@ void ChessEngine::new_game( )
     STInfo tmp = model->get_info();
 
 
-    app->set_piece_positions( current_state.piece_positions );
-    app->set_info( tmp );
+    presenter->set_piece_positions( current_state.piece_positions );
+    presenter->set_info( tmp );
 }
 
 
@@ -93,13 +100,13 @@ void ChessEngine::do_move( STSquare start_square, STSquare end_square )
 
 	translator.remove_from_square( start_square );
 
-    app->set_piece_positions( translator.to_FEN() );
+    presenter->set_piece_positions( translator.to_FEN() );
 
 
-	app->animate( start_square, end_square, piece );
+	presenter->animate( start_square, end_square, piece );
 
 	translator.add_to_square( end_square, piece );
-    app->set_piece_positions( translator.to_FEN() );
+    presenter->set_piece_positions( translator.to_FEN() );
 
 	current_state.piece_positions = translator.to_FEN();
 	current_state.is_white_move = ! current_state.is_white_move;
@@ -130,7 +137,7 @@ void ChessEngine::arranging_start()
 
     is_arranging = true;
 
-    app->set_piece_positions( arrange_state.piece_positions );
+    presenter->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::arranging_clear()
@@ -138,7 +145,7 @@ void ChessEngine::arranging_clear()
     arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
     arrange_state.is_white_move = true;             // is it whites next move?
 
-    app->set_piece_positions( arrange_state.piece_positions );
+    presenter->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::put_piece_on_square( STSquare square, char piece )
@@ -159,7 +166,7 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
 	if( is_arranging )
 		arrange_state.piece_positions = translator.to_FEN();
 
-    app->set_piece_positions( translator.to_FEN() );
+    presenter->set_piece_positions( translator.to_FEN() );
 }
 
 void ChessEngine::arrange_turn( eTurns new_turn )
@@ -176,7 +183,7 @@ bool ChessEngine::arranging_end( bool canceled )
 {
 	if( canceled ) {
 		is_arranging = false;
-		app->set_piece_positions( current_state.piece_positions );
+		presenter->set_piece_positions( current_state.piece_positions );
 		return true;
 	}
 
@@ -208,7 +215,7 @@ bool ChessEngine::arranging_end( bool canceled )
 	current_state.is_white_move = arrange_state.is_white_move;
 
 	is_arranging = false;
-	app->set_piece_positions( current_state.piece_positions );
+	presenter->set_piece_positions( current_state.piece_positions );
 	return true;
 }
 
@@ -243,8 +250,8 @@ void ChessEngine::advance( )
     model->advance();
 
     STInfo tmp = model->get_info();
-    app->set_piece_positions( model->get_piece_positions() );
-    app->set_info( tmp );
+    presenter->set_piece_positions( model->get_piece_positions() );
+    presenter->set_info( tmp );
 }
 
 

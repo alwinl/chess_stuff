@@ -28,7 +28,29 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
-#include "engineinterface.h"
+#include "../logicsrc/engineinterface.h"
+#include "../logicsrc/presentationinterface.h"
+
+class GUIPresenter : public PresentationInterface
+{
+public:
+	GUIPresenter( ChessWindow * view, ChessBoard * board ) : PresentationInterface() {
+		this->view = view;
+		this->board = board;
+	};
+	~GUIPresenter() {};
+
+	void set_piece_positions( std::string FEN_string ) { board->set_piece_positions( FEN_string ); };
+	void set_info( STInfo info ) { board->set_info( info ); };
+	void set_thinking( bool on ) { view->show_menu( on ? ChessWindow::MENU_STOP : ChessWindow::MENU_GAME ); };
+	void animate( STSquare start_square, STSquare end_square, char piece ) { board->animate( start_square, end_square, piece ); };
+
+private:
+	ChessWindow * view;
+    ChessBoard * board;
+};
+
+
 
 /**-----------------------------------------------------------------------------
  * \brief Create an instance of the application
@@ -148,6 +170,8 @@ void ChessController::on_startup()
 
 	bind_actions();
 	get_widgets();
+
+	engine->set_presentation_pointer( new GUIPresenter( view, board ) );
 }
 
 /**-----------------------------------------------------------------------------
@@ -458,32 +482,3 @@ void ChessController::on_action_thinking_stop()
 {
 	engine->stop_thinking();
 }
-
-/*-----------------------------------------------------------------------------
- * The next functions are called from the engine
- */
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::set_piece_positions( std::string FEN_string )
-	{ board->set_piece_positions( FEN_string ); }
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::set_info( STInfo info )
-	{ board->set_info( info ); }
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::set_thinking( bool on )
-	{ view->show_menu( on ? ChessWindow::MENU_STOP : ChessWindow::MENU_GAME ); }
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-void ChessController::animate( STSquare start_square, STSquare end_square, char piece )
-	{ board->animate( start_square, end_square, piece ); }
-
