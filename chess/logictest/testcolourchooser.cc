@@ -74,7 +74,7 @@ void TestColourChooser::no_change_exit_ok()
     bool result = test_object.choose_colours( );
 
     CPPUNIT_ASSERT( result == true );
-    CPPUNIT_ASSERT( test_object.is_colour(colours) );
+    CPPUNIT_ASSERT( test_object == colours );
 }
 
 void TestColourChooser::no_change_exit_cancel()
@@ -113,7 +113,7 @@ void TestColourChooser::change_exit_ok()
     bool result = test_object.choose_colours( );
 
     CPPUNIT_ASSERT( result == true );
-    CPPUNIT_ASSERT( test_object.is_colour(new_colours) );
+    CPPUNIT_ASSERT( test_object == new_colours );
 }
 
 void TestColourChooser::change_exit_cancel()

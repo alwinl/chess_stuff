@@ -25,7 +25,8 @@
 #include <utility>
 #include <string>
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 class TimeInputter
 {
@@ -45,7 +46,6 @@ protected:
     virtual void setup( const std::string& title, const std::string& prompt, int& value ) = 0;
     virtual bool manipulate( ) = 0;
     virtual int result( ) = 0;
-
 
 private:
     bool get_input( const std::string& title, const std::string& prompt, int current_value )

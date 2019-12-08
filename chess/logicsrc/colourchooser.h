@@ -22,10 +22,10 @@
 #ifndef COLOURCHOOSER_H
 #define COLOURCHOOSER_H
 
-#include <utility>
 #include <string>
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 class ColourChooser
 {
@@ -48,8 +48,9 @@ public:
     virtual ~ColourChooser() {};
 
     bool choose_colours();
-	bool is_colour( STColours& rhs ) const;
 	STColours get_colours() const { return colors; };
+
+	bool operator==( STColours& rhs ) const;
 
 protected:
     virtual void setup( ) = 0;
@@ -59,6 +60,5 @@ protected:
 private:
 	STColours colors;
 };
-
 
 #endif // COLOURCHOOSER_H

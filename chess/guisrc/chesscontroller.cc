@@ -20,7 +20,7 @@
  */
 
 #include "chesscontroller.h"
-#include "chessappbase.h"
+
 #include "chessview.h"
 #include "chessboard.h"
 #include "dlgcolours.h"
@@ -31,6 +31,9 @@
 #include "../logicsrc/engineinterface.h"
 #include "../logicsrc/presentationinterface.h"
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 class GUIPresenter : public PresentationInterface
 {
 public:

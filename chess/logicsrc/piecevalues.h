@@ -22,18 +22,12 @@
 #ifndef PIECEVALUES_H
 #define PIECEVALUES_H
 
-#include <utility>
-
-
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 class PieceValues
 {
 public:
-	/**-----------------------------------------------------------------------------
-	 * \brief Struct to hold
-	 *
-	 */
 	struct STPieceValues
 	{
 		int QueenValue;
@@ -46,14 +40,11 @@ public:
     PieceValues( ) {};
     virtual ~PieceValues() {};
 
-    //void push_map( std::map<char,int> new_map );
-    //std::map<char,int> pull_map( );
-
     void init_piece_values( STPieceValues values );
     bool choose_piece_values( );
     STPieceValues get_piece_values() const { return save_values; };
 
-    bool operator==( STPieceValues& rhs );
+    bool operator==( STPieceValues& rhs ) const;
 
 protected:
     virtual void setup() = 0;

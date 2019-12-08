@@ -140,7 +140,6 @@
 		</Unit>
 		<Unit filename="logicsrc/board.cc" />
 		<Unit filename="logicsrc/board.h" />
-		<Unit filename="logicsrc/chessappbase.cc" />
 		<Unit filename="logicsrc/chessappbase.h" />
 		<Unit filename="logicsrc/chessengine.cc" />
 		<Unit filename="logicsrc/chessengine.h" />

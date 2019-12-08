@@ -21,6 +21,9 @@
 
 #include "dlgtimeinputter.h"
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
 class DialogInput : public Gtk::Dialog
 {
 public:
@@ -34,14 +37,6 @@ private:
     Gtk::Entry * txtEntry;
 };
 
-
-
-/** \brief
- *
- * \param cobject BaseObjectType*
- * \param ui_model const Glib::RefPtr<Gtk::Builder>&
- *
- */
 DialogInput::DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
     : Gtk::Dialog( cobject )
 {
@@ -63,11 +58,8 @@ std::string DialogInput::get_input()
     return txtEntry->get_text();
 }
 
-
-
-
-
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * \param ui_model Glib::RefPtr<Gtk::Builder>&
  * \param parent Gtk::Window&
@@ -96,5 +88,3 @@ int GUITimeInputter::result( )
 {
     return std::stoi( dlg->get_input() );
 }
-
-

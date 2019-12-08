@@ -21,7 +21,8 @@
 
 #include "dlgpiecevalues.h"
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 class DialogPieceValues : public Gtk::Dialog
 {
@@ -47,13 +48,6 @@ private:
 
 std::string DialogPieceValues::spinNames[] = { "spnQueen", "spnRook", "spnBishop", "spnKnight", "spnPawn" };
 
-/** \brief
- *
- * \param cobject BaseObjectType*
- * \param ui_model const Glib::RefPtr<Gtk::Builder>&
- * \param parent Gtk::Window&
- *
- */
 DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
     : Gtk::Dialog( cobject )
 {
@@ -101,7 +95,8 @@ void DialogPieceValues::on_revert_clicked()
 		piece_data[idx].spnButton->set_value( piece_data[idx].orig_value );
 }
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * \param ui_model Glib::RefPtr<Gtk::Builder>&
  * \param parent Gtk::Window&

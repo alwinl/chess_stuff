@@ -21,7 +21,8 @@
 
 #include "dlgcolours.h"
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  */
 class DialogColours : public Gtk::Dialog
 {
@@ -38,13 +39,6 @@ private:
     Gtk::ColorButton * btnBlackColour;
 };
 
-/** \brief
- *
- * \param cobject BaseObjectType*
- * \param ui_model const Glib::RefPtr<Gtk::Builder>&
- * \param parent Gtk::Window&
- *
- */
 DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
     : Gtk::Dialog( cobject )
 {
@@ -79,7 +73,8 @@ ColourChooser::STColours DialogColours::get_colours( )
 
 
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * \param ui_model Glib::RefPtr<Gtk::Builder>&
  * \param parent Gtk::Window&

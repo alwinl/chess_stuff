@@ -23,7 +23,6 @@
 #define FILENAMECHOOSER_H
 
 #include <string>
-#include <utility>
 
 /** \brief Encapsulation of filename
  *

@@ -20,8 +20,6 @@
  */
 
 #include "chessview.h"
-#include "chesscontroller.h"
-#include "chessboard.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Director of all screen real estate supplied to the application

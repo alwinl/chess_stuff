@@ -31,7 +31,6 @@
 
 #include "../logicsrc/pods.h"
 #include "../logicsrc/colourchooser.h"
-
 #include "../logicsrc/engineinterface.h"
 
 /**-----------------------------------------------------------------------------

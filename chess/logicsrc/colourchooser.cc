@@ -35,7 +35,7 @@ bool ColourChooser::choose_colours()
 
 }
 
-bool ColourChooser::is_colour( STColours& rhs ) const
+bool ColourChooser::operator==( STColours& rhs ) const
 {
 	if( colors.bg != rhs.bg ) return false;
 	if( colors.fg != rhs.fg ) return false;

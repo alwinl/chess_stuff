@@ -21,10 +21,10 @@
 
 #include "dlgfilenamechooser.h"
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * \return std::string
- *
  */
 std::string GUIFilenameChooser::get_load_name()
 {
@@ -53,10 +53,10 @@ std::string GUIFilenameChooser::get_load_name()
 	return ret;
 }
 
-/** \brief
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * \return std::string
- *
  */
 std::string GUIFilenameChooser::get_save_name()
 {

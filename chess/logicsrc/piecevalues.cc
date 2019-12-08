@@ -37,7 +37,7 @@ bool PieceValues::choose_piece_values( )
 	return first;
 }
 
-bool PieceValues::operator==( PieceValues::STPieceValues& rhs )
+bool PieceValues::operator==( PieceValues::STPieceValues& rhs ) const
 {
     if( save_values.QueenValue != rhs.QueenValue ) return false;
     if( save_values.RookValue != rhs.RookValue ) return false;
