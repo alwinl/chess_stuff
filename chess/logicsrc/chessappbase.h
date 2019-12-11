@@ -22,10 +22,6 @@
 #ifndef CHESSAPPBASE_H
 #define CHESSAPPBASE_H
 
-#include <string>
-
-#include "pods.h"
-
 class ChessEngine;
 
 /**-----------------------------------------------------------------------------
@@ -39,10 +35,9 @@ public:
 	/* called from main function */;
 	virtual int run(  int argc, char *argv[] ) = 0;
 
-    ChessEngine* get_engine() const { return engine; };
-
 protected:
 	ChessAppBase( ChessEngine* engine_init ) :  engine(engine_init)  { };
+    ChessEngine* get_engine() const { return engine; };
 
 private:
 	ChessEngine* engine;
