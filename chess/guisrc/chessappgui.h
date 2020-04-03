@@ -22,11 +22,7 @@
 #ifndef CHESSAPPGUI_H
 #define CHESSAPPGUI_H
 
-#include <gtkmm.h>
-
 #include <../logicsrc/chessappbase.h>
-
-#include "chesscontroller.h"
 
 /**-----------------------------------------------------------------------------
  * \brief GUI Application entry
@@ -41,9 +37,6 @@ public:
 
 	/* called from main function */;
 	virtual int run(  int argc, char *argv[] );
-
-private:
-	Glib::RefPtr<ChessController> controller;
 };
 
 #endif // CHESSAPPGUI_H

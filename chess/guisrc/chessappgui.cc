@@ -21,9 +21,13 @@
 
 #include "chessappgui.h"
 
+#include "chesscontroller.h"
+
 /* called from main function */;
 int ChessAppGUI::run(  int argc, char *argv[] )
 {
+	Glib::RefPtr<ChessController> controller;
+
 	controller = ChessController::create( get_engine() );
 	return controller->run( argc, argv );
 }
