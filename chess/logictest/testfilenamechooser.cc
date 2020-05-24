@@ -21,7 +21,7 @@
 
 #include "testfilenamechooser.h"
 
-#include <../logicsrc/filenamechooser.h>
+#include "../logicsrc/filenamechooser.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestFilenameChooser );
 

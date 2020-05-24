@@ -29,8 +29,7 @@
  * \param acontroller ChessController&
  *
  */
-ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, EngineInterface anEngine )
-                            : Gtk::DrawingArea(cobject), engine(anEngine)
+ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model ) : Gtk::DrawingArea(cobject)
 {
 	using namespace Cairo;
 
@@ -452,10 +451,8 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
 		typename std::map<STSquare,char>::iterator it = pieces.find(drag_start_square);
 		if( it != pieces.end() ) {
-
 			start_dragging( (*it).second, mouse_point );
-
-			engine.put_piece_on_square( drag_start_square, ' ' ); // Putting a space is removing the piece
+			return false;		// keep processing
 		}
 
     } else if( is_edit && edit_outline.intersects( mouse_pos ) ) {
@@ -478,18 +475,14 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 		return true;
 
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( release_event->x, release_event->y, 1, 1 );
-    char piece_code = floating_piece_code;
+    save_piece_code = floating_piece_code;
 
     stop_dragging();
 
-	STSquare end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
+	end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
 
-	if( board_outline.intersects( mouse_pos ) ) {
-		if( is_edit )
-			engine.put_piece_on_square( end_square, piece_code );
-		else
-			engine.make_move( drag_start_square, end_square );
-    }
+	if( board_outline.intersects( mouse_pos ) )
+		return false;		// keep processing
 
     return true;
 }

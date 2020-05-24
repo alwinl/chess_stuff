@@ -29,9 +29,8 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/pods.h"
+#include "../ADTsrc/pods.h"
 #include "../logicsrc/colourchooser.h"
-#include "../logicsrc/engineinterface.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
@@ -46,7 +45,7 @@ private:
 	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
 
 public:
-	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, EngineInterface anEngine );
+	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
     void set_piece_positions( std::string FEN_string );
 	void set_info( STInfo& info );
@@ -56,6 +55,11 @@ public:
     void toggle_bestline();
 	void animate( STSquare start_square, STSquare end_square, char piece );
 	void highlight( STSquare square );
+
+	bool get_is_edit() const { return is_edit; }
+	STSquare get_drag_square() const { return drag_start_square; }
+	STSquare get_end_square() const { return end_square; }
+	char get_piece_code() const { return save_piece_code; }
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
@@ -108,11 +112,11 @@ private:
 	Gdk::Point annimate_delta;
 	Gdk::Point highlight_pos;
 	char floating_piece_code;
+	char save_piece_code;
 	STSquare drag_start_square;
+	STSquare end_square;
 
 	int timeout_counter;
-
-	EngineInterface engine;
 };
 
 #endif // CHESSBOARD_H_INCLUDED

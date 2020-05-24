@@ -26,7 +26,7 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/pods.h"
+#include "../ADTsrc/pods.h"
 
 class TimeInputter;
 class PieceValues;
@@ -87,6 +87,9 @@ private:
 	void on_action_arrange_turn( unsigned int turn );
 	void on_action_arrange_cancel();
 	void on_action_thinking_stop();
+
+	bool on_board_button_pressed( GdkEventButton* button_event );
+	bool on_board_button_released( GdkEventButton* button_event );
 
 	void bind_actions();
 

@@ -21,7 +21,7 @@
 
 #include "testpiecevalues.h"
 #include "../logicsrc/piecevalues.h"
-#include "../logicsrc/pods.h"
+#include "../ADTsrc/pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPieceValues );
 

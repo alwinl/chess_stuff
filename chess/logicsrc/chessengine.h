@@ -32,7 +32,7 @@ class STSquare;
 
 class PieceValues;
 
-#include "pods.h"
+#include "../ADTsrc/pods.h"
 
 /** \brief
  */

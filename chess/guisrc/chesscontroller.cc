@@ -28,7 +28,7 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
-#include "../logicsrc/engineinterface.h"
+#include "../logicsrc/chessengine.h"
 #include "../logicsrc/presentationinterface.h"
 
 /**-----------------------------------------------------------------------------
@@ -132,7 +132,10 @@ void ChessController::get_widgets()
 
 	ui_model->get_widget_derived("main_view", view );
     ui_model->get_widget( "widStatusBar", status_bar );
-	ui_model->get_widget_derived("canvas", board, EngineInterface(*engine) );
+	ui_model->get_widget_derived("canvas", board );
+
+	board->signal_button_press_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_pressed) );
+	board->signal_button_release_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_released) );
 
 	std::vector<std::string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
@@ -485,3 +488,28 @@ void ChessController::on_action_thinking_stop()
 {
 	engine->stop_thinking();
 }
+
+/**-----------------------------------------------------------------------------
+ * \brief Button action
+ */
+bool ChessController::on_board_button_pressed( GdkEventButton* button_event )
+{
+	engine->put_piece_on_square( board->get_drag_square(), ' ' ); // Putting a space is removing the piece
+
+	return true;
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief Button actions
+ */
+bool ChessController::on_board_button_released( GdkEventButton* button_event )
+{
+	if( board->get_is_edit() )
+		engine->put_piece_on_square( board->get_end_square(), board->get_piece_code() );
+	else
+		engine->do_move( board->get_drag_square(), board->get_end_square() );
+
+	return true;
+}
+
+

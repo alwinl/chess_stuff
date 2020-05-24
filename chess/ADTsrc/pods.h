@@ -27,6 +27,7 @@
 enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLAYSEARCH, MATESEARCH, LEVELCOUNT };
 enum eTurns { TURNWHITE, TURNBLACK, TURNCOUNT };
 
+#if 0
 /**-----------------------------------------------------------------------------
  * \brief Struct to hold
  *
@@ -37,6 +38,7 @@ struct STInput
     std::string prompt;
     std::string value;
 };
+#endif // 0
 
 /**-----------------------------------------------------------------------------
  * \brief Struct to hold

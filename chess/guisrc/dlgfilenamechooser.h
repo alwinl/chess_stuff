@@ -22,7 +22,7 @@
 #ifndef GUIFILENAMECHOOSER_H
 #define GUIFILENAMECHOOSER_H
 
-#include <../logicsrc/filenamechooser.h>
+#include "../logicsrc/filenamechooser.h"
 
 #include <gtkmm.h>
 

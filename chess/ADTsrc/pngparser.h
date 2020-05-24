@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alwin Leerling <alwin@jambo>
+ * Copyright 2019 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,30 +19,22 @@
  *
  */
 
-#include "colourchooser.h"
-#include "../ADTsrc/pods.h"
+#ifndef PNGPARSER_H
+#define PNGPARSER_H
 
-bool ColourChooser::choose_colours()
+#include "chessgame.h"
+
+class PNGParser
 {
-	setup( );
+public:
+    PNGParser();
 
-	bool ret = manipulate();
+    ChessGame do_parse( std::istream& is );
 
-	if( ret )
-		colors = result();
+protected:
 
-	return ret;
+private:
+	ChessGame game;
+};
 
-}
-
-bool ColourChooser::operator==( STColours& rhs ) const
-{
-	if( colors.bg != rhs.bg ) return false;
-	if( colors.fg != rhs.fg ) return false;
-	if( colors.white != rhs.white ) return false;
-	if( colors.black != rhs.black ) return false;
-
-	return true;
-}
-
-
+#endif // PNGPARSER_H

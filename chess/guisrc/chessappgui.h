@@ -22,7 +22,7 @@
 #ifndef CHESSAPPGUI_H
 #define CHESSAPPGUI_H
 
-#include <../logicsrc/chessappbase.h>
+#include "../logicsrc/chessappbase.h"
 
 /**-----------------------------------------------------------------------------
  * \brief GUI Application entry

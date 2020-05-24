@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alwin Leerling <alwin@jambo>
+ * Copyright 2019 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,30 +19,29 @@
  *
  */
 
-#include "colourchooser.h"
-#include "../ADTsrc/pods.h"
+ /* https://en.wikipedia.org/wiki/Portable_Game_Notation */
 
-bool ColourChooser::choose_colours()
+#include "pngparser.h"
+
+PNGParser::PNGParser()
 {
-	setup( );
-
-	bool ret = manipulate();
-
-	if( ret )
-		colors = result();
-
-	return ret;
-
+    //ctor
 }
 
-bool ColourChooser::operator==( STColours& rhs ) const
+ChessGame PNGParser::do_parse( std::istream& is )
 {
-	if( colors.bg != rhs.bg ) return false;
-	if( colors.fg != rhs.fg ) return false;
-	if( colors.white != rhs.white ) return false;
-	if( colors.black != rhs.black ) return false;
+/*
+	string line;
 
-	return true;
+	game.init();
+
+	while( !eof_reached && !is.eof() ) {
+
+		getline( is, line );
+
+
+	extract_tag_pairs( is );
+	extract_movetext( is );
+*/
+	return game;
 }
-
-

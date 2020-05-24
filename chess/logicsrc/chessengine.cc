@@ -26,7 +26,7 @@
 #include <regex>
 
 #include "chessengine.h"
-#include "chessgame.h"
+#include "../ADTsrc/chessgame.h"
 #include "chessappbase.h"
 #include "timeinputter.h"
 #include "piecevalues.h"
