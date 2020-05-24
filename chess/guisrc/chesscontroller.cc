@@ -28,6 +28,8 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
+#include "../ADTsrc/pods.h"
+
 #include "../logicsrc/chessengine.h"
 #include "../logicsrc/presentationinterface.h"
 
@@ -137,21 +139,29 @@ void ChessController::get_widgets()
 	board->signal_button_press_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_pressed) );
 	board->signal_button_release_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_released) );
 
+	Gtk::RadioMenuItem * chkMenuItem;
+
 	std::vector<std::string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
-		ui_model->get_widget( level_widgets[level], chkLevel[level] );
-		chkLevel[level]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_level ), level) );
+
+		ui_model->get_widget( level_widgets[level], chkMenuItem );
+		chkLevelItems.push_back( chkMenuItem );
+
+		chkLevelItems[level]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_level ), level) );
 	}
 
-	chkLevel[EASY]->set_active();
+	chkLevelItems[EASY]->set_active();
 
 	std::vector<std::string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
 	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
-		ui_model->get_widget( turn_widgets[turn], chkTurn[turn] );
-		chkTurn[turn]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ), turn) );
+
+		ui_model->get_widget( turn_widgets[turn], chkMenuItem );
+		chkTurnItems.push_back( chkMenuItem );
+
+		chkTurnItems[turn]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ), turn) );
 	}
 
-	chkTurn[TURNWHITE]->set_active();
+	chkTurnItems[TURNWHITE]->set_active();
 
 	ui_model->get_widget( "chkOptionSound", chkSound );
 
@@ -370,7 +380,7 @@ void ChessController::on_action_piecevalues()
  */
 void ChessController::on_action_level( unsigned int level)
 {
-	if( ! chkLevel[level]->get_active() )
+	if( ! chkLevelItems[level]->get_active() )
 		return;
 
 	if( (eLevels)level == TIMED ) {
@@ -466,7 +476,7 @@ void ChessController::on_action_arrange_clear()
  */
 void ChessController::on_action_arrange_turn( unsigned int turn )
 {
-	if( chkTurn[turn]->get_active() )
+	if( chkTurnItems[turn]->get_active() )
 		engine->arrange_turn( (eTurns)turn );
 }
 

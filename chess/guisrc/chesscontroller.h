@@ -23,10 +23,9 @@
 #define APPCONTROLLER_H
 
 #include <string>
+#include <vector>
 
 #include <gtkmm.h>
-
-#include "../ADTsrc/pods.h"
 
 class TimeInputter;
 class PieceValues;
@@ -96,8 +95,8 @@ private:
 	// Widgets
 	ChessWindow * view;
     Gtk::Statusbar * status_bar;
-	Gtk::RadioMenuItem * chkLevel[LEVELCOUNT];
-	Gtk::RadioMenuItem * chkTurn[TURNCOUNT];
+	std::vector<Gtk::RadioMenuItem *> chkLevelItems;
+	std::vector<Gtk::RadioMenuItem *> chkTurnItems;
 	Gtk::CheckMenuItem * chkSound;
     ChessBoard * board;
     ColourChooser * guiColourChooser;
