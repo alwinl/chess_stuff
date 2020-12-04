@@ -74,7 +74,7 @@ bool IllegalMove( MOVESTRUCT *amove )
     bool illegal;
 
     SetMove( amove );
-    illegal = Attacks( Opponent, PieceTab[Player][0].isquare );
+    illegal = Attacks( Opponent, PieceTab[Player][0].isquare );	// By doing this move will the king be attacked?
     ResetMove( amove );
 
     return illegal;

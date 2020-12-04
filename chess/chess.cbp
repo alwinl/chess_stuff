@@ -141,7 +141,6 @@
 		<Unit filename="logicsrc/chessengine.h" />
 		<Unit filename="logicsrc/colourchooser.cc" />
 		<Unit filename="logicsrc/colourchooser.h" />
-		<Unit filename="logicsrc/engineinterface.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
 		<Unit filename="logicsrc/filenamechooser.cc" />
