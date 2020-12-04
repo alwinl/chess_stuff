@@ -30,9 +30,13 @@ class ChessAppBase;
 class PresentationInterface;
 class STSquare;
 
+class TimeInputter;
+class FilenameChooser;
+
 class PieceValues;
 
 #include "../ADTsrc/pods.h"
+#include "colourchooser.h"
 
 /** \brief
  */
@@ -64,25 +68,42 @@ public:
     void new_game();
     bool can_quit();
 
-    bool open_file( std::string name );
-    bool save_file( std::string name );
+    bool open_file( );
+    bool save_file( );
+    bool save_file_as( );
 
 	void undo();
 	void redo();
 	void stop_thinking();
-	void change_level( eLevels new_level, int time_parameter );
+	void change_level( eLevels new_level );
 
 	void init_piece_values();
 
-	void change_piece_values( PieceValues* piece_value );
+	void change_piece_values( );
+
+
 
 
 	void CalculatePawnTable();
 	void CalcMaterial();
 
+	void init_colour_chooser( ColourChooser * object ) { colour_chooser = object; }
+	void init_time_inputter( TimeInputter * object ) { time_inputter = object; }
+	void init_piece_value_object( PieceValues * object ) { piece_values_object = object; }
+	void init_filename_chooser( FilenameChooser * object ) { filename_chooser = object; }
+
+	ColourChooser::STColours get_colours() { return colour_chooser->get_colours(); };
+	bool choose_colours();
+
 private:
 	ChessGame * model;
 	PresentationInterface* presenter;
+
+    ColourChooser * colour_chooser;
+    TimeInputter * time_inputter;
+    PieceValues * piece_values_object;
+    FilenameChooser * filename_chooser;
+
 
 	std::map<char,int> piece_values;
 

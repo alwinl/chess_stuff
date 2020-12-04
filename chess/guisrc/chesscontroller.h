@@ -27,11 +27,6 @@
 
 #include <gtkmm.h>
 
-class TimeInputter;
-class PieceValues;
-class FilenameChooser;
-class ColourChooser;
-
 class ChessEngine;
 
 class ChessWindow;
@@ -99,10 +94,6 @@ private:
 	std::vector<Gtk::RadioMenuItem *> chkTurnItems;
 	Gtk::CheckMenuItem * chkSound;
     ChessBoard * board;
-    ColourChooser * guiColourChooser;
-    TimeInputter * guiTimeInputter;
-    PieceValues * guiPieceValues;
-    FilenameChooser * guiFilenameChooser;
 
 	void get_widgets();
 

@@ -73,11 +73,6 @@ Glib::RefPtr<ChessController> ChessController::create( ChessEngine* engine_init 
 ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application( "net.dnatechnologies.chess" ), engine( engine_init )
 {
 	Glib::set_application_name("GTKmm Chess");
-
-	guiColourChooser = nullptr;
-	guiTimeInputter = nullptr;
-	guiPieceValues = nullptr;
-    guiFilenameChooser = nullptr;
 }
 
 /**-----------------------------------------------------------------------------
@@ -85,10 +80,6 @@ ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application(
  */
 ChessController::~ChessController( )
 {
-	delete guiColourChooser;
-	delete guiTimeInputter;
-	delete guiPieceValues;
-    delete guiFilenameChooser;
 }
 
 /**-----------------------------------------------------------------------------
@@ -165,16 +156,10 @@ void ChessController::get_widgets()
 
 	ui_model->get_widget( "chkOptionSound", chkSound );
 
-	ColourChooser::STColours default_colours;
-    default_colours.bg = "rgb(78,154,6)";
-    default_colours.fg = "rgb(0,0,0)";
-    default_colours.black = "rgb(85,87,83)";
-    default_colours.white = "rgb(238,238,236)";
-
-	guiColourChooser = new GUIColourChooser( ui_model, *view, default_colours );
-	guiTimeInputter = new GUITimeInputter( ui_model, *view );
-	guiPieceValues = new GUIPieceValues( ui_model, *view );
-	guiFilenameChooser = new GUIFilenameChooser( *view );
+	engine->init_colour_chooser( new GUIColourChooser( ui_model, *view ) );
+	engine->init_time_inputter( new GUITimeInputter( ui_model, *view ) );
+	engine->init_piece_value_object( new GUIPieceValues( ui_model, *view ) );
+	engine->init_filename_chooser( new GUIFilenameChooser( *view ) );
 }
 
 /**-----------------------------------------------------------------------------
@@ -202,7 +187,7 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-	board->set_colours( guiColourChooser->get_colours() );
+	board->set_colours( engine->get_colours() );
 
     on_action_new();
 }
@@ -213,8 +198,6 @@ void ChessController::on_activate()
 void ChessController::on_action_new()
 {
 	status_bar->push( std::string("") );
-
-	guiFilenameChooser->new_file();
 
 	engine->new_game(  );
 
@@ -228,12 +211,7 @@ void ChessController::on_action_open()
 {
 	status_bar->push( std::string("") );
 
-	std::string open_name = guiFilenameChooser->load_file();
-
-	if( open_name.empty() )
-		return;
-
-	if( ! engine->open_file( open_name ) ) {
+	if( ! engine->open_file( ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -241,7 +219,7 @@ void ChessController::on_action_open()
 		return;
 	}
 
-	status_bar->push( std::string("Opened ") + open_name );
+	status_bar->push( std::string("Game loaded") );
 }
 
 /**-----------------------------------------------------------------------------
@@ -251,12 +229,7 @@ void ChessController::on_action_save()
 {
 	status_bar->push( std::string("") );
 
-	std::string save_name = guiFilenameChooser->save_file();
-
-	if( save_name.empty() )
-		return;
-
-	if( ! engine->save_file( save_name ) ) {
+	if( ! engine->save_file( ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -264,7 +237,7 @@ void ChessController::on_action_save()
 		return;
 	}
 
-	status_bar->push( std::string("Saved ") + save_name );
+	status_bar->push( std::string("Saved game") );
 }
 
 /**-----------------------------------------------------------------------------
@@ -274,12 +247,7 @@ void ChessController::on_action_save_as()
 {
 	status_bar->push( std::string("") );
 
-	std::string save_name = guiFilenameChooser->save_file_as();
-
-	if( save_name.empty() )
-		return;
-
-	if( ! engine->save_file( save_name ) ) {
+	if( ! engine->save_file_as( ) ) {
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
@@ -287,7 +255,7 @@ void ChessController::on_action_save_as()
 		return;
 	}
 
-	status_bar->push( std::string("Saved ") + save_name );
+	status_bar->push( std::string("Saved game") );
 }
 
 
@@ -372,7 +340,7 @@ void ChessController::on_action_demomode()
  */
 void ChessController::on_action_piecevalues()
 {
-	engine->change_piece_values( guiPieceValues );
+	engine->change_piece_values( );
 }
 
 /**-----------------------------------------------------------------------------
@@ -383,20 +351,7 @@ void ChessController::on_action_level( unsigned int level)
 	if( ! chkLevelItems[level]->get_active() )
 		return;
 
-	if( (eLevels)level == TIMED ) {
-
-		if( guiTimeInputter->time_per_move( 120 ) )
-			engine->change_level( (eLevels)level, guiTimeInputter->get_time() );
-
-	} else if( (eLevels)level == TOTALTIME ) {
-
-	    if( guiTimeInputter->total_game_time( 60 ) )
-			engine->change_level( (eLevels)level, guiTimeInputter->get_time() );
-
-	} else {
-
-		engine->change_level( (eLevels)level, 0 );
-	}
+	engine->change_level( (eLevels)level );
 }
 
 /**-----------------------------------------------------------------------------
@@ -406,8 +361,8 @@ void ChessController::on_action_level( unsigned int level)
  */
 void ChessController::on_action_colours()
 {
-    if( guiColourChooser->choose_colours( ) )
-		board->set_colours( guiColourChooser->get_colours() );
+    if( engine->choose_colours( ) )
+		board->set_colours( engine->get_colours() );
 }
 
 /**-----------------------------------------------------------------------------

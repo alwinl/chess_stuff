@@ -50,6 +50,11 @@ ChessEngine::ChessEngine()
     is_arranging = false;
 
     init_piece_values();
+
+    colour_chooser = nullptr;
+    time_inputter = nullptr;
+    piece_values_object = nullptr;
+    filename_chooser = nullptr;
 }
 
 ChessEngine::~ChessEngine()
@@ -69,6 +74,8 @@ void ChessEngine::set_presentation_pointer( PresentationInterface* presentation_
 
 void ChessEngine::new_game( )
 {
+	filename_chooser->new_file();
+
 	current_state = make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     model->initialise();
@@ -227,18 +234,43 @@ bool ChessEngine::arranging_end( bool canceled )
 
 
 
-bool ChessEngine::open_file( std::string name )
+bool ChessEngine::open_file( )
 {
-    if( model->load_game( name ) == -1 ) {    // load the file and build the DS in the model_ member
+
+	std::string open_name = filename_chooser->load_file();
+
+	if( open_name.empty() )
+		return false;
+
+    if( model->load_game( open_name ) == -1 ) {    // load the file and build the DS in the model_ member
         return false;
     }
 
     return true;
 }
 
-bool ChessEngine::save_file( std::string name )
+bool ChessEngine::save_file( )
 {
-    if( model->store_game( name ) == -1 ) {
+	std::string save_name = filename_chooser->save_file();
+
+	if( save_name.empty() )
+		return false;
+
+    if( model->store_game( save_name ) == -1 ) {
+        return false;
+    }
+
+    return true;
+}
+
+bool ChessEngine::save_file_as( )
+{
+	std::string save_name = filename_chooser->save_file_as();
+
+	if( save_name.empty() )
+		return false;
+
+    if( model->store_game( save_name ) == -1 ) {
         return false;
     }
 
@@ -271,7 +303,7 @@ void ChessEngine::init_piece_values()
 	piece_values.insert( pair<char,int>( 'k',    0  ) );
 }
 
-void ChessEngine::change_piece_values( PieceValues* piece_value )
+void ChessEngine::change_piece_values( )
 {
 	PieceValues::STPieceValues values;
 
@@ -281,12 +313,12 @@ void ChessEngine::change_piece_values( PieceValues* piece_value )
     values.KnightValue = piece_values['N'] >> 4;
     values.PawnValue   = piece_values['P'] >> 4;
 
-    piece_value->init_piece_values( values );
+    piece_values_object->init_piece_values( values );
 
-    if( !piece_value->choose_piece_values( ) )
+    if( !piece_values_object->choose_piece_values( ) )
 		return;
 
-	values = piece_value->get_piece_values();
+	values = piece_values_object->get_piece_values();
 
 	piece_values['Q'] = values.QueenValue << 4;
 	piece_values['R'] = values.RookValue << 4;
@@ -323,16 +355,32 @@ void ChessEngine::stop_thinking()
 
 }
 
-void ChessEngine::change_level( eLevels new_level, int time_parameter )
+void ChessEngine::change_level( eLevels new_level )
 {
 
 	if( new_level == TIMED ) {
-		cout << "Got " << time_parameter << " seconds per move" << endl;
+
+		if( time_inputter->time_per_move( 120 ) )
+			cout << "Got " << time_inputter->get_time() << " seconds per move" << endl;
+
+		return;
 	}
 
 	if( new_level == TOTALTIME ) {
-		cout << "Got " << time_parameter << " minutes per game" << endl;
+	    if( time_inputter->total_game_time( 60 ) )
+			cout << "Got " << time_inputter->get_time() << " minutes per game" << endl;
+
+		return;
 	}
+
+	// new level is (eLevels)level
+
+}
+
+bool ChessEngine::choose_colours()
+{
+    return colour_chooser->choose_colours( );
+
 }
 
 

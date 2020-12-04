@@ -44,7 +44,12 @@ public:
 		std::string black;
 	};
 
-	ColourChooser( STColours& init ) : colors( init ) { };
+	ColourChooser( ) {
+		colors.bg = "rgb(78,154,6)";
+		colors.fg = "rgb(0,0,0)";
+		colors.black = "rgb(85,87,83)";
+		colors.white = "rgb(238,238,236)";
+	};
     virtual ~ColourChooser() {};
 
     bool choose_colours();
