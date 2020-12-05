@@ -550,21 +550,23 @@ void ChessBoard::set_colours( ColourChooser::STColours new_colours )
     background_colour = Gdk::RGBA(new_colours.bg);
 	foreground_colour = Gdk::RGBA(new_colours.fg);
 
-    Gdk::RGBA white_colour = Gdk::RGBA(new_colours.white);
-    Gdk::RGBA black_colour = Gdk::RGBA(new_colours.black);
-
 	/* Create a context for the background image object so we can draw on it */
 	RefPtr<Context> context = Context::create( background_image );
 
-	/* draw the board background */
-	for( int cell=0; cell<64; cell++ ) {
-		if( (cell + (cell/8)) % 2 )
-			context->set_source_rgb( white_colour.get_red(), white_colour.get_green(), white_colour.get_blue() );
-		else
-			context->set_source_rgb( black_colour.get_red(), black_colour.get_green(), black_colour.get_blue() );
+	/* paint the complete image in the black colour */
+    Gdk::RGBA black_colour = Gdk::RGBA(new_colours.black);
+	context->set_source_rgb( black_colour.get_red(), black_colour.get_green(), black_colour.get_blue() );
+	context->rectangle( 0, 0, 8 * SQUARE_SIZE, 8 * SQUARE_SIZE );
+	context->fill();
 
-		context->rectangle( (cell%8) * SQUARE_SIZE, (cell/8) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE );
-		context->fill();
+	/* Now paint each alternate square in the white colour */
+    Gdk::RGBA white_colour = Gdk::RGBA(new_colours.white);
+	context->set_source_rgb( white_colour.get_red(), white_colour.get_green(), white_colour.get_blue() );
+	for( int cell=0; cell<64; cell++ ) {
+		if( (cell + (cell/8)) % 2 ) {
+			context->rectangle( (cell%8) * SQUARE_SIZE, (cell/8) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE );
+			context->fill();
+		}
 	}
 
 	update();   // Redraw the chessboard
