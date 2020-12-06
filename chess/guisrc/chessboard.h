@@ -43,6 +43,7 @@ class ChessBoard : public Gtk::DrawingArea
 private:
 	static const int SQUARE_SIZE = 36;
 	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
+	static const int MAX_HEIGHT = 1024;
 
 public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
@@ -70,25 +71,29 @@ private:
 
 	void update();
 
+	void paint_board();
+	void paint_pieces();
+	void paint_edit_pieces();
+	void paint_text( Cairo::RefPtr<Cairo::Context>& context, double x, double y, std::string text );
+	void paint_info( );
+
+
 	STSquare adjust_for_reverse( STSquare square );
 	STSquare point_to_square( Gdk::Point point );
 	char point_to_edit_piece( Gdk::Point point );
 	Gdk::Point square_to_point( STSquare square );
-
-	bool draw_board( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_pieces( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_info( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_edit( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_floating_piece( const Cairo::RefPtr<Cairo::Context>& cr );
-	bool draw_square_highlight( const Cairo::RefPtr<Cairo::Context>& cr );
 
 	bool on_animate_timeout();
 	bool on_highlight_timeout();
 	void start_dragging( char piece, Gdk::Point start_point );
 	void stop_dragging();
 
+
+
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
+	Cairo::RefPtr<Cairo::ImageSurface> info_image;
+	Cairo::RefPtr<Cairo::ImageSurface> pieces_overlay;
 
 	Gdk::Rectangle board_outline;
 	Gdk::Rectangle info_outline;
@@ -96,10 +101,13 @@ private:
 
 	Gdk::RGBA background_colour;
 	Gdk::RGBA foreground_colour;
+	Gdk::RGBA white_colour;
+	Gdk::RGBA black_colour;
 
 	std::map<char,Gdk::Point> pieces_image_offsets;
-	std::vector< std::pair<std::string,std::string> > info_data;
 	std::map<STSquare,char> pieces;
+
+	STInfo info;
 
 	bool show_bestline_info;
 	bool draw_highlight;
