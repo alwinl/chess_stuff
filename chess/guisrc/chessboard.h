@@ -49,23 +49,26 @@ public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
     void set_piece_positions( std::string FEN_string );
-	void set_info( STInfo& info );
-    void set_colours( ColourChooser::STColours new_colours );
+	void set_info( STInfo info );
+    void set_colours( ColourChooser::STColours new_colours, STInfo info );
 	void set_edit( bool on );
-    void toggle_reverse();
-    void toggle_bestline();
-	void animate( STSquare start_square, STSquare end_square, char piece );
+    void toggle_reverse( );
+    void toggle_bestline( STInfo the_info );
+
 	void highlight( STSquare square );
 
-	bool get_is_edit() const { return is_edit; }
+	void animate_move_start();
+	void animate_move_continue();
+	void animate_move_finish();
+
 	STSquare get_drag_square() const { return drag_start_square; }
-	STSquare get_end_square() const { return end_square; }
+	STSquare get_end_square() const { return drag_end_square; }
 	char get_piece_code() const { return save_piece_code; }
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
 	virtual bool on_draw( const Cairo::RefPtr<Cairo::Context>& cr );
-	virtual bool on_button_press_event(GdkEventButton* button_event);
+	virtual bool on_button_press_event( GdkEventButton* button_event );
     virtual bool on_button_release_event( GdkEventButton* release_event );
     virtual bool on_motion_notify_event( GdkEventMotion* motion_event );
 
@@ -75,25 +78,25 @@ private:
 	void paint_pieces();
 	void paint_edit_pieces();
 	void paint_text( Cairo::RefPtr<Cairo::Context>& context, double x, double y, std::string text );
-	void paint_info( );
-
+	void paint_info( STInfo& info );
 
 	STSquare adjust_for_reverse( STSquare square );
 	STSquare point_to_square( Gdk::Point point );
 	char point_to_edit_piece( Gdk::Point point );
 	Gdk::Point square_to_point( STSquare square );
 
-	bool on_animate_timeout();
 	bool on_highlight_timeout();
+
 	void start_dragging( char piece, Gdk::Point start_point );
+	void update_dragging( Gdk::Point new_point );
 	void stop_dragging();
-
-
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
 	Cairo::RefPtr<Cairo::ImageSurface> info_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_overlay;
+
+    std::map<char,Gdk::Point> pieces_image_offsets;
 
 	Gdk::Rectangle board_outline;
 	Gdk::Rectangle info_outline;
@@ -104,27 +107,23 @@ private:
 	Gdk::RGBA white_colour;
 	Gdk::RGBA black_colour;
 
-	std::map<char,Gdk::Point> pieces_image_offsets;
-	std::map<STSquare,char> pieces;
-
-	STInfo info;
-
-	bool show_bestline_info;
+	bool show_bestline;
 	bool draw_highlight;
 	bool is_dragging;
 	bool is_animating;
 	bool is_reversed;
 	bool is_edit;
 
+	int timeout_counter;
+
+	std::map<STSquare,STPiece> pieces;
 	Gdk::Point floating_piece_position;
 	Gdk::Point annimate_delta;
 	Gdk::Point highlight_pos;
 	char floating_piece_code;
 	char save_piece_code;
 	STSquare drag_start_square;
-	STSquare end_square;
-
-	int timeout_counter;
+	STSquare drag_end_square;
 };
 
 #endif // CHESSBOARD_H_INCLUDED

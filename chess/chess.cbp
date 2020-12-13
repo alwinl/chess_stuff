@@ -149,7 +149,6 @@
 		<Unit filename="logicsrc/movegenerator.h" />
 		<Unit filename="logicsrc/piecevalues.cc" />
 		<Unit filename="logicsrc/piecevalues.h" />
-		<Unit filename="logicsrc/presentationinterface.h" />
 		<Unit filename="logicsrc/timeinputter.h" />
 		<Unit filename="logictest/testapplication.cc">
 			<Option target="Test" />
@@ -199,13 +198,11 @@
 			<Option target="Release" />
 		</Unit>
 		<Extensions>
-			<code_completion />
-			<envvars />
 			<lib_finder disable_auto="0">
 				<lib name="gtkmm-3.0" />
 				<lib name="cppunit" />
+				<lib name="gthread-2.0" />
 			</lib_finder>
-			<debugger />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

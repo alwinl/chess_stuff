@@ -22,37 +22,31 @@
 #ifndef PIECEVALUES_H
 #define PIECEVALUES_H
 
+#include <map>
+
 /**-----------------------------------------------------------------------------
  * \brief
  */
 class PieceValues
 {
 public:
-	struct STPieceValues
-	{
-		int QueenValue;
-		int RookValue;
-		int BishopValue;
-		int KnightValue;
-		int PawnValue;
-	};
+	enum ePieceIdx { QUEEN, ROOK, BISHOP, KNIGHT, PAWN, KING, PIECECOUNT };
+	enum ePieceColour { WHITE, BLACK, COLOURCOUNT };
 
-    PieceValues( ) {};
+    PieceValues( );
     virtual ~PieceValues() {};
 
-    void init_piece_values( STPieceValues values );
     bool choose_piece_values( );
-    STPieceValues get_piece_values() const { return save_values; };
+    int get_piece_value( char index ) const;
 
-    bool operator==( STPieceValues& rhs ) const;
+    int get_piece_value( PieceValues::ePieceIdx index, PieceValues::ePieceColour colour ) const;
 
 protected:
-    virtual void setup() = 0;
+    virtual void setup( ) = 0;
     virtual bool manipulate() = 0;
-    virtual STPieceValues result( ) = 0;
+    virtual void result( ) = 0;
 
-private:
-    STPieceValues save_values;
+	std::map<ePieceIdx,int> values;
 };
 
 #endif // PIECEVALUES_H

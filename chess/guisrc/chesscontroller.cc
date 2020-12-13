@@ -31,30 +31,6 @@
 #include "../ADTsrc/pods.h"
 
 #include "../logicsrc/chessengine.h"
-#include "../logicsrc/presentationinterface.h"
-
-/**-----------------------------------------------------------------------------
- * \brief
- */
-class GUIPresenter : public PresentationInterface
-{
-public:
-	GUIPresenter( ChessWindow * view, ChessBoard * board ) : PresentationInterface() {
-		this->view = view;
-		this->board = board;
-	};
-	~GUIPresenter() {};
-
-	void set_piece_positions( std::string FEN_string ) { board->set_piece_positions( FEN_string ); };
-	void set_info( STInfo info ) { board->set_info( info ); };
-	void set_thinking( bool on ) { view->show_menu( on ? ChessWindow::MENU_STOP : ChessWindow::MENU_GAME ); };
-	void animate( STSquare start_square, STSquare end_square, char piece ) { board->animate( start_square, end_square, piece ); };
-
-private:
-	ChessWindow * view;
-    ChessBoard * board;
-};
-
 
 
 /**-----------------------------------------------------------------------------
@@ -73,6 +49,7 @@ Glib::RefPtr<ChessController> ChessController::create( ChessEngine* engine_init 
 ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application( "net.dnatechnologies.chess" ), engine( engine_init )
 {
 	Glib::set_application_name("GTKmm Chess");
+	move_calculator_thread = nullptr;
 }
 
 /**-----------------------------------------------------------------------------
@@ -127,7 +104,6 @@ void ChessController::get_widgets()
     ui_model->get_widget( "widStatusBar", status_bar );
 	ui_model->get_widget_derived("canvas", board );
 
-	board->signal_button_press_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_pressed) );
 	board->signal_button_release_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_released) );
 
 	Gtk::RadioMenuItem * chkMenuItem;
@@ -154,6 +130,8 @@ void ChessController::get_widgets()
 
 	chkTurnItems[TURNWHITE]->set_active();
 
+	move_calculator_slot.connect(sigc::mem_fun(*this, &ChessController::on_move_calculator_notify ));
+
 	ui_model->get_widget( "chkOptionSound", chkSound );
 
 	engine->init_colour_chooser( new GUIColourChooser( ui_model, *view ) );
@@ -171,8 +149,6 @@ void ChessController::on_startup()
 
 	bind_actions();
 	get_widgets();
-
-	engine->set_presentation_pointer( new GUIPresenter( view, board ) );
 }
 
 /**-----------------------------------------------------------------------------
@@ -187,7 +163,7 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-	board->set_colours( engine->get_colours() );
+	board->set_colours( engine->get_colours(), engine->get_info() );
 
     on_action_new();
 }
@@ -200,6 +176,9 @@ void ChessController::on_action_new()
 	status_bar->push( std::string("") );
 
 	engine->new_game(  );
+
+    board->set_piece_positions( engine->get_piece_positions() );
+    board->set_info( engine->get_info() );
 
 	status_bar->push( std::string("New game") );
 }
@@ -282,6 +261,10 @@ void ChessController::on_action_quit()
 void ChessController::on_action_play()
 {
 	engine->advance(  );
+
+    board->set_piece_positions( engine->get_piece_positions() );
+    board->set_info( engine->get_info() );
+
 }
 
 /**-----------------------------------------------------------------------------
@@ -314,6 +297,8 @@ void ChessController::on_action_redo()
 void ChessController::on_action_arrange()
 {
 	engine->arranging_start();
+
+    board->set_piece_positions( engine->get_piece_positions() );
 
 	view->show_menu( ChessWindow::MENU_ARRANGE );
 	board->set_edit( true );
@@ -362,7 +347,7 @@ void ChessController::on_action_level( unsigned int level)
 void ChessController::on_action_colours()
 {
     if( engine->choose_colours( ) )
-		board->set_colours( engine->get_colours() );
+		board->set_colours( engine->get_colours(), engine->get_info() );
 }
 
 /**-----------------------------------------------------------------------------
@@ -370,7 +355,7 @@ void ChessController::on_action_colours()
  */
 void ChessController::on_action_reverse()
 {
-	board->toggle_reverse();
+	board->toggle_reverse( );
 }
 
 /**-----------------------------------------------------------------------------
@@ -378,7 +363,7 @@ void ChessController::on_action_reverse()
  */
 void ChessController::on_action_showbestline()
 {
-	board->toggle_bestline();
+	board->toggle_bestline( engine->get_info() );
 }
 
 /**-----------------------------------------------------------------------------
@@ -414,6 +399,8 @@ void ChessController::on_action_arrange_done()
 		return;
 	}
 
+    board->set_piece_positions( engine->get_piece_positions() );
+
 	view->show_menu( ChessWindow::MENU_GAME );
 	board->set_edit( false );
 }
@@ -424,6 +411,8 @@ void ChessController::on_action_arrange_done()
 void ChessController::on_action_arrange_clear()
 {
 	engine->arranging_clear();
+
+    board->set_piece_positions( engine->get_piece_positions() );
 }
 
 /**-----------------------------------------------------------------------------
@@ -442,6 +431,8 @@ void ChessController::on_action_arrange_cancel()
 {
 	engine->arranging_end( true );
 
+    board->set_piece_positions( engine->get_piece_positions( ) );
+
 	view->show_menu( ChessWindow::MENU_GAME );
 	board->set_edit( false );
 }
@@ -454,13 +445,50 @@ void ChessController::on_action_thinking_stop()
 	engine->stop_thinking();
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Button action
- */
-bool ChessController::on_board_button_pressed( GdkEventButton* button_event )
-{
-	engine->put_piece_on_square( board->get_drag_square(), ' ' ); // Putting a space is removing the piece
 
+void ChessController::on_move_calculator_notify()
+{
+	if( move_calculator_thread->joinable() )
+		move_calculator_thread->join();
+
+	board->set_piece_positions( engine->get_piece_positions() );
+    board->set_info( engine->get_info() );
+
+	view->show_menu( ChessWindow::MENU_GAME );
+}
+
+
+void ChessController::move_calculator()
+{
+	engine->calculate_move();
+
+	move_calculator_slot.emit();
+}
+
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ */
+bool ChessController::on_animate_timeout()
+{
+	if( ! --timeout_counter ) {
+		board->animate_move_finish();
+
+		STSquare end_square = board->get_end_square();
+		char piece_code = board->get_piece_code();
+
+		engine->put_piece_on_square( end_square, piece_code );
+		board->set_piece_positions( engine->get_piece_positions() );
+
+		// if it is the computers turn here, let the AI calculate a move
+		view->show_menu( ChessWindow::MENU_STOP );
+
+		move_calculator_thread = new std::thread( sigc::mem_fun(*this, &ChessController::move_calculator) );
+
+		return false;
+	}
+
+	board->animate_move_continue();
 	return true;
 }
 
@@ -469,10 +497,29 @@ bool ChessController::on_board_button_pressed( GdkEventButton* button_event )
  */
 bool ChessController::on_board_button_released( GdkEventButton* button_event )
 {
-	if( board->get_is_edit() )
-		engine->put_piece_on_square( board->get_end_square(), board->get_piece_code() );
-	else
-		engine->do_move( board->get_drag_square(), board->get_end_square() );
+	STSquare start_square = board->get_drag_square();
+	STSquare end_square = board->get_end_square();
+	char piece_code = board->get_piece_code();
+
+	if( start_square.file != -1 )
+		engine->put_piece_on_square( start_square, ' ' ); // Putting a space is removing the piece
+
+	if( engine->in_edit_mode() ) {
+		engine->put_piece_on_square( end_square, piece_code );
+		board->set_piece_positions( engine->get_piece_positions() );
+		return true;
+	}
+
+	// regular move, check if this this move cannot be made
+	if( ! engine->enter_move( start_square, end_square ) ) {
+		board->set_piece_positions( engine->get_piece_positions() );
+		return true;
+	}
+
+	board->animate_move_start( );
+
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
 
 	return true;
 }

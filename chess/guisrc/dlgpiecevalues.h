@@ -37,9 +37,9 @@ public:
     GUIPieceValues( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
 protected:
-    virtual void setup();
+    virtual void setup( );
     virtual bool manipulate();
-    virtual STPieceValues result( );
+    virtual void result( );
 
 private:
     DialogPieceValues * dlg;

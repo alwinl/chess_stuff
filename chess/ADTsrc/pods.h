@@ -73,6 +73,7 @@ struct STPiece
 {
 	char code;
 	bool is_white;
+	bool is_dragging;
 };
 
 /**-----------------------------------------------------------------------------

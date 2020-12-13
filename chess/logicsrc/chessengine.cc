@@ -34,8 +34,6 @@
 
 #include "fentranslator.h"
 
-#include "presentationinterface.h"
-
 #include <iostream>
 
 using namespace std;
@@ -43,13 +41,9 @@ using namespace std;
 
 ChessEngine::ChessEngine()
 {
-	presenter = new NullPresentation;
-
     model = new ChessGame;
 
     is_arranging = false;
-
-    init_piece_values();
 
     colour_chooser = nullptr;
     time_inputter = nullptr;
@@ -61,14 +55,6 @@ ChessEngine::~ChessEngine()
 {
     delete model;
 
-    delete presenter;
-}
-
-void ChessEngine::set_presentation_pointer( PresentationInterface* presentation_init )
-{
-	delete presenter;
-
-	presenter = presentation_init;
 }
 
 
@@ -79,46 +65,14 @@ void ChessEngine::new_game( )
 	current_state = make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     model->initialise();
-
-    STInfo tmp = model->get_info();
-
-
-    presenter->set_piece_positions( current_state.piece_positions );
-    presenter->set_info( tmp );
 }
 
 
 
 
-void ChessEngine::do_move( STSquare start_square, STSquare end_square )
+bool ChessEngine::enter_move( STSquare start_square, STSquare end_square )
 {
-	FENTranslator translator;
-	char piece;
-
-	translator.from_FEN( current_state.piece_positions );
-
-	piece = translator.query_square( start_square );
-	if( piece == ' ' )
-		return;		/* invalid move */
-
-	/*
-	 *	We need to do a bunch more checking here
-	 */
-
-	translator.remove_from_square( start_square );
-
-    presenter->set_piece_positions( translator.to_FEN() );
-
-
-	presenter->animate( start_square, end_square, piece );
-
-	translator.add_to_square( end_square, piece );
-    presenter->set_piece_positions( translator.to_FEN() );
-
-	current_state.piece_positions = translator.to_FEN();
-	current_state.is_white_move = ! current_state.is_white_move;
-
-	//model->push_state( current_state );
+	return true;
 }
 
 STSquare ChessEngine::hint()
@@ -133,8 +87,6 @@ void ChessEngine::cancel_move( )
 {
 }
 
-
-
 void ChessEngine::arranging_start()
 {
 	arrange_state = STGameState();
@@ -143,16 +95,12 @@ void ChessEngine::arranging_start()
     arrange_state.is_white_move = true;             // is it whites next move?
 
     is_arranging = true;
-
-    presenter->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::arranging_clear()
 {
     arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
     arrange_state.is_white_move = true;             // is it whites next move?
-
-    presenter->set_piece_positions( arrange_state.piece_positions );
 }
 
 void ChessEngine::put_piece_on_square( STSquare square, char piece )
@@ -164,6 +112,8 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
 	else
 		translator.from_FEN( current_state.piece_positions );
 
+	last_state.piece_positions = translator.to_FEN();
+
 	if( translator.query_square(square) != ' ' )
 		translator.remove_from_square( square );
 
@@ -172,8 +122,8 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
 
 	if( is_arranging )
 		arrange_state.piece_positions = translator.to_FEN();
-
-    presenter->set_piece_positions( translator.to_FEN() );
+	else
+		current_state.piece_positions = translator.to_FEN();
 }
 
 void ChessEngine::arrange_turn( eTurns new_turn )
@@ -190,7 +140,6 @@ bool ChessEngine::arranging_end( bool canceled )
 {
 	if( canceled ) {
 		is_arranging = false;
-		presenter->set_piece_positions( current_state.piece_positions );
 		return true;
 	}
 
@@ -222,7 +171,6 @@ bool ChessEngine::arranging_end( bool canceled )
 	current_state.is_white_move = arrange_state.is_white_move;
 
 	is_arranging = false;
-	presenter->set_piece_positions( current_state.piece_positions );
 	return true;
 }
 
@@ -280,57 +228,11 @@ bool ChessEngine::save_file_as( )
 void ChessEngine::advance( )
 {
     model->advance();
-
-    STInfo tmp = model->get_info();
-    presenter->set_piece_positions( model->get_piece_positions() );
-    presenter->set_info( tmp );
-}
-
-
-void ChessEngine::init_piece_values()
-{
-	piece_values.insert( pair<char,int>( 'Q',  2304 ) );		// 9 << 8
-	piece_values.insert( pair<char,int>( 'R',  1280 ) );		// 5 << 8
-	piece_values.insert( pair<char,int>( 'B',   768 ) );		// 3 << 8
-	piece_values.insert( pair<char,int>( 'N',   768 ) );		// 3 << 8
-	piece_values.insert( pair<char,int>( 'P',   256 ) );		// 1 << 8
-	piece_values.insert( pair<char,int>( 'K',     0 ) );
-	piece_values.insert( pair<char,int>( 'q', -2304 ) );
-	piece_values.insert( pair<char,int>( 'r', -1280 ) );
-	piece_values.insert( pair<char,int>( 'b',  -768 ) );
-	piece_values.insert( pair<char,int>( 'n',  -768 ) );
-	piece_values.insert( pair<char,int>( 'p',  -256 ) );
-	piece_values.insert( pair<char,int>( 'k',    0  ) );
 }
 
 void ChessEngine::change_piece_values( )
 {
-	PieceValues::STPieceValues values;
-
-    values.QueenValue  = piece_values['Q'] >> 4;
-    values.RookValue   = piece_values['R'] >> 4;
-    values.BishopValue = piece_values['B'] >> 4;
-    values.KnightValue = piece_values['N'] >> 4;
-    values.PawnValue   = piece_values['P'] >> 4;
-
-    piece_values_object->init_piece_values( values );
-
-    if( !piece_values_object->choose_piece_values( ) )
-		return;
-
-	values = piece_values_object->get_piece_values();
-
-	piece_values['Q'] = values.QueenValue << 4;
-	piece_values['R'] = values.RookValue << 4;
-	piece_values['B'] = values.BishopValue << 4;
-	piece_values['N'] = values.KnightValue << 4;
-	piece_values['P'] = values.PawnValue << 4;
-
-	piece_values['q'] = -values.QueenValue << 4;
-	piece_values['r'] = -values.RookValue << 4;
-	piece_values['b'] = -values.BishopValue << 4;
-	piece_values['n'] = -values.KnightValue << 4;
-	piece_values['p'] = -values.PawnValue << 4;
+    piece_values_object->choose_piece_values( );
 }
 
 
@@ -427,12 +329,21 @@ void ChessEngine::CalcMaterial()
 
 		STPiece piece = (*it).second;
 
-		material += piece_values[piece.code];
-		totalMaterial += abs( piece_values[piece.code] );
+
+
+		material += piece_values_object->get_piece_value( piece.code );
+		totalMaterial += abs( piece_values_object->get_piece_value( piece.code ) );
 
     }
 }
 
+#include <unistd.h>
+void ChessEngine::calculate_move()
+{
+	unsigned int microsecond = 1000000;
+
+	usleep( 5 * microsecond );
+}
 
 bool ChessEngine::toggle_multiplayer()
 {

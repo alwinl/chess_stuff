@@ -23,7 +23,6 @@
 #include "../ADTsrc/pods.h"
 
 #include <sstream>
-//#include <iostream>
 
 using namespace std;
 
@@ -48,6 +47,7 @@ map<STSquare,STPiece> FENTranslator::from_FEN( std::string FENstring )
 
         	piece.code = code;
 			piece.is_white = ( string("KQRBNP").find( code ) != std::string::npos );
+			piece.is_dragging = false;
 
             content.insert( std::pair<STSquare, STPiece>( square, piece) );
             ++square.file;
@@ -103,6 +103,7 @@ bool FENTranslator::add_to_square( STSquare square, char code )
 
 	piece.code = code;
 	piece.is_white = ( string("KQRBNP").find( code ) != std::string::npos );
+	piece.is_dragging = false;
 
     content.insert( std::pair<STSquare, STPiece>( square, piece) );
     return true;

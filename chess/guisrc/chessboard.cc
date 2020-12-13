@@ -21,6 +21,8 @@
 
 #include "chessboard.h"
 
+#include "../logicsrc/fentranslator.h"
+
 /**-----------------------------------------------------------------------------
  * \brief ChessBoard constructor
  *
@@ -37,7 +39,7 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
 	info_image = Cairo::ImageSurface::create( Cairo::FORMAT_ARGB32, INFO_WIDTH, MAX_HEIGHT );
 	pieces_overlay = Cairo::ImageSurface::create( Cairo::FORMAT_ARGB32, 8*SQUARE_SIZE, 8*SQUARE_SIZE );
 
-    show_bestline_info = true;
+    show_bestline = true;
 	draw_highlight = false;
 	is_dragging = false;
 	is_animating = false;
@@ -45,6 +47,8 @@ ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder
 	is_edit = false;
 
 	floating_piece_code = ' ';
+
+	timeout_counter = 0;
 
 	// The pieces bitmap contains king through to pawn, white pieces in top row and black pieces in bottom row
     pieces_image_offsets['K'] = Gdk::Point( 0 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 );
@@ -272,10 +276,24 @@ void ChessBoard::start_dragging( char piece, Gdk::Point start_point )
  * \return void
  *
  */
+void ChessBoard::update_dragging( Gdk::Point new_point )
+{
+    floating_piece_position = Gdk::Point( new_point.get_x() - .5 * SQUARE_SIZE, new_point.get_y() - .5 * SQUARE_SIZE );
+
+    update();
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * \return void
+ *
+ */
 void ChessBoard::stop_dragging()
 {
 	is_dragging = false;
 	floating_piece_code = ' ';
+
 	update();
 }
 
@@ -287,7 +305,7 @@ void ChessBoard::stop_dragging()
  */
 bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 {
-	if( is_animating )
+	if( is_animating )		// block user input during animations
 		return true;
 
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( button_event->x, button_event->y, 1, 1 );
@@ -297,13 +315,21 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
 		drag_start_square = point_to_square( mouse_point );
 
-		typename std::map<STSquare,char>::iterator it = pieces.find(drag_start_square);
+		typename std::map<STSquare,STPiece>::iterator it = pieces.find(drag_start_square);
 		if( it != pieces.end() ) {
-			start_dragging( (*it).second, mouse_point );
-			return false;		// keep processing
+			STPiece piece = (*it).second;
+			piece.is_dragging = true;
+			(*it).second = piece;
+
+			start_dragging( piece.code, mouse_point );
+
+			paint_pieces();
+			update();
 		}
 
     } else if( is_edit && edit_outline.intersects( mouse_pos ) ) {
+
+		drag_start_square.file = -1;
 
 		start_dragging( point_to_edit_piece( mouse_point ), mouse_point );
     }
@@ -319,6 +345,9 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
  */
 bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 {
+	if( is_animating )		// block user input during animations
+		return true;
+
 	if( !is_dragging )
 		return true;
 
@@ -327,7 +356,14 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 
     stop_dragging();
 
-	end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
+	typename std::map<STSquare,STPiece>::iterator it = pieces.find(drag_start_square);
+	if( it != pieces.end() ) {
+		STPiece piece = (*it).second;
+		piece.is_dragging = false;
+		(*it).second = piece;
+	}
+
+	drag_end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
 
 	if( board_outline.intersects( mouse_pos ) )
 		return false;		// keep processing
@@ -343,12 +379,13 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
  */
 bool ChessBoard::on_motion_notify_event( GdkEventMotion* motion_event )
 {
-    if( !is_dragging )
-        return true;
+	if( is_animating )		// block user input during animations
+		return true;
 
-    floating_piece_position = Gdk::Point( motion_event->x - .5 * SQUARE_SIZE, motion_event->y - .5 * SQUARE_SIZE );
+	if( !is_dragging )
+		return true;
 
-    update();
+	update_dragging( Gdk::Point(motion_event->x, motion_event->y) );
 
     return true;
 }
@@ -394,20 +431,26 @@ void ChessBoard::paint_pieces()
 	context->restore();
 
 	// draw the pieces
-	for( std::pair<const STSquare,char>& piece : pieces ) {
+	for( std::pair<const STSquare,STPiece>& entry : pieces ) {
+
+		STPiece piece = entry.second;
+
+		if( piece.is_dragging )
+			continue;
 
 		Gdk::Point dest;
 
-		STSquare square = adjust_for_reverse( piece.first );
+		STSquare square = adjust_for_reverse( entry.first );
 
 		dest.set_x( 1 + square.file * SQUARE_SIZE );
 		dest.set_y( 1 + square.rank * SQUARE_SIZE );
 
+
 		// To paint a particular piece we have to offset our source bitmap so that the correct bitmap
 		// overlays our square to be painted. The pieces are stored as two rows (a white and a black row)
 		// in six columns, calculable by type.
-		Gdk::Point source = Gdk::Point( dest.get_x() - pieces_image_offsets[piece.second].get_x(),
-										dest.get_y() - pieces_image_offsets[piece.second].get_y() );
+		Gdk::Point source = Gdk::Point( dest.get_x() - pieces_image_offsets[piece.code].get_x(),
+										dest.get_y() - pieces_image_offsets[piece.code].get_y() );
 
 		context->set_source( pieces_image, source.get_x(), source.get_y() );
 		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
@@ -449,7 +492,7 @@ void ChessBoard::paint_text( Cairo::RefPtr<Cairo::Context>& context, double x, d
 /**-----------------------------------------------------------------------------
  * \brief
  */
-void ChessBoard::paint_info( )
+void ChessBoard::paint_info( STInfo& the_info )
 {
 	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create( info_image );
     Cairo::TextExtents extents;
@@ -457,7 +500,7 @@ void ChessBoard::paint_info( )
     context->set_font_size( 12 );
     context->get_text_extents( "Bestline", extents ); // Need it for the height of the frame
 
-    int height = (show_bestline_info ? 12 : 11 ) * (extents.height + 5);
+    int height = (show_bestline ? 12 : 11 ) * (extents.height + 5);
 
     // blank the complete image
 	context->save();
@@ -490,17 +533,17 @@ void ChessBoard::paint_info( )
     double label_offset_x = 10;
     double info_offset_x = 10 + extents.width + 10;
 
-	paint_text( context, label_offset_x, offset_y, "Turn"  ); paint_text( context, info_offset_x, offset_y, info.turn  ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "White" ); paint_text( context, info_offset_x, offset_y, info.white ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "Black" ); paint_text( context, info_offset_x, offset_y, info.black ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "Time"  ); paint_text( context, info_offset_x, offset_y, info.time  ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "Level" ); paint_text( context, info_offset_x, offset_y, info.level ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "Value" ); paint_text( context, info_offset_x, offset_y, info.value ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "Nodes" ); paint_text( context, info_offset_x, offset_y, info.nodes ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "N/Sec" ); paint_text( context, info_offset_x, offset_y, info.n_sec ); offset_y += extents.height + 5;
-	paint_text( context, label_offset_x, offset_y, "Depth" ); paint_text( context, info_offset_x, offset_y, info.depth ); offset_y += extents.height + 5;
-	if( show_bestline_info ) {
-		paint_text( context, label_offset_x, offset_y, "Bestline" ); paint_text( context, info_offset_x, offset_y, info.bestline );
+	paint_text( context, label_offset_x, offset_y, "Turn"  ); paint_text( context, info_offset_x, offset_y, the_info.turn  ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "White" ); paint_text( context, info_offset_x, offset_y, the_info.white ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "Black" ); paint_text( context, info_offset_x, offset_y, the_info.black ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "Time"  ); paint_text( context, info_offset_x, offset_y, the_info.time  ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "Level" ); paint_text( context, info_offset_x, offset_y, the_info.level ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "Value" ); paint_text( context, info_offset_x, offset_y, the_info.value ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "Nodes" ); paint_text( context, info_offset_x, offset_y, the_info.nodes ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "N/Sec" ); paint_text( context, info_offset_x, offset_y, the_info.n_sec ); offset_y += extents.height + 5;
+	paint_text( context, label_offset_x, offset_y, "Depth" ); paint_text( context, info_offset_x, offset_y, the_info.depth ); offset_y += extents.height + 5;
+	if( show_bestline ) {
+		paint_text( context, label_offset_x, offset_y, "Bestline" ); paint_text( context, info_offset_x, offset_y, the_info.bestline );
 	}
 }
 
@@ -513,22 +556,7 @@ void ChessBoard::paint_info( )
  */
 void ChessBoard::set_piece_positions( std::string FEN_string )
 {
-    STSquare square = make_square(0,7);         // first = file, second is rank
-
-    pieces.clear();
-
-    for( char& code : FEN_string ) {
-
-        if( (code > '0') && (code < '9') ) {       // Character can either be a number (squares to skip)
-           square.file += (code - '0' );
-        } else if( code == '/' ) {                      // ... or an end of rank indicator
-            --square.rank;
-            square.file = 0;
-        } else {                                    // or an piece designator
-        	pieces.insert( std::pair<STSquare,char>(square, code) );
-            ++square.file;
-        }
-    }
+	pieces = FENTranslator().from_FEN( FEN_string );
 
 	paint_pieces();
 
@@ -544,7 +572,7 @@ void ChessBoard::set_piece_positions( std::string FEN_string )
  * \return void
  *
  */
-void ChessBoard::set_colours( ColourChooser::STColours new_colours )
+void ChessBoard::set_colours( ColourChooser::STColours new_colours, STInfo info )
 {
     background_colour = Gdk::RGBA(new_colours.bg);
 	foreground_colour = Gdk::RGBA(new_colours.fg);
@@ -552,7 +580,7 @@ void ChessBoard::set_colours( ColourChooser::STColours new_colours )
 	black_colour =  Gdk::RGBA(new_colours.black);
 
 	paint_board();
-	paint_info();
+	paint_info( info );
 
 	update();   // Redraw the chessboard
 }
@@ -590,11 +618,9 @@ void ChessBoard::set_edit( bool on )
  * \brief
  *
  */
-void ChessBoard::set_info( STInfo& info )
+void ChessBoard::set_info( STInfo info )
 {
-	this->info = info;
-
-    paint_info( );
+    paint_info( info );
 
     update();
 }
@@ -603,66 +629,55 @@ void ChessBoard::set_info( STInfo& info )
  * \brief
  *
  */
-void ChessBoard::toggle_bestline()
+void ChessBoard::toggle_bestline( STInfo info )
 {
-    show_bestline_info = !show_bestline_info;
+    show_bestline = !show_bestline;
 
-    paint_info( );
+    paint_info( info );
 
     update();
 }
 
 /**-----------------------------------------------------------------------------
  * \brief
- */
-bool ChessBoard::on_animate_timeout()
-{
-	if( ! --timeout_counter ) {
-		floating_piece_code = ' ';
-		is_animating = false;
-
-		update();
-		return false;
-	}
-
-	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
-	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
-
-	update();
-	return true;
-}
-
-
-/**-----------------------------------------------------------------------------
- * \brief
  *
  */
-void ChessBoard::animate( STSquare start_square, STSquare end_square, char piece )
+void ChessBoard::animate_move_start()
 {
-	Gdk::Point end_point = square_to_point( end_square );
-
-	floating_piece_position = square_to_point( start_square );
+	Gdk::Point end_point = square_to_point( drag_end_square );
+	floating_piece_position = square_to_point( drag_start_square );
 
 	annimate_delta.set_x( (end_point.get_x() - floating_piece_position.get_x()) / 10 );
 	annimate_delta.set_y( (end_point.get_y() - floating_piece_position.get_y()) / 10 );
 
+	floating_piece_code = save_piece_code;
+	is_animating = true;
+
+	// make the first step
 	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
 	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
 
-	floating_piece_code = piece;
+	update();
+}
 
-	is_animating = true;
+void ChessBoard::animate_move_continue()
+{
+	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
+	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
 
 	update();
-
-	timeout_counter = 10;
-	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessBoard::on_animate_timeout), 100 );
-
-	while( timeout_counter ) {
-		while( Gtk::Main::instance()->events_pending() )
-			Gtk::Main::instance()->iteration();
-	}
 }
+
+void ChessBoard::animate_move_finish()
+{
+	floating_piece_code = ' ';
+	is_animating = false;
+
+	timeout_counter = 0;
+
+	update();
+}
+
 
 /**-----------------------------------------------------------------------------
  * \brief
@@ -697,11 +712,5 @@ void ChessBoard::highlight( STSquare square )
 
 	timeout_counter = 10;
 	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessBoard::on_highlight_timeout), 100 );
-
-	while( timeout_counter ) {
-		while( Gtk::Main::instance()->events_pending() )
-			Gtk::Main::instance()->iteration();
-	}
-
 }
 

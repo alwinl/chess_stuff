@@ -33,7 +33,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestColourChooser );
 class MockColourChooserOk : public ColourChooser
 {
 public:
-    MockColourChooserOk( STColours& init_colours, STColours& test_colours ) : ColourChooser(init_colours), new_colours(test_colours) {};
+    MockColourChooserOk( STColours& init_colours, STColours& test_colours ) : ColourChooser(), new_colours(test_colours) {};
 
 private:
     STColours new_colours;
@@ -46,7 +46,7 @@ private:
 class MockColourChooserCancel : public ColourChooser
 {
 public:
-    MockColourChooserCancel( STColours& init_colours ) : ColourChooser(init_colours) {};
+    MockColourChooserCancel( STColours& init_colours ) : ColourChooser() {};
 
 private:
     virtual void setup( )  { };

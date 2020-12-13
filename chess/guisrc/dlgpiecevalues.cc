@@ -27,12 +27,10 @@
 class DialogPieceValues : public Gtk::Dialog
 {
 public:
-	enum ePieceIdx { QUEEN, ROOK, BISHOP, KNIGHT, PAWN, PIECECOUNT };
-
     DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
-	void set_widgets( PieceValues::STPieceValues values );
-	PieceValues::STPieceValues get_widgets( );
+	void set_value( PieceValues::ePieceIdx idx, int new_value );
+	int get_value( PieceValues::ePieceIdx idx );
 
 private:
     void on_revert_clicked();
@@ -42,8 +40,8 @@ private:
 		int orig_value;
 	};
 
-	PieceData piece_data[PIECECOUNT];
-	static std::string spinNames[PIECECOUNT];
+	PieceData piece_data[PieceValues::PIECECOUNT];
+	static std::string spinNames[PieceValues::PIECECOUNT];
 };
 
 std::string DialogPieceValues::spinNames[] = { "spnQueen", "spnRook", "spnBishop", "spnKnight", "spnPawn" };
@@ -53,7 +51,7 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
 {
     set_transient_for( parent );
 
-    for( int idx = 0; idx < PIECECOUNT; ++idx )
+    for( int idx = 0; idx < PieceValues::KING; ++idx )
 		ui_model->get_widget( spinNames[idx], piece_data[idx].spnButton );
 
     Gtk::Button * btnRevert;
@@ -61,37 +59,20 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
     btnRevert->signal_clicked().connect( sigc::mem_fun( *this, &DialogPieceValues::on_revert_clicked ));
 }
 
-void DialogPieceValues::set_widgets( PieceValues::STPieceValues values )
+void DialogPieceValues::set_value( PieceValues::ePieceIdx idx, int new_value )
 {
-	piece_data[QUEEN].spnButton->set_value( values.QueenValue );
-	piece_data[ROOK].spnButton->set_value( values.RookValue );
-	piece_data[BISHOP].spnButton->set_value( values.BishopValue );
-	piece_data[KNIGHT].spnButton->set_value( values.KnightValue );
-	piece_data[PAWN].spnButton->set_value( values.PawnValue );
-
-	piece_data[QUEEN].orig_value = values.QueenValue;
-	piece_data[ROOK].orig_value = values.RookValue;
-	piece_data[BISHOP].orig_value = values.BishopValue;
-	piece_data[KNIGHT].orig_value = values.KnightValue;
-	piece_data[PAWN].orig_value = values.PawnValue;
+	piece_data[idx].spnButton->set_value( new_value );
+	piece_data[idx].orig_value = new_value;
 }
 
-PieceValues::STPieceValues DialogPieceValues::get_widgets( )
+int DialogPieceValues::get_value( PieceValues::ePieceIdx idx )
 {
-	PieceValues::STPieceValues values;
-
-    values.QueenValue = int( piece_data[QUEEN].spnButton->get_value() );
-    values.RookValue = int( piece_data[ROOK].spnButton->get_value() );
-    values.BishopValue = int( piece_data[BISHOP].spnButton->get_value() );
-    values.KnightValue = int( piece_data[KNIGHT].spnButton->get_value() );
-    values.PawnValue = int( piece_data[PAWN].spnButton->get_value() );
-
-	return values;
+	return int( piece_data[idx].spnButton->get_value() );
 }
 
 void DialogPieceValues::on_revert_clicked()
 {
-    for( int idx = 0; idx < PIECECOUNT; ++idx )
+    for( int idx = 0; idx < PieceValues::KING; ++idx )
 		piece_data[idx].spnButton->set_value( piece_data[idx].orig_value );
 }
 
@@ -109,7 +90,11 @@ GUIPieceValues::GUIPieceValues( Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Windo
 
 void GUIPieceValues::setup()
 {
-    dlg->set_widgets( get_piece_values() );
+	dlg->set_value( QUEEN,  values[QUEEN] >> 4 );
+    dlg->set_value( ROOK,   values[ROOK] >> 4 );
+    dlg->set_value( BISHOP, values[BISHOP] >> 4 );
+    dlg->set_value( KNIGHT, values[KNIGHT] >> 4 );
+    dlg->set_value( PAWN,   values[PAWN] >> 4 );
 }
 
 bool GUIPieceValues::manipulate()
@@ -121,7 +106,11 @@ bool GUIPieceValues::manipulate()
     return response == Gtk::RESPONSE_OK;
 }
 
-PieceValues::STPieceValues GUIPieceValues::result( )
+void GUIPieceValues::result( )
 {
-	return dlg->get_widgets( );
+    values[QUEEN]  = dlg->get_value(QUEEN ) << 4;
+    values[ROOK]   = dlg->get_value(ROOK  ) << 4;
+    values[BISHOP] = dlg->get_value(BISHOP) << 4;
+    values[KNIGHT] = dlg->get_value(KNIGHT) << 4;
+    values[PAWN]   = dlg->get_value(PAWN  ) << 4;
 }

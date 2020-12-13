@@ -47,10 +47,9 @@ public:
     ChessEngine();
     ~ChessEngine();
 
-    void set_presentation_pointer( PresentationInterface* presentation_init );
-
-    void do_move( STSquare start_square, STSquare end_square );
+    bool enter_move( STSquare start_square, STSquare end_square );
     void cancel_move();
+    void calculate_move();
 
 	bool toggle_multiplayer();
 	void do_demo();
@@ -60,6 +59,7 @@ public:
 	void put_piece_on_square( STSquare square, char piece );
 	void arrange_turn( eTurns new_turn );
 	bool arranging_end( bool canceled );
+	bool in_edit_mode() { return is_arranging; }
 
     void advance();
 
@@ -77,9 +77,11 @@ public:
 	void stop_thinking();
 	void change_level( eLevels new_level );
 
-	void init_piece_values();
-
 	void change_piece_values( );
+
+	STInfo get_info() { return info; }
+
+	std::string get_piece_positions( ) { return is_arranging ? arrange_state.piece_positions : current_state.piece_positions; }
 
 
 
@@ -97,19 +99,18 @@ public:
 
 private:
 	ChessGame * model;
-	PresentationInterface* presenter;
 
     ColourChooser * colour_chooser;
     TimeInputter * time_inputter;
     PieceValues * piece_values_object;
     FilenameChooser * filename_chooser;
 
-
-	std::map<char,int> piece_values;
-
+    STGameState last_state;
     STGameState current_state;
     STGameState arrange_state;
     bool is_arranging;
+
+    STInfo info;
 };
 
 #endif // CHESSENGINE_H

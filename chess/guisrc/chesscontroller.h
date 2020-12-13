@@ -24,6 +24,7 @@
 
 #include <string>
 #include <vector>
+#include <thread>
 
 #include <gtkmm.h>
 
@@ -82,10 +83,17 @@ private:
 	void on_action_arrange_cancel();
 	void on_action_thinking_stop();
 
-	bool on_board_button_pressed( GdkEventButton* button_event );
 	bool on_board_button_released( GdkEventButton* button_event );
 
 	void bind_actions();
+
+	void on_move_calculator_notify();
+	void move_calculator();
+	std::thread * move_calculator_thread;
+	Glib::Dispatcher move_calculator_slot;
+
+	bool on_animate_timeout();
+	int timeout_counter;
 
 	// Widgets
 	ChessWindow * view;

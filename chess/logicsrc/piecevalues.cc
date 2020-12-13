@@ -21,30 +21,63 @@
 
 #include "piecevalues.h"
 
+#include <utility>
+using namespace std;
 
-void PieceValues::init_piece_values( PieceValues::STPieceValues values )
+PieceValues::PieceValues( )
 {
-	save_values = values;
+	values.insert( pair<ePieceIdx,int>( QUEEN,  2304 ) );		// 9 << 8
+	values.insert( pair<ePieceIdx,int>( ROOK,  1280 ) );		// 5 << 8
+	values.insert( pair<ePieceIdx,int>( BISHOP,   768 ) );		// 3 << 8
+	values.insert( pair<ePieceIdx,int>( KNIGHT,   768 ) );		// 3 << 8
+	values.insert( pair<ePieceIdx,int>( PAWN,   256 ) );		// 1 << 8
+	values.insert( pair<ePieceIdx,int>( KING,   0 ) );			// 0 << 8
 }
 
 bool PieceValues::choose_piece_values( )
 {
-	setup();
+	setup( );
+
 	bool first = manipulate( );
 	if( first )
-		save_values = result( );
+		result( );
 
 	return first;
 }
 
-bool PieceValues::operator==( PieceValues::STPieceValues& rhs ) const
-{
-    if( save_values.QueenValue != rhs.QueenValue ) return false;
-    if( save_values.RookValue != rhs.RookValue ) return false;
-    if( save_values.BishopValue != rhs.BishopValue ) return false;
-    if( save_values.KnightValue != rhs.KnightValue ) return false;
-    if( save_values.PawnValue != rhs.PawnValue ) return false;
 
-    return true;
+int PieceValues::get_piece_value( char index ) const
+{
+	PieceValues::ePieceIdx idx;
+	PieceValues::ePieceColour colour;
+
+	// ugly ugly ugly, but this code needs to be chopped anyway
+	switch( index ) {
+	case 'Q' : idx = QUEEN; colour = WHITE; break;
+	case 'R' : idx = ROOK; colour = WHITE; break;
+	case 'B' : idx = BISHOP; colour = WHITE; break;
+	case 'N' : idx = KNIGHT; colour = WHITE; break;
+	case 'P' : idx = PAWN; colour = WHITE; break;
+	case 'K' : idx = KING; colour = WHITE; break;
+	case 'q' : idx = QUEEN; colour = BLACK; break;
+	case 'r' : idx = ROOK; colour = BLACK; break;
+	case 'b' : idx = BISHOP; colour = BLACK; break;
+	case 'n' : idx = KNIGHT; colour = BLACK; break;
+	case 'p' : idx = PAWN; colour = BLACK; break;
+	case 'k' : idx = KING; colour = BLACK; break;
+	}
+
+	return get_piece_value( idx, colour );
 }
+
+int PieceValues::get_piece_value( PieceValues::ePieceIdx index, PieceValues::ePieceColour colour ) const
+{
+	std::map<ePieceIdx,int>::const_iterator it = values.find(index);
+
+	if( it == values.end() )
+		return 0;
+
+	return ( colour == BLACK ) ? -it->second : it->second;
+}
+
 
