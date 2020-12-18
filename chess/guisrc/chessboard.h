@@ -81,9 +81,13 @@ private:
 	void paint_info( STInfo& info );
 
 	STSquare adjust_for_reverse( STSquare square );
+
 	STSquare point_to_square( Gdk::Point point );
-	char point_to_edit_piece( Gdk::Point point );
 	Gdk::Point square_to_point( STSquare square );
+	Gdk::Point square_to_board_point( STSquare square );
+
+	char point_to_edit_piece( Gdk::Point point );
+	Gdk::Point source_point( Gdk::Point point, char piece_code );
 
 	bool on_highlight_timeout();
 
@@ -118,6 +122,7 @@ private:
 
 	std::map<STSquare,STPiece> pieces;
 	Gdk::Point floating_piece_position;
+	Gdk::Point floating_piece_source;
 	Gdk::Point annimate_delta;
 	Gdk::Point highlight_pos;
 	char floating_piece_code;

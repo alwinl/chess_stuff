@@ -155,11 +155,7 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
 
     if( floating_piece_code != ' ' ) {
 		cr->rectangle( floating_piece_position.get_x(), floating_piece_position.get_y(), SQUARE_SIZE, SQUARE_SIZE );
-
-		int source_x = floating_piece_position.get_x() - pieces_image_offsets[floating_piece_code].get_x();
-		int source_y = floating_piece_position.get_y() - pieces_image_offsets[floating_piece_code].get_y();
-
-		cr->set_source( pieces_image, source_x, source_y );
+		cr->set_source( pieces_image, floating_piece_source.get_x(), floating_piece_source.get_y() );
 		cr->fill();
     }
 
@@ -234,6 +230,21 @@ Gdk::Point ChessBoard::square_to_point( STSquare square )
 
 /**-----------------------------------------------------------------------------
  * \brief
+ */
+Gdk::Point ChessBoard::square_to_board_point( STSquare square )
+{
+	Gdk::Point pt;
+
+	square = adjust_for_reverse( square );
+
+	pt.set_x( 1 + square.file * SQUARE_SIZE );
+	pt.set_y( 1 + square.rank * SQUARE_SIZE );
+
+	return pt;
+}
+
+/**-----------------------------------------------------------------------------
+ * \brief
  *
  * The bitmap is organised as:
  *          KQRBNP
@@ -254,6 +265,20 @@ char ChessBoard::point_to_edit_piece( Gdk::Point point )
 	return piece_chars[ row * 6 + col ];
 }
 
+/**-----------------------------------------------------------------------------
+ * \brief
+ *
+ * To paint a particular piece we have to offset our source bitmap so that the correct bitmap
+ * overlays our square to be painted. The pieces are stored as two rows (a white and a black row)
+ * in six columns, calculable by type.
+ */
+Gdk::Point ChessBoard::source_point( Gdk::Point point, char piece_code )
+{
+	return Gdk::Point(
+		point.get_x() - pieces_image_offsets[piece_code].get_x(),
+		point.get_y() - pieces_image_offsets[piece_code].get_y()
+	);
+}
 
 /**-----------------------------------------------------------------------------
  * \brief
@@ -265,6 +290,7 @@ void ChessBoard::start_dragging( char piece, Gdk::Point start_point )
 {
 	floating_piece_code = piece;
 	floating_piece_position = Gdk::Point( start_point.get_x() - .5 * SQUARE_SIZE, start_point.get_y() - .5 * SQUARE_SIZE );
+	floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 	is_dragging = true;
 
 	update();
@@ -279,6 +305,7 @@ void ChessBoard::start_dragging( char piece, Gdk::Point start_point )
 void ChessBoard::update_dragging( Gdk::Point new_point )
 {
     floating_piece_position = Gdk::Point( new_point.get_x() - .5 * SQUARE_SIZE, new_point.get_y() - .5 * SQUARE_SIZE );
+    floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 
     update();
 }
@@ -438,19 +465,8 @@ void ChessBoard::paint_pieces()
 		if( piece.is_dragging )
 			continue;
 
-		Gdk::Point dest;
-
-		STSquare square = adjust_for_reverse( entry.first );
-
-		dest.set_x( 1 + square.file * SQUARE_SIZE );
-		dest.set_y( 1 + square.rank * SQUARE_SIZE );
-
-
-		// To paint a particular piece we have to offset our source bitmap so that the correct bitmap
-		// overlays our square to be painted. The pieces are stored as two rows (a white and a black row)
-		// in six columns, calculable by type.
-		Gdk::Point source = Gdk::Point( dest.get_x() - pieces_image_offsets[piece.code].get_x(),
-										dest.get_y() - pieces_image_offsets[piece.code].get_y() );
+		Gdk::Point dest = square_to_board_point( entry.first );
+		Gdk::Point source = source_point( dest, piece.code );
 
 		context->set_source( pieces_image, source.get_x(), source.get_y() );
 		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
@@ -656,6 +672,7 @@ void ChessBoard::animate_move_start()
 	// make the first step
 	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
 	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
+    floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 
 	update();
 }
@@ -664,6 +681,7 @@ void ChessBoard::animate_move_continue()
 {
 	floating_piece_position.set_x( floating_piece_position.get_x() + annimate_delta.get_x() );
 	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
+    floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 
 	update();
 }
