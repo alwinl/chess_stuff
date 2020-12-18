@@ -19,9 +19,30 @@
  *
  */
 
-#include "board.h"
+#ifndef BOARD_H
+#define BOARD_H
 
-Board::Board()
+#include <map>
+
+#include "../ADTsrc/pods.h"
+
+class Board
 {
-	//ctor
-}
+public:
+	Board();
+
+	Board standard_opening_board();
+
+	Board add_piece( STSquare square, STPiece new_piece );
+	Board remove_piece( STSquare square );
+
+	Board move_piece( STSquare old_square, STSquare new_square );
+	Board capture_piece( STSquare old_square, STSquare new_square );
+
+
+
+private:
+	std::map<STSquare,STPiece> pieces;
+};
+
+#endif // BOARD_H

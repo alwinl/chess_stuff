@@ -19,18 +19,41 @@
  *
  */
 
-#ifndef BOARD_H
-#define BOARD_H
+#include "board.h"
+#include "fentranslator.h"
 
+#include "../ADTsrc/pods.h"
 
-class Board
+Board::Board()
 {
-public:
-	Board();
+	//ctor
+}
 
-protected:
+Board Board::standard_opening_board()
+{
+	pieces = FENTranslator().from_FEN( "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" );
 
-private:
-};
+	return *this;
+}
 
-#endif // BOARD_H
+Board Board::add_piece( STSquare square, STPiece new_piece )
+{
+	pieces.insert( std::pair<STSquare, STPiece>( square, new_piece) );
+
+	return *this;
+}
+
+Board Board::remove_piece( STSquare square )
+{
+	return *this;
+}
+
+Board Board::move_piece( STSquare old_square, STSquare new_square )
+{
+	return *this;
+}
+
+Board Board::capture_piece( STSquare old_square, STSquare new_square )
+{
+	return *this;
+}
