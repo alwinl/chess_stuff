@@ -52,6 +52,8 @@
 		<Unit filename="ADTsrc/board.h" />
 		<Unit filename="ADTsrc/chessgame.cc" />
 		<Unit filename="ADTsrc/chessgame.h" />
+		<Unit filename="ADTsrc/ply.cc" />
+		<Unit filename="ADTsrc/ply.h" />
 		<Unit filename="ADTsrc/pngparser.cc" />
 		<Unit filename="ADTsrc/pngparser.h" />
 		<Unit filename="ADTsrc/pods.cc" />
