@@ -48,7 +48,7 @@ private:
 public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
-    void set_piece_positions( std::string FEN_string );
+    void set_piece_positions( std::map<STSquare,STPiece> new_pieces );
 	void set_info( STInfo info );
     void set_colours( ColourChooser::STColours new_colours, STInfo info );
 	void set_edit( bool on );
@@ -72,13 +72,13 @@ private:
     virtual bool on_button_release_event( GdkEventButton* release_event );
     virtual bool on_motion_notify_event( GdkEventMotion* motion_event );
 
-	void update();
-
 	void paint_board();
 	void paint_pieces();
 	void paint_edit_pieces();
 	void paint_text( Cairo::RefPtr<Cairo::Context>& context, double x, double y, std::string text );
 	void paint_info( STInfo& info );
+
+	//bool on_tick(const Glib::RefPtr<Gdk::FrameClock>& frame_clock);
 
 	STSquare adjust_for_reverse( STSquare square );
 

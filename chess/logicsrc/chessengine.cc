@@ -65,6 +65,19 @@ void ChessEngine::new_game( )
 	current_state = make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     model->initialise();
+
+
+    info.turn = "white";
+    info.black = "";
+    info.time = "";
+    info.level = "";
+    info.value = "";
+    info.nodes = "";
+    info.n_sec = "";
+    info.depth = "";
+    info.bestline = "";
+
+	multi_player = false;
 }
 
 
@@ -105,6 +118,7 @@ void ChessEngine::arranging_clear()
 
 void ChessEngine::put_piece_on_square( STSquare square, char piece )
 {
+	#if 0
 	FENTranslator translator;
 
 	if( is_arranging )
@@ -124,6 +138,7 @@ void ChessEngine::put_piece_on_square( STSquare square, char piece )
 		arrange_state.piece_positions = translator.to_FEN();
 	else
 		current_state.piece_positions = translator.to_FEN();
+	#endif // 0
 }
 
 void ChessEngine::arrange_turn( eTurns new_turn )
@@ -180,6 +195,9 @@ bool ChessEngine::arranging_end( bool canceled )
 
 
 
+std::map<STSquare,STPiece> ChessEngine::get_piece_positions( )
+{
+	return is_arranging ? FENTranslator::from_FEN(arrange_state.piece_positions) : FENTranslator::from_FEN(current_state.piece_positions); }
 
 
 bool ChessEngine::open_file( )
@@ -259,23 +277,81 @@ void ChessEngine::stop_thinking()
 
 void ChessEngine::change_level( eLevels new_level )
 {
-
-	if( new_level == TIMED ) {
-
-		if( time_inputter->time_per_move( 120 ) )
-			cout << "Got " << time_inputter->get_time() << " seconds per move" << endl;
-
+	if( multi_player ) {
+		model->set_level_info( "Two Player" );
 		return;
 	}
 
-	if( new_level == TOTALTIME ) {
-	    if( time_inputter->total_game_time( 60 ) )
-			cout << "Got " << time_inputter->get_time() << " minutes per game" << endl;
+	switch( new_level ) {
+	case EASY:
+		model->set_level_info( "Easy" );
+		break;
 
-		return;
+	case TIMED:
+		if( !time_inputter->time_per_move( 120 ) )
+			return;
+
+		level_time = time_inputter->get_time();
+
+		// model->set_level_info(      "%1.0f sec / move", level_time
+		break;
+
+	case TOTALTIME:
+	    if( !time_inputter->total_game_time( 60 ) )
+			return;
+
+		level_time = time_inputter->get_time();
+		// model->set_level_info(      "%2.2f min / game", AverageTime )
+		break;
+
+	case INFINITE:
+		model->set_level_info( "Infinite" );
+		break;
+
+	case PLAYSEARCH:
+		//sprintf( info_string, "Ply-Depth = %d", MaxLevel );
+		break;
+
+	case MATESEARCH:
+		model->set_level_info( "MateSearch" );
+		break;
+
+	case MATCHING:
+		model->set_level_info( "Match users time" );
+		break;
+
+	default:
+		break;
+
 	}
+
+	if( new_level)
+	level = new_level;
 
 	// new level is (eLevels)level
+
+
+/*
+	model->set_level_info(
+    if( MultiMove ) {
+        TInfo->SetLevelText( "Two Player" );
+        return;
+    }
+
+    char info_string[80];
+
+    switch( Level ) {
+    case normal       : sprintf( info_string, "%1.0f sec / move", AverageTime ); break;
+    case fullgametime : sprintf( info_string, "%2.2f min / game", AverageTime ); break;
+    case easygame     : strcpy( info_string, "Easy" );                           break;
+    case infinite     : strcpy( info_string, "Infinite" );                       break;
+    case plysearch    : sprintf( info_string, "Ply-Depth = %d", MaxLevel );      break;
+    case matesearch   : strcpy( info_string, "MateSearch" );                     break;
+    case matching     : strcpy( info_string, "Match users time" );               break;
+    }
+
+    TInfo->SetLevelText( info_string );
+*/
 
 }
 
@@ -347,9 +423,10 @@ void ChessEngine::calculate_move()
 
 bool ChessEngine::toggle_multiplayer()
 {
-	static bool multi_player = false;
-
 	multi_player = !multi_player;
+
+	if( multi_player )
+		model->set_level_info( "Two Player" );
 
 	return multi_player;
 }

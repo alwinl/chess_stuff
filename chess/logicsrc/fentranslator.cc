@@ -26,13 +26,10 @@
 
 using namespace std;
 
-FENTranslator::FENTranslator()
-{
-    //ctor
-}
-
 map<STSquare,STPiece> FENTranslator::from_FEN( std::string FENstring )
 {
+	std::map<STSquare, STPiece> content;
+
     STSquare square = make_square(0,7);         // first = file, second is rank
 
     for( char& code : FENstring ) {
@@ -57,64 +54,33 @@ map<STSquare,STPiece> FENTranslator::from_FEN( std::string FENstring )
     return content;
 }
 
-std::string FENTranslator::to_FEN()
+std::string FENTranslator::to_FEN( std::map<STSquare, STPiece> content )
 {
     ostringstream ss;
-    char ch;
 
     for( int rank=7; rank >= 0; --rank ) {
+
         int blanks = 0;
+
         for( int file=0; file < 8; ++file ) {
-            if( (ch = query_square( make_square(file, rank) )) != ' ' ) {
+
+			map<STSquare, STPiece>::iterator it = content.find( make_square(file, rank) );
+			if( it != content.end() ) {
                 if( blanks ) {
                     ss << blanks;
                     blanks = 0;
                 }
-                ss << ch;
-            } else
+                ss << (*it).second.code;
+			} else
                 ++blanks;
         }
+
         if( blanks )
             ss << blanks;
+
         if( rank )
             ss << "/";
     }
 
     return ss.str();
 }
-
-bool FENTranslator::remove_from_square( STSquare square )
-{
-    map<STSquare, STPiece>::iterator it = content.find( square );
-    if( it == content.end() )
-        return false;
-
-    content.erase( it );
-    return true;
-}
-
-bool FENTranslator::add_to_square( STSquare square, char code )
-{
-    map<STSquare, STPiece>::iterator it = content.find( square );
-	if( it != content.end() )
-		return false;
-
-	STPiece piece;
-
-	piece.code = code;
-	piece.is_white = ( string("KQRBNP").find( code ) != std::string::npos );
-	piece.is_dragging = false;
-
-    content.insert( std::pair<STSquare, STPiece>( square, piece) );
-    return true;
-}
-
-char FENTranslator::query_square( STSquare square )
-{
-    map<STSquare, STPiece>::iterator it = content.find( square );
-    if( it != content.end() )
-        return (*it).second.code;
-
-    return ' ';
-}
-

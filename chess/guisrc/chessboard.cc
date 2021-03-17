@@ -21,8 +21,6 @@
 
 #include "chessboard.h"
 
-#include "../logicsrc/fentranslator.h"
-
 /**-----------------------------------------------------------------------------
  * \brief ChessBoard constructor
  *
@@ -171,21 +169,6 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
 }
 
 /**-----------------------------------------------------------------------------
- * \brief Invalidating the window causes the on_draw function to be called
- *
- * \return void
- *
- */
-void ChessBoard::update()
-{
-    Glib::RefPtr<Gdk::Window> win = get_window();
-    if( !win )      // window has not been realised yet
-        return;
-
-    win->invalidate( true);
-}
-
-/**-----------------------------------------------------------------------------
  * \brief
  */
 STSquare ChessBoard::adjust_for_reverse( STSquare square )
@@ -293,7 +276,7 @@ void ChessBoard::start_dragging( char piece, Gdk::Point start_point )
 	floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 	is_dragging = true;
 
-	update();
+	queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -307,7 +290,7 @@ void ChessBoard::update_dragging( Gdk::Point new_point )
     floating_piece_position = Gdk::Point( new_point.get_x() - .5 * SQUARE_SIZE, new_point.get_y() - .5 * SQUARE_SIZE );
     floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 
-    update();
+    queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -321,7 +304,7 @@ void ChessBoard::stop_dragging()
 	is_dragging = false;
 	floating_piece_code = ' ';
 
-	update();
+	queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -351,7 +334,7 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 			start_dragging( piece.code, mouse_point );
 
 			paint_pieces();
-			update();
+			queue_draw();
 		}
 
     } else if( is_edit && edit_outline.intersects( mouse_pos ) ) {
@@ -570,13 +553,13 @@ void ChessBoard::paint_info( STInfo& the_info )
  * \return void
  *
  */
-void ChessBoard::set_piece_positions( std::string FEN_string )
+void ChessBoard::set_piece_positions( std::map<STSquare,STPiece> new_pieces )
 {
-	pieces = FENTranslator().from_FEN( FEN_string );
+	pieces = new_pieces;
 
 	paint_pieces();
 
-    update();
+    queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -598,7 +581,7 @@ void ChessBoard::set_colours( ColourChooser::STColours new_colours, STInfo info 
 	paint_board();
 	paint_info( info );
 
-	update();   // Redraw the chessboard
+	queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -613,7 +596,7 @@ void ChessBoard::toggle_reverse()
 
 	paint_pieces();
 
-    update();
+    queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -627,7 +610,7 @@ void ChessBoard::set_edit( bool on )
 
 	is_edit = on;
 
-	update();
+	queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -638,7 +621,7 @@ void ChessBoard::set_info( STInfo info )
 {
     paint_info( info );
 
-    update();
+    queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -651,7 +634,7 @@ void ChessBoard::toggle_bestline( STInfo info )
 
     paint_info( info );
 
-    update();
+    queue_draw();
 }
 
 /**-----------------------------------------------------------------------------
@@ -674,7 +657,7 @@ void ChessBoard::animate_move_start()
 	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
     floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 
-	update();
+	queue_draw();
 }
 
 void ChessBoard::animate_move_continue()
@@ -683,7 +666,7 @@ void ChessBoard::animate_move_continue()
 	floating_piece_position.set_y( floating_piece_position.get_y() + annimate_delta.get_y() );
     floating_piece_source = source_point( floating_piece_position, floating_piece_code );
 
-	update();
+	queue_draw();
 }
 
 void ChessBoard::animate_move_finish()
@@ -693,7 +676,7 @@ void ChessBoard::animate_move_finish()
 
 	timeout_counter = 0;
 
-	update();
+	queue_draw();
 }
 
 
@@ -707,13 +690,13 @@ bool ChessBoard::on_highlight_timeout()
 	if( ! --timeout_counter ) {
 		highlight_on = false;
 		draw_highlight = highlight_on;
-		update();
+		queue_draw();
 		return false;
 	}
 
 	highlight_on = !highlight_on;
 	draw_highlight = highlight_on;
-	update();
+	queue_draw();
 	return true;
 }
 
@@ -726,9 +709,16 @@ void ChessBoard::highlight( STSquare square )
 	highlight_pos = square_to_point( square );
 	draw_highlight = true;
 
-	update();
+	queue_draw();
 
 	timeout_counter = 10;
 	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessBoard::on_highlight_timeout), 100 );
 }
+
+#if 0
+bool ChessBoard::on_tick(const Glib::RefPtr<Gdk::FrameClock>& frame_clock)
+{
+
+}
+#endif // 0
 

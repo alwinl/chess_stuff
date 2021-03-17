@@ -81,7 +81,7 @@ public:
 
 	STInfo get_info() { return info; }
 
-	std::string get_piece_positions( ) { return is_arranging ? arrange_state.piece_positions : current_state.piece_positions; }
+	std::map<STSquare,STPiece> get_piece_positions( );
 
 
 
@@ -111,6 +111,11 @@ private:
     bool is_arranging;
 
     STInfo info;
+
+    bool multi_player;
+    eLevels level;
+    int level_time;
+
 };
 
 #endif // CHESSENGINE_H

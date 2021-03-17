@@ -33,17 +33,8 @@ class STPiece;
 class FENTranslator
 {
 public:
-    FENTranslator();
-
-    std::map<STSquare,STPiece> from_FEN( std::string FENstring );
-    std::string to_FEN();
-
-    bool remove_from_square( STSquare square );
-    bool add_to_square( STSquare square, char code );
-    char query_square( STSquare square );
-
-private:
-    std::map<STSquare, STPiece> content;
+    static std::map<STSquare,STPiece> from_FEN( std::string FENstring );
+    static std::string to_FEN( std::map<STSquare, STPiece> content );
 };
 
 #endif // FENTRANSLATOR_H
