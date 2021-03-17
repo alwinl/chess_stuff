@@ -22,9 +22,9 @@
 #ifndef DLGCOLOURS_H
 #define DLGCOLOURS_H
 
-#include "../logicsrc/colourchooser.h"
-
 #include <gtkmm.h>
+
+#include "../logicsrc/colourchooser.h"
 
 class DialogColours;
 

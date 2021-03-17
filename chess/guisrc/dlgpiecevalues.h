@@ -22,12 +22,11 @@
 #ifndef GUIPIECEVALUES_H
 #define GUIPIECEVALUES_H
 
-#include "../logicsrc/piecevalues.h"
-
 #include <gtkmm.h>
 
-class DialogPieceValues;
+#include "../logicsrc/piecevalues.h"
 
+class DialogPieceValues;
 
 /** \brief
  */

@@ -22,11 +22,9 @@
 #ifndef DLGINPUT_H
 #define DLGINPUT_H
 
-#include <string>
+#include <gtkmm.h>
 
 #include "../logicsrc/timeinputter.h"
-
-#include <gtkmm.h>
 
 class DialogInput;
 

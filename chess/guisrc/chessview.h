@@ -24,9 +24,6 @@
 
 #include <gtkmm.h>
 
-class ChessController;
-class ChessBoard;
-
 /**-----------------------------------------------------------------------------
  * \brief The main application window
  *
