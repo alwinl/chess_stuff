@@ -22,6 +22,8 @@
 #ifndef PNGPARSER_H
 #define PNGPARSER_H
 
+#include <string>
+
 #include "chessgame.h"
 
 class PNGParser
@@ -34,7 +36,11 @@ public:
 protected:
 
 private:
-	ChessGame game;
+
+	//static std::map<std::string, std::string> tags;
+
+	void extract_tag_pair( std::string line );
+	std::string::size_type extract_move( std::string movetext );
 };
 
 #endif // PNGPARSER_H

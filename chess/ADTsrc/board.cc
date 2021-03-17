@@ -20,7 +20,7 @@
  */
 
 #include "board.h"
-#include "fentranslator.h"
+#include "../logicsrc/fentranslator.h"
 
 #include "../ADTsrc/pods.h"
 
@@ -45,15 +45,40 @@ Board Board::add_piece( STSquare square, STPiece new_piece )
 
 Board Board::remove_piece( STSquare square )
 {
+	std::map<STSquare,STPiece>::iterator it = pieces.find( square );
+	if( it != pieces.end() )
+		pieces.erase( it );
+
 	return *this;
 }
 
 Board Board::move_piece( STSquare old_square, STSquare new_square )
 {
+	std::map<STSquare,STPiece>::iterator it_from = pieces.find( old_square );
+	std::map<STSquare,STPiece>::iterator it_to = pieces.find( new_square );
+
+	if( (it_from == pieces.end()) || (it_to != pieces.end()) )
+		return *this;		// cannot move, throw an exception
+
+	// this really should be transactional maybe use swap
+	pieces.insert( std::pair<STSquare, STPiece>( new_square, (*it_from).second ) );
+	pieces.erase( it_from );
+
 	return *this;
 }
 
 Board Board::capture_piece( STSquare old_square, STSquare new_square )
 {
+	std::map<STSquare,STPiece>::iterator it_from = pieces.find( old_square );
+	std::map<STSquare,STPiece>::iterator it_to = pieces.find( new_square );
+
+	if( (it_from == pieces.end()) || (it_to == pieces.end()) )
+		return *this;		// cannot capture, throw an exception
+
+	// this really should be transactional maybe use swap
+	pieces.erase( it_to );
+	pieces.insert( std::pair<STSquare, STPiece>( new_square, (*it_from).second ) );
+	pieces.erase( it_from );
+
 	return *this;
 }

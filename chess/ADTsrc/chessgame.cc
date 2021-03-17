@@ -49,16 +49,6 @@ void ChessGame::initialise()
     game_states.push_back( make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") );
     current = 0;
 
-    info.turn = "white";
-    info.black = "";
-    info.time = "";
-    info.level = "";
-    info.value = "";
-    info.nodes = "";
-    info.n_sec = "";
-    info.depth = "";
-    info.bestline = "";
-
 }
 
 /** \brief
@@ -83,5 +73,11 @@ int ChessGame::load_game( const std::string& file_name )
 
     return 0;
 }
+
+void ChessGame::add_tag_pair( std::string tag, std::string value )
+{
+	//tag_pairs.insert( make_pair<std::string,std::string>(tag, value) );
+}
+
 
 
