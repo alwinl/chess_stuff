@@ -24,7 +24,7 @@
 
 #include <string>
 
-enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLAYSEARCH, MATESEARCH, LEVELCOUNT };
+enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLAYSEARCH, MATESEARCH, MATCHING, LEVELCOUNT };
 enum eTurns { TURNWHITE, TURNBLACK, TURNCOUNT };
 
 #if 0
@@ -46,9 +46,9 @@ struct STInput
  */
 struct STInfo
 {
-    std::string turn;
-    std::string white;
-    std::string black;
+    std::string turn;	/* either "black" or "white" */
+    std::string white;	/* the last move white made. Format: minutes:seconds movenumber movestring */
+    std::string black;	/* the last move black made. Format: minutes:seconds movenumber movestring */
     std::string time;
     std::string level;
     std::string value;

@@ -28,8 +28,6 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
-#include "../ADTsrc/pods.h"
-
 #include "../logicsrc/chessengine.h"
 
 
@@ -108,7 +106,7 @@ void ChessController::get_widgets()
 
 	Gtk::RadioMenuItem * chkMenuItem;
 
-	std::vector<std::string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch" };
+	std::vector<std::string> level_widgets = { "chkLevelEasy", "chkLevelTimed", "chkLevelTotalTime", "chkLevelInfinite", "chkLevelPlaySearch", "chkLevelMateSearch", "chkLevelMatching" };
 	for( unsigned int level = EASY; level < LEVELCOUNT; ++level ) {
 
 		ui_model->get_widget( level_widgets[level], chkMenuItem );
@@ -116,8 +114,6 @@ void ChessController::get_widgets()
 
 		chkLevelItems[level]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_level ), level) );
 	}
-
-	chkLevelItems[EASY]->set_active();
 
 	std::vector<std::string> turn_widgets = { "chkTurnWhite", "chkTurnBlack" };
 	for( unsigned int turn = TURNWHITE; turn < TURNCOUNT; ++turn ) {
@@ -127,8 +123,6 @@ void ChessController::get_widgets()
 
 		chkTurnItems[turn]->signal_activate().connect( sigc::bind<unsigned int>(sigc::mem_fun(*this, &ChessController::on_action_arrange_turn ), turn) );
 	}
-
-	chkTurnItems[TURNWHITE]->set_active();
 
 	move_calculator_slot.connect(sigc::mem_fun(*this, &ChessController::on_move_calculator_notify ));
 
@@ -164,6 +158,9 @@ void ChessController::on_activate()
     view->show();
 
 	board->set_colours( engine->get_colours(), engine->get_info() );
+
+	chkLevelItems[EASY]->set_active();
+	chkTurnItems[TURNWHITE]->set_active();
 
     on_action_new();
 }
