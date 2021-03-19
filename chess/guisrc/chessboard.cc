@@ -714,11 +714,3 @@ void ChessBoard::highlight( STSquare square )
 	timeout_counter = 10;
 	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessBoard::on_highlight_timeout), 100 );
 }
-
-#if 0
-bool ChessBoard::on_tick(const Glib::RefPtr<Gdk::FrameClock>& frame_clock)
-{
-
-}
-#endif // 0
-

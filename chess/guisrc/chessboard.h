@@ -78,8 +78,6 @@ private:
 	void paint_text( Cairo::RefPtr<Cairo::Context>& context, double x, double y, std::string text );
 	void paint_info( STInfo& info );
 
-	//bool on_tick(const Glib::RefPtr<Gdk::FrameClock>& frame_clock);
-
 	STSquare adjust_for_reverse( STSquare square );
 
 	STSquare point_to_square( Gdk::Point point );
