@@ -52,6 +52,26 @@ Board Board::remove_piece( STSquare square )
 	return *this;
 }
 
+Board Board::clear_all()
+{
+	pieces.clear();
+
+    is_white_move = true;             // is it whites next move?
+
+    white_can_castle_kingside =
+    white_can_castle_queenside =
+    black_can_castle_kingside =
+    black_can_castle_queenside = true;
+
+    STSquare en_passant_target = make_square( -1, -1 );		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
+
+    halfmove_clock = 0;             // Number of half moves since last capture or pawn advance
+    fullmove_number = 0;             // The number of the move, start at one increment after black move
+
+	return *this;
+}
+
+
 Board Board::move_piece( STSquare old_square, STSquare new_square )
 {
 	std::map<STSquare,STPiece>::iterator it_from = pieces.find( old_square );
@@ -82,3 +102,11 @@ Board Board::capture_piece( STSquare old_square, STSquare new_square )
 
 	return *this;
 }
+
+Board Board::set_white_move( bool on )
+{
+	is_white_move = on;
+
+	return *this;
+}
+

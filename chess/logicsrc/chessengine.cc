@@ -62,7 +62,7 @@ void ChessEngine::new_game( )
 {
 	filename_chooser->new_file();
 
-	current_state = make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	//current_state = make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     model->initialise();
 
@@ -78,6 +78,8 @@ void ChessEngine::new_game( )
     info.bestline = "";
 
 	multi_player = false;
+
+	current_board.standard_opening_board();
 }
 
 
@@ -102,29 +104,45 @@ void ChessEngine::cancel_move( )
 
 void ChessEngine::arranging_start()
 {
-	arrange_state = STGameState();
+	arrange_board.clear_all();
+	//arrange_state = STGameState();
 
-    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
-    arrange_state.is_white_move = true;             // is it whites next move?
+    //arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    //arrange_state.is_white_move = true;             // is it whites next move?
 
     is_arranging = true;
 }
 
 void ChessEngine::arranging_clear()
 {
-    arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
-    arrange_state.is_white_move = true;             // is it whites next move?
+	arrange_board.clear_all();
+    //arrange_state.piece_positions = "/8/8/8/8/8/8/8/8";    // Piece placement in FEN.
+    //arrange_state.is_white_move = true;             // is it whites next move?
 }
 
 void ChessEngine::put_piece_on_square( STSquare square, char piece )
 {
+
+	STPiece new_piece;
+
+	new_piece.code = piece;
+	new_piece.is_dragging = false;
+	new_piece.is_white = true; /// not true but I don't think its used t the moment
+
+	if( is_arranging )
+		arrange_board.add_piece( square, new_piece );
+	else
+		current_board.add_piece( square, new_piece );
+
 	#if 0
 	FENTranslator translator;
 
+	std::map<STSquare,STPiece> position;
+
 	if( is_arranging )
-		translator.from_FEN( arrange_state.piece_positions );
+		FENTranslator::from_FEN( arrange_state.piece_positions );
 	else
-		translator.from_FEN( current_state.piece_positions );
+		FENTranslator::from_FEN( current_state.piece_positions );
 
 	last_state.piece_positions = translator.to_FEN();
 
@@ -148,7 +166,8 @@ void ChessEngine::arrange_turn( eTurns new_turn )
 	else
 		cout << "processing turn message: it's now black turn" << endl;
 
-	arrange_state.is_white_move = ( new_turn == TURNWHITE );
+	//arrange_state.is_white_move = ( new_turn == TURNWHITE );
+	arrange_board.set_white_move( new_turn == TURNWHITE );
 }
 
 bool ChessEngine::arranging_end( bool canceled )
@@ -159,9 +178,10 @@ bool ChessEngine::arranging_end( bool canceled )
 	}
 
 	/* check if the board is valid */
-	FENTranslator translator;
+	//FENTranslator translator;
 
-	map<STSquare,STPiece> pieces = translator.from_FEN( arrange_state.piece_positions );
+	map<STSquare,STPiece> pieces = arrange_board.get_pieces();
+	//map<STSquare,STPiece> pieces = translator.from_FEN( arrange_state.piece_positions );
 
     int KingCount[2]  = { 0, 0 };
     int TotalCount[2] = { 0, 0 };
@@ -182,8 +202,10 @@ bool ChessEngine::arranging_end( bool canceled )
 	if( !valid )
 		return false;
 
-	current_state.piece_positions = arrange_state.piece_positions;
-	current_state.is_white_move = arrange_state.is_white_move;
+	//current_state.piece_positions = arrange_state.piece_positions;
+	//current_state.is_white_move = arrange_state.is_white_move;
+
+	current_board = arrange_board;
 
 	is_arranging = false;
 	return true;
@@ -197,7 +219,11 @@ bool ChessEngine::arranging_end( bool canceled )
 
 std::map<STSquare,STPiece> ChessEngine::get_piece_positions( )
 {
-	return is_arranging ? FENTranslator::from_FEN(arrange_state.piece_positions) : FENTranslator::from_FEN(current_state.piece_positions); }
+	return is_arranging ? arrange_board.get_pieces() : current_board.get_pieces();
+
+
+	//FENTranslator::from_FEN(arrange_state.piece_positions) : FENTranslator::from_FEN(current_state.piece_positions);
+}
 
 
 bool ChessEngine::open_file( )
@@ -372,9 +398,10 @@ void ChessEngine::CalculatePawnTable()
         PawnTable[ 1 ][ rank ] = 0;
     }
 
-	FENTranslator translator;
+	//FENTranslator translator;
 
-	map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
+	//map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
+	map<STSquare,STPiece> pieces = current_board.get_pieces();
 
     for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
 
@@ -394,9 +421,10 @@ void ChessEngine::CalcMaterial()
 {
 
 
-	FENTranslator translator;
+	//FENTranslator translator;
 
-	map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
+	//map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
+	map<STSquare,STPiece> pieces = current_board.get_pieces();
 
 	int material = 0;
 	int totalMaterial = 0;

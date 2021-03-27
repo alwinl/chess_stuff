@@ -35,9 +35,12 @@ public:
 
 	Board add_piece( STSquare square, STPiece new_piece );
 	Board remove_piece( STSquare square );
+	Board clear_all();
 
 	Board move_piece( STSquare old_square, STSquare new_square );
 	Board capture_piece( STSquare old_square, STSquare new_square );
+
+	Board set_white_move( bool on );
 
 	std::map<STSquare,STPiece> get_pieces() { return pieces; }
 

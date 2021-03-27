@@ -38,6 +38,8 @@ class PieceValues;
 #include "../ADTsrc/pods.h"
 #include "colourchooser.h"
 
+#include "../ADTsrc/board.h"
+
 /** \brief
  */
 class ChessEngine
@@ -105,9 +107,13 @@ private:
     PieceValues * piece_values_object;
     FilenameChooser * filename_chooser;
 
+
+	Board current_board;
+	Board arrange_board;
+
     STGameState last_state;
-    STGameState current_state;
-    STGameState arrange_state;
+    //STGameState current_state;
+    //STGameState arrange_state;
     bool is_arranging;
 
     STInfo info;
