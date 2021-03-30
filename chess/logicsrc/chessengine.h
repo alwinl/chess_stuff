@@ -58,7 +58,8 @@ public:
 
 	void arranging_start();
 	void arranging_clear();
-	void put_piece_on_square( STSquare square, char piece );
+	void arrange_add_piece( STSquare square, char piece );
+	void arrange_remove_piece( STSquare square );
 	void arrange_turn( eTurns new_turn );
 	bool arranging_end( bool canceled );
 	bool in_edit_mode() { return is_arranging; }

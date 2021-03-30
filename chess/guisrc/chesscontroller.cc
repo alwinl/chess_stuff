@@ -471,10 +471,6 @@ bool ChessController::on_animate_timeout()
 	if( ! --timeout_counter ) {
 		board->animate_move_finish();
 
-		STSquare end_square = board->get_end_square();
-		char piece_code = board->get_piece_code();
-
-		engine->put_piece_on_square( end_square, piece_code );
 		board->set_piece_positions( engine->get_piece_positions() );
 
 		// if it is the computers turn here, let the AI calculate a move
@@ -498,26 +494,27 @@ bool ChessController::on_board_button_released( GdkEventButton* button_event )
 	STSquare end_square = board->get_end_square();
 	char piece_code = board->get_piece_code();
 
-	if( start_square.file != -1 )
-		engine->put_piece_on_square( start_square, ' ' ); // Putting a space is removing the piece
-
+	// Arranging?
 	if( engine->in_edit_mode() ) {
-		engine->put_piece_on_square( end_square, piece_code );
+
+        engine->arrange_remove_piece( start_square );
+		engine->arrange_add_piece( end_square, piece_code );
+
 		board->set_piece_positions( engine->get_piece_positions() );
 		return true;
 	}
 
-	// regular move, check if this this move cannot be made
-	if( ! engine->enter_move( start_square, end_square ) ) {
-		board->set_piece_positions( engine->get_piece_positions() );
+	// regular move, check if this this move can be made
+	if( engine->enter_move( start_square, end_square ) ) {
+
+        board->animate_move_start( );
+
+        timeout_counter = 10;
+        Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
 		return true;
 	}
 
-	board->animate_move_start( );
-
-	timeout_counter = 10;
-	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
-
+    // Not a valid move
 	return true;
 }
 

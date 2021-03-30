@@ -371,12 +371,20 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
 		STPiece piece = (*it).second;
 		piece.is_dragging = false;
 		(*it).second = piece;
+        paint_pieces();
+        queue_draw();
 	}
 
-	drag_end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
 
-	if( board_outline.intersects( mouse_pos ) )
+	if( board_outline.intersects( mouse_pos ) ) {
+        drag_end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
 		return false;		// keep processing
+	}
+
+	if( is_edit ) {
+        drag_end_square.file = -1;
+        return false;
+	}
 
     return true;
 }
@@ -646,6 +654,15 @@ void ChessBoard::animate_move_start()
 	Gdk::Point end_point = square_to_point( drag_end_square );
 	floating_piece_position = square_to_point( drag_start_square );
 
+    typename std::map<STSquare,STPiece>::iterator it = pieces.find(drag_start_square);
+    if( it != pieces.end() ) {
+        STPiece piece = (*it).second;
+        piece.is_dragging = true;
+        (*it).second = piece;
+
+        paint_pieces();
+    }
+
 	annimate_delta.set_x( (end_point.get_x() - floating_piece_position.get_x()) / 10 );
 	annimate_delta.set_y( (end_point.get_y() - floating_piece_position.get_y()) / 10 );
 
@@ -671,6 +688,15 @@ void ChessBoard::animate_move_continue()
 
 void ChessBoard::animate_move_finish()
 {
+    typename std::map<STSquare,STPiece>::iterator it = pieces.find(drag_start_square);
+    if( it != pieces.end() ) {
+        STPiece piece = (*it).second;
+        piece.is_dragging = false;
+        (*it).second = piece;
+
+        paint_pieces();
+    }
+
 	floating_piece_code = ' ';
 	is_animating = false;
 
