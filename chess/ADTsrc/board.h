@@ -42,6 +42,8 @@ public:
 
 	Board set_white_move( bool on );
 
+	bool is_valid();
+
 	std::map<STSquare,STPiece> get_pieces() { return pieces; }
 
 private:

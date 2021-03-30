@@ -110,3 +110,22 @@ Board Board::set_white_move( bool on )
 	return *this;
 }
 
+bool Board::is_valid()
+{
+    int KingCount[2]  = { 0, 0 };
+    int TotalCount[2] = { 0, 0 };
+
+    for( std::map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
+
+        int colour_idx = (*it).second.is_white ? 0 : 1;
+
+        TotalCount[ colour_idx ]++;
+
+        if( std::string("Kk").find( (*it).second.code ) != std::string::npos )
+            KingCount[ colour_idx ]++;
+    }
+
+    return ( TotalCount[ 0 ] <= 16 ) && ( KingCount[ 0 ] == 1 )
+                 && ( TotalCount[ 1 ] <= 16 ) && ( KingCount[ 1 ] == 1 );
+}
+
