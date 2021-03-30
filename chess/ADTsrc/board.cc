@@ -38,7 +38,8 @@ Board Board::standard_opening_board()
 
 Board Board::add_piece( STSquare square, STPiece new_piece )
 {
-	pieces.insert( std::pair<STSquare, STPiece>( square, new_piece) );
+    if( square.file != -1 )
+        pieces.insert( std::pair<STSquare, STPiece>( square, new_piece) );
 
 	return *this;
 }
