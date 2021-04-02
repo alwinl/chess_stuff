@@ -195,6 +195,9 @@ void ChessController::on_action_open()
 		return;
 	}
 
+    board->set_piece_positions( engine->get_piece_positions() );
+    board->set_info( engine->get_info() );
+
 	status_bar->push( std::string("Game loaded") );
 }
 
@@ -257,7 +260,6 @@ void ChessController::on_action_quit()
  */
 void ChessController::on_action_play()
 {
-	engine->advance(  );
 
     board->set_piece_positions( engine->get_piece_positions() );
     board->set_info( engine->get_info() );
@@ -278,6 +280,11 @@ void ChessController::on_action_hint()
 void ChessController::on_action_undo()
 {
 	engine->undo();
+
+    board->set_piece_positions( engine->get_piece_positions() );
+    board->set_info( engine->get_info() );
+
+	status_bar->push( std::string("Undone") );
 }
 
 /**-----------------------------------------------------------------------------
@@ -286,6 +293,11 @@ void ChessController::on_action_undo()
 void ChessController::on_action_redo()
 {
 	engine->redo();
+
+    board->set_piece_positions( engine->get_piece_positions() );
+    board->set_info( engine->get_info() );
+
+	status_bar->push( std::string("Redone") );
 }
 
 /**-----------------------------------------------------------------------------
