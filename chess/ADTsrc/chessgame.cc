@@ -21,10 +21,6 @@
 
 #include "chessgame.h"
 
-//#include <sstream>
-//#include <vector>
-//#include <iostream>
-
 using namespace std;
 
 
@@ -46,38 +42,19 @@ ChessGame::ChessGame( )
 void ChessGame::initialise()
 {
     moves.clear();
-    game_states.push_back( make_game_state("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") );
-    current = 0;
-
-}
-
-/** \brief
- *
- * \param file_name std::string
- * \return int
- *
- */
-int ChessGame::store_game( const std::string& file_name )
-{
-    return 0;
-}
-
-int ChessGame::load_game( const std::string& file_name )
-{
-    initialise();
-
-
-    game_states.push_back( make_game_state("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1") );
-    game_states.push_back( make_game_state("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2") );
-    game_states.push_back( make_game_state("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2") );
-
-    return 0;
 }
 
 void ChessGame::add_tag_pair( std::string tag, std::string value )
 {
-	//tag_pairs.insert( make_pair<std::string,std::string>(tag, value) );
+	tag_pairs.insert( std::pair<std::string, std::string>(tag, value) );
 }
 
+std::string ChessGame::get_tag_value( std::string key )
+{
+    map<std::string,std::string>::iterator it = tag_pairs.find( key );
 
+    if( it != tag_pairs.end() )
+        return (*it).second;
 
+    return "";
+}

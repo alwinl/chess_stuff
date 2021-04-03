@@ -63,48 +63,21 @@ class ChessGame
 public:
 	ChessGame( );
 
-    int new_game();
-    int store_game( const std::string& file_name );
-    int load_game( const std::string& file_name );
-
     void initialise();
 
     void add_move( );
     void remove_move();
 
-    void advance() { if( current < game_states.size() ) current += 1; };
-
-    std::string get_piece_positions() { return game_states[current].piece_positions; };
-    void set_piece_positions( std::string positions ) { game_states[current].piece_positions = positions; };
-    //STInfo get_info() { return info; };
-
-    // we insert or remove pieces only from the initial board
-    void insert_piece( STSquare square, char piece );
-    void remove_piece( STSquare square );       // piece used for checking, not necessary for operation
-
-    Board get_board_at( int PlyNr );	/* if PlyNr is -1 return the board from the current state of play */
     void add_ply( Ply new_ply );
 
 	void add_tag_pair( std::string tag, std::string value );
 
-	void set_level_info( std::string new_info ) {};
+	std::string get_tag_value( std::string key );
 
 private:
-    //STInfo info;
-    std::vector<STGameState> game_states;
-    unsigned int current;
-    //std::vector<unsigned int> moves;
-
-    //std::vector<Board> board_states;
-
     Board initial;
     std::vector<Ply> moves;
-    Board current_board;
-    std::map<std::string,std::string> tag_pairs;
-
-    bool multi_player;
-    eLevels level;
-    int level_time;
+    std::map<std::string, std::string> tag_pairs;
 };
 
 #endif // APPMODEL_H

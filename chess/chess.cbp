@@ -145,8 +145,8 @@
 		<Unit filename="logicsrc/colourchooser.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
-		<Unit filename="logicsrc/filenamechooser.cc" />
-		<Unit filename="logicsrc/filenamechooser.h" />
+		<Unit filename="logicsrc/gameloader.cc" />
+		<Unit filename="logicsrc/gameloader.h" />
 		<Unit filename="logicsrc/movegenerator.cc" />
 		<Unit filename="logicsrc/movegenerator.h" />
 		<Unit filename="logicsrc/piecevalues.cc" />
@@ -164,22 +164,25 @@
 		<Unit filename="logictest/testcolourchooser.h">
 			<Option target="Test" />
 		</Unit>
-		<Unit filename="logictest/testfentranslator.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testfentranslator.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testfilenamechooser.cc">
-			<Option target="Test" />
-		</Unit>
 		<Unit filename="logictest/testfilenamechooser.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testgameobject.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testgameobject.h">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testpiecevalues.cc">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testpiecevalues.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpngparser.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpngparser.h">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/teststhalvemove.cc">

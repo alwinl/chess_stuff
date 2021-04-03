@@ -31,13 +31,14 @@ class PresentationInterface;
 class STSquare;
 
 class TimeInputter;
-class FilenameChooser;
+class GameLoader;
 
 class PieceValues;
 
 #include "../ADTsrc/pods.h"
 #include "colourchooser.h"
 
+#include "../ADTsrc/chessgame.h"
 #include "../ADTsrc/board.h"
 
 /** \brief
@@ -64,8 +65,6 @@ public:
 	bool arranging_end( bool canceled );
 	bool in_edit_mode() { return is_arranging; }
 
-    void advance();
-
     STSquare hint();
 
     void new_game();
@@ -83,7 +82,6 @@ public:
 	void change_piece_values( );
 
 	STInfo get_info() { return info; }
-
 	std::map<STSquare,STPiece> get_piece_positions( );
 
 
@@ -95,34 +93,28 @@ public:
 	void init_colour_chooser( ColourChooser * object ) { colour_chooser = object; }
 	void init_time_inputter( TimeInputter * object ) { time_inputter = object; }
 	void init_piece_value_object( PieceValues * object ) { piece_values_object = object; }
-	void init_filename_chooser( FilenameChooser * object ) { filename_chooser = object; }
+	void init_filename_chooser( GameLoader * object ) { game_loader = object; }
 
 	ColourChooser::STColours get_colours() { return colour_chooser->get_colours(); };
 	bool choose_colours();
 
 private:
-	ChessGame * model;
-
-    ColourChooser * colour_chooser;
-    TimeInputter * time_inputter;
-    PieceValues * piece_values_object;
-    FilenameChooser * filename_chooser;
-
+	ChessGame game;
 
 	Board current_board;
 	Board arrange_board;
-
-    STGameState last_state;
-    //STGameState current_state;
-    //STGameState arrange_state;
-    bool is_arranging;
-
     STInfo info;
 
+    STGameState last_state;
+    bool is_arranging;
     bool multi_player;
     eLevels level;
     int level_time;
 
+    ColourChooser * colour_chooser;
+    TimeInputter * time_inputter;
+    PieceValues * piece_values_object;
+    GameLoader * game_loader;
 };
 
 #endif // CHESSENGINE_H

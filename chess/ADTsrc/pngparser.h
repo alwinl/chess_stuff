@@ -39,7 +39,7 @@ private:
 
 	//static std::map<std::string, std::string> tags;
 
-	void extract_tag_pair( std::string line );
+    void extract_tag_pair( ChessGame& game, std::string line );
 	std::string::size_type extract_move( std::string movetext );
 };
 

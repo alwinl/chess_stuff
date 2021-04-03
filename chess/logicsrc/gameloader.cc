@@ -19,9 +19,9 @@
  *
  */
 
-#include "filenamechooser.h"
+#include "gameloader.h"
 
-bool FilenameChooser::new_file()
+bool GameLoader::new_file()
 {
 	// Check if dirty and ask to save
 
@@ -29,16 +29,27 @@ bool FilenameChooser::new_file()
 	return true;
 }
 
-std::string FilenameChooser::load_file()
+bool GameLoader::load_file( ChessGame& game )
 {
 	// Check if dirty and ask to save
 
 	filename = get_load_name();
 
-	return filename;
+#if 0
+    if( open_name.empty() )
+        return false;
+
+    if( model->load_game( open_name ) == -1 ) {    // load the file and build the DS in the model_ member
+        return false;
+    }
+
+    return true;
+#endif
+
+	return true;
 }
 
-std::string FilenameChooser::save_file()
+bool GameLoader::save_file( ChessGame& game )
 {
 	if( filename.empty() )
 		filename = get_save_name();
@@ -47,10 +58,10 @@ std::string FilenameChooser::save_file()
 		if( filename.find( ".chess") == std::string::npos )     // no .chess added
 			filename += std::string(".chess");
 
-	return filename;
+	return true;
 }
 
-std::string FilenameChooser::save_file_as()
+bool GameLoader::save_file_as( ChessGame& game )
 {
 	filename = get_save_name();
 
@@ -58,5 +69,5 @@ std::string FilenameChooser::save_file_as()
 		if( filename.find( ".chess") == std::string::npos )     // no .chess added
 			filename += std::string(".chess");
 
-	return filename;
+	return true;
 }

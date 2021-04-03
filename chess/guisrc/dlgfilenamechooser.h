@@ -24,12 +24,12 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/filenamechooser.h"
+#include "../logicsrc/gameloader.h"
 
-class GUIFilenameChooser : public FilenameChooser
+class GUIFilenameChooser : public GameLoader
 {
 public:
-	GUIFilenameChooser( Gtk::Window& aParent ) : FilenameChooser(), parent(aParent) {};
+	GUIFilenameChooser( Gtk::Window& aParent ) : GameLoader(), parent(aParent) {};
 	virtual ~GUIFilenameChooser() {};
 
 protected:

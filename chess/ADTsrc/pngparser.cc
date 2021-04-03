@@ -104,12 +104,13 @@ class Lexer
  *	[Event "F/S Return Match"] : tag = Event, value = F/S Return Match
  *
  */
-void PNGParser::extract_tag_pair( std::string line )
+void PNGParser::extract_tag_pair( ChessGame& game, std::string line )
 {
-	//std::string tag = line.substr( 1, line.find_first_of( ' ' ) );
-	//std::string value = line.substr( line.find_first_of("\"") + 1, line.find_first_of("\"", value_start_pos + 1 ) );
+	std::string tag = line.substr( 1, line.find_first_of( ' ' ) );
+	std::string::size_type value_start_pos = line.find_first_of("\"") + 1;
+	std::string value = line.substr( value_start_pos, line.find_first_of("\"", value_start_pos + 1 ) );
 
-	//game.add_tag_pair( tag, value );
+	game.add_tag_pair( tag, value );
 }
 
 
@@ -158,7 +159,7 @@ ChessGame PNGParser::do_parse( std::istream& is )
 			continue;
 
 		if( line[0] == '[' ) {
-			extract_tag_pair( line );
+			extract_tag_pair( game, line );
 			continue;
 		}
 

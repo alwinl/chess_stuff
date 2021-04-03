@@ -19,8 +19,6 @@
  *
  */
 
-//#include <unistd.h>
-
 #include <chrono>
 #include <thread>
 #include <regex>
@@ -30,7 +28,7 @@
 #include "chessappbase.h"
 #include "timeinputter.h"
 #include "piecevalues.h"
-#include "filenamechooser.h"
+#include "gameloader.h"
 
 #include "fentranslator.h"
 
@@ -41,27 +39,24 @@ using namespace std;
 
 ChessEngine::ChessEngine()
 {
-    model = new ChessGame;
-
     is_arranging = false;
 
     colour_chooser = nullptr;
     time_inputter = nullptr;
     piece_values_object = nullptr;
-    filename_chooser = nullptr;
+    game_loader = nullptr;
 }
 
 ChessEngine::~ChessEngine()
 {
-    delete model;
 }
 
 
 void ChessEngine::new_game( )
 {
-    filename_chooser->new_file();
+    game_loader->new_file();
 
-    model->initialise();
+    game.initialise();
 
 
     info.turn = "white";
@@ -138,12 +133,6 @@ void ChessEngine::arrange_remove_piece(STSquare square )
 
 void ChessEngine::arrange_turn( eTurns new_turn )
 {
-    if( new_turn == TURNWHITE )
-        cout << "processing turn message: it's now whites turn" << endl;
-    else
-        cout << "processing turn message: it's now black turn" << endl;
-
-    //arrange_state.is_white_move = ( new_turn == TURNWHITE );
     arrange_board.set_white_move( new_turn == TURNWHITE );
 }
 
@@ -172,58 +161,22 @@ bool ChessEngine::arranging_end( bool canceled )
 std::map<STSquare,STPiece> ChessEngine::get_piece_positions( )
 {
     return is_arranging ? arrange_board.get_pieces() : current_board.get_pieces();
-
-
-    //FENTranslator::from_FEN(arrange_state.piece_positions) : FENTranslator::from_FEN(current_state.piece_positions);
 }
 
 
 bool ChessEngine::open_file( )
 {
-
-    std::string open_name = filename_chooser->load_file();
-
-    if( open_name.empty() )
-        return false;
-
-    if( model->load_game( open_name ) == -1 ) {    // load the file and build the DS in the model_ member
-        return false;
-    }
-
-    return true;
+    return game_loader->load_file( game );
 }
 
 bool ChessEngine::save_file( )
 {
-    std::string save_name = filename_chooser->save_file();
-
-    if( save_name.empty() )
-        return false;
-
-    if( model->store_game( save_name ) == -1 ) {
-        return false;
-    }
-
-    return true;
+    return game_loader->save_file( game );
 }
 
 bool ChessEngine::save_file_as( )
 {
-    std::string save_name = filename_chooser->save_file_as();
-
-    if( save_name.empty() )
-        return false;
-
-    if( model->store_game( save_name ) == -1 ) {
-        return false;
-    }
-
-    return true;
-}
-
-void ChessEngine::advance( )
-{
-    model->advance();
+    return game_loader->save_file_as( game );
 }
 
 void ChessEngine::change_piece_values( )
@@ -256,13 +209,13 @@ void ChessEngine::stop_thinking()
 void ChessEngine::change_level( eLevels new_level )
 {
     if( multi_player ) {
-        model->set_level_info( "Two Player" );
+        info.level = "Two Player";
         return;
     }
 
     switch( new_level ) {
     case EASY:
-        model->set_level_info( "Easy" );
+        info.level = "Easy";
         break;
 
     case TIMED:
@@ -283,7 +236,7 @@ void ChessEngine::change_level( eLevels new_level )
         break;
 
     case INFINITE:
-        model->set_level_info( "Infinite" );
+        info.level = "Infinite";
         break;
 
     case PLAYSEARCH:
@@ -291,11 +244,11 @@ void ChessEngine::change_level( eLevels new_level )
         break;
 
     case MATESEARCH:
-        model->set_level_info( "MateSearch" );
+        info.level = "MateSearch";
         break;
 
     case MATCHING:
-        model->set_level_info( "Match users time" );
+        info.level = "Match users time";
         break;
 
     default:
@@ -407,7 +360,7 @@ bool ChessEngine::toggle_multiplayer()
     multi_player = !multi_player;
 
     if( multi_player )
-        model->set_level_info( "Two Player" );
+        info.level = "Two Player";
 
     return multi_player;
 }

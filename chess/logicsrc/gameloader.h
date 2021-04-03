@@ -24,6 +24,8 @@
 
 #include <string>
 
+class ChessGame;
+
 /** \brief Encapsulation of filename
  *
  * This class is the interface to filename encapsulation
@@ -31,16 +33,16 @@
  * with either a user (through a GUI or a CLI) or a system
  * to manipulate the filename entity.
  */
-class FilenameChooser
+class GameLoader
 {
 public:
-	FilenameChooser() {};
-	virtual ~FilenameChooser() {};
+	GameLoader() {};
+	virtual ~GameLoader() {};
 
 	bool new_file();
-	std::string load_file();
-	std::string save_file();
-	std::string save_file_as();
+	bool load_file( ChessGame& game );
+	bool save_file( ChessGame& game );
+	bool save_file_as( ChessGame& game );
 
 protected:
 	virtual std::string get_load_name() = 0;
