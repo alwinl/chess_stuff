@@ -23,24 +23,19 @@
 #define PNGPARSER_H
 
 #include <string>
-
+#include <map>
 #include "chessgame.h"
 
 class PNGParser
 {
 public:
-    PNGParser();
-
-    ChessGame do_parse( std::istream& is );
-
-protected:
+	ChessGame do_parse( std::istream& is );
 
 private:
+	static std::map<std::string, std::string> tags;
 
-	//static std::map<std::string, std::string> tags;
-
-    void extract_tag_pair( ChessGame& game, std::string line );
-	std::string::size_type extract_move( std::string movetext );
+	std::string::size_type extract_tag_pair( ChessGame& game, std::string line );
+	std::string::size_type extract_move( ChessGame& game, std::string movetext );
 };
 
 #endif // PNGPARSER_H

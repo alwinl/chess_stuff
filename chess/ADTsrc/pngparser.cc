@@ -27,12 +27,9 @@
 
 #include <istream>
 
-PNGParser::PNGParser()
-{
-    //ctor
-}
+#include <cctype>
 
-/*
+
 std::map<std::string, std::string> PNGParser::tags = {
 	{ "Event", "" },
 	{ "Site", "" },
@@ -51,7 +48,7 @@ std::map<std::string, std::string> PNGParser::tags = {
 	{ "SetUp", "" },
 };
 
-
+/*
 Tokens:
 
 	<string> ::= """ any printable character """
@@ -70,47 +67,181 @@ Tokens:
 	letter ::= [A-Za-z]
 	digit ::= [0-9]
 	specials ::= "_" | "+" | "#" | "=" | "-"
-
+*/
 class Token
 {
-	enum eTokens { STRING, INTEGER, MOVENOINDICATOR, GAMETERMINATOR, TAGSTART, TAGEND, RAVSTART, RAVEND, RESERVEDSTART, RESERVEDEND, NAG, SYMBOL };
+public:
+	bool terminated() { return kind != INVALID; }
+	void add_character( char ch );
 
-	eToken kind;
+private:
+	enum eToken { INVALID, STRING, INTEGER, MOVENOINDICATOR, GAMETERMINATOR, TAGSTART, TAGEND, RAVSTART, RAVEND, RESERVEDSTART, RESERVEDEND, NAG, SYMBOL, COMMENT };
 
-	std::string str_value;
-	int int_value;
+	enum eState { COLLECTING_NONE, COLLECTING_STRING, COLLECTING_NAG, COLLECTING_SYMBOL, COLLECTING_INTEGER, COLLECTING_COMMENT };
+
+	eToken kind = INVALID;
+	eState state = COLLECTING_NONE;
+	std::string collected = "";
+	std::string str_value = "";
+	int int_value = 0;
+};
+
+void Token::add_character( char ch )
+{
+	switch( state ) {
+	case COLLECTING_NONE:
+		switch( ch ) {
+		case '[': kind = TAGSTART; break;
+		case ']': kind = TAGEND; break;
+		case '.': kind = MOVENOINDICATOR; break;
+		case '*': kind = GAMETERMINATOR; break;
+		case '(': kind = RAVSTART; break;
+		case ')': kind = RAVEND; break;
+		case '<': kind = RESERVEDSTART; break;
+		case '>': kind = RESERVEDEND; break;
+		case '"': state = COLLECTING_STRING; break;
+		case '$': state = COLLECTING_NAG; break;
+		case '{': state = COLLECTING_COMMENT; break;
+		default:
+			if( std::isalpha(ch) ) {
+				collected += ch;
+				state = COLLECTING_SYMBOL;
+			}
+			if ( std::isdigit(ch) ) {
+				collected += ch;
+				state = COLLECTING_INTEGER;
+			}
+			break;
+		}
+		break;
+
+	case COLLECTING_STRING:
+		if( escaped ) {
+			collected += ch;
+			escaped = false;
+			break;
+		}
+		if( ch == '\\' ) {
+			escaped = true;
+			break;
+		}
+		if( ch == '"' ) {
+			kind = STRING;
+			state = COLLECTING_NONE;
+			break;
+		}
+		collected += ch;
+		break;
+
+	case COLLECTING_NAG:
+		if( ! std::isdigit(ch) ) {
+			kind = NAG;
+			state = COLLECTING_NONE;
+			break;
+		}
+		collected + ch;
+		break;
+	case COLLECTING_SYMBOL:
+		break;
+	case COLLECTING_INTEGER:
+		if( std::isdigit(ch)) {
+			collected += ch;
+			break;
+		}
+		if( std::isspace() ) {
+			kind = INTEGER;
+			value = std::stoul( collected );
+			break;
+		}
+		if( std::isalpha(ch) ) {
+			state = COLLECTING_SYMBOL;
+			collected += ch;
+			break;
+		}
+
+		break;
+	case COLLECTING_COMMENT:
+		if( ch == '}' ) {
+			kind = COMMENT;
+			state = COLLECTING_NONE;
+			break;
+		}
+		collected += ch;
+		break;
+	}
+
 }
 
 class Lexer
 {
+public:
+	Lexer( std::istream& is_ ) : is(is_) {};
 
-	Token get_next_token( istream& is ) {
+	Token get_next_token( );
 
-		char ch;
+private:
+	std::istream& is;
+};
+
+Token Lexer::get_next_token( )
+{
+	char ch;
+	Token new_token;
+
+	while( is.good() && !new_token.terminated() ) {
 		is.get( ch );
-
-
+		new_token.add_character( ch );
 	}
+
+	return new_token;
 }
-*/
+
+
 
 
 /**********************************************************
  * \brief
  *
- * Format of a tag value pair is [<tag> "<value"]
+ * Format of a tag value pair is ["<tag>" "<value"]
  *
  * Example:
  *	[Event "F/S Return Match"] : tag = Event, value = F/S Return Match
  *
+ * However, the standard allows a tag value pair to span multiple lines
+ * on import or even more than one pair per line.
  */
-void PNGParser::extract_tag_pair( ChessGame& game, std::string line )
+std::string::size_type PNGParser::extract_tag_pair( ChessGame& game, std::string line )
 {
-	std::string tag = line.substr( 1, line.find_first_of( ' ' ) );
-	std::string::size_type value_start_pos = line.find_first_of("\"") + 1;
-	std::string value = line.substr( value_start_pos, line.find_first_of("\"", value_start_pos + 1 ) );
+	// Lets find the start and end markers
+	std::string::size_type start_marker = line.find_first_of("[");
+	std::string::size_type end_marker = line.find_first_of("]");
+	if( (start_marker == std::string::npos) || (end_marker == std::string::npos) )
+		return 0;   // no markers, cannot extract a pair
+
+	// Now that we have tag pair delimiters, lets extract tag and pair
+
+	std::string::size_type start_tag = line.find_first_of( "\"", start_marker + 1 );
+	if( start_tag == std::string::npos )
+		return end_marker; // invalid sequence, consume the whole thing and discard
+
+	std::string::size_type end_tag = line.find_first_of( "\"", start_tag + 1 );
+	if( end_tag == std::string::npos )
+		return end_marker; // invalid sequence, consume the whole thing and discard
+
+	std::string::size_type start_value = line.find_first_of( "\"", end_tag + 1 );
+	if( start_value == std::string::npos )
+		return end_marker; // invalid sequence, consume the whole thing and discard
+
+	std::string::size_type end_value = line.find_first_of( "\"", start_value + 1 );
+	if( end_value == std::string::npos )
+		return end_marker; // invalid sequence, consume the whole thing and discard
+
+	std::string tag = line.substr( start_tag, end_tag );
+	std::string value = line.substr( start_value, end_value );
 
 	game.add_tag_pair( tag, value );
+
+	return end_marker;
 }
 
 
@@ -126,7 +257,7 @@ void PNGParser::extract_tag_pair( ChessGame& game, std::string line )
  * \return std::string::size_type
  *
  */
-std::string::size_type  PNGParser::extract_move( std::string movetext )
+std::string::size_type PNGParser::extract_move( ChessGame& game, std::string movetext )
 {
 	// First deliniator is a period
 	std::string::size_type period = movetext.find( '.' );
@@ -147,7 +278,9 @@ std::string::size_type  PNGParser::extract_move( std::string movetext )
 ChessGame PNGParser::do_parse( std::istream& is )
 {
 	std::string line;
-	std::string movetext;
+	std::string extracted_text;
+	std::string::size_type chars_processed;
+	bool processing_tagvalues = true;
 
 	ChessGame game;
 
@@ -158,17 +291,20 @@ ChessGame PNGParser::do_parse( std::istream& is )
 		if( line[0] == '%' )		/* Standard chapter 6 */
 			continue;
 
-		if( line[0] == '[' ) {
-			extract_tag_pair( game, line );
+		if( line.empty() ) {
+			processing_tagvalues = false;
+			extracted_text.clear();
 			continue;
 		}
 
-		movetext += line;
+		extracted_text += line;
 
-		std::string::size_type chars_processed;
-
-		while( (chars_processed = extract_move( movetext ) ) != 0 )
-			movetext.erase( 0, chars_processed );
+		if( processing_tagvalues )
+			while( (chars_processed = extract_tag_pair( game, extracted_text ) ) != 0 )
+				extracted_text.erase( 0, chars_processed );
+		else
+			while( (chars_processed = extract_move( game, extracted_text ) ) != 0 )
+				extracted_text.erase( 0, chars_processed );
 	}
 
 	return game;
