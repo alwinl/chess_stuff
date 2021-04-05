@@ -25,9 +25,12 @@
 
 #include "pngparser.h"
 
+#include "pnglexer.h"
+
 #include <istream>
 
 #include <cctype>
+#include <cassert>
 
 
 std::map<std::string, std::string> PNGParser::tags = {
@@ -48,153 +51,9 @@ std::map<std::string, std::string> PNGParser::tags = {
 	{ "SetUp", "" },
 };
 
-/*
-Tokens:
 
-	<string> ::= """ any printable character """
-	<integer> ::= { <digit> }
-	<movenoindicator> ::= "."
-	<game_terminator> ::= "*"
-	<tag_start> ::= "["
-	<tag_end> ::= "]"
-	<RAV_start> ::= "("
-	<RAV_end> ::= ")"
-	<reserved_start> ::= "<"
-	<reserved_end> ::= ">"
-	<NAG> ::= "$" { <digit> }
-	<symbol> ::=  <letter> | <digit>  { <letter> | <digit> | <specials> }
 
-	letter ::= [A-Za-z]
-	digit ::= [0-9]
-	specials ::= "_" | "+" | "#" | "=" | "-"
-*/
-class Token
-{
-public:
-	bool terminated() { return kind != INVALID; }
-	void add_character( char ch );
 
-private:
-	enum eToken { INVALID, STRING, INTEGER, MOVENOINDICATOR, GAMETERMINATOR, TAGSTART, TAGEND, RAVSTART, RAVEND, RESERVEDSTART, RESERVEDEND, NAG, SYMBOL, COMMENT };
-
-	enum eState { COLLECTING_NONE, COLLECTING_STRING, COLLECTING_NAG, COLLECTING_SYMBOL, COLLECTING_INTEGER, COLLECTING_COMMENT };
-
-	eToken kind = INVALID;
-	eState state = COLLECTING_NONE;
-	std::string collected = "";
-	std::string str_value = "";
-	int int_value = 0;
-};
-
-void Token::add_character( char ch )
-{
-	switch( state ) {
-	case COLLECTING_NONE:
-		switch( ch ) {
-		case '[': kind = TAGSTART; break;
-		case ']': kind = TAGEND; break;
-		case '.': kind = MOVENOINDICATOR; break;
-		case '*': kind = GAMETERMINATOR; break;
-		case '(': kind = RAVSTART; break;
-		case ')': kind = RAVEND; break;
-		case '<': kind = RESERVEDSTART; break;
-		case '>': kind = RESERVEDEND; break;
-		case '"': state = COLLECTING_STRING; break;
-		case '$': state = COLLECTING_NAG; break;
-		case '{': state = COLLECTING_COMMENT; break;
-		default:
-			if( std::isalpha(ch) ) {
-				collected += ch;
-				state = COLLECTING_SYMBOL;
-			}
-			if ( std::isdigit(ch) ) {
-				collected += ch;
-				state = COLLECTING_INTEGER;
-			}
-			break;
-		}
-		break;
-
-	case COLLECTING_STRING:
-		if( escaped ) {
-			collected += ch;
-			escaped = false;
-			break;
-		}
-		if( ch == '\\' ) {
-			escaped = true;
-			break;
-		}
-		if( ch == '"' ) {
-			kind = STRING;
-			state = COLLECTING_NONE;
-			break;
-		}
-		collected += ch;
-		break;
-
-	case COLLECTING_NAG:
-		if( ! std::isdigit(ch) ) {
-			kind = NAG;
-			state = COLLECTING_NONE;
-			break;
-		}
-		collected + ch;
-		break;
-	case COLLECTING_SYMBOL:
-		break;
-	case COLLECTING_INTEGER:
-		if( std::isdigit(ch)) {
-			collected += ch;
-			break;
-		}
-		if( std::isspace() ) {
-			kind = INTEGER;
-			value = std::stoul( collected );
-			break;
-		}
-		if( std::isalpha(ch) ) {
-			state = COLLECTING_SYMBOL;
-			collected += ch;
-			break;
-		}
-
-		break;
-	case COLLECTING_COMMENT:
-		if( ch == '}' ) {
-			kind = COMMENT;
-			state = COLLECTING_NONE;
-			break;
-		}
-		collected += ch;
-		break;
-	}
-
-}
-
-class Lexer
-{
-public:
-	Lexer( std::istream& is_ ) : is(is_) {};
-
-	Token get_next_token( );
-
-private:
-	std::istream& is;
-};
-
-Token Lexer::get_next_token( )
-{
-	char ch;
-	Token new_token;
-
-	while( is.good() && !new_token.terminated() ) {
-		is.get( ch );
-		new_token.add_character( ch );
-	}
-
-	return new_token;
-}
 
 
 
@@ -264,11 +123,11 @@ std::string::size_type PNGParser::extract_move( ChessGame& game, std::string mov
 	if( period == std::string::npos )
 		return 0;	// cannot extract a move
 
-	int moveno = std::atoi( movetext.substr( 0, period ).c_str() );
+	//int moveno = std::atoi( movetext.substr( 0, period ).c_str() );
 
 	// Do we have a white ply?
 	if( movetext.substr(period,3) != "..." ) {
-		std::string::size_type end_of_ply = movetext.find( ' ' );
+		//std::string::size_type end_of_ply = movetext.find( ' ' );
 
 	}
 

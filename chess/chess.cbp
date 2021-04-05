@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="ADTsrc" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -22,6 +23,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="ADTsrc" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -35,6 +37,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DTESTING" />
+					<Add directory="ADTsrc" />
 				</Compiler>
 			</Target>
 		</Build>
@@ -54,8 +57,12 @@
 		<Unit filename="ADTsrc/chessgame.h" />
 		<Unit filename="ADTsrc/ply.cc" />
 		<Unit filename="ADTsrc/ply.h" />
+		<Unit filename="ADTsrc/pnglexer.cc" />
+		<Unit filename="ADTsrc/pnglexer.h" />
 		<Unit filename="ADTsrc/pngparser.cc" />
 		<Unit filename="ADTsrc/pngparser.h" />
+		<Unit filename="ADTsrc/pngtoken.cc" />
+		<Unit filename="ADTsrc/pngtoken.h" />
 		<Unit filename="ADTsrc/pods.cc" />
 		<Unit filename="ADTsrc/pods.h" />
 		<Unit filename="chessmain.cc" />
@@ -152,9 +159,7 @@
 		<Unit filename="logicsrc/piecevalues.cc" />
 		<Unit filename="logicsrc/piecevalues.h" />
 		<Unit filename="logicsrc/timeinputter.h" />
-		<Unit filename="logictest/testapplication.cc">
-			<Option target="Test" />
-		</Unit>
+		<Unit filename="logictest/testapplication.cc" />
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />
 		</Unit>
@@ -179,12 +184,20 @@
 		<Unit filename="logictest/testpiecevalues.h">
 			<Option target="Test" />
 		</Unit>
+		<Unit filename="logictest/testpnglexer.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpnglexer.h" />
 		<Unit filename="logictest/testpngparser.cc">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testpngparser.h">
 			<Option target="Test" />
 		</Unit>
+		<Unit filename="logictest/testpngtoken.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpngtoken.h" />
 		<Unit filename="logictest/teststhalvemove.cc">
 			<Option target="Test" />
 		</Unit>
