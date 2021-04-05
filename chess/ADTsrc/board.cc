@@ -38,8 +38,8 @@ Board Board::standard_opening_board()
 
 Board Board::add_piece( STSquare square, STPiece new_piece )
 {
-    if( square.file != -1 )
-        pieces.insert( std::pair<STSquare, STPiece>( square, new_piece) );
+	if( square.file != -1 )
+		pieces.insert( std::pair<STSquare, STPiece>( square, new_piece) );
 
 	return *this;
 }
@@ -64,7 +64,7 @@ Board Board::clear_all()
     black_can_castle_kingside =
     black_can_castle_queenside = true;
 
-    STSquare en_passant_target = make_square( -1, -1 );		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
+    //STSquare en_passant_target = make_square( -1, -1 );		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
 
     halfmove_clock = 0;             // Number of half moves since last capture or pawn advance
     fullmove_number = 0;             // The number of the move, start at one increment after black move
