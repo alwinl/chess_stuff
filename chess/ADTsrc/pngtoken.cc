@@ -89,6 +89,7 @@ void PNGToken::state_none( char ch )
 	case ')': kind = RAVEND; break;
 	case '<': kind = RESERVEDSTART; break;
 	case '>': kind = RESERVEDEND; break;
+	case '\n': kind = LINETERMINATOR; break;
 
 	// non self terminating tokens
 	case '"': state = COLLECTING_STRING; break;

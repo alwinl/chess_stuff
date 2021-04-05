@@ -35,11 +35,12 @@ public:
 
 	CPPUNIT_TEST( check_EOFToken );
 	CPPUNIT_TEST( check_EOSToken );
-	CPPUNIT_TEST( check_symbol );
+	CPPUNIT_TEST( check_symbols );
+	CPPUNIT_TEST( check_strings );
+	CPPUNIT_TEST( check_integers );
 	CPPUNIT_TEST( check_self_terminators );
-	CPPUNIT_TEST( check_nag );
+	CPPUNIT_TEST( check_nags );
 	CPPUNIT_TEST( check_tagpair );
-	CPPUNIT_TEST( check_linefeed );
 	CPPUNIT_TEST( check_tagpair_section );
 
 	CPPUNIT_TEST_SUITE_END();
@@ -47,11 +48,12 @@ public:
 private:
 	void check_EOFToken();
 	void check_EOSToken();
-	void check_symbol();
+	void check_symbols();
+	void check_strings();
+	void check_integers();
 	void check_self_terminators();
-	void check_nag();
+	void check_nags();
 	void check_tagpair();
-	void check_linefeed();
 	void check_tagpair_section();
 };
 

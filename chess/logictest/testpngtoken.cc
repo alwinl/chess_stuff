@@ -48,7 +48,7 @@ void TestPNGToken::check_EOSToken()
 
 void TestPNGToken::check_self_terminators()
 {
-	std::string input_data( "[].*()<>" );
+	std::string input_data( "[].*()<>\n" );
 
 	std::vector<PNGToken> tokens;
 	PNGToken token;
@@ -62,7 +62,7 @@ void TestPNGToken::check_self_terminators()
 		token.reset();
 	}
 
-	CPPUNIT_ASSERT( tokens.size() == 8 );
+	CPPUNIT_ASSERT( tokens.size() == 9 );
 
 	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::TAGSTART );
 	CPPUNIT_ASSERT( tokens[1].type() == PNGToken::TAGEND );
@@ -72,36 +72,112 @@ void TestPNGToken::check_self_terminators()
 	CPPUNIT_ASSERT( tokens[5].type() == PNGToken::RAVEND );
 	CPPUNIT_ASSERT( tokens[6].type() == PNGToken::RESERVEDSTART );
 	CPPUNIT_ASSERT( tokens[7].type() == PNGToken::RESERVEDEND );
+	CPPUNIT_ASSERT( tokens[8].type() == PNGToken::LINETERMINATOR );
 }
 
-void TestPNGToken::check_symbol()
-{
-	std::string the_symbol( "ASimpleSymbol" );
+//STRING, INTEGER, COMMENT
 
+void TestPNGToken::check_symbols()
+{
+	std::string input_data( "ASimpleSymbol asymbolwith1number 1symbolwithnumber " );
+
+	std::vector<PNGToken> tokens;
 	PNGToken token;
 
-	for( char& ch : the_symbol )
-		CPPUNIT_ASSERT( token.add_character( ch ) == false );
+	for( char& ch : input_data ) {
 
-	CPPUNIT_ASSERT( token.add_character( ' ' ) == true );
+		if( ! token.add_character( ch ) )
+			continue;
 
-	CPPUNIT_ASSERT( token.type() == PNGToken::SYMBOL );
-	CPPUNIT_ASSERT( token.data() == the_symbol );
+		tokens.push_back( token );
+		token.reset();
+	}
+
+	CPPUNIT_ASSERT( tokens.size() == 3 );
+
+	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::SYMBOL );
+	CPPUNIT_ASSERT( tokens[1].type() == PNGToken::SYMBOL );
+	CPPUNIT_ASSERT( tokens[2].type() == PNGToken::SYMBOL );
+
+	CPPUNIT_ASSERT( tokens[0].data() == std::string("ASimpleSymbol") );
+	CPPUNIT_ASSERT( tokens[1].data() == std::string("asymbolwith1number") );
+	CPPUNIT_ASSERT( tokens[2].data() == std::string("1symbolwithnumber") );
 }
 
-void TestPNGToken::check_nag()
+void TestPNGToken::check_strings()
 {
-	std::string the_nag( "$1" );
+	std::string input_data( "\"AString\" \"AnotherString\"" );
 
+	std::vector<PNGToken> tokens;
 	PNGToken token;
 
-	for( char& ch : the_nag )
-		CPPUNIT_ASSERT( token.add_character( ch ) == false );
+	for( char& ch : input_data ) {
 
-	CPPUNIT_ASSERT( token.add_character( 'a' ) == true );
+		if( ! token.add_character( ch ) )
+			continue;
 
-	CPPUNIT_ASSERT( token.type() == PNGToken::NAG );
-	CPPUNIT_ASSERT( std::stoul(token.data()) == 1 );
+		tokens.push_back( token );
+		token.reset();
+	}
+
+	CPPUNIT_ASSERT( tokens.size() == 3 );
+
+	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::STRING );
+	CPPUNIT_ASSERT( tokens[1].type() == PNGToken::INVALID );
+	CPPUNIT_ASSERT( tokens[2].type() == PNGToken::STRING );
+
+	CPPUNIT_ASSERT( tokens[0].data() == std::string("AString") );
+	CPPUNIT_ASSERT( tokens[2].data() == std::string("AnotherString") );
+}
+
+void TestPNGToken::check_integers()
+{
+	std::string input_data( "123 456 " );
+
+	std::vector<PNGToken> tokens;
+	PNGToken token;
+
+	for( char& ch : input_data ) {
+
+		if( ! token.add_character( ch ) )
+			continue;
+
+		tokens.push_back( token );
+		token.reset();
+	}
+
+	CPPUNIT_ASSERT( tokens.size() == 2 );
+
+	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::INTEGER );
+	CPPUNIT_ASSERT( tokens[1].type() == PNGToken::INTEGER );
+
+	CPPUNIT_ASSERT( std::stoul(tokens[0].data()) == 123 );
+	CPPUNIT_ASSERT( std::stoul(tokens[1].data()) == 456 );
+}
+
+void TestPNGToken::check_nags()
+{
+	std::string input_data( "$1 $2a" );
+
+	std::vector<PNGToken> tokens;
+	PNGToken token;
+
+	for( char& ch : input_data ) {
+
+		if( ! token.add_character( ch ) )
+			continue;
+
+		tokens.push_back( token );
+		token.reset();
+	}
+
+	CPPUNIT_ASSERT( tokens.size() == 2 );
+
+	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::NAG );
+	CPPUNIT_ASSERT( tokens[1].type() == PNGToken::NAG );
+
+	CPPUNIT_ASSERT( std::stoul(tokens[0].data()) == 1 );
+	CPPUNIT_ASSERT( std::stoul(tokens[1].data()) == 2 );
 }
 
 void TestPNGToken::check_tagpair()
@@ -131,10 +207,9 @@ void TestPNGToken::check_tagpair()
 	CPPUNIT_ASSERT( tokens[2].data() == std::string( "Moscow City Championship" ) );
 }
 
-
-void TestPNGToken::check_linefeed()
+void TestPNGToken::check_tagpair_section()
 {
-	std::string input_data( "\n" );
+	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n" );
 
 	std::vector<PNGToken> tokens;
 	PNGToken token;
@@ -148,43 +223,24 @@ void TestPNGToken::check_linefeed()
 		token.reset();
 	}
 
-	CPPUNIT_ASSERT( tokens.size() == 1 );
-	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::INVALID );
-}
-
-void TestPNGToken::check_tagpair_section()
-{
-	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n" );
-
-	std::vector<PNGToken> tokens;
-	PNGToken token;
-
-	for( char& ch : input_data ) {
-
-		if( ! token.add_character( ch ) )
-			continue;
-
-		if( token.type() != PNGToken::INVALID )
-			tokens.push_back( token );
-
-		token.reset();
-	}
-
-	CPPUNIT_ASSERT( tokens.size() == 8 );
+	CPPUNIT_ASSERT( tokens.size() == 11 );
 
 	CPPUNIT_ASSERT( tokens[0].type() == PNGToken::TAGSTART );
 	CPPUNIT_ASSERT( tokens[1].type() == PNGToken::SYMBOL );
 	CPPUNIT_ASSERT( tokens[2].type() == PNGToken::STRING );
 	CPPUNIT_ASSERT( tokens[3].type() == PNGToken::TAGEND );
-	CPPUNIT_ASSERT( tokens[4].type() == PNGToken::TAGSTART );
-	CPPUNIT_ASSERT( tokens[5].type() == PNGToken::SYMBOL );
-	CPPUNIT_ASSERT( tokens[6].type() == PNGToken::STRING );
-	CPPUNIT_ASSERT( tokens[7].type() == PNGToken::TAGEND );
+	CPPUNIT_ASSERT( tokens[4].type() == PNGToken::LINETERMINATOR );
+	CPPUNIT_ASSERT( tokens[5].type() == PNGToken::TAGSTART );
+	CPPUNIT_ASSERT( tokens[6].type() == PNGToken::SYMBOL );
+	CPPUNIT_ASSERT( tokens[7].type() == PNGToken::STRING );
+	CPPUNIT_ASSERT( tokens[8].type() == PNGToken::TAGEND );
+	CPPUNIT_ASSERT( tokens[9].type() == PNGToken::LINETERMINATOR );
+	CPPUNIT_ASSERT( tokens[10].type() == PNGToken::LINETERMINATOR );
 
 	CPPUNIT_ASSERT( tokens[1].data() == std::string( "Event" ) );
 	CPPUNIT_ASSERT( tokens[2].data() == std::string( "Moscow City Championship" ) );
-	CPPUNIT_ASSERT( tokens[5].data() == std::string( "Site" ) );
-	CPPUNIT_ASSERT( tokens[6].data() == std::string( "New York City, NY USA" ) );
+	CPPUNIT_ASSERT( tokens[6].data() == std::string( "Site" ) );
+	CPPUNIT_ASSERT( tokens[7].data() == std::string( "New York City, NY USA" ) );
 
 }
 
