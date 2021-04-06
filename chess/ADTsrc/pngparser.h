@@ -29,7 +29,7 @@
 class PNGParser
 {
 public:
-	ChessGame do_parse( std::istream& is );
+    bool do_parse( std::istream& is, ChessGame& game );
 
 private:
 	static std::map<std::string, std::string> tags;

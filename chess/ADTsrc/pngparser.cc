@@ -134,37 +134,22 @@ std::string::size_type PNGParser::extract_move( ChessGame& game, std::string mov
 	return 0;
 }
 
-ChessGame PNGParser::do_parse( std::istream& is )
+bool PNGParser::do_parse( std::istream& is, ChessGame& game )
 {
-	std::string line;
-	std::string extracted_text;
-	std::string::size_type chars_processed;
-	bool processing_tagvalues = true;
+    PNGLexer lexer( is );
 
-	ChessGame game;
+    std::map<std::string, std::string> tagpairs = lexer.parse_tag_pair_section();
 
-	while( !is.eof() ) {
+    if( tagpairs.empty())
+        return false;
 
-		getline( is, line );
+    for( auto tagpair : tagpairs )
+        game.add_tag_pair( tagpair.first, tagpair.second );
 
-		if( line[0] == '%' )		/* Standard chapter 6 */
-			continue;
+    std::vector<Ply> moves = lexer.parse_movetext_section();
 
-		if( line.empty() ) {
-			processing_tagvalues = false;
-			extracted_text.clear();
-			continue;
-		}
+    for( auto ply : moves )
+        game.add_ply( ply );
 
-		extracted_text += line;
-
-		if( processing_tagvalues )
-			while( (chars_processed = extract_tag_pair( game, extracted_text ) ) != 0 )
-				extracted_text.erase( 0, chars_processed );
-		else
-			while( (chars_processed = extract_move( game, extracted_text ) ) != 0 )
-				extracted_text.erase( 0, chars_processed );
-	}
-
-	return game;
+    return true;
 }
