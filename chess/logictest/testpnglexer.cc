@@ -38,6 +38,23 @@ TestPNGLexer::~TestPNGLexer()
 
 void TestPNGLexer::create_test()
 {
-    CPPUNIT_ASSERT( true );
+
+    std::string input_data( "[Event \"F/S Return Match\"]\n"
+                            "[Site \"Belgrade, Serbia JUG\"]\n"
+                            "[Date \"1992.11.04\"]\n"
+                            "[Round \"29\"]\n"
+                            "[White \"Fischer, Robert J.\"]\n"
+                            "[Black \"Spassky, Boris V.\"]\n"
+                            "[Result \"1/2-1/2\"]\n"
+                            "\n" );
+
+    std::stringstream is( input_data );
+    PNGLexer lexer( is );
+
+    std::map<std::string, std::string> tagpairs;
+
+    tagpairs = lexer.parse_tag_pair_section(  );
+
+    CPPUNIT_ASSERT( tagpairs.size() == 7 );
 }
 
