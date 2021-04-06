@@ -22,9 +22,14 @@
 #ifndef PNGLEXER_H
 #define PNGLEXER_H
 
-#include <pngtoken.h>
+#include "pngtoken.h"
+
+#include "ply.h"
 
 #include <istream>
+#include <map>
+#include <vector>
+#include <string>
 
 class ChessGame;
 
@@ -35,7 +40,8 @@ public:
 
 	void ParseGrammar();
 
-	void ParseTagPairSection( ChessGame& game );
+    std::map<std::string, std::string> parse_tag_pair_section(  );
+    std::vector<Ply> parse_movetext_section(  );
 
 private:
 /*

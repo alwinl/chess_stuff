@@ -32,38 +32,15 @@ PNGLexer::PNGLexer( std::istream& is_ ) : is(is_)
 
 PNGToken PNGLexer::get_next_token( )
 {
-	char ch;
-	char last_ch;
 	PNGToken new_token;
-	bool eating_comment = false;
+	char ch;
 
 	for(;;) {
 
 		is.get( ch );
 
 		if( is.eof() )
-			return PNGToken::EOFToken();
-
-		if( eating_comment ) {
-			if( ch != '\n' )
-				continue;
-
-			eating_comment = false;
-			continue;
-		}
-
-		if( ch == ';' ) {					// eat line comments
-			eating_comment = true;
-			continue;
-		}
-
-		if( last_ch == '\n' && ch == '\n')		// empty line => end of section
-			return PNGToken::EOSToken();
-
-		last_ch = ch;
-
-		if( ch == '\n' )
-			continue;
+            break;
 
 		if( new_token.add_character( ch ) )
 			return new_token;
@@ -79,20 +56,27 @@ void PNGLexer::parse_error( std::string message )
 
 /*
  */
-void PNGLexer::ParseTagPairSection( ChessGame& game )
+std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 {
+    std::map<std::string, std::string> result;
 	std::pair<std::string, std::string>  tag_pair;
 	enum eSTAGES { NOTHING, GOT_TAG_START, GOT_TAG, GOT_DATA, } stage = NOTHING;
+	bool last_token_is_nl = false;
 
 	for(;;) {
 
 		PNGToken token = get_next_token();
 
-		if( token.type() == PNGToken::FILEEND )		// should never happen
-			return;
+		if( token.type() == PNGToken::EOFToken().type() )
+            return std::map<std::string, std::string>();      // should never happen, return an empty map
 
-		if( token.type() == PNGToken::SECTIONEND )		// all tag pairs parsed, go home
-			return;
+		if( token.type() == PNGToken::LINETERMINATOR ) {
+            if( last_token_is_nl )          // Two newlines is a row means an empty line, ergo end of section
+                return result;
+
+            last_token_is_nl = true;
+		} else
+            last_token_is_nl = false;
 
 		switch( stage ) {
 		case NOTHING:
@@ -128,9 +112,45 @@ void PNGLexer::ParseTagPairSection( ChessGame& game )
 				stage = NOTHING;
 				break;
 			}
-			game.add_tag_pair( tag_pair.first, tag_pair.second );
+			result.insert( tag_pair );
 			stage = NOTHING;
 			break;
+		}
+	}
+}
+
+std::vector<Ply> PNGLexer::parse_movetext_section()
+{
+    std::vector<Ply> result;
+    Ply ply;
+	enum eSTAGES { NOTHING, GOT_MOVEINDICATOR } stage = NOTHING;
+	bool last_token_is_nl = false;
+
+	for(;;) {
+
+		PNGToken token = get_next_token();
+
+		if( token.type() == PNGToken::EOFToken().type() )
+            return std::vector<Ply>();      // should never happen, return an empty map
+
+		if( token.type() == PNGToken::LINETERMINATOR ) {
+            if( last_token_is_nl )          // Two newlines is a row means an empty line, ergo end of section
+                return result;
+
+            last_token_is_nl = true;
+		} else
+            last_token_is_nl = false;
+
+		switch( stage ) {
+        case NOTHING:
+			if( token.type() != PNGToken::INTEGER )
+				break;
+
+			stage = GOT_MOVEINDICATOR;
+			break;
+
+        case GOT_MOVEINDICATOR:
+            break;
 		}
 	}
 }
