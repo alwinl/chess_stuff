@@ -44,6 +44,11 @@ void ChessGame::initialise()
     moves.clear();
 }
 
+void ChessGame::add_ply( Ply new_ply )
+{
+    moves.push_back( new_ply );
+}
+
 void ChessGame::add_tag_pair( std::string tag, std::string value )
 {
 	tag_pairs.insert( std::pair<std::string, std::string>(tag, value) );
