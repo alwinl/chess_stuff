@@ -45,7 +45,7 @@ public:
 	std::string data() const { return collected; };
 
 private:
-	enum eState { COLLECTING_NONE, COLLECTING_STRING, COLLECTING_NAG, COLLECTING_SYMBOL, COLLECTING_INTEGER, COLLECTING_COMMENT };
+	enum eState { COLLECTING_NONE, COLLECTING_STRING, COLLECTING_NAG, COLLECTING_SYMBOL, COLLECTING_INTEGER, COLLECTING_COMMENT, COLLECTING_LINECOMMENT };
 
 	eTokenType kind = PROCESSING;
 	eState state = COLLECTING_NONE;
@@ -61,6 +61,7 @@ private:
 	void state_symbol( char ch );
 	void state_integer( char ch );
 	void state_comment( char ch );
+	void state_linecomment( char ch );
 };
 
 #endif // PNGTOKEN_H

@@ -49,6 +49,7 @@ PNGToken::PNGToken()
 	state_dispatchers.insert( std::make_pair( COLLECTING_SYMBOL, &PNGToken::state_symbol ) );
 	state_dispatchers.insert( std::make_pair( COLLECTING_INTEGER, &PNGToken::state_integer ) );
 	state_dispatchers.insert( std::make_pair( COLLECTING_COMMENT, &PNGToken::state_comment ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_LINECOMMENT, &PNGToken::state_linecomment ) );
 }
 
 PNGToken PNGToken::EOFToken()
@@ -95,6 +96,7 @@ void PNGToken::state_none( char ch )
 	case '"': state = COLLECTING_STRING; break;
 	case '$': state = COLLECTING_NAG; break;
 	case '{': state = COLLECTING_COMMENT; break;
+	case ';': state = COLLECTING_LINECOMMENT; break;
 	default:
 		if( std::isalpha(ch) ) {
 			collected += ch;
@@ -181,6 +183,17 @@ void PNGToken::state_integer( char ch )
 void PNGToken::state_comment( char ch )
 {
 	if( ch == '}' ) {
+		kind = COMMENT;
+		state = COLLECTING_NONE;
+		return;
+	}
+
+	collected += ch;
+}
+
+void PNGToken::state_linecomment( char ch )
+{
+	if( ch == '\n' ) {
 		kind = COMMENT;
 		state = COLLECTING_NONE;
 		return;
