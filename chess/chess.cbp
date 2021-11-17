@@ -46,6 +46,10 @@
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-DGTKMM_DISABLE_DEPRECATED" />
+			<Add option="-DGDKMM_DISABLE_DEPRECATED" />
+			<Add option="-DGLIBMM_DISABLE_DEPRECATED" />
+			<Add option="-DGIOMM_DISABLE_DEPRECATED" />
 			<Add directory="./" />
 		</Compiler>
 		<ExtraCommands>

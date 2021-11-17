@@ -30,8 +30,8 @@ std::string GUIFilenameChooser::get_load_name()
 {
 	Gtk::FileChooserDialog * dlg = new Gtk::FileChooserDialog( parent, "Restore chess game", Gtk::FILE_CHOOSER_ACTION_OPEN );
 
-	dlg->add_button( Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL );
-	dlg->add_button( Gtk::Stock::OPEN, Gtk::RESPONSE_OK );
+	dlg->add_button( "gtk-cancel", Gtk::RESPONSE_CANCEL );
+	dlg->add_button( "gtk-ok", Gtk::RESPONSE_OK );
 
 	Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
 	filter_chess->set_name( "Chess Files" );
@@ -62,8 +62,8 @@ std::string GUIFilenameChooser::get_save_name()
 {
     Gtk::FileChooserDialog * dlg = new Gtk::FileChooserDialog( parent, "Save chess game", Gtk::FILE_CHOOSER_ACTION_SAVE );
 
-	dlg->add_button( Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL );
-	dlg->add_button( Gtk::Stock::SAVE, Gtk::RESPONSE_OK );
+	dlg->add_button( "gtk-cancel", Gtk::RESPONSE_CANCEL );
+	dlg->add_button( "gtk-ok", Gtk::RESPONSE_OK );
 
 	Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
 	filter_chess->set_name( "Chess Files" );
