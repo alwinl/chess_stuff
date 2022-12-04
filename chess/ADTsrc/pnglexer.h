@@ -33,10 +33,10 @@
 
 class ChessGame;
 
-class PNGLexer
+class PGNLexer
 {
 public:
-	PNGLexer( std::istream& is_ );
+	PGNLexer( std::istream& is_ );
 
 	void ParseGrammar();
 
@@ -65,14 +65,14 @@ private:
 	bool process_comment( PNGToken& token );
 */
 
-	PNGToken get_next_token( );
+	PGNToken get_next_token( );
 	void parse_error( std::string );
 
 
 	//std::pair<std::string, std::string> ParseTagPair();
 
 	std::istream& is;
-	PNGToken::eTokenType expected_type;
+	PGNToken::eTokenType expected_type;
 
 
 };

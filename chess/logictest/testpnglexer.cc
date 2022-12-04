@@ -49,7 +49,7 @@ void TestPNGLexer::create_test()
                             "\n" );
 
     std::stringstream is( input_data );
-    PNGLexer lexer( is );
+    PGNLexer lexer( is );
 
     std::map<std::string, std::string> tagpairs;
 

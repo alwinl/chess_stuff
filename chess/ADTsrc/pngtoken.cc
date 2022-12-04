@@ -41,36 +41,36 @@ Tokens:
 	digit ::= [0-9]
 	specials ::= "_" | "+" | "#" | "=" | "-"
 */
-PNGToken::PNGToken()
+PGNToken::PGNToken()
 {
-	state_dispatchers.insert( std::make_pair( COLLECTING_NONE, &PNGToken::state_none ) );
-	state_dispatchers.insert( std::make_pair( COLLECTING_STRING, &PNGToken::state_string ) );
-	state_dispatchers.insert( std::make_pair( COLLECTING_NAG, &PNGToken::state_nag ) );
-	state_dispatchers.insert( std::make_pair( COLLECTING_SYMBOL, &PNGToken::state_symbol ) );
-	state_dispatchers.insert( std::make_pair( COLLECTING_INTEGER, &PNGToken::state_integer ) );
-	state_dispatchers.insert( std::make_pair( COLLECTING_COMMENT, &PNGToken::state_comment ) );
-	state_dispatchers.insert( std::make_pair( COLLECTING_LINECOMMENT, &PNGToken::state_linecomment ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_NONE, &PGNToken::state_none ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_STRING, &PGNToken::state_string ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_NAG, &PGNToken::state_nag ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_SYMBOL, &PGNToken::state_symbol ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_INTEGER, &PGNToken::state_integer ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_COMMENT, &PGNToken::state_comment ) );
+	state_dispatchers.insert( std::make_pair( COLLECTING_LINECOMMENT, &PGNToken::state_linecomment ) );
 }
 
-PNGToken PNGToken::EOFToken()
+PGNToken PGNToken::EOFToken()
 {
-	PNGToken the_token;
+	PGNToken the_token;
 
 	the_token.kind = FILEEND;
 
 	return the_token;
 }
 
-PNGToken PNGToken::EOSToken()
+PGNToken PGNToken::EOSToken()
 {
-	PNGToken the_token;
+	PGNToken the_token;
 
 	the_token.kind = SECTIONEND;
 
 	return the_token;
 }
 
-void PNGToken::reset()
+void PGNToken::reset()
 {
 	kind = PROCESSING;
 	state = COLLECTING_NONE;
@@ -78,7 +78,7 @@ void PNGToken::reset()
 	escaped = false;
 }
 
-void PNGToken::state_none( char ch )
+void PGNToken::state_none( char ch )
 {
 	switch( ch ) {
 	// self terminating tokens
@@ -113,7 +113,7 @@ void PNGToken::state_none( char ch )
 	}
 }
 
-void PNGToken::state_string( char ch )
+void PGNToken::state_string( char ch )
 {
 	if( escaped ) {
 		collected += ch;
@@ -135,7 +135,7 @@ void PNGToken::state_string( char ch )
 	collected += ch;
 }
 
-void PNGToken::state_nag( char ch )
+void PGNToken::state_nag( char ch )
 {
 	if( ! std::isdigit(ch) ) {
 		kind = NAG;
@@ -146,7 +146,7 @@ void PNGToken::state_nag( char ch )
 	collected += ch;
 }
 
-void PNGToken::state_symbol( char ch )
+void PGNToken::state_symbol( char ch )
 {
 	if( std::isspace( ch ) ) {
 		kind = SYMBOL;
@@ -161,7 +161,7 @@ void PNGToken::state_symbol( char ch )
 	kind = INVALID;
 }
 
-void PNGToken::state_integer( char ch )
+void PGNToken::state_integer( char ch )
 {
 	if( std::isdigit(ch)) {
 		collected += ch;
@@ -180,7 +180,7 @@ void PNGToken::state_integer( char ch )
 	kind = INVALID;
 }
 
-void PNGToken::state_comment( char ch )
+void PGNToken::state_comment( char ch )
 {
 	if( ch == '}' ) {
 		kind = COMMENT;
@@ -191,7 +191,7 @@ void PNGToken::state_comment( char ch )
 	collected += ch;
 }
 
-void PNGToken::state_linecomment( char ch )
+void PGNToken::state_linecomment( char ch )
 {
 	if( ch == '\n' ) {
 		kind = COMMENT;
@@ -202,7 +202,7 @@ void PNGToken::state_linecomment( char ch )
 	collected += ch;
 }
 
-bool PNGToken::add_character( char ch )
+bool PGNToken::add_character( char ch )
 {
 	FN_SIG fp = state_dispatchers[state];
 	(this->*fp)( ch );

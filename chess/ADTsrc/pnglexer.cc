@@ -25,14 +25,14 @@
 
 #include <iostream>
 
-PNGLexer::PNGLexer( std::istream& is_ ) : is(is_)
+PGNLexer::PGNLexer( std::istream& is_ ) : is(is_)
 {
 }
 
 
-PNGToken PNGLexer::get_next_token( )
+PGNToken PGNLexer::get_next_token( )
 {
-	PNGToken new_token;
+	PGNToken new_token;
 	char ch;
 
 	for(;;) {
@@ -46,17 +46,17 @@ PNGToken PNGLexer::get_next_token( )
 			return new_token;
 	}
 
-	return PNGToken::EOFToken();
+	return PGNToken::EOFToken();
 }
 
-void PNGLexer::parse_error( std::string message )
+void PGNLexer::parse_error( std::string message )
 {
 	std::cout << message << std::endl;
 }
 
 /*
  */
-std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
+std::map<std::string, std::string> PGNLexer::parse_tag_pair_section(  )
 {
     std::map<std::string, std::string> result;
 	std::pair<std::string, std::string>  tag_pair;
@@ -65,12 +65,12 @@ std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 
 	for(;;) {
 
-		PNGToken token = get_next_token();
+		PGNToken token = get_next_token();
 
-		if( token.type() == PNGToken::FILEEND )
+		if( token.type() == PGNToken::FILEEND )
             return std::map<std::string, std::string>();      // should never happen, return an empty map
 
-		if( token.type() == PNGToken::LINETERMINATOR ) {
+		if( token.type() == PGNToken::LINETERMINATOR ) {
             if( last_token_is_nl )          // Two newlines is a row means an empty line, ergo end of section
                 return result;
 
@@ -80,14 +80,14 @@ std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 
 		switch( stage ) {
 		case NOTHING:
-			if( token.type() != PNGToken::TAGSTART )
+			if( token.type() != PGNToken::TAGSTART )
 				break;
 
 			stage = GOT_TAG_START;
 			break;
 
 		case GOT_TAG_START:
-			if( token.type() != PNGToken::SYMBOL ) {
+			if( token.type() != PGNToken::SYMBOL ) {
 				parse_error( "Expecting a symbol here" );
 				stage = NOTHING;
 				break;
@@ -97,7 +97,7 @@ std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 			break;
 
 		case GOT_TAG:
-			if( token.type() != PNGToken::STRING ) {
+			if( token.type() != PGNToken::STRING ) {
 				parse_error( "Expecting a string here" );
 				stage = NOTHING;
 				break;
@@ -107,7 +107,7 @@ std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 			break;
 
 		case GOT_DATA:
-			if( token.type() != PNGToken::TAGEND ) {
+			if( token.type() != PGNToken::TAGEND ) {
 				parse_error( "Expecting a tag end here" );
 				stage = NOTHING;
 				break;
@@ -119,7 +119,7 @@ std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 	}
 }
 
-std::vector<Ply> PNGLexer::parse_movetext_section()
+std::vector<Ply> PGNLexer::parse_movetext_section()
 {
     std::vector<Ply> result;
     Ply ply;
@@ -128,12 +128,12 @@ std::vector<Ply> PNGLexer::parse_movetext_section()
 
 	for(;;) {
 
-		PNGToken token = get_next_token();
+		PGNToken token = get_next_token();
 
-		if( token.type() == PNGToken::FILEEND )
+		if( token.type() == PGNToken::FILEEND )
             return std::vector<Ply>();      // should never happen, return an empty map
 
-		if( token.type() == PNGToken::LINETERMINATOR ) {
+		if( token.type() == PGNToken::LINETERMINATOR ) {
             if( last_token_is_nl )          // Two newlines is a row means an empty line, ergo end of section
                 return result;
 
@@ -143,7 +143,7 @@ std::vector<Ply> PNGLexer::parse_movetext_section()
 
 		switch( stage ) {
         case NOTHING:
-			if( token.type() != PNGToken::INTEGER )
+			if( token.type() != PGNToken::INTEGER )
 				break;
 
 			stage = GOT_MOVEINDICATOR;

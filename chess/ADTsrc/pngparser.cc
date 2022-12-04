@@ -33,7 +33,7 @@
 #include <cassert>
 
 
-std::map<std::string, std::string> PNGParser::tags = {
+std::map<std::string, std::string> PGNParser::tags = {
 	{ "Event", "" },
 	{ "Site", "" },
 	{ "Date", "" },
@@ -69,7 +69,7 @@ std::map<std::string, std::string> PNGParser::tags = {
  * However, the standard allows a tag value pair to span multiple lines
  * on import or even more than one pair per line.
  */
-std::string::size_type PNGParser::extract_tag_pair( ChessGame& game, std::string line )
+std::string::size_type PGNParser::extract_tag_pair( ChessGame& game, std::string line )
 {
 	// Lets find the start and end markers
 	std::string::size_type start_marker = line.find_first_of("[");
@@ -116,7 +116,7 @@ std::string::size_type PNGParser::extract_tag_pair( ChessGame& game, std::string
  * \return std::string::size_type
  *
  */
-std::string::size_type PNGParser::extract_move( ChessGame& game, std::string movetext )
+std::string::size_type PGNParser::extract_move( ChessGame& game, std::string movetext )
 {
 	// First deliniator is a period
 	std::string::size_type period = movetext.find( '.' );
@@ -134,9 +134,9 @@ std::string::size_type PNGParser::extract_move( ChessGame& game, std::string mov
 	return 0;
 }
 
-bool PNGParser::do_parse( std::istream& is, ChessGame& game )
+bool PGNParser::do_parse( std::istream& is, ChessGame& game )
 {
-    PNGLexer lexer( is );
+    PGNLexer lexer( is );
 
     std::map<std::string, std::string> tagpairs = lexer.parse_tag_pair_section();
 

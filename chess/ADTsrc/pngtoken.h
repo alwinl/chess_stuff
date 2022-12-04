@@ -25,19 +25,19 @@
 #include <map>
 #include <string>
 
-class PNGToken
+class PGNToken
 {
 public:
 	enum eTokenType { PROCESSING, INVALID, SECTIONEND, FILEEND, STRING, INTEGER, MOVENOINDICATOR, GAMETERMINATOR,
 						TAGSTART, TAGEND, RAVSTART, RAVEND, RESERVEDSTART, RESERVEDEND, NAG, SYMBOL, COMMENT, LINETERMINATOR };
 
 public:
-	PNGToken();
+	PGNToken();
 
 	void reset();
 
-	static PNGToken EOFToken();
-	static PNGToken EOSToken();
+	static PGNToken EOFToken();
+	static PGNToken EOSToken();
 
 	bool add_character( char ch );
 
@@ -52,7 +52,7 @@ private:
 	std::string collected = "";
 	bool escaped = false;
 
-	typedef void (PNGToken::*FN_SIG)(char);
+	typedef void (PGNToken::*FN_SIG)(char);
 	std::map<eState, FN_SIG> state_dispatchers;
 
 	void state_none( char ch );

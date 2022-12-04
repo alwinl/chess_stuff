@@ -26,7 +26,7 @@
 #include <map>
 #include "chessgame.h"
 
-class PNGParser
+class PGNParser
 {
 public:
     bool do_parse( std::istream& is, ChessGame& game );
