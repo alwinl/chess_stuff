@@ -59,14 +59,14 @@
 		<Unit filename="ADTsrc/board.h" />
 		<Unit filename="ADTsrc/chessgame.cc" />
 		<Unit filename="ADTsrc/chessgame.h" />
+		<Unit filename="ADTsrc/pgnlexer.cc" />
+		<Unit filename="ADTsrc/pgnlexer.h" />
+		<Unit filename="ADTsrc/pgnparser.cc" />
+		<Unit filename="ADTsrc/pgnparser.h" />
+		<Unit filename="ADTsrc/pgntoken.cc" />
+		<Unit filename="ADTsrc/pgntoken.h" />
 		<Unit filename="ADTsrc/ply.cc" />
 		<Unit filename="ADTsrc/ply.h" />
-		<Unit filename="ADTsrc/pnglexer.cc" />
-		<Unit filename="ADTsrc/pnglexer.h" />
-		<Unit filename="ADTsrc/pngparser.cc" />
-		<Unit filename="ADTsrc/pngparser.h" />
-		<Unit filename="ADTsrc/pngtoken.cc" />
-		<Unit filename="ADTsrc/pngtoken.h" />
 		<Unit filename="ADTsrc/pods.cc" />
 		<Unit filename="ADTsrc/pods.h" />
 		<Unit filename="chessmain.cc" />
@@ -182,26 +182,26 @@
 		<Unit filename="logictest/testgameobject.h">
 			<Option target="Test" />
 		</Unit>
+		<Unit filename="logictest/testpgnlexer.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpgnlexer.h" />
+		<Unit filename="logictest/testpgnparser.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpgnparser.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpgntoken.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="logictest/testpgntoken.h" />
 		<Unit filename="logictest/testpiecevalues.cc">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testpiecevalues.h">
 			<Option target="Test" />
 		</Unit>
-		<Unit filename="logictest/testpnglexer.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpnglexer.h" />
-		<Unit filename="logictest/testpngparser.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpngparser.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpngtoken.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpngtoken.h" />
 		<Unit filename="logictest/teststhalvemove.cc">
 			<Option target="Test" />
 		</Unit>
