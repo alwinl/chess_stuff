@@ -19,12 +19,12 @@
  *
  */
 
-#include "testpngtoken.h"
+#include "testpgntoken.h"
 
 //#include <sstream>
 #include <iostream>
 
-#include "../ADTsrc/pngtoken.h"
+#include "../ADTsrc/pgntoken.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPNGToken );
 

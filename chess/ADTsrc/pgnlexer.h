@@ -22,7 +22,7 @@
 #ifndef PNGLEXER_H
 #define PNGLEXER_H
 
-#include "pngtoken.h"
+#include "pgntoken.h"
 
 #include "ply.h"
 

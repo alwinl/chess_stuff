@@ -23,9 +23,9 @@
 
  /* http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm */
 
-#include "pngparser.h"
+#include "pgnparser.h"
 
-#include "pnglexer.h"
+#include "pgnlexer.h"
 
 #include <istream>
 

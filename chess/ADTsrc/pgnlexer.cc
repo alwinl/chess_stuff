@@ -19,7 +19,7 @@
  *
  */
 
-#include "pnglexer.h"
+#include "pgnlexer.h"
 
 #include "chessgame.h"
 

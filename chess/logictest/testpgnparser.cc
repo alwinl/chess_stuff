@@ -19,11 +19,11 @@
  *
  */
 
-#include "testpngparser.h"
+#include "testpgnparser.h"
 
 #include <sstream>
 
-#include "../ADTsrc/pngparser.h"
+#include "../ADTsrc/pgnparser.h"
 #include "../ADTsrc/pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPNGParser );

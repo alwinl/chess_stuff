@@ -19,7 +19,7 @@
  *
  */
 
-#include "pngtoken.h"
+#include "pgntoken.h"
 
 /*
 Tokens:

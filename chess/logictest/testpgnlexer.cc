@@ -19,11 +19,11 @@
  *
  */
 
-#include "testpnglexer.h"
+#include "testpgnlexer.h"
 
 #include <sstream>
 
-#include "../ADTsrc/pnglexer.h"
+#include "../ADTsrc/pgnlexer.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPNGLexer );
 
