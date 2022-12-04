@@ -53,7 +53,7 @@
 			<Add directory="./" />
 		</Compiler>
 		<ExtraCommands>
-			<Add before="glib-compile-resources --target=resources.c --sourcedir=guisrc --generate-source guisrc/chess.gresource.xml" />
+			<Add before="glib-compile-resources --target=guisrc/resources.c --sourcedir=guisrc --generate-source guisrc/chess.gresource.xml" />
 		</ExtraCommands>
 		<Unit filename="ADTsrc/board.cc" />
 		<Unit filename="ADTsrc/board.h" />
@@ -149,6 +149,11 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="guisrc/resources.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="logicsrc/chessappbase.h" />
 		<Unit filename="logicsrc/chessengine.cc" />
 		<Unit filename="logicsrc/chessengine.h" />
@@ -213,11 +218,6 @@
 		</Unit>
 		<Unit filename="logictest/testtimeinputter.h">
 			<Option target="Test" />
-		</Unit>
-		<Unit filename="resources.c">
-			<Option compilerVar="CC" />
-			<Option target="Debug" />
-			<Option target="Release" />
 		</Unit>
 		<Extensions>
 			<lib_finder disable_auto="0">
