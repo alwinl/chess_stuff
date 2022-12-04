@@ -67,7 +67,7 @@ std::map<std::string, std::string> PNGLexer::parse_tag_pair_section(  )
 
 		PNGToken token = get_next_token();
 
-		if( token.type() == PNGToken::EOFToken().type() )
+		if( token.type() == PNGToken::FILEEND )
             return std::map<std::string, std::string>();      // should never happen, return an empty map
 
 		if( token.type() == PNGToken::LINETERMINATOR ) {
@@ -130,7 +130,7 @@ std::vector<Ply> PNGLexer::parse_movetext_section()
 
 		PNGToken token = get_next_token();
 
-		if( token.type() == PNGToken::EOFToken().type() )
+		if( token.type() == PNGToken::FILEEND )
             return std::vector<Ply>();      // should never happen, return an empty map
 
 		if( token.type() == PNGToken::LINETERMINATOR ) {
