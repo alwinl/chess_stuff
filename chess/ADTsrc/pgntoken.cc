@@ -56,6 +56,14 @@ PGNToken::PGNToken()
 	state_dispatchers.insert( std::make_pair( COLLECTING_LINECOMMENT, &PGNToken::state_linecomment ) );
 }
 
+void PGNToken::reset()
+{
+	kind = PROCESSING;
+	state = COLLECTING_NONE;
+	collected = "";
+	escaped = false;
+}
+
 PGNToken PGNToken::EOFToken()
 {
 	PGNToken the_token;
@@ -74,12 +82,12 @@ PGNToken PGNToken::EOSToken()
 	return the_token;
 }
 
-void PGNToken::reset()
+bool PGNToken::add_character( char ch )
 {
-	kind = PROCESSING;
-	state = COLLECTING_NONE;
-	collected = "";
-	escaped = false;
+	FN_SIG fp = state_dispatchers[state];
+	(this->*fp)( ch );
+
+	return kind != PROCESSING;
 }
 
 void PGNToken::state_none( char ch )
@@ -218,23 +226,9 @@ void PGNToken::state_linecomment( char ch )
 	collected += ch;
 }
 
-bool PGNToken::add_character( char ch )
-{
-	FN_SIG fp = state_dispatchers[state];
-	(this->*fp)( ch );
-
-	return kind != PROCESSING;
-}
-
-
 std::ostream& operator<<( std::ostream& os, PGNToken token )
 {
-//	std::string type_rep = std::vector<std::string> { "PROCESSING", "INVALID", "SECTIONEND", "FILEEND", "STRING", "INTEGER", "MOVENOINDICATOR", "GAMETERMINATOR",
-//						"TAGSTART", "TAGEND", "RAVSTART", "RAVEND", "RESERVEDSTART", "RESERVEDEND", "NAG", "SYMBOL", "COMMENT", "LINETERMINATOR" }[ token.type() ];
-
-//	os << "Token : " << type_rep << " '" << token.data() << "'\n";
 	os << "Token : " << token.type() << " '" << token.data() << "'\n";
-
 	return os;
 }
 
