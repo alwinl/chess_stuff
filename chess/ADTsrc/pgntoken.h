@@ -67,5 +67,6 @@ private:
 };
 
 std::ostream& operator<<( std::ostream& os, PGNToken token );
+std::ostream& operator<<( std::ostream& os, PGNToken::eTokenType type );
 
 #endif // PNGTOKEN_H

@@ -229,11 +229,20 @@ bool PGNToken::add_character( char ch )
 
 std::ostream& operator<<( std::ostream& os, PGNToken token )
 {
-	std::string type_rep = std::vector<std::string> { "PROCESSING", "INVALID", "SECTIONEND", "FILEEND", "STRING", "INTEGER", "MOVENOINDICATOR", "GAMETERMINATOR",
-						"TAGSTART", "TAGEND", "RAVSTART", "RAVEND", "RESERVEDSTART", "RESERVEDEND", "NAG", "SYMBOL", "COMMENT", "LINETERMINATOR" }[ token.type() ];
+//	std::string type_rep = std::vector<std::string> { "PROCESSING", "INVALID", "SECTIONEND", "FILEEND", "STRING", "INTEGER", "MOVENOINDICATOR", "GAMETERMINATOR",
+//						"TAGSTART", "TAGEND", "RAVSTART", "RAVEND", "RESERVEDSTART", "RESERVEDEND", "NAG", "SYMBOL", "COMMENT", "LINETERMINATOR" }[ token.type() ];
 
-	os << "Token : " << type_rep << " '" << token.data() << "'\n";
+//	os << "Token : " << type_rep << " '" << token.data() << "'\n";
+	os << "Token : " << token.type() << " '" << token.data() << "'\n";
 
 	return os;
 }
 
+std::ostream& operator<<( std::ostream& os, PGNToken::eTokenType type )
+{
+	std::string type_rep = std::vector<std::string> { "PROCESSING", "INVALID", "SECTIONEND", "FILEEND", "STRING", "INTEGER", "MOVENOINDICATOR", "GAMETERMINATOR",
+						"TAGSTART", "TAGEND", "RAVSTART", "RAVEND", "RESERVEDSTART", "RESERVEDEND", "NAG", "SYMBOL", "COMMENT", "LINETERMINATOR" }[ type ];
+
+	os << type_rep;
+	return os;
+}
