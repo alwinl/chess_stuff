@@ -34,11 +34,13 @@ public:
 	CPPUNIT_TEST_SUITE( TestPNGParser );
 
 	CPPUNIT_TEST( create_test );
+	CPPUNIT_TEST( tokenise );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
     void create_test();
+    void tokenise();
 };
 
 #endif // TESTPNGPARSER_H

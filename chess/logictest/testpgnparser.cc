@@ -26,6 +26,10 @@
 #include "../ADTsrc/pgnparser.h"
 #include "../ADTsrc/pods.h"
 
+#include "pgntoken.h"
+
+#include <iostream>
+
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPNGParser );
 
 TestPNGParser::TestPNGParser()
@@ -45,5 +49,22 @@ void TestPNGParser::create_test()
     //ChessGame game = PNGParser().do_parse(stm);
 
     CPPUNIT_ASSERT( true );
+}
+
+void TestPNGParser::tokenise()
+{
+	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n1. e4 e5\n\n" ); //1. e4 e5\n\n
+
+	std::stringstream is( input_data );
+
+	std::vector<PGNToken> tokens = PGNParser().Tokenise( is );
+
+	std::cout << std::endl;
+	std::cout << "------------------------" << std::endl;
+	std::for_each( tokens.begin(), tokens.end(), [](PGNToken& token) { std::cout << token; });
+	std::cout << "------------------------" << std::endl;
+
+	CPPUNIT_ASSERT_EQUAL( 15, static_cast<int>(tokens.size()) );
+
 }
 

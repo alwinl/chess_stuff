@@ -24,12 +24,17 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include "chessgame.h"
+
+#include <pgntoken.h>
 
 class PGNParser
 {
 public:
     bool do_parse( std::istream& is, ChessGame& game );
+
+	std::vector<PGNToken> Tokenise( std::istream& is );
 
 private:
 	static std::map<std::string, std::string> tags;

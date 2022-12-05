@@ -27,10 +27,14 @@
 
 #include "pgnlexer.h"
 
+#include "pgntoken.h"
+
 #include <istream>
 
 #include <cctype>
 #include <cassert>
+
+#include <algorithm>
 
 
 std::map<std::string, std::string> PGNParser::tags = {
@@ -133,6 +137,58 @@ std::string::size_type PGNParser::extract_move( ChessGame& game, std::string mov
 
 	return 0;
 }
+
+std::vector<PGNToken> PGNParser::Tokenise( std::istream& is )
+{
+	std::vector<PGNToken> tokens;
+	PGNToken new_token;
+	char ch;
+
+	while( is.good() ) {
+
+		is.get( ch );
+
+		if( is.eof() )
+            break;
+
+		if( ! new_token.add_character( ch ) )
+			continue;
+
+		tokens.push_back( new_token );
+
+		if( new_token.type() != PGNToken::SYMBOL ) {
+			new_token.reset();
+			continue;
+		}
+
+		new_token.reset();
+
+		if( new_token.add_character( ch ) ) {
+			tokens.push_back( new_token );
+			new_token.reset();
+		}
+	}
+
+	if( new_token.add_character( '\0' ) )
+		tokens.push_back( new_token );
+
+	tokens.push_back( PGNToken::EOFToken() );
+
+	// Replace two consecutive line terminators with one section end
+	for( ;; ) {
+		std::vector<PGNToken>::iterator it = std::adjacent_find( tokens.begin(), tokens.end(), [](PGNToken token1, PGNToken token2)
+							{ return (token1.type() == PGNToken::LINETERMINATOR) && (token2.type() == PGNToken::LINETERMINATOR); } );
+
+		if( it == tokens.end() )
+			break;
+
+		it = tokens.insert( it, PGNToken::EOSToken() );
+		tokens.erase( it + 1, it + 3 );
+	}
+
+	return tokens;
+}
+
 
 bool PGNParser::do_parse( std::istream& is, ChessGame& game )
 {

@@ -25,6 +25,8 @@
 #include <map>
 #include <string>
 
+#include <iosfwd>
+
 class PGNToken
 {
 public:
@@ -63,5 +65,7 @@ private:
 	void state_comment( char ch );
 	void state_linecomment( char ch );
 };
+
+std::ostream& operator<<( std::ostream& os, PGNToken token );
 
 #endif // PNGTOKEN_H

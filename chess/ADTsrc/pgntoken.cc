@@ -21,6 +21,10 @@
 
 #include "pgntoken.h"
 
+#include <vector>
+
+#include <iostream>
+
 /*
 Tokens:
 
@@ -108,6 +112,9 @@ void PGNToken::state_none( char ch )
 			state = COLLECTING_INTEGER;
 			break;
 		}
+		if( ( ch == '\0' ) || std::isspace(ch) ) {
+			break;
+		}
 		kind = INVALID;
 		break;
 	}
@@ -126,7 +133,7 @@ void PGNToken::state_string( char ch )
 		return;
 	}
 
-	if( ch == '"' ) {
+	if( ( ch == '\0' ) || (ch == '"') ) {
 		kind = STRING;
 		state = COLLECTING_NONE;
 		return;
@@ -148,8 +155,9 @@ void PGNToken::state_nag( char ch )
 
 void PGNToken::state_symbol( char ch )
 {
-	if( std::isspace( ch ) ) {
+	if( ( ch == '\0' ) || std::isspace( ch ) ) {
 		kind = SYMBOL;
+		state = COLLECTING_NONE;
 		return;
 	}
 
@@ -167,10 +175,18 @@ void PGNToken::state_integer( char ch )
 		collected += ch;
 		return;
 	}
-	if( std::isspace( ch ) ) {
+	if( ( ch == '\0' ) || std::isspace( ch ) ) {
 		kind = INTEGER;
+		state = COLLECTING_NONE;
 		return;
 	}
+
+	 if( ch == '.' ) {
+		kind = MOVENOINDICATOR;
+		state = COLLECTING_NONE;
+		return;
+	 }
+
 	if( std::isalpha(ch) ) {
 		state = COLLECTING_SYMBOL;
 		collected += ch;
@@ -182,7 +198,7 @@ void PGNToken::state_integer( char ch )
 
 void PGNToken::state_comment( char ch )
 {
-	if( ch == '}' ) {
+	if( ( ch == '\0' ) || ( ch == '}' ) ) {
 		kind = COMMENT;
 		state = COLLECTING_NONE;
 		return;
@@ -193,7 +209,7 @@ void PGNToken::state_comment( char ch )
 
 void PGNToken::state_linecomment( char ch )
 {
-	if( ch == '\n' ) {
+	if( ( ch == '\0' ) || ( ch == '\n' ) ) {
 		kind = COMMENT;
 		state = COLLECTING_NONE;
 		return;
@@ -209,3 +225,15 @@ bool PGNToken::add_character( char ch )
 
 	return kind != PROCESSING;
 }
+
+
+std::ostream& operator<<( std::ostream& os, PGNToken token )
+{
+	std::string type_rep = std::vector<std::string> { "PROCESSING", "INVALID", "SECTIONEND", "FILEEND", "STRING", "INTEGER", "MOVENOINDICATOR", "GAMETERMINATOR",
+						"TAGSTART", "TAGEND", "RAVSTART", "RAVEND", "RESERVEDSTART", "RESERVEDEND", "NAG", "SYMBOL", "COMMENT", "LINETERMINATOR" }[ token.type() ];
+
+	os << "Token : " << type_rep << " '" << token.data() << "'\n";
+
+	return os;
+}
+

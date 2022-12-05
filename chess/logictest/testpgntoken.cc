@@ -120,14 +120,13 @@ void TestPNGToken::check_strings()
 		token.reset();
 	}
 
-	CPPUNIT_ASSERT( tokens.size() == 3 );
+	CPPUNIT_ASSERT( tokens.size() == 2 );
 
 	CPPUNIT_ASSERT( tokens[0].type() == PGNToken::STRING );
-	CPPUNIT_ASSERT( tokens[1].type() == PGNToken::INVALID );
-	CPPUNIT_ASSERT( tokens[2].type() == PGNToken::STRING );
+	CPPUNIT_ASSERT( tokens[1].type() == PGNToken::STRING );
 
 	CPPUNIT_ASSERT( tokens[0].data() == std::string("AString") );
-	CPPUNIT_ASSERT( tokens[2].data() == std::string("AnotherString") );
+	CPPUNIT_ASSERT( tokens[1].data() == std::string("AnotherString") );
 }
 
 void TestPNGToken::check_integers()
@@ -157,10 +156,12 @@ void TestPNGToken::check_integers()
 
 void TestPNGToken::check_nags()
 {
-	std::string input_data( "$1 $2a" );
+	std::string input_data( "$1 $2" );
 
 	std::vector<PGNToken> tokens;
 	PGNToken token;
+
+	input_data.push_back( '\0' );
 
 	for( char& ch : input_data ) {
 
@@ -168,10 +169,11 @@ void TestPNGToken::check_nags()
 			continue;
 
 		tokens.push_back( token );
+
 		token.reset();
 	}
 
-	CPPUNIT_ASSERT( tokens.size() == 2 );
+	CPPUNIT_ASSERT_EQUAL( 2, static_cast<int>(tokens.size()) );
 
 	CPPUNIT_ASSERT( tokens[0].type() == PGNToken::NAG );
 	CPPUNIT_ASSERT( tokens[1].type() == PGNToken::NAG );
@@ -222,6 +224,12 @@ void TestPNGToken::check_tagpair_section()
 		tokens.push_back( token );
 		token.reset();
 	}
+
+	std::cout << std::endl;
+	std::cout << "------------------------" << std::endl;
+	std::for_each( tokens.begin(), tokens.end(), [](PGNToken& token) { std::cout << token; });
+	std::cout << "------------------------" << std::endl;
+
 
 	CPPUNIT_ASSERT( tokens.size() == 11 );
 
