@@ -25,12 +25,14 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <string>
+#include <vector>
+
+class PGNToken;
+
 class TestPNGToken : public CppUnit::TestFixture
 {
 public:
-    TestPNGToken();
-    virtual ~TestPNGToken();
-
 	CPPUNIT_TEST_SUITE( TestPNGToken );
 
 	CPPUNIT_TEST( check_EOFToken );
@@ -55,6 +57,9 @@ private:
 	void check_nags();
 	void check_tagpair();
 	void check_tagpair_section();
+
+	std::vector<PGNToken> process_string( std::string input_data );
+
 };
 
 #endif // TESTPNGTOKEN_H
