@@ -23,24 +23,36 @@
 #define PNGPARSER_H
 
 #include <string>
-#include <map>
 #include <vector>
-#include "chessgame.h"
+#include <iosfwd>
 
-#include <pgntoken.h>
+class PGNToken;
+
+class PGNParserCollector
+{
+public:
+	virtual ~PGNParserCollector() {};
+
+	virtual void add_tag_pair( std::string tag, std::string value ) = 0;
+	virtual void add_move_text( unsigned int moveno, std::string white_move, std::string black_move ) = 0;
+
+	virtual void debug_token_list( std::vector<PGNToken> tokens ) {};
+
+protected:
+	PGNParserCollector() {};
+};
 
 class PGNParser
 {
 public:
-    bool do_parse( std::istream& is, ChessGame& game );
-
-	std::vector<PGNToken> Tokenise( std::istream& is );
+    bool do_parse( std::istream& is, PGNParserCollector* collector );
 
 private:
-	static std::map<std::string, std::string> tags;
-
-	std::string::size_type extract_tag_pair( ChessGame& game, std::string line );
-	std::string::size_type extract_move( ChessGame& game, std::string movetext );
+	void tokenise( std::vector<PGNToken>& tokens, std::istream& is );
+	void replace_lineterminators_with_sectionend( std::vector<PGNToken>& tokens );
+	void remove_lineends( std::vector<PGNToken>& tokens );
+	void replace_three_moveindicators_with_movesubstitute( std::vector<PGNToken>& tokens );
+	void process_tokens( std::vector<PGNToken> tokens, PGNParserCollector* collector );
 };
 
 #endif // PNGPARSER_H

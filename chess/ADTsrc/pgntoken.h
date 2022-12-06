@@ -24,7 +24,6 @@
 
 #include <map>
 #include <string>
-
 #include <iosfwd>
 
 class PGNToken
@@ -35,6 +34,7 @@ public:
 
 public:
 	PGNToken();
+	PGNToken( eTokenType type, std::string data ) : kind( type ), collected( data ) { };
 
 	void reset();
 

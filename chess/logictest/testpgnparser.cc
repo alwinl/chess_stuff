@@ -21,50 +21,84 @@
 
 #include "testpgnparser.h"
 
-#include <sstream>
-
-#include "../ADTsrc/pgnparser.h"
-#include "../ADTsrc/pods.h"
-
+#include "pgnparser.h"
 #include "pgntoken.h"
 
 #include <iostream>
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPNGParser );
 
-TestPNGParser::TestPNGParser()
+class GameADTTest : public PGNParserCollector
 {
-}
+public:
+	GameADTTest() {};
+	virtual ~GameADTTest() {};
 
-TestPNGParser::~TestPNGParser()
-{
-}
+	virtual void add_tag_pair( std::string tag, std::string value )
+	{
+		std::cout << "Tag: " << tag << ", Value: " << value << std::endl;
+	}
+	virtual void add_move_text( unsigned int moveno, std::string white_move, std::string black_move )
+	{
+		std::cout << "MoveNo: " << moveno << ", white: '" << white_move <<  "', black: '" << black_move << "'" << std::endl;
+	}
 
+	virtual void debug_token_list( std::vector<PGNToken> tokens )
+	{
+		if( ! debugging )
+			return;
 
-void TestPNGParser::create_test()
-{
-    std::string test_data = "[key \"value\"]";
-    std::istringstream stm(test_data);
+		std::cout << std::endl;
+		std::cout << "------------------------" << std::endl;
+		std::for_each( tokens.begin(), tokens.end(), [](PGNToken& token) { std::cout << token; });
+		std::cout << "------------------------" << std::endl;
+	}
 
-    //ChessGame game = PNGParser().do_parse(stm);
+	bool debugging = false;
+};
 
-    CPPUNIT_ASSERT( true );
-}
 
 void TestPNGParser::tokenise()
 {
-	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n1. e4 e5\n\n" ); //1. e4 e5\n\n
+	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n1. e4 e5\n\n" );
 
 	std::stringstream is( input_data );
+	GameADTTest collector;
 
-	std::vector<PGNToken> tokens = PGNParser().Tokenise( is );
+	collector.debugging = true;
 
 	std::cout << std::endl;
-	std::cout << "------------------------" << std::endl;
-	std::for_each( tokens.begin(), tokens.end(), [](PGNToken& token) { std::cout << token; });
-	std::cout << "------------------------" << std::endl;
+	PGNParser().do_parse( is, &collector );
+}
 
-	CPPUNIT_ASSERT_EQUAL( 15, static_cast<int>(tokens.size()) );
+void TestPNGParser::parse_it()
+{
+	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n1. e4 e5 2. a3 h6\n\n" );
+
+	std::stringstream is( input_data );
+	GameADTTest collector;
+
+	std::cout << std::endl;
+	PGNParser().do_parse( is, &collector );
+}
+
+void TestPNGParser::ProcessGameFile()
+{
+	std::string input_data( "\n\n1... e5 2. O-O Nh6x 3... O-O-O\n\n" );
+
+	std::stringstream is( input_data );
+	GameADTTest collector;
+
+	std::cout << std::endl;
+	PGNParser().do_parse( is, &collector );
 
 }
 
+void TestPNGParser::test_game_data()
+{
+	std::ifstream is("game.pgn");
+	GameADTTest collector;
+
+	std::cout << std::endl;
+    PGNParser().do_parse( is, &collector );
+}

@@ -28,19 +28,20 @@
 class TestPNGParser : public CppUnit::TestFixture
 {
 public:
-    TestPNGParser();
-    virtual ~TestPNGParser();
-
 	CPPUNIT_TEST_SUITE( TestPNGParser );
 
-	CPPUNIT_TEST( create_test );
 	CPPUNIT_TEST( tokenise );
+	CPPUNIT_TEST( parse_it );
+	CPPUNIT_TEST( ProcessGameFile );
+	CPPUNIT_TEST( test_game_data );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
-    void create_test();
     void tokenise();
+    void parse_it();
+    void ProcessGameFile();
+    void test_game_data();
 };
 
 #endif // TESTPNGPARSER_H
