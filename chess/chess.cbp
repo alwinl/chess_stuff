@@ -59,8 +59,6 @@
 		<Unit filename="ADTsrc/board.h" />
 		<Unit filename="ADTsrc/chessgame.cc" />
 		<Unit filename="ADTsrc/chessgame.h" />
-		<Unit filename="ADTsrc/pgnlexer.cc" />
-		<Unit filename="ADTsrc/pgnlexer.h" />
 		<Unit filename="ADTsrc/pgnparser.cc" />
 		<Unit filename="ADTsrc/pgnparser.h" />
 		<Unit filename="ADTsrc/pgntoken.cc" />
@@ -70,7 +68,7 @@
 		<Unit filename="ADTsrc/pods.cc" />
 		<Unit filename="ADTsrc/pods.h" />
 		<Unit filename="chessmain.cc" />
-		<Unit filename="game.png" />
+		<Unit filename="game.pgn" />
 		<Unit filename="guisrc/appui.glade">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -187,10 +185,6 @@
 		<Unit filename="logictest/testgameobject.h">
 			<Option target="Test" />
 		</Unit>
-		<Unit filename="logictest/testpgnlexer.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpgnlexer.h" />
 		<Unit filename="logictest/testpgnparser.cc">
 			<Option target="Test" />
 		</Unit>
