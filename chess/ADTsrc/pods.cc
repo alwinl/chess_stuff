@@ -44,7 +44,7 @@ STSquare make_square( int file_in, int rank_in )
 string move_to_LAN( STMove& move_in )
 {
     if( move_in.castling != '-' )
-        return ( (move_in.castling == 'k') || (move_in.castling == 'K') ) ? "0 - 0" : "0 - 0 - 0";
+        return ( (move_in.castling == 'k') || (move_in.castling == 'K') ) ? "O-O" : "O-O-O";
 
     stringstream ss;
 
