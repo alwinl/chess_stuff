@@ -63,24 +63,6 @@ void PGNToken::reset()
 	escaped = false;
 }
 
-PGNToken PGNToken::EOFToken()
-{
-	PGNToken the_token;
-
-	the_token.kind = FILEEND;
-
-	return the_token;
-}
-
-PGNToken PGNToken::EOSToken()
-{
-	PGNToken the_token;
-
-	the_token.kind = SECTIONEND;
-
-	return the_token;
-}
-
 bool PGNToken::add_character( char ch )
 {
 	FN_SIG fp = state_dispatchers[state];

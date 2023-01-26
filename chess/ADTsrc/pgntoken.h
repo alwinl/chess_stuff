@@ -38,8 +38,8 @@ public:
 
 	void reset();
 
-	static PGNToken EOFToken();
-	static PGNToken EOSToken();
+	static PGNToken EOFToken() { return PGNToken( FILEEND, "" ); }
+	static PGNToken EOSToken() { return PGNToken( SECTIONEND, "" ); }
 
 	bool add_character( char ch );
 
