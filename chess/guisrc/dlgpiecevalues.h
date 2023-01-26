@@ -24,7 +24,7 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/piecevalues.h"
+#include "piecevalues.h"
 
 class DialogPieceValues;
 

@@ -24,7 +24,7 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/timeinputter.h"
+#include "timeinputter.h"
 
 class DialogInput;
 

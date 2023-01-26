@@ -19,18 +19,17 @@
  *
  */
 
-#include <chrono>
-#include <thread>
-#include <regex>
-
 #include "chessengine.h"
-#include "../ADTsrc/chessgame.h"
-#include "chessappbase.h"
+#include "chessgame.h"
 #include "timeinputter.h"
 #include "piecevalues.h"
 #include "gameloader.h"
 
 #include "fentranslator.h"
+
+#include <chrono>
+#include <thread>
+#include <regex>
 
 #include <iostream>
 

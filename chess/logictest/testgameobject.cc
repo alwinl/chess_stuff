@@ -21,8 +21,8 @@
 
 #include "testgameobject.h"
 
-#include "../ADTsrc/chessgame.h"
-#include "../ADTsrc/pods.h"
+#include "chessgame.h"
+#include "pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestGameObject );
 

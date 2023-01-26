@@ -46,13 +46,10 @@ class ChessBoard;
 class ChessController : public Gtk::Application
 {
 public:
-	// Instance creator as constructor is private
-	static Glib::RefPtr<ChessController> create( ChessEngine* engine_init );
+	ChessController( );
 	virtual ~ChessController();
 
 private:
-	// Non public construction to ensure only references can be obtained. Private as class is terminal
-	ChessController( ChessEngine* engine_init );
 
 	// Initialisation
 	virtual void on_startup();

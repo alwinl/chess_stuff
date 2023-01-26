@@ -35,7 +35,7 @@ std::string GUIFilenameChooser::get_load_name()
 
 	Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
 	filter_chess->set_name( "Chess Files" );
-	filter_chess->add_pattern( "*.chess" );
+	filter_chess->add_pattern( "*.pgn" );
 	dlg->add_filter( filter_chess );
 
 	Glib::RefPtr<Gtk::FileFilter> filter_all = Gtk::FileFilter::create();
@@ -67,7 +67,7 @@ std::string GUIFilenameChooser::get_save_name()
 
 	Glib::RefPtr<Gtk::FileFilter> filter_chess = Gtk::FileFilter::create();
 	filter_chess->set_name( "Chess Files" );
-	filter_chess->add_pattern( "*.chess" );
+	filter_chess->add_pattern( "*.pgn" );
 	dlg->add_filter( filter_chess );
 
 	std::string ret;

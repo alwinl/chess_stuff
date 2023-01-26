@@ -20,7 +20,7 @@
  */
 
 #include "colourchooser.h"
-#include "../ADTsrc/pods.h"
+#include "pods.h"
 
 bool ColourChooser::choose_colours()
 {

@@ -21,7 +21,7 @@
 
 #include "teststhalvemove.h"
 
-#include "../ADTsrc/chessgame.h"
+#include "chessgame.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestSTHalveMove );
 

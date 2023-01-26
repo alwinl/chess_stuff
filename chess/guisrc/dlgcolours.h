@@ -24,7 +24,7 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/colourchooser.h"
+#include "colourchooser.h"
 
 class DialogColours;
 

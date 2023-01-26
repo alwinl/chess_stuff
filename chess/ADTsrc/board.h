@@ -24,7 +24,7 @@
 
 #include <map>
 
-#include "../ADTsrc/pods.h"
+#include "pods.h"
 
 class Board
 {

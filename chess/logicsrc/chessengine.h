@@ -25,6 +25,12 @@
 #include <string>
 #include <map>
 
+#include "pods.h"
+#include "colourchooser.h"
+
+#include "chessgame.h"
+#include "board.h"
+
 class ChessGame;
 class ChessAppBase;
 class PresentationInterface;
@@ -34,12 +40,6 @@ class TimeInputter;
 class GameLoader;
 
 class PieceValues;
-
-#include "../ADTsrc/pods.h"
-#include "colourchooser.h"
-
-#include "../ADTsrc/chessgame.h"
-#include "../ADTsrc/board.h"
 
 /** \brief
  */

@@ -29,8 +29,8 @@
 
 #include <gtkmm.h>
 
-#include "../ADTsrc/pods.h"
-#include "../logicsrc/colourchooser.h"
+#include "pods.h"
+#include "colourchooser.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area

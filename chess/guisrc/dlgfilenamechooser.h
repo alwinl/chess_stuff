@@ -24,7 +24,7 @@
 
 #include <gtkmm.h>
 
-#include "../logicsrc/gameloader.h"
+#include "gameloader.h"
 
 class GUIFilenameChooser : public GameLoader
 {

@@ -22,6 +22,7 @@
 #include "piecevalues.h"
 
 #include <utility>
+
 using namespace std;
 
 PieceValues::PieceValues( )

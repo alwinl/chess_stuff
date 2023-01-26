@@ -22,7 +22,6 @@
 #include "pgntoken.h"
 
 #include <vector>
-
 #include <iostream>
 
 /*

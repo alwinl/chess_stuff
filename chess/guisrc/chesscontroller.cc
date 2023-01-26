@@ -28,25 +28,18 @@
 #include "dlgpiecevalues.h"
 #include "dlgfilenamechooser.h"
 
-#include "../logicsrc/chessengine.h"
+#include "chessengine.h"
 
-
-/**-----------------------------------------------------------------------------
- * \brief Create an instance of the application
- *
- * \return Glib::RefPtr<ChessController>
- */
-Glib::RefPtr<ChessController> ChessController::create( ChessEngine* engine_init )
-{
-    return Glib::RefPtr<ChessController>( new ChessController( engine_init ) );
-}
 
 /**-----------------------------------------------------------------------------
  * \brief Application class constructor
  */
-ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application( "net.dnatechnologies.chess" ), engine( engine_init )
+ChessController::ChessController( ) : Gtk::Application( "net.dnatechnologies.chess" )
 {
 	Glib::set_application_name("GTKmm Chess");
+
+	engine = new ChessEngine;
+
 	move_calculator_thread = nullptr;
 }
 
@@ -55,6 +48,7 @@ ChessController::ChessController( ChessEngine* engine_init ) : Gtk::Application(
  */
 ChessController::~ChessController( )
 {
+	delete engine;
 }
 
 /**-----------------------------------------------------------------------------

@@ -20,9 +20,8 @@
  */
 
 #include "board.h"
-#include "../logicsrc/fentranslator.h"
-
-#include "../ADTsrc/pods.h"
+#include "fentranslator.h"
+#include "pods.h"
 
 Board::Board()
 {

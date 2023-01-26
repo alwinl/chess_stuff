@@ -22,19 +22,13 @@
 #ifndef APPTESTER_H
 #define APPTESTER_H
 
-#include "../logicsrc/chessappbase.h"
-
 /** \brief
  */
-class TestApplication : public ChessAppBase
+class TestApplication
 {
 public:
-	TestApplication( ChessEngine* engine_init ) : ChessAppBase( engine_init ) { };
-	virtual ~TestApplication() {};
-
 	/* called from main function */;
 	virtual int run(  int argc, char *argv[] );
-
 };
 
 #endif // APPTESTER_H
