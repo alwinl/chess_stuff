@@ -63,21 +63,21 @@ class ChessGame
 public:
 	ChessGame( );
 
-    void initialise();
-
-    void add_move( );
-    void remove_move();
-
-    void add_ply( Ply new_ply );
-
 	void add_tag_pair( std::string tag, std::string value );
+    void add_white_move( unsigned int moveno, std::string the_move );
+    void add_black_move( unsigned int moveno, std::string the_move );
+    void add_comment( std::string the_comment );
 
-	std::string get_tag_value( std::string key );
+
+	//std::string get_tag_value( std::string key );
 
 private:
     Board initial;
     std::vector<Ply> moves;
     std::map<std::string, std::string> tag_pairs;
+
+	void set_alternate_starting_position();
+
 };
 
 #endif // APPMODEL_H

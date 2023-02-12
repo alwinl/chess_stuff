@@ -15,23 +15,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
 #ifndef APPCONTROLLER_H
 #define APPCONTROLLER_H
 
+#include <gtkmm.h>
+
 #include <string>
 #include <vector>
 #include <thread>
-
-#include <gtkmm.h>
 
 class ChessEngine;
 
 class ChessWindow;
 class ChessBoard;
+class DialogColours;
+class DialogPieceValues;
+class DialogInput;
 
 /**-----------------------------------------------------------------------------
  * \brief Main application object
@@ -46,13 +47,10 @@ class ChessBoard;
 class ChessController : public Gtk::Application
 {
 public:
-	// Instance creator as constructor is private
-	static Glib::RefPtr<ChessController> create( ChessEngine* engine_init );
+	ChessController( );
 	virtual ~ChessController();
 
 private:
-	// Non public construction to ensure only references can be obtained. Private as class is terminal
-	ChessController( ChessEngine* engine_init );
 
 	// Initialisation
 	virtual void on_startup();
@@ -69,7 +67,14 @@ private:
 	void on_action_undo();
 	void on_action_redo();
 	void on_action_arrange();
-	void on_action_level( unsigned int level );
+	void on_action_level_easy();
+	void on_action_level_timed();
+	void on_action_level_total_time();
+	void on_action_level_infinite();
+	void on_action_level_ply_search();
+	void on_action_level_mate_search();
+	void on_action_level_matching();
+
 	void on_action_twoplayer();
 	void on_action_demomode();
     void on_action_piecevalues();
@@ -79,16 +84,21 @@ private:
 	void on_action_help_about();
 	void on_action_arrange_done();
 	void on_action_arrange_clear();
-	void on_action_arrange_turn( unsigned int turn );
+	void on_action_arrange_turn_white();
+	void on_action_arrange_turn_black();
 	void on_action_arrange_cancel();
 	void on_action_thinking_stop();
 
 	bool on_board_button_released( GdkEventButton* button_event );
 
 	void bind_actions();
+	void get_widgets();
+	void connect_signals();
+
 
 	void on_move_calculator_notify();
 	void move_calculator();
+
 	std::thread * move_calculator_thread;
 	Glib::Dispatcher move_calculator_slot;
 
@@ -97,13 +107,25 @@ private:
 
 	// Widgets
 	ChessWindow * view;
-    Gtk::Statusbar * status_bar;
-	std::vector<Gtk::RadioMenuItem *> chkLevelItems;
-	std::vector<Gtk::RadioMenuItem *> chkTurnItems;
-	Gtk::CheckMenuItem * chkSound;
     ChessBoard * board;
-
-	void get_widgets();
+    DialogPieceValues * dlgPieceValues;
+    DialogColours * dlgColours;
+    DialogInput * dlgTimeInput;
+    Gtk::Statusbar * status_bar;
+	Gtk::RadioMenuItem *chkLevelEasy;
+	Gtk::RadioMenuItem *chkLevelTimed;
+	Gtk::RadioMenuItem *chkLevelTotalTime;
+	Gtk::RadioMenuItem *chkLevelInfinite;
+	Gtk::RadioMenuItem *chkLevelPlySearch;
+	Gtk::RadioMenuItem *chkLevelMateSearch;
+	Gtk::RadioMenuItem *chkLevelMatching;
+    Gtk::MenuItem * mnuTwoplayer;
+    Gtk::MenuBar * mnuGame;
+    Gtk::MenuBar * mnuArrange;
+    Gtk::MenuBar * mnuStop;
+	Gtk::RadioMenuItem * chkTurnWhite;
+	Gtk::RadioMenuItem * chkTurnBlack;
+	Gtk::CheckMenuItem * chkSound;
 
     // Data
     ChessEngine* engine;

@@ -9,11 +9,11 @@
 			<Target title="Debug">
 				<Option output="bin/Debug/chess" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add directory="ADTsrc" />
+					<Add directory="guisrc" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -23,7 +23,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add directory="ADTsrc" />
+					<Add directory="guisrc" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -37,7 +37,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DTESTING" />
-					<Add directory="ADTsrc" />
+					<Add directory="logictest" />
 				</Compiler>
 			</Target>
 		</Build>
@@ -50,7 +50,8 @@
 			<Add option="-DGDKMM_DISABLE_DEPRECATED" />
 			<Add option="-DGLIBMM_DISABLE_DEPRECATED" />
 			<Add option="-DGIOMM_DISABLE_DEPRECATED" />
-			<Add directory="./" />
+			<Add directory="logicsrc" />
+			<Add directory="ADTsrc" />
 		</Compiler>
 		<ExtraCommands>
 			<Add before="glib-compile-resources --target=guisrc/resources.c --sourcedir=guisrc --generate-source guisrc/chess.gresource.xml" />
@@ -85,14 +86,6 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessappgui.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/chessappgui.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
 		<Unit filename="guisrc/chessboard.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
@@ -109,37 +102,11 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessview.cc">
+		<Unit filename="guisrc/dialogs.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessview.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgcolours.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgcolours.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgfilenamechooser.cc" />
-		<Unit filename="guisrc/dlgfilenamechooser.h" />
-		<Unit filename="guisrc/dlgpiecevalues.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgpiecevalues.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgtimeinputter.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgtimeinputter.h">
+		<Unit filename="guisrc/dialogs.h">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
@@ -152,20 +119,14 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="logicsrc/chessappbase.h" />
 		<Unit filename="logicsrc/chessengine.cc" />
 		<Unit filename="logicsrc/chessengine.h" />
-		<Unit filename="logicsrc/colourchooser.cc" />
-		<Unit filename="logicsrc/colourchooser.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
 		<Unit filename="logicsrc/gameloader.cc" />
 		<Unit filename="logicsrc/gameloader.h" />
 		<Unit filename="logicsrc/movegenerator.cc" />
 		<Unit filename="logicsrc/movegenerator.h" />
-		<Unit filename="logicsrc/piecevalues.cc" />
-		<Unit filename="logicsrc/piecevalues.h" />
-		<Unit filename="logicsrc/timeinputter.h" />
 		<Unit filename="logictest/testapplication.cc" />
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />

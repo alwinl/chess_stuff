@@ -22,7 +22,6 @@
 #include "pgntoken.h"
 
 #include <vector>
-
 #include <iostream>
 
 /*
@@ -62,24 +61,6 @@ void PGNToken::reset()
 	state = COLLECTING_NONE;
 	collected = "";
 	escaped = false;
-}
-
-PGNToken PGNToken::EOFToken()
-{
-	PGNToken the_token;
-
-	the_token.kind = FILEEND;
-
-	return the_token;
-}
-
-PGNToken PGNToken::EOSToken()
-{
-	PGNToken the_token;
-
-	the_token.kind = SECTIONEND;
-
-	return the_token;
 }
 
 bool PGNToken::add_character( char ch )

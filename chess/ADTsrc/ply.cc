@@ -21,7 +21,3 @@
 
 #include "ply.h"
 
-Ply::Ply()
-{
-    //ctor
-}

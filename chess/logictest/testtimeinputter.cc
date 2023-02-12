@@ -21,7 +21,7 @@
 
 #include "testtimeinputter.h"
 
-#include "../logicsrc/timeinputter.h"
+#include "timeinputter.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestTimeInputter );
 

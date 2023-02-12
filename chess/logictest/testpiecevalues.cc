@@ -20,8 +20,9 @@
  */
 
 #include "testpiecevalues.h"
-#include "../logicsrc/piecevalues.h"
-#include "../ADTsrc/pods.h"
+
+#include "piecevalues.h"
+#include "pods.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPieceValues );
 

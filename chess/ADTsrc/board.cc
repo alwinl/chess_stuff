@@ -20,9 +20,8 @@
  */
 
 #include "board.h"
-#include "../logicsrc/fentranslator.h"
-
-#include "../ADTsrc/pods.h"
+#include "fentranslator.h"
+#include "pods.h"
 
 Board::Board()
 {
@@ -32,6 +31,13 @@ Board::Board()
 Board Board::standard_opening_board()
 {
 	pieces = FENTranslator().from_FEN( "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" );
+
+	return *this;
+}
+
+Board Board::build_from_FEN( std::string FEN )
+{
+	pieces = FENTranslator().from_FEN( FEN );
 
 	return *this;
 }

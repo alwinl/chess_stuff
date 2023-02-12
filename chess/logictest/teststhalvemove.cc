@@ -21,7 +21,7 @@
 
 #include "teststhalvemove.h"
 
-#include "../ADTsrc/chessgame.h"
+#include "chessgame.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestSTHalveMove );
 
@@ -39,10 +39,10 @@ void TestSTHalveMove::test_toLAN()
 {
     STMove test;
 
-    test.castling = 'K'; CPPUNIT_ASSERT( move_to_LAN(test) == "0 - 0" );         // king side castling
-    test.castling = 'k'; CPPUNIT_ASSERT( move_to_LAN(test) == "0 - 0" );         // king side castling
-    test.castling = 'Q'; CPPUNIT_ASSERT( move_to_LAN(test) == "0 - 0 - 0" );     // Queen side castling
-    test.castling = 'q'; CPPUNIT_ASSERT( move_to_LAN(test) == "0 - 0 - 0" );     // Queen side castling
+    test.castling = 'K'; CPPUNIT_ASSERT( move_to_LAN(test) == "O-O" );         // king side castling
+    test.castling = 'k'; CPPUNIT_ASSERT( move_to_LAN(test) == "O-O" );         // king side castling
+    test.castling = 'Q'; CPPUNIT_ASSERT( move_to_LAN(test) == "O-O-O" );     // Queen side castling
+    test.castling = 'q'; CPPUNIT_ASSERT( move_to_LAN(test) == "O-O-O" );     // Queen side castling
 
     test.castling = '-';    // castling testing is done
 

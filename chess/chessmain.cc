@@ -19,20 +19,15 @@
  *
  */
 
-
-#include "logicsrc/chessengine.h"
-
 #ifdef TESTING
-#include "logictest/testapplication.h"
+#include "testapplication.h"
 #define AppClass TestApplication
 #else
-#include "guisrc/chessappgui.h"
-#define AppClass ChessAppGUI
+#include "chesscontroller.h"
+#define AppClass ChessController
 #endif
 
 int main( int argc, char *argv[] )
 {
-    ChessEngine engine;
-
-    return AppClass( &engine ).run( argc, argv );
+    return AppClass().run( argc, argv );
 }

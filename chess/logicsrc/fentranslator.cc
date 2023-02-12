@@ -20,7 +20,7 @@
  */
 
 #include "fentranslator.h"
-#include "../ADTsrc/pods.h"
+#include "pods.h"
 
 #include <sstream>
 

@@ -23,8 +23,9 @@
 #define BOARD_H
 
 #include <map>
+#include <string>
 
-#include "../ADTsrc/pods.h"
+#include "pods.h"
 
 class Board
 {
@@ -32,6 +33,7 @@ public:
 	Board();
 
 	Board standard_opening_board();
+	Board build_from_FEN( std::string FEN );
 
 	Board add_piece( STSquare square, STPiece new_piece );
 	Board remove_piece( STSquare square );
