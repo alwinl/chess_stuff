@@ -28,6 +28,7 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestPNGParser );
 
+/*
 class GameADTTest : public PGNParserCollector
 {
 public:
@@ -56,19 +57,19 @@ public:
 
 	bool debugging = false;
 };
-
+*/
 
 void TestPNGParser::tokenise()
 {
 	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n1. e4 e5\n\n" );
 
 	std::stringstream is( input_data );
-	GameADTTest collector;
+	//GameADTTest collector;
 
-	collector.debugging = true;
+	//collector.debugging = true;
 
 	std::cout << std::endl;
-	PGNParser().do_parse( is, &collector );
+	PGNParser().do_parse( is );
 }
 
 void TestPNGParser::parse_it()
@@ -76,10 +77,10 @@ void TestPNGParser::parse_it()
 	std::string input_data( "[Event \"Moscow City Championship\"]\n[Site \"New York City, NY USA\"]\n\n1. e4 e5 2. a3 h6\n\n" );
 
 	std::stringstream is( input_data );
-	GameADTTest collector;
+	//GameADTTest collector;
 
 	std::cout << std::endl;
-	PGNParser().do_parse( is, &collector );
+	PGNParser().do_parse( is );
 }
 
 void TestPNGParser::ProcessGameFile()
@@ -87,18 +88,18 @@ void TestPNGParser::ProcessGameFile()
 	std::string input_data( "\n\n1... e5 2. O-O Nh6x 3... O-O-O\n\n" );
 
 	std::stringstream is( input_data );
-	GameADTTest collector;
+	//GameADTTest collector;
 
 	std::cout << std::endl;
-	PGNParser().do_parse( is, &collector );
+	PGNParser().do_parse( is );
 
 }
 
 void TestPNGParser::test_game_data()
 {
 	std::ifstream is("game.pgn");
-	GameADTTest collector;
+	//GameADTTest collector;
 
 	std::cout << std::endl;
-    PGNParser().do_parse( is, &collector );
+    PGNParser().do_parse( is );
 }

@@ -22,15 +22,24 @@
 #ifndef PLY_H
 #define PLY_H
 
+#include <string>
+
 
 class Ply
 {
 public:
-    Ply();
+	enum class Colour { WHITE, BLACK };
+    Ply( Colour col, int moveno_, std::string SAN_text ) : colour( col ), moveno(moveno_), SAN(SAN_text) {};
+
+    void add_comment( std::string the_comment ) { comment = the_comment; }
 
 protected:
 
 private:
+	Colour colour;
+	int moveno;
+	std::string SAN;
+	std::string comment;
 };
 
 #endif // PLY_H

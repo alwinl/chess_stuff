@@ -29,59 +29,26 @@
 #include <istream>
 #include <algorithm>
 
-struct ParseTagPairs
+#include "ply.h"
+
+ChessGame PGNParser::do_parse( std::istream& is )
 {
-public:
-	ParseTagPairs( PGNParserCollector* adt_ ) : adt(adt_) {};
+	std::vector<PGNToken> tokens = tokenise( is );
 
-	void operator()( PGNToken& token );
-
-private:
-	PGNParserCollector* adt;
-
-	std::string tag;
-	std::string value;
-
-	enum CollectionState { COLLECTED_NONE, COLLECTED_TAG } state = COLLECTED_NONE;
-};
-
-struct ParseMoveText
-{
-public:
-	ParseMoveText( PGNParserCollector* adt_ ) : adt(adt_) {};
-
-	void operator()( PGNToken& token );
-
-private:
-	PGNParserCollector* adt;
-
-	unsigned int moveno;
-	std::string white_move;
-	std::string black_move;
-
-	enum CollectionState { COLLECTED_NONE, COLLECTED_MOVENO, COLLECTED_WHITE } state = COLLECTED_NONE;
-};
-
-bool PGNParser::do_parse( std::istream& is, PGNParserCollector* collector )
-{
-	std::vector<PGNToken> tokens;
-
-	tokenise( tokens, is );
 	replace_lineterminators_with_sectionend( tokens );
 	remove_lineends( tokens );
 	replace_three_moveindicators_with_movesubstitute( tokens );
 
-	collector->debug_token_list( tokens );
-
-	process_tokens( tokens, collector );
-
-    return true;
+    return build_game( tokens );
 }
 
-void PGNParser::tokenise( std::vector<PGNToken>& tokens, std::istream& is )
+std::vector<PGNToken> PGNParser::tokenise( std::istream& is )
 {
+	std::vector<PGNToken> tokens;
 	PGNToken new_token;
 	char ch;
+	bool escaping = false;
+	char last_char = '\n';
 
 	while( is.good() ) {
 
@@ -89,6 +56,18 @@ void PGNParser::tokenise( std::vector<PGNToken>& tokens, std::istream& is )
 
 		if( is.eof() )
             break;
+
+		// Escape mechanism: http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm chapter 6
+		if( ch == '%' && last_char == '\n' )	// do we have the '%' as the first character in the first column of a line?
+			escaping = true;
+
+		if( escaping ) {
+			if( ch != '\n' )
+				escaping = false;
+			continue;
+		}
+
+		last_char = ch;
 
 		if( ! new_token.add_character( ch ) )
 			continue;
@@ -112,6 +91,8 @@ void PGNParser::tokenise( std::vector<PGNToken>& tokens, std::istream& is )
 		tokens.push_back( new_token );
 
 	tokens.push_back( PGNToken::EOFToken() );
+
+	return tokens;
 }
 
 void PGNParser::replace_lineterminators_with_sectionend( std::vector<PGNToken>& tokens )
@@ -150,57 +131,71 @@ void PGNParser::remove_lineends( std::vector<PGNToken>& tokens )
 	tokens.erase( std::remove_if( tokens.begin(), tokens.end(), [](PGNToken token) { return token.type() == PGNToken::LINETERMINATOR; } ), tokens.end() );
 }
 
-void PGNParser::process_tokens( std::vector<PGNToken> tokens, PGNParserCollector* collector )
+ChessGame PGNParser::build_game( std::vector<PGNToken>& tokens )
 {
-	auto it = find_if( tokens.begin(), tokens.end(), [](PGNToken token) { return token.type() == PGNToken::SECTIONEND; });
+	ChessGame game;
 
-	for_each( tokens.begin(), it, ParseTagPairs( collector ) );
-	for_each( it, tokens.end(), ParseMoveText( collector ) );
+	CollectionState state = { CollectionState::COLLECTED_NONE };
+
+	std::string tag;
+	std::string value;
+	unsigned int moveno;
+	std::string white_move;
+	std::string black_move;
+
+	for_each( tokens.begin(), tokens.end(),
+		[&](PGNToken& token)
+		{
+			switch( state ) {
+			case CollectionState::COLLECTED_NONE:
+				if( token.type() == PGNToken::SECTIONEND ) {
+					state = CollectionState::COLLECTED_TAGPAIRS;
+					break;
+				}
+
+				if( token.type() != PGNToken::SYMBOL )		// We ignore the TAGSTART and TAGEND tokems
+					break;
+
+				tag = token.data();
+				state = CollectionState::COLLECTED_TAG;
+				break;
+
+			case CollectionState::COLLECTED_TAG:
+				if( token.type() != PGNToken::STRING )
+					break;
+
+				value = token.data();
+				game.add_tag_pair( tag, value );
+				state = CollectionState::COLLECTED_NONE;
+				break;
+
+			case CollectionState::COLLECTED_TAGPAIRS:
+				if( token.type() == PGNToken::COMMENT )
+					game.add_comment( token.data() );
+
+				if( token.type() != PGNToken::MOVENOINDICATOR )
+					break;
+				moveno = std::atoi( token.data().c_str() );
+				state = CollectionState::COLLECTED_MOVENO;
+				break;
+
+			case CollectionState::COLLECTED_MOVENO:
+				if( token.type() != PGNToken::SYMBOL )
+					break;
+				game.add_white_move( moveno, token.data() );
+				state = CollectionState::COLLECTED_WHITE;
+				break;
+
+			case CollectionState::COLLECTED_WHITE:
+				if( token.type() != PGNToken::SYMBOL )
+					break;
+				game.add_black_move( moveno, token.data() );
+				state = CollectionState::COLLECTED_TAGPAIRS;
+				break;
+			}
+
+		}
+	);
+
+	return game;
 }
-
-void ParseTagPairs::operator()(PGNToken& token )
-{
-	switch( state ) {
-	case COLLECTED_NONE:
-		if( token.type() != PGNToken::SYMBOL )
-			break;
-		tag = token.data();
-		state = COLLECTED_TAG;
-		break;
-	case COLLECTED_TAG:
-		if( token.type() != PGNToken::STRING )
-			break;
-		value = token.data();
-		adt->add_tag_pair( tag, value );
-		state = COLLECTED_NONE;
-		break;
-	}
-}
-
-void ParseMoveText::operator()( PGNToken& token )
-{
-	switch( state ) {
-	case COLLECTED_NONE:
-		if( token.type() != PGNToken::MOVENOINDICATOR )
-			break;
-		moveno = std::atoi( token.data().c_str() );
-		state = COLLECTED_MOVENO;
-		break;
-	case COLLECTED_MOVENO:
-		if( token.type() != PGNToken::SYMBOL )
-			break;
-		white_move = token.data();
-		state = COLLECTED_WHITE;
-		break;
-
-	case COLLECTED_WHITE:
-		if( token.type() != PGNToken::SYMBOL )
-			break;
-		black_move = token.data();
-		adt->add_move_text( moveno, white_move, black_move );
-		state = COLLECTED_NONE;
-		break;
-	}
-}
-
-

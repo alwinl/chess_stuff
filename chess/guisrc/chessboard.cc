@@ -429,7 +429,7 @@ void ChessBoard::paint_board( )
 	/* Now paint each alternate square in the white colour */
 	context->set_source_rgb( white_colour.get_red(), white_colour.get_green(), white_colour.get_blue() );
 	for( int cell=0; cell<64; cell++ ) {
-		if( (cell + (cell/8)) % 2 ) {
+		if( !( (cell + (cell/8)) % 2 ) ) {
 			context->rectangle( (cell%8) * SQUARE_SIZE + 1, (cell/8) * SQUARE_SIZE + 1, SQUARE_SIZE, SQUARE_SIZE );
 			context->fill();
 		}
@@ -579,12 +579,12 @@ void ChessBoard::set_piece_positions( std::map<STSquare,STPiece> new_pieces )
  * \return void
  *
  */
-void ChessBoard::set_colours( ColourChooser::STColours new_colours, STInfo info )
+void ChessBoard::set_colours( std::array<std::string,4> new_colours, STInfo info )
 {
-    background_colour = Gdk::RGBA(new_colours.bg);
-	foreground_colour = Gdk::RGBA(new_colours.fg);
-	white_colour =  Gdk::RGBA(new_colours.white);
-	black_colour =  Gdk::RGBA(new_colours.black);
+    background_colour = Gdk::RGBA(new_colours[0]);
+	foreground_colour = Gdk::RGBA(new_colours[1]);
+	white_colour =  Gdk::RGBA(new_colours[2]);
+	black_colour =  Gdk::RGBA(new_colours[3]);
 
 	paint_board();
 	paint_info( info );

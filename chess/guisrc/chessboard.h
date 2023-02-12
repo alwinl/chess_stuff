@@ -15,22 +15,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
-#ifndef CHESSBOARD_H_INCLUDED
-#define CHESSBOARD_H_INCLUDED
-
-#include <map>
-#include <string>
-#include <vector>
-#include <utility>
+#ifndef CHESSBOARD_H
+#define CHESSBOARD_H
 
 #include <gtkmm.h>
 
+#include <map>
+#include <string>
+#include <array>
+
 #include "pods.h"
-#include "colourchooser.h"
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
@@ -50,7 +46,7 @@ public:
 
     void set_piece_positions( std::map<STSquare,STPiece> new_pieces );
 	void set_info( STInfo info );
-    void set_colours( ColourChooser::STColours new_colours, STInfo info );
+	void set_colours( std::array<std::string,4> new_colours, STInfo info );
 	void set_edit( bool on );
     void toggle_reverse( );
     void toggle_bestline( STInfo the_info );
@@ -129,4 +125,4 @@ private:
 	STSquare drag_end_square;
 };
 
-#endif // CHESSBOARD_H_INCLUDED
+#endif // CHESSBOARD_H

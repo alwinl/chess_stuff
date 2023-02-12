@@ -35,6 +35,13 @@ Board Board::standard_opening_board()
 	return *this;
 }
 
+Board Board::build_from_FEN( std::string FEN )
+{
+	pieces = FENTranslator().from_FEN( FEN );
+
+	return *this;
+}
+
 Board Board::add_piece( STSquare square, STPiece new_piece )
 {
 	if( square.file != -1 )

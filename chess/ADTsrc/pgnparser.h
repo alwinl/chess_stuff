@@ -22,37 +22,28 @@
 #ifndef PNGPARSER_H
 #define PNGPARSER_H
 
-#include <string>
 #include <vector>
 #include <iosfwd>
 
+#include "chessgame.h"
+
 class PGNToken;
-
-class PGNParserCollector
-{
-public:
-	virtual ~PGNParserCollector() {};
-
-	virtual void add_tag_pair( std::string tag, std::string value ) = 0;
-	virtual void add_move_text( unsigned int moveno, std::string white_move, std::string black_move ) = 0;
-
-	virtual void debug_token_list( std::vector<PGNToken> tokens ) {};
-
-protected:
-	PGNParserCollector() {};
-};
 
 class PGNParser
 {
 public:
-    bool do_parse( std::istream& is, PGNParserCollector* collector );
+    ChessGame do_parse( std::istream& is );
 
 private:
-	void tokenise( std::vector<PGNToken>& tokens, std::istream& is );
+	std::vector<PGNToken> tokenise( std::istream& is );
+
 	void replace_lineterminators_with_sectionend( std::vector<PGNToken>& tokens );
 	void remove_lineends( std::vector<PGNToken>& tokens );
 	void replace_three_moveindicators_with_movesubstitute( std::vector<PGNToken>& tokens );
-	void process_tokens( std::vector<PGNToken> tokens, PGNParserCollector* collector );
+
+	ChessGame build_game( std::vector<PGNToken>& tokens );
+
+	enum class CollectionState { COLLECTED_NONE, COLLECTED_TAG, COLLECTED_TAGPAIRS, COLLECTED_MOVENO, COLLECTED_WHITE };
 };
 
 #endif // PNGPARSER_H

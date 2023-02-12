@@ -22,8 +22,7 @@
 #include "chessengine.h"
 #include "chessgame.h"
 #include "timeinputter.h"
-#include "piecevalues.h"
-#include "gameloader.h"
+#include "pgnparser.h"
 
 #include "fentranslator.h"
 
@@ -32,6 +31,7 @@
 #include <regex>
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -40,10 +40,27 @@ ChessEngine::ChessEngine()
 {
     is_arranging = false;
 
-    colour_chooser = nullptr;
-    time_inputter = nullptr;
-    piece_values_object = nullptr;
-    game_loader = nullptr;
+	piece_values = {
+		{ 'Q', 2304 }, // 9 << 8
+		{ 'R', 1280 }, // 5 << 8
+		{ 'B', 768 },  // 3 << 8
+		{ 'N', 768 },  // 3 << 8
+		{ 'P', 256 },  // 1 << 8
+		{ 'K', 0 },
+		{ 'q', -2304 },
+		{ 'r', -1280 },
+		{ 'b', -768 },
+		{ 'n', -768 },
+		{ 'p', -256 },
+		{ 'k', 0 },
+	};
+
+	colours = {
+		"rgb(78,154,6)",
+		"rgb(0,0,0)",
+		"rgb(238,238,236)",
+		"rgb(85,87,83)",
+	};
 }
 
 ChessEngine::~ChessEngine()
@@ -53,9 +70,7 @@ ChessEngine::~ChessEngine()
 
 void ChessEngine::new_game( )
 {
-    game_loader->new_file();
-
-    game.initialise();
+    game = ChessGame();
 
 
     info.turn = "white";
@@ -163,26 +178,33 @@ std::map<STSquare,STPiece> ChessEngine::get_piece_positions( )
 }
 
 
-bool ChessEngine::open_file( )
+bool ChessEngine::open_file( std::string filename )
 {
-    return game_loader->load_file( game );
+	if( filename.empty() )
+		return false;
+
+	std::ifstream is( filename.c_str() );
+
+	if( !is.good() )
+		return false;
+
+	game = PGNParser().do_parse( is );
+
+	is.close();
+	return true;
 }
 
 bool ChessEngine::save_file( )
 {
-    return game_loader->save_file( game );
+    //return game_loader->save_file( game );
+    return true;
 }
 
-bool ChessEngine::save_file_as( )
+bool ChessEngine::save_file_as( std::string filename )
 {
-    return game_loader->save_file_as( game );
+    //return game_loader->save_file_as( game );
+    return true;
 }
-
-void ChessEngine::change_piece_values( )
-{
-    piece_values_object->choose_piece_values( );
-}
-
 
 bool ChessEngine::can_quit( )
 {
@@ -204,7 +226,7 @@ void ChessEngine::stop_thinking()
 {
 
 }
-
+#if 0
 void ChessEngine::change_level( eLevels new_level )
 {
     if( multi_player ) {
@@ -212,6 +234,7 @@ void ChessEngine::change_level( eLevels new_level )
         return;
     }
 
+    #if 0
     switch( new_level ) {
     case EASY:
         info.level = "Easy";
@@ -254,6 +277,7 @@ void ChessEngine::change_level( eLevels new_level )
         break;
 
     }
+#endif // 0
 
     if( new_level)
         level = new_level;
@@ -284,11 +308,41 @@ void ChessEngine::change_level( eLevels new_level )
     */
 
 }
+#endif // 0
 
-bool ChessEngine::choose_colours()
+bool ChessEngine::set_level_easy()
 {
-    return colour_chooser->choose_colours( );
+	return true;
+}
 
+bool ChessEngine::set_level_timed( int timeout )
+{
+	return true;
+}
+
+bool ChessEngine::set_level_total_time( int timeout )
+{
+	return true;
+}
+
+bool ChessEngine::set_level_infinite()
+{
+	return true;
+}
+
+bool ChessEngine::set_level_ply_search()
+{
+	return true;
+}
+
+bool ChessEngine::set_level_mate_search()
+{
+	return true;
+}
+
+bool ChessEngine::set_level_matching()
+{
+	return true;
 }
 
 
@@ -340,8 +394,8 @@ void ChessEngine::CalcMaterial()
 
 
 
-        material += piece_values_object->get_piece_value( piece.code );
-        totalMaterial += abs( piece_values_object->get_piece_value( piece.code ) );
+        material += piece_values.at( piece.code ); //piece_values_object->get_piece_value( piece.code );
+        totalMaterial += abs( piece_values.at( piece.code ) );
 
     }
 }

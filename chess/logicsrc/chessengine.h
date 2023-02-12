@@ -24,22 +24,14 @@
 
 #include <string>
 #include <map>
+#include <array>
 
 #include "pods.h"
-#include "colourchooser.h"
 
 #include "chessgame.h"
 #include "board.h"
 
-class ChessGame;
-class ChessAppBase;
-class PresentationInterface;
 class STSquare;
-
-class TimeInputter;
-class GameLoader;
-
-class PieceValues;
 
 /** \brief
  */
@@ -70,33 +62,38 @@ public:
     void new_game();
     bool can_quit();
 
-    bool open_file( );
+    bool open_file( std::string filename );
     bool save_file( );
-    bool save_file_as( );
+    bool save_file_as( std::string filename );
 
 	void undo();
 	void redo();
 	void stop_thinking();
-	void change_level( eLevels new_level );
-
-	void change_piece_values( );
 
 	STInfo get_info() { return info; }
 	std::map<STSquare,STPiece> get_piece_positions( );
 
 
+	int get_timed_level_value() { return 120; };
+	int get_total_time_level_value() { return 60; };
+
+	bool set_level_easy();
+	bool set_level_timed( int timeout );
+	bool set_level_total_time( int timeout );
+	bool set_level_infinite();
+	bool set_level_ply_search();
+	bool set_level_mate_search();
+	bool set_level_matching();
 
 
 	void CalculatePawnTable();
 	void CalcMaterial();
 
-	void init_colour_chooser( ColourChooser * object ) { colour_chooser = object; }
-	void init_time_inputter( TimeInputter * object ) { time_inputter = object; }
-	void init_piece_value_object( PieceValues * object ) { piece_values_object = object; }
-	void init_filename_chooser( GameLoader * object ) { game_loader = object; }
+	std::array<std::string,4> get_colour_values() const { return colours; };
+	bool set_colour_values( std::array<std::string,4> new_colours ) { colours = new_colours; return true; };
 
-	ColourChooser::STColours get_colours() { return colour_chooser->get_colours(); };
-	bool choose_colours();
+	std::map<char, int> get_piece_values() const { return piece_values; };
+	bool set_piece_values( std::map<char, int> new_values ) { piece_values = new_values; return true; };
 
 private:
 	ChessGame game;
@@ -111,10 +108,10 @@ private:
     eLevels level;
     int level_time;
 
-    ColourChooser * colour_chooser;
-    TimeInputter * time_inputter;
-    PieceValues * piece_values_object;
-    GameLoader * game_loader;
+    std::array<std::string,4> colours;
+	std::map<char, int> piece_values;
+
+
 };
 
 #endif // CHESSENGINE_H

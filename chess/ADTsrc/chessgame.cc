@@ -24,42 +24,54 @@
 using namespace std;
 
 
-/** \brief
- *
- * \param
- *
- */
 ChessGame::ChessGame( )
 {
-    initialise();
-}
-
-/** \brief
- *
- * \return void
- *
- */
-void ChessGame::initialise()
-{
+    initial = Board().standard_opening_board();
     moves.clear();
-}
-
-void ChessGame::add_ply( Ply new_ply )
-{
-    moves.push_back( new_ply );
+    tag_pairs.clear();
 }
 
 void ChessGame::add_tag_pair( std::string tag, std::string value )
 {
 	tag_pairs.insert( std::pair<std::string, std::string>(tag, value) );
+
+	// http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm chapter 9.7 Alternative starting positions
+	if( (tag == "SetUp") || ( tag == "FEN" ) )
+		set_alternate_starting_position();
 }
 
-std::string ChessGame::get_tag_value( std::string key )
+void ChessGame::set_alternate_starting_position()
 {
-    map<std::string,std::string>::iterator it = tag_pairs.find( key );
+	map<std::string,std::string>::iterator SetUp_it = tag_pairs.find( "SetUp" );
+	map<std::string,std::string>::iterator FEN_it = tag_pairs.find( "FEN" );
 
-    if( it != tag_pairs.end() )
-        return (*it).second;
+	if( (SetUp_it == tag_pairs.end() ) || (FEN_it == tag_pairs.end() ) )
+		return;
 
-    return "";
+	if( (*SetUp_it).second != "1" )
+		return;
+
+	initial = Board().build_from_FEN( (*FEN_it).second );
 }
+
+
+void ChessGame::add_white_move( unsigned int moveno, std::string the_move )
+{
+	moves.push_back( Ply( Ply::Colour::WHITE, moveno, the_move ) );
+}
+
+void ChessGame::add_black_move( unsigned int moveno, std::string the_move )
+{
+	moves.push_back( Ply( Ply::Colour::BLACK, moveno, the_move ) );
+}
+
+void ChessGame::add_comment( std::string the_comment )
+{
+	if( moves.empty() )
+		return;		// ignore comments before any movetext at the moment
+
+	std::vector<Ply>::iterator it = std::prev( moves.end(), 1);
+
+	(*it).add_comment( the_comment );
+}
+

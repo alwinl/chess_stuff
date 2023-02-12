@@ -9,7 +9,7 @@
 			<Target title="Debug">
 				<Option output="bin/Debug/chess" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
@@ -102,37 +102,11 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessview.cc">
+		<Unit filename="guisrc/dialogs.cc">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="guisrc/chessview.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgcolours.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgcolours.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgfilenamechooser.cc" />
-		<Unit filename="guisrc/dlgfilenamechooser.h" />
-		<Unit filename="guisrc/dlgpiecevalues.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgpiecevalues.h">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgtimeinputter.cc">
-			<Option target="Debug" />
-			<Option target="Release" />
-		</Unit>
-		<Unit filename="guisrc/dlgtimeinputter.h">
+		<Unit filename="guisrc/dialogs.h">
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
@@ -147,17 +121,12 @@
 		</Unit>
 		<Unit filename="logicsrc/chessengine.cc" />
 		<Unit filename="logicsrc/chessengine.h" />
-		<Unit filename="logicsrc/colourchooser.cc" />
-		<Unit filename="logicsrc/colourchooser.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
 		<Unit filename="logicsrc/gameloader.cc" />
 		<Unit filename="logicsrc/gameloader.h" />
 		<Unit filename="logicsrc/movegenerator.cc" />
 		<Unit filename="logicsrc/movegenerator.h" />
-		<Unit filename="logicsrc/piecevalues.cc" />
-		<Unit filename="logicsrc/piecevalues.h" />
-		<Unit filename="logicsrc/timeinputter.h" />
 		<Unit filename="logictest/testapplication.cc" />
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />
