@@ -24,14 +24,19 @@
 
 #include <string>
 
+#include "pods.h"
+
 
 class Ply
 {
 public:
 	enum class Colour { WHITE, BLACK };
-    Ply( Colour col, int moveno_, std::string SAN_text ) : colour( col ), moveno(moveno_), SAN(SAN_text) {};
+    Ply( Colour col = Colour::WHITE, int moveno_ = -1, std::string SAN_text = "" ) : colour( col ), moveno(moveno_), SAN(SAN_text) {};
 
     void add_comment( std::string the_comment ) { comment = the_comment; }
+
+    STSquare get_start_square() const { return start_square; }
+    STSquare get_end_square() const { return end_square; }
 
 protected:
 
@@ -40,6 +45,8 @@ private:
 	int moveno;
 	std::string SAN;
 	std::string comment;
+	STSquare start_square;
+	STSquare end_square;
 };
 
 #endif // PLY_H

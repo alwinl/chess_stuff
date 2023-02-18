@@ -34,6 +34,8 @@ class DialogColours;
 class DialogPieceValues;
 class DialogInput;
 
+struct STSquare;
+
 /**-----------------------------------------------------------------------------
  * \brief Main application object
  *
@@ -104,6 +106,13 @@ private:
 
 	bool on_animate_timeout();
 	int timeout_counter;
+
+    void animate_move( STSquare start_square, STSquare end_square );
+
+    bool do_demo_start_move();
+    bool do_demo_move();
+
+
 
 	// Widgets
 	ChessWindow * view;

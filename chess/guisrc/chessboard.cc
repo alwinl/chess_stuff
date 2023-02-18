@@ -649,12 +649,14 @@ void ChessBoard::toggle_bestline( STInfo info )
  * \brief
  *
  */
-void ChessBoard::animate_move_start()
+void ChessBoard::animate_move_start( STSquare& start_square, STSquare& end_square )
 {
-	Gdk::Point end_point = square_to_point( drag_end_square );
-	floating_piece_position = square_to_point( drag_start_square );
+	Gdk::Point end_point = square_to_point( end_square );
+	floating_piece_position = square_to_point( start_square );
 
-    typename std::map<STSquare,STPiece>::iterator it = pieces.find(drag_start_square);
+	animating_square_start = start_square;
+
+    typename std::map<STSquare,STPiece>::iterator it = pieces.find( start_square );
     if( it != pieces.end() ) {
         STPiece piece = (*it).second;
         piece.is_dragging = true;
@@ -688,7 +690,8 @@ void ChessBoard::animate_move_continue()
 
 void ChessBoard::animate_move_finish()
 {
-    typename std::map<STSquare,STPiece>::iterator it = pieces.find(drag_start_square);
+    #if 0
+    typename std::map<STSquare,STPiece>::iterator it = pieces.find( animating_square_start );
     if( it != pieces.end() ) {
         STPiece piece = (*it).second;
         piece.is_dragging = false;
@@ -696,6 +699,7 @@ void ChessBoard::animate_move_finish()
 
         paint_pieces();
     }
+#endif // 0
 
 	floating_piece_code = ' ';
 	is_animating = false;

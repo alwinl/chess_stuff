@@ -48,6 +48,7 @@ public:
 
 	bool toggle_multiplayer();
 	void do_demo();
+	bool get_next_ply( Ply& ply ) { return false; };
 
 	void arranging_start();
 	void arranging_clear();

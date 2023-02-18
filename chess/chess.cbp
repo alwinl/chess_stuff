@@ -131,12 +131,6 @@
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />
 		</Unit>
-		<Unit filename="logictest/testcolourchooser.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testcolourchooser.h">
-			<Option target="Test" />
-		</Unit>
 		<Unit filename="logictest/testfilenamechooser.h">
 			<Option target="Test" />
 		</Unit>
@@ -156,9 +150,6 @@
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testpgntoken.h" />
-		<Unit filename="logictest/testpiecevalues.cc">
-			<Option target="Test" />
-		</Unit>
 		<Unit filename="logictest/testpiecevalues.h">
 			<Option target="Test" />
 		</Unit>
@@ -166,9 +157,6 @@
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/teststhalvemove.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testtimeinputter.cc">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testtimeinputter.h">

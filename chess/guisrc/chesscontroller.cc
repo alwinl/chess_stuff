@@ -345,11 +345,6 @@ void ChessController::on_action_twoplayer()
 /**-----------------------------------------------------------------------------
  * \brief Menu actions
  */
-void ChessController::on_action_demomode()
-{
-	engine->do_demo();
-}
-
 void ChessController::on_action_level_easy()
 {
 	if( ! chkLevelEasy->get_active() )
@@ -678,13 +673,12 @@ bool ChessController::on_board_button_released( GdkEventButton* button_event )
 {
 	STSquare start_square = board->get_drag_square();
 	STSquare end_square = board->get_end_square();
-	char piece_code = board->get_piece_code();
 
 	// Arranging?
 	if( engine->in_edit_mode() ) {
 
         engine->arrange_remove_piece( start_square );
-		engine->arrange_add_piece( end_square, piece_code );
+		engine->arrange_add_piece( end_square, board->get_piece_code() );
 
 		board->set_piece_positions( engine->get_piece_positions() );
 		return true;
@@ -693,7 +687,7 @@ bool ChessController::on_board_button_released( GdkEventButton* button_event )
 	// regular move, check if this this move can be made
 	if( engine->enter_move( start_square, end_square ) ) {
 
-        board->animate_move_start( );
+        board->animate_move_start( start_square, end_square );
 
         timeout_counter = 10;
         Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
@@ -703,3 +697,63 @@ bool ChessController::on_board_button_released( GdkEventButton* button_event )
     // Not a valid move
 	return true;
 }
+
+void ChessController::animate_move( STSquare start_square, STSquare end_square )
+{
+    board->animate_move_start( start_square, end_square );
+
+    timeout_counter = 10;
+    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
+}
+
+
+
+
+void ChessController::on_action_demomode()
+{
+	status_bar->push( std::string("Demo") );
+
+    mnuGame->hide();
+    mnuStop->show();
+
+    do_demo_start_move();
+}
+
+
+bool ChessController::do_demo_start_move()
+{
+    Ply ply;
+
+    if( ! engine->get_next_ply( ply ) ) {
+        mnuStop->hide();
+        mnuGame->show();
+        return false;
+    }
+
+    STSquare start_square = ply.get_start_square();
+    STSquare end_square = ply.get_end_square();
+
+    board->animate_move_start( start_square, end_square );
+
+    timeout_counter = 10;
+    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_move), 100 );
+
+    return false;
+}
+
+bool ChessController::do_demo_move()
+{
+	if( --timeout_counter ) {
+        board->animate_move_continue();
+        return true;
+	}
+
+    board->animate_move_finish();
+
+    board->set_piece_positions( engine->get_piece_positions() );
+
+    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_start_move), 1000 );
+
+    return false;
+}
+

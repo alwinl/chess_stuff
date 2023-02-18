@@ -53,7 +53,7 @@ public:
 
 	void highlight( STSquare square );
 
-	void animate_move_start();
+	void animate_move_start( STSquare& start_square, STSquare& end_square );
 	void animate_move_continue();
 	void animate_move_finish();
 
@@ -123,6 +123,8 @@ private:
 	char save_piece_code;
 	STSquare drag_start_square;
 	STSquare drag_end_square;
+
+	STSquare animating_square_start;
 };
 
 #endif // CHESSBOARD_H
