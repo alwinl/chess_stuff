@@ -26,7 +26,6 @@
  *
  * \param cobject BaseObjectType*
  * \param ui_model const Glib::RefPtr<Gtk::Builder>&
- * \param acontroller ChessController&
  *
  */
 ChessBoard::ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model ) : Gtk::DrawingArea(cobject)
