@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alwin Leerling <alwin@jambo>
+ * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
 #include "chesscontroller.h"
@@ -32,13 +30,17 @@ public:
 	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model ) : Gtk::ApplicationWindow(cobject) {};
 };
 
+
+/**-----------------------------------------------------------------------------
+ * Construction / Destruction
+ */
 ChessController::ChessController( ) : Gtk::Application( "net.dnatechnologies.chess" )
 {
 	Glib::set_application_name("GTKmm Chess");
 
 	engine = new ChessEngine;
 
-	move_calculator_thread = nullptr;
+	thread_move_calculator = nullptr;
 }
 
 ChessController::~ChessController( )
@@ -46,6 +48,9 @@ ChessController::~ChessController( )
 	delete engine;
 }
 
+/**-----------------------------------------------------------------------------
+ * Setup
+ */
 void ChessController::on_startup()
 {
     Gtk::Application::on_startup();
@@ -86,6 +91,25 @@ void ChessController::bind_actions()
     add_action("think_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
 }
 
+void ChessController::connect_signals()
+{
+ 	chkLevelEasy->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_easy ) );
+	chkLevelTimed->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_timed ) );
+	chkLevelTotalTime->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_total_time) );
+	chkLevelInfinite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_infinite) );
+	chkLevelPlySearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_ply_search) );
+	chkLevelMateSearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_mate_search) );
+	chkLevelMatching->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_matching) );
+
+	chkTurnWhite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_white) );
+	chkTurnBlack->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black) );
+
+	board->signal_button_press_event().connect( sigc::mem_fun(*this, &ChessController::on_drag_start) );
+	board->signal_button_release_event().connect( sigc::mem_fun(*this, &ChessController::on_drag_done) );
+
+	slot_move_calculator.connect( sigc::mem_fun(*this, &ChessController::on_move_calculator_notify) );
+}
+
 void ChessController::get_widgets()
 {
     Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
@@ -118,30 +142,6 @@ void ChessController::get_widgets()
     ui_model->get_widget( "chkTurnBlack", chkTurnBlack );
 }
 
-void ChessController::connect_signals()
-{
- 	chkLevelEasy->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_easy ) );
-	chkLevelTimed->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_timed ) );
-	chkLevelTotalTime->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_total_time) );
-	chkLevelInfinite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_infinite) );
-	chkLevelPlySearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_ply_search) );
-	chkLevelMateSearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_mate_search) );
-	chkLevelMatching->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_matching) );
-
-	chkTurnWhite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_white ) );
-	chkTurnBlack->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black ) );
-
-	board->signal_button_release_event().connect( sigc::mem_fun( *this, &ChessController::on_board_button_released) );
-	move_calculator_slot.connect( sigc::mem_fun(*this, &ChessController::on_move_calculator_notify ) );
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Connect the GUI to our objects
- *
- * The application has been started. Time to create and show a window
- * NB we could build multiple views here and activate (show) views
- * as needed
- */
 void ChessController::on_activate()
 {
 	view->set_default_size( 640,480 );
@@ -150,7 +150,7 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-	board->set_colours( engine->get_colour_values(), engine->get_info() );
+	board->set_colours( engine->get_colour_values() );
 
 	chkLevelEasy->set_active();
 	chkTurnWhite->set_active();
@@ -161,8 +161,9 @@ void ChessController::on_activate()
     on_action_new();
 }
 
+
 /**-----------------------------------------------------------------------------
- * \brief Menu actions
+ * Menu actions
  */
 void ChessController::on_action_new()
 {
@@ -176,9 +177,6 @@ void ChessController::on_action_new()
 	status_bar->push( std::string("New game") );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_open()
 {
     Gtk::FileChooserDialog dlg( *view, "Open Chess File", Gtk::FILE_CHOOSER_ACTION_OPEN );
@@ -217,9 +215,6 @@ void ChessController::on_action_open()
     status_bar->push( std::string("Opened ") + dlg.get_filename() );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_save()
 {
 	status_bar->push( std::string("") );
@@ -236,10 +231,6 @@ void ChessController::on_action_save()
 	status_bar->push( std::string("Saved game") );
 }
 
-
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_save_as()
 {
     Gtk::FileChooserDialog dlg( *view, "Save Chess File", Gtk::FILE_CHOOSER_ACTION_SAVE );
@@ -274,13 +265,6 @@ void ChessController::on_action_save_as()
     status_bar->push( std::string( "Saved " ) + dlg.get_filename() );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Handle a user request to end the program
- *
- * We first ask the engine if we need to save data.
- * If not we can quit right away.
- * If we have unsaved data, pop up a box to confirm to lose the data
- */
 void ChessController::on_action_quit()
 {
 	if( engine->can_quit() )
@@ -291,26 +275,18 @@ void ChessController::on_action_quit()
 		quit();
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_play()
 {
     board->set_piece_positions( engine->get_piece_positions() );
     board->set_info( engine->get_info() );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_hint()
 {
-	board->highlight( engine->hint() );
+	do_highlight( engine->hint() );
+
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_undo()
 {
 	engine->undo();
@@ -321,9 +297,6 @@ void ChessController::on_action_undo()
 	status_bar->push( std::string("Undone") );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_redo()
 {
 	engine->redo();
@@ -334,17 +307,18 @@ void ChessController::on_action_redo()
 	status_bar->push( std::string("Redone") );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
-void ChessController::on_action_twoplayer()
+void ChessController::on_action_arrange()
 {
-	mnuTwoplayer->set_label( engine->toggle_multiplayer() ? "_Single Player" : "_Two Player" );
+	engine->arranging_start();
+
+    board->set_piece_positions( engine->get_piece_positions() );
+
+	mnuGame->hide();
+	mnuArrange->show();
+
+	board->set_edit( true );
 }
 
-/**-----------------------------------------------------------------------------
- * \brief Menu actions
- */
 void ChessController::on_action_level_easy()
 {
 	if( ! chkLevelEasy->get_active() )
@@ -470,6 +444,8 @@ void ChessController::on_action_level_matching()
 	if( ! chkLevelMatching->get_active() )
 		return;
 
+	status_bar->push( std::string("") );
+
 	if( ! engine->set_level_matching() ) {
 
 		if( chkSound->get_active() )
@@ -480,6 +456,21 @@ void ChessController::on_action_level_matching()
 	}
 
 	status_bar->push( std::string("Level: Matching") );
+}
+
+void ChessController::on_action_twoplayer()
+{
+	mnuTwoplayer->set_label( engine->toggle_multiplayer() ? "_Single Player" : "_Two Player" );
+}
+
+void ChessController::on_action_demomode()
+{
+	status_bar->push( std::string("Demo") );
+
+    mnuGame->hide();
+    mnuStop->show();
+
+    do_demo_move();
 }
 
 void ChessController::on_action_piecevalues()
@@ -529,19 +520,27 @@ void ChessController::on_action_colours()
 		return;
 	}
 
-	board->set_colours( dlgColours->get_colours(), engine->get_info() );
+	board->set_colours( dlgColours->get_colours() );
 
 	status_bar->push( std::string("Changed colours") );
 }
 
 void ChessController::on_action_reverse()
 {
+	status_bar->push( std::string("") );
+
 	board->toggle_reverse( );
+
+	status_bar->push( std::string("Toggled reverse") );
 }
 
 void ChessController::on_action_showbestline()
 {
-	board->toggle_bestline( engine->get_info() );
+	status_bar->push( std::string("") );
+
+	board->toggle_bestline();
+
+	status_bar->push( std::string("Toggled bestline") );
 }
 
 void ChessController::on_action_help_about()
@@ -557,18 +556,6 @@ void ChessController::on_action_help_about()
     dlg.set_website( "http://github" ) ;
 
     dlg.run();
-}
-
-void ChessController::on_action_arrange()
-{
-	engine->arranging_start();
-
-    board->set_piece_positions( engine->get_piece_positions() );
-
-	mnuGame->hide();
-	mnuArrange->show();
-
-	board->set_edit( true );
 }
 
 void ChessController::on_action_arrange_clear()
@@ -593,7 +580,6 @@ void ChessController::on_action_arrange_turn_black()
 
 	engine->arrange_turn( TURNBLACK );
 }
-
 
 void ChessController::on_action_arrange_cancel()
 {
@@ -630,97 +616,142 @@ void ChessController::on_action_thinking_stop()
 	engine->stop_thinking();
 }
 
+/**-----------------------------------------------------------------------------
+ * Mouse input
+ */
+bool ChessController::on_drag_start( GdkEventButton* button_event )
+{
+	drag_data.start_square.file = button_event->x;
+	drag_data.start_square.rank = button_event->y;
+	drag_data.piece_code        = button_event->state;
+
+	std::map<STSquare,STPiece> save_board = engine->get_piece_positions();
+	save_board.erase( drag_data.start_square );
+	board->set_piece_positions( save_board );
+
+	return true;
+}
+
+bool ChessController::on_drag_done( GdkEventButton* button_event )
+{
+	drag_data.end_square.file = button_event->x;
+	drag_data.end_square.rank = button_event->y;
+
+	// Arranging?
+	if( engine->in_edit_mode() ) {
+
+        engine->arrange_remove_piece( drag_data.start_square );
+		engine->arrange_add_piece( drag_data.end_square, drag_data.piece_code );
+
+		board->set_piece_positions( engine->get_piece_positions() );
+		return true;
+	}
+
+	std::map<STSquare,STPiece> save_board = engine->get_piece_positions();
+
+	// regular move, check if this this move can be made
+	if( engine->enter_move( drag_data.start_square, drag_data.end_square ) ) {
+
+		// take the piece of the start square:
+		save_board.erase( drag_data.start_square );
+		board->set_piece_positions( save_board );
+
+		do_animate( drag_data.start_square, drag_data.end_square, drag_data.piece_code );
+
+		return true;
+	}
+
+	board->set_piece_positions( save_board );
+
+    // Not a valid move
+	return true;
+}
+
+
+/**-----------------------------------------------------------------------------
+ * AI move calculator
+ */
+void ChessController::move_calculator_start()
+{
+	mnuGame->hide();
+	mnuStop->show();
+
+	board->computer_is_thinking( true );
+
+	thread_move_calculator = new std::thread( sigc::mem_fun(*this, &ChessController::move_calculator_thread) );
+}
+
+void ChessController::move_calculator_thread()
+{
+	engine->calculate_move();
+
+	slot_move_calculator.emit();
+}
+
 void ChessController::on_move_calculator_notify()
 {
-	if( move_calculator_thread->joinable() )
-		move_calculator_thread->join();
+	if( thread_move_calculator->joinable() )
+		thread_move_calculator->join();
 
 	board->set_piece_positions( engine->get_piece_positions() );
     board->set_info( engine->get_info() );
 
 	mnuStop->hide();
 	mnuGame->show();
+
+	board->computer_is_thinking( false );
 }
 
-void ChessController::move_calculator()
+
+/**-----------------------------------------------------------------------------
+ * Animation of moves, highlights and demo
+ */
+void ChessController::do_animate( STSquare start_square, STSquare end_square, char piece )
 {
-	engine->calculate_move();
-
-	move_calculator_slot.emit();
-}
-
-bool ChessController::on_animate_timeout()
-{
-	if( ! --timeout_counter ) {
-		board->animate_move_finish();
-
-		board->set_piece_positions( engine->get_piece_positions() );
-
-		// if it is the computers turn here, let the AI calculate a move
-		mnuGame->hide();
-		mnuStop->show();
-
-		move_calculator_thread = new std::thread( sigc::mem_fun(*this, &ChessController::move_calculator) );
-
-		return false;
-	}
-
-	board->animate_move_continue();
-	return true;
-}
-
-bool ChessController::on_board_button_released( GdkEventButton* button_event )
-{
-	STSquare start_square = board->get_drag_square();
-	STSquare end_square = board->get_end_square();
-
-	// Arranging?
-	if( engine->in_edit_mode() ) {
-
-        engine->arrange_remove_piece( start_square );
-		engine->arrange_add_piece( end_square, board->get_piece_code() );
-
-		board->set_piece_positions( engine->get_piece_positions() );
-		return true;
-	}
-
-	// regular move, check if this this move can be made
-	if( engine->enter_move( start_square, end_square ) ) {
-
-        board->animate_move_start( start_square, end_square );
-
-        timeout_counter = 10;
-        Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
-		return true;
-	}
-
-    // Not a valid move
-	return true;
-}
-
-void ChessController::animate_move( STSquare start_square, STSquare end_square )
-{
-    board->animate_move_start( start_square, end_square );
+    board->animate_start( start_square, end_square, piece );
 
     timeout_counter = 10;
     Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_animate_timeout), 100 );
 }
 
-
-
-
-void ChessController::on_action_demomode()
+bool ChessController::on_animate_timeout()
 {
-	status_bar->push( std::string("Demo") );
+	if( --timeout_counter ) {
+		board->animate_continue();
+		return true;
+	}
 
-    mnuGame->hide();
-    mnuStop->show();
+	board->animate_finish();
 
-    do_demo_start_move();
+	board->set_piece_positions( engine->get_piece_positions() );
+
+	// if it is the computers turn here, let the AI calculate a move
+	move_calculator_start();
+
+	return false;
 }
 
+void ChessController::do_highlight( STSquare square )
+{
+	board->highlight_start( square );
 
-bool ChessController::do_demo_start_move()
+	timeout_counter = 10;
+	Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_highlight_timeout), 100 );
+}
+
+bool ChessController::on_highlight_timeout()
+{
+	if( --timeout_counter ) {
+		board->highlight_continue();
+		return true;
+	}
+
+	board->highlight_finish();
+
+	return false;
+}
+
+bool ChessController::do_demo_move()
 {
     Ply ply;
 
@@ -733,26 +764,33 @@ bool ChessController::do_demo_start_move()
     STSquare start_square = ply.get_start_square();
     STSquare end_square = ply.get_end_square();
 
-    board->animate_move_start( start_square, end_square );
+	std::map<STSquare,STPiece> save_board = engine->get_piece_positions();
+	// extract the piece code
+	char piece = save_board.at(start_square).code;
+	// take the piece of the start square:
+	save_board.erase( start_square );
+	board->set_piece_positions( save_board );
+
+    board->animate_start( start_square, end_square, piece );
 
     timeout_counter = 10;
-    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_move), 100 );
+    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_demo_move_timeout), 100 );
 
     return false;
 }
 
-bool ChessController::do_demo_move()
+bool ChessController::on_demo_move_timeout()
 {
 	if( --timeout_counter ) {
-        board->animate_move_continue();
+        board->animate_continue();
         return true;
 	}
 
-    board->animate_move_finish();
+    board->animate_finish();
 
     board->set_piece_positions( engine->get_piece_positions() );
 
-    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_start_move), 1000 );
+    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_move), 1000 );	// Wait a second, then initiate the next move
 
     return false;
 }

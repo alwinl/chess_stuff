@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alwin Leerling <alwin@jambo>
+ * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,17 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef APPCONTROLLER_H
-#define APPCONTROLLER_H
+#ifndef CHESSCONTROLLER_H
+#define CHESSCONTROLLER_H
 
 #include <gtkmm.h>
 
 #include <string>
 #include <vector>
 #include <thread>
+
+#include "pods.h"
+
 
 class ChessEngine;
 
@@ -54,11 +57,14 @@ public:
 
 private:
 
-	// Initialisation
+	// Setup
 	virtual void on_startup();
 	virtual void on_activate();
+	void bind_actions();
+	void connect_signals();
+	void get_widgets();
 
-	// Actions
+	// Menu actions
 	void on_action_new();
 	void on_action_open();
 	void on_action_save();
@@ -76,7 +82,6 @@ private:
 	void on_action_level_ply_search();
 	void on_action_level_mate_search();
 	void on_action_level_matching();
-
 	void on_action_twoplayer();
 	void on_action_demomode();
     void on_action_piecevalues();
@@ -84,35 +89,29 @@ private:
     void on_action_reverse();
     void on_action_showbestline();
 	void on_action_help_about();
-	void on_action_arrange_done();
 	void on_action_arrange_clear();
 	void on_action_arrange_turn_white();
 	void on_action_arrange_turn_black();
 	void on_action_arrange_cancel();
+	void on_action_arrange_done();
 	void on_action_thinking_stop();
 
-	bool on_board_button_released( GdkEventButton* button_event );
+	// Mouse input
+	bool on_drag_start( GdkEventButton* button_event );
+	bool on_drag_done( GdkEventButton* button_event );
 
-	void bind_actions();
-	void get_widgets();
-	void connect_signals();
-
-
+	// AI move calculator
+	void move_calculator_start();
+	void move_calculator_thread();
 	void on_move_calculator_notify();
-	void move_calculator();
 
-	std::thread * move_calculator_thread;
-	Glib::Dispatcher move_calculator_slot;
-
+	// Animation of moves, highlights and demo
+    void do_animate( STSquare start_square, STSquare end_square, char piece );
 	bool on_animate_timeout();
-	int timeout_counter;
-
-    void animate_move( STSquare start_square, STSquare end_square );
-
-    bool do_demo_start_move();
+	void do_highlight( STSquare square );
+	bool on_highlight_timeout();
     bool do_demo_move();
-
-
+    bool on_demo_move_timeout();
 
 	// Widgets
 	ChessWindow * view;
@@ -137,7 +136,20 @@ private:
 	Gtk::CheckMenuItem * chkSound;
 
     // Data
+	std::thread * thread_move_calculator;
+	Glib::Dispatcher slot_move_calculator;
+	int timeout_counter;
     ChessEngine* engine;
+
+	struct DragData {
+		STSquare start_square;
+		STSquare end_square;
+		char piece_code;
+	};
+
+	DragData drag_data;
+
+
 };
 
-#endif // APPCONTROLLER_H
+#endif // CHESSCONTROLLER_H

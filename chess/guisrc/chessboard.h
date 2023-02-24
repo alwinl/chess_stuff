@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alwin Leerling <alwin@jambo>
+ * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,20 +46,20 @@ public:
 
     void set_piece_positions( std::map<STSquare,STPiece> new_pieces );
 	void set_info( STInfo info );
-	void set_colours( std::array<std::string,4> new_colours, STInfo info );
+	void set_colours( std::array<std::string,4> new_colours );
 	void set_edit( bool on );
-    void toggle_reverse( );
-    void toggle_bestline( STInfo the_info );
+    void toggle_reverse();
+    void toggle_bestline();
 
-	void highlight( STSquare square );
+	void highlight_start( STSquare square );
+	void highlight_continue();
+	void highlight_finish();
 
-	void animate_move_start( STSquare& start_square, STSquare& end_square );
-	void animate_move_continue();
-	void animate_move_finish();
+	void animate_start( STSquare& start_square, STSquare& end_square, char piece );
+	void animate_continue();
+	void animate_finish();
 
-	STSquare get_drag_square() const { return drag_start_square; }
-	STSquare get_end_square() const { return drag_end_square; }
-	char get_piece_code() const { return save_piece_code; }
+	void computer_is_thinking( bool on ) { is_computer_move = on; }
 
 private:
 	virtual bool on_configure_event( GdkEventConfigure* event );
@@ -71,30 +71,23 @@ private:
 	void paint_board();
 	void paint_pieces();
 	void paint_edit_pieces();
-	void paint_text( Cairo::RefPtr<Cairo::Context>& context, double x, double y, std::string text );
-	void paint_info( STInfo& info );
+	void paint_info();
 
-	STSquare adjust_for_reverse( STSquare square );
-
-	STSquare point_to_square( Gdk::Point point );
-	Gdk::Point square_to_point( STSquare square );
-	Gdk::Point square_to_board_point( STSquare square );
-
-	char point_to_edit_piece( Gdk::Point point );
-	Gdk::Point source_point( Gdk::Point point, char piece_code );
-
-	bool on_highlight_timeout();
-
-	void start_dragging( char piece, Gdk::Point start_point );
+	void start_dragging( Gdk::Point start_point, char piece_code );
 	void update_dragging( Gdk::Point new_point );
 	void stop_dragging();
+
+	STSquare   point_to_square( Gdk::Point point );
+	STSquare   adjust_for_reverse( STSquare square );
+	Gdk::Point square_to_point( STSquare square );
+	Gdk::Point square_to_board_point( STSquare square );
+	Gdk::Point piece_source_point( Gdk::Point point, char piece_code );
+	char       point_to_edit_piece( Gdk::Point point );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
 	Cairo::RefPtr<Cairo::ImageSurface> info_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_overlay;
-
-    std::map<char,Gdk::Point> pieces_image_offsets;
 
 	Gdk::Rectangle board_outline;
 	Gdk::Rectangle info_outline;
@@ -105,26 +98,22 @@ private:
 	Gdk::RGBA white_colour;
 	Gdk::RGBA black_colour;
 
-	bool show_bestline;
-	bool draw_highlight;
-	bool is_dragging;
-	bool is_animating;
-	bool is_reversed;
-	bool is_edit;
-
-	int timeout_counter;
+	bool show_bestline = true;
+	bool draw_highlight = false;
+	bool draw_floating_piece = false;
+	bool is_dragging = false;
+	bool is_animating = false;
+	bool is_computer_move = false;
+	bool is_reversed = false;
+	bool is_edit = false;
 
 	std::map<STSquare,STPiece> pieces;
+	std::array<std::pair<std::string,std::string>,10> info;
+
 	Gdk::Point floating_piece_position;
-	Gdk::Point floating_piece_source;
+	char floating_piece_code;
 	Gdk::Point annimate_delta;
 	Gdk::Point highlight_pos;
-	char floating_piece_code;
-	char save_piece_code;
-	STSquare drag_start_square;
-	STSquare drag_end_square;
-
-	STSquare animating_square_start;
 };
 
 #endif // CHESSBOARD_H
