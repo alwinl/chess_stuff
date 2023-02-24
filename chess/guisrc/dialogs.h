@@ -57,7 +57,7 @@ private:
 		int orig_value;
 	};
 
-	std::array<PieceData,5> new_piece_data;
+	std::array<PieceData,5> piece_data;
 };
 
 class DialogInput : public Gtk::Dialog

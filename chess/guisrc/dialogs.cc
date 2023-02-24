@@ -55,11 +55,11 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
 {
     set_transient_for( parent );
 
-	ui_model->get_widget( "spnQueen",  new_piece_data[0].spnButton );
-	ui_model->get_widget( "spnRook",   new_piece_data[1].spnButton );
-	ui_model->get_widget( "spnBishop", new_piece_data[2].spnButton );
-	ui_model->get_widget( "spnKnight", new_piece_data[3].spnButton );
-	ui_model->get_widget( "spnPawn",   new_piece_data[4].spnButton );
+	ui_model->get_widget( "spnQueen",  piece_data[0].spnButton );
+	ui_model->get_widget( "spnRook",   piece_data[1].spnButton );
+	ui_model->get_widget( "spnBishop", piece_data[2].spnButton );
+	ui_model->get_widget( "spnKnight", piece_data[3].spnButton );
+	ui_model->get_widget( "spnPawn",   piece_data[4].spnButton );
 
     Gtk::Button * btnRevert;
     ui_model->get_widget( "btnRevert", btnRevert );
@@ -68,33 +68,33 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
 
 void DialogPieceValues::set_values( std::map<char, int> values )
 {
-	new_piece_data[0].spnButton->set_value( values.at('Q') >> 4 );
-	new_piece_data[1].spnButton->set_value( values.at('R') >> 4 );
-	new_piece_data[2].spnButton->set_value( values.at('B') >> 4 );
-	new_piece_data[3].spnButton->set_value( values.at('N') >> 4 );
-	new_piece_data[4].spnButton->set_value( values.at('P') >> 4 );
+	piece_data[0].spnButton->set_value( values.at('Q') >> 4 );
+	piece_data[1].spnButton->set_value( values.at('R') >> 4 );
+	piece_data[2].spnButton->set_value( values.at('B') >> 4 );
+	piece_data[3].spnButton->set_value( values.at('N') >> 4 );
+	piece_data[4].spnButton->set_value( values.at('P') >> 4 );
 
-	new_piece_data[0].orig_value = values.at('Q') >> 4;
-	new_piece_data[1].orig_value = values.at('R') >> 4;
-	new_piece_data[2].orig_value = values.at('B') >> 4;
-	new_piece_data[3].orig_value = values.at('N') >> 4;
-	new_piece_data[4].orig_value = values.at('P') >> 4;
+	piece_data[0].orig_value = values.at('Q') >> 4;
+	piece_data[1].orig_value = values.at('R') >> 4;
+	piece_data[2].orig_value = values.at('B') >> 4;
+	piece_data[3].orig_value = values.at('N') >> 4;
+	piece_data[4].orig_value = values.at('P') >> 4;
 }
 
 std::map<char, int> DialogPieceValues::get_values()
 {
 	std::map<char, int> result = {
-		{ 'Q', int( new_piece_data[0].spnButton->get_value() ) << 4 },
-		{ 'R', int( new_piece_data[1].spnButton->get_value() ) << 4 },
-		{ 'B', int( new_piece_data[2].spnButton->get_value() ) << 4 },
-		{ 'N', int( new_piece_data[3].spnButton->get_value() ) << 4 },
-		{ 'P', int( new_piece_data[4].spnButton->get_value() ) << 4 },
+		{ 'Q', int( piece_data[0].spnButton->get_value() ) << 4 },
+		{ 'R', int( piece_data[1].spnButton->get_value() ) << 4 },
+		{ 'B', int( piece_data[2].spnButton->get_value() ) << 4 },
+		{ 'N', int( piece_data[3].spnButton->get_value() ) << 4 },
+		{ 'P', int( piece_data[4].spnButton->get_value() ) << 4 },
 		{ 'K', 0 },
-		{ 'q', -(int( new_piece_data[0].spnButton->get_value() ) << 4) },
-		{ 'r', -(int( new_piece_data[1].spnButton->get_value() ) << 4) },
-		{ 'b', -(int( new_piece_data[2].spnButton->get_value() ) << 4) },
-		{ 'n', -(int( new_piece_data[3].spnButton->get_value() ) << 4) },
-		{ 'p', -(int( new_piece_data[4].spnButton->get_value() ) << 4) },
+		{ 'q', -(int( piece_data[0].spnButton->get_value() ) << 4) },
+		{ 'r', -(int( piece_data[1].spnButton->get_value() ) << 4) },
+		{ 'b', -(int( piece_data[2].spnButton->get_value() ) << 4) },
+		{ 'n', -(int( piece_data[3].spnButton->get_value() ) << 4) },
+		{ 'p', -(int( piece_data[4].spnButton->get_value() ) << 4) },
 		{ 'k', 0 },
 	};
 
@@ -104,7 +104,7 @@ std::map<char, int> DialogPieceValues::get_values()
 void DialogPieceValues::on_revert_clicked()
 {
     for( unsigned int idx = 0; idx < 5; ++idx )
-		new_piece_data[idx].spnButton->set_value( new_piece_data[idx].orig_value );
+		piece_data[idx].spnButton->set_value( piece_data[idx].orig_value );
 }
 
 DialogInput::DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
