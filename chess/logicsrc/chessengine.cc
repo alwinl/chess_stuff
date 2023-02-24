@@ -196,13 +196,37 @@ bool ChessEngine::open_file( std::string filename )
 
 bool ChessEngine::save_file( )
 {
-    //return game_loader->save_file( game );
+	if( game_filename.empty() )
+		return false;
+
+	std::ofstream os( game_filename.c_str() );
+
+	if( !os.good() )
+		return false;
+
+    //game_loader->save_file( game );
+
+    os.close();
+
     return true;
 }
 
 bool ChessEngine::save_file_as( std::string filename )
 {
-    //return game_loader->save_file_as( game );
+	if( filename.empty() )
+		return false;
+
+	std::ofstream os( filename.c_str() );
+
+	if( !os.good() )
+		return false;
+
+    //game_loader->save_file_as( game );
+
+    game_filename = filename;
+
+    os.close();
+
     return true;
 }
 

@@ -103,6 +103,8 @@ private:
 	Board arrange_board;
     STInfo info;
 
+    std::string game_filename;
+
     STGameState last_state;
     bool is_arranging;
     bool multi_player;
