@@ -22,8 +22,15 @@
 #ifndef BOARD_H_INCLUDED
 #define BOARD_H_INCLUDED
 
-extern int OfficerNo[];
-extern int PawnNo[];
+struct BOARDTYPE {
+    ENUMPIECE     piece;
+    ENUMCOLOR     color;
+    short         index;
+    unsigned char attacked;
+};
+
+extern BOARDTYPE     Board[0x78];
+
 
 void ClearBoard( void );
 void CalcPieceTab( void );
@@ -35,5 +42,7 @@ void SetMove( MOVESTRUCT *amove );
 void ResetMove( MOVESTRUCT *amove );
 bool EqMove( MOVESTRUCT *a, MOVESTRUCT *b );
 
+int get_total_piece_count( ENUMCOLOR color );
+int get_officer_count( ENUMCOLOR color );
 
 #endif // BOARD_H_INCLUDED

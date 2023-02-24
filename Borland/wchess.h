@@ -315,7 +315,6 @@ private:
     PTInfoWindow TInfo;       // pointer to the information window
     TEditBarWindow *TEditBar; // pointer to the edit bar
 
-    bool NewGame;             // a new game is being set up?
     bool GotStartSquare;      // did the user select a valid piece to move?
     bool Modified;            // has the board been changed in edit mode?
     bool EditingBoard;        // is the user editing the board

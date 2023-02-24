@@ -22,6 +22,8 @@
 #ifndef SMALL_H_INCLUDED
 #define SMALL_H_INCLUDED
 
+extern ENUMCOLOR     ProgramColor;
+
 void TakeBackMove( MOVESTRUCT *amove );
 void MakeMove( MOVESTRUCT * );
 void EnterKeyMove( void );

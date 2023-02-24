@@ -24,12 +24,12 @@
 #include <ctype.h>
 
 #include "wcdefs.h"
-//#include "externs.h"
 
+#include "board.h"
 
 struct SAVERESTORE {
     ENUMCOLOR 	Player;
-    ENUMCOLOR 	Opponent;
+    ENUMCOLOR 	opponent;
     ENUMCOLOR 	ProgramColor;
     bool 		Turned;
     bool 		MultiMove;
@@ -66,7 +66,7 @@ int SaveGame( char *file_name )
     }
 
     Save->Player = Player;
-    Save->Opponent = Opponent;
+    Save->opponent = Opponent;
     Save->ProgramColor = ProgramColor;
     Save->Turned = Turned;
     Save->MultiMove = MultiMove;
@@ -108,7 +108,7 @@ int RestoreGame( char *file_name )
     fclose( gameboard );
 
     Player = Restore.Player;
-    Opponent = Restore.Opponent;
+    Opponent = Restore.opponent;
     ProgramColor = Restore.ProgramColor;
     Turned = Restore.Turned;
     MultiMove = Restore.MultiMove;

@@ -31,7 +31,6 @@ char        MaxLevel;
 bool        Turned;
 bool        UseLib;
 unsigned char * Openings;
-ENUMCOLOR   ProgramColor;
 int         MoveNo;
 MOVESTRUCT    PlayerMove;
 bool        Logging;

@@ -17,13 +17,11 @@ MOVESTRUCT ZeroMove = { 8, 8, 0, no_piece, no_piece };
 MOVESTRUCT KeyMove;
 bool Running;
 ENUMCOLOR RunColor;
+ENUMCOLOR   ProgramColor;
 bool Analysis, Opan;
 double WantedTime;
 bool GameOver = false;
 char EndGameMessage[80];
-
-
-void EndMessage( char * );
 
 
 /*
@@ -74,7 +72,7 @@ bool IllegalMove( MOVESTRUCT *amove )
     bool illegal;
 
     SetMove( amove );
-    illegal = Attacks( Opponent, PieceTab[Player][0].isquare );	// By doing this move will the king be attacked?
+    illegal = Attacks( Opponent, get_king_square(Player) );	// By doing this move will the king be attacked?
     ResetMove( amove );
 
     return illegal;
@@ -111,46 +109,55 @@ void PrintComment( void )
     MOVESTRUCT test_move;
     do {
         test_move = MovGen();
-        if( test_move.movpiece != no_piece )
-            if( !IllegalMove( &test_move ) )
-                possiblemove = 1;
+        if( (test_move.movpiece != no_piece ) && ( !IllegalMove( &test_move ) )
+			possiblemove = 1;
+
     } while( test_move.movpiece != no_piece && !possiblemove );
 
     Depth--;
-    check = Attacks( Opponent, PieceTab[Player][0].isquare ); /* calculate check */
+    check = Attacks( Opponent, get_king_square(Player) ); /* calculate check */
 
     /*  No possible move means checkmate or stalemate  */
-    if( !possiblemove ) {
-        if( check ) {
-            checkmate = 1;
-            EndMessage( "CheckMate" );
-        } else
-            EndMessage( "Stalemate!" );
-    } else if( HintEvalu >= MATEVALUE - DEPTHFACTOR * 16 ) {
+	if( !possiblemove && check ) {
+		checkmate = 1;
+		strcpy( EndGameMessage, "CheckMate" );
+		GameOver = true;
+	}
+
+	if( !possiblemove && !check ) {
+		strcpy( EndGameMessage, "Stalemate!" );
+		GameOver = true;
+	}
+
+    if( possiblemove && ( HintEvalu >= MATEVALUE - DEPTHFACTOR * 16 ) ) {
         nummoves = ( MATEVALUE - HintEvalu + 0x40 ) / ( DEPTHFACTOR * 2 );
         char mate_message[40];
         sprintf( mate_message, "Mate in %d Move%c", nummoves, ( nummoves > 1 ) ? 's!':'!' );
         TInfo_SetMessageText( mate_message );
     }
 
-    if( check && !checkmate )
+    if( possiblemove && check ) {
         TInfo_SetMessageText( "Check!" );
-    else { /*  test 50 move rule and repetition of moves  */
-        if( FiftyMoveCnt() >= 100 ) {
-            EndMessage( "50 Move rule" );
-        } else if( Repetition( 0 ) >= 3 ) {
-            EndMessage( "3 fold Repetition" );
-        } else              /*  Resign if the position is hopeless  */
-            if( -25500 < HintEvalu && HintEvalu < -0x880 ) {
-                switch( Opponent ) {
-                case white :
-                    EndMessage( " White resigns" );
-                    break;
-                case black :
-                    EndMessage( " Black resigns" );
-                }
-            }
+        return;
     }
+
+	if( FiftyMoveCnt() >= 100 ) {
+		strcpy( EndGameMessage, "50 Move rule" );
+		GameOver = true;
+		return;
+	}
+
+	if( Repetition( 0 ) >= 3 ) {
+		strcpy( EndGameMessage, "3 fold Repetition" );
+		GameOver = true;
+		return;
+	}
+
+	/*  Resign if the position is hopeless  */
+	if( -25500 < HintEvalu && HintEvalu < -0x880 ) {
+		strcpy( EndGameMessage, (Opponent == white) ? " White resigns" : " Black resigns" );
+		GameOver = true;
+	}
 }
 
 void EnterMove( MOVESTRUCT *amove )
@@ -367,11 +374,5 @@ void DoSlideMove( MOVESTRUCT &amove )
         GenCastSquare( amove.new1, &castsquare, &cornersquare );
         SlidePiece( castsquare, cornersquare );
     }
-}
-
-void EndMessage( char *message )
-{
-    strcpy( EndGameMessage, message );
-    GameOver = true;
 }
 

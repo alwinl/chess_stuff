@@ -197,7 +197,7 @@ static bool update( PARAMTYPE *P )
     if( Level == matesearch ) { /*  Matesearch  */
         SetMove( &MovTab[ Depth ] );  /*  Perform Move on the board  */
 
-        if( Attacks( Opponent, PieceTab[ Player ][ 0 ].isquare ) ) {		/*  Check if Move is legal  */
+        if( Attacks( Opponent, get_king_square(Player) ) ) {		/*  Check if Move is legal  */
             ResetMove( &MovTab[ Depth ] );	// take back the move
 			if( Analysis || !Depth )
 				TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
@@ -213,7 +213,7 @@ static bool update( PARAMTYPE *P )
 
         if( P->S->nextply <= 0 ) { /*  Calculate check and perform evt. cut-off  */
             if( !P->S->nextply )
-                checktable[ Depth + 1 ] = Attacks( Player, PieceTab[ Opponent ][ 0 ].isquare );
+                checktable[ Depth + 1 ] = Attacks( Player, get_king_square(Opponent) );
 
             if( !checktable[ Depth + 1 ] ) {
 				// test cut_off
@@ -262,7 +262,7 @@ static bool update( PARAMTYPE *P )
      * Calculate checktab (only checks with moved piece are calculated) Giving Check
      * does not count as a ply
      */
-    checktable[Depth + 1] = PieceAttacks( MovTab[Depth].movpiece, Player, MovTab[Depth].new1, PieceTab[Opponent][0].isquare );
+    checktable[Depth + 1] = PieceAttacks( MovTab[Depth].movpiece, Player, MovTab[Depth].new1, get_king_square( Opponent ) );
 
     if( checktable[Depth + 1] )
         P->S->nextply = P->ply;
@@ -296,7 +296,7 @@ static bool update( PARAMTYPE *P )
     SetMove( &MovTab[Depth] );       /* perform move on the board */
 
     /* check if move is legal */
-    if( Attacks( Opponent, PieceTab[Player][0].isquare ) ) {
+    if( Attacks( Opponent, get_king_square(Player) ) ) {
         ResetMove( &MovTab[Depth] );   // take back the move
 		if( Analysis || !Depth )
 			TInfo_PrintDepthMessage( MaxDepth, &MovTab[0] );
@@ -642,8 +642,8 @@ static short capmovgen( int newsq, PARAMTYPE *P )
         }
     }
 
-    for( i = OfficerNo[ Player ]; i >= 0; i-- ) { /*  other captures  */
-        if( PieceTab[ Player ][ i ].ipiece != no_piece && PieceTab[ Player ][ i ].ipiece != pawn ) {
+    for( i = get_officer_count(Player); i >= 0; i-- ) { /*  other captures  */
+        if( PieceTab[ Player ][ i ].ipiece != pawn ) {
             if( PieceAttacks( PieceTab[ Player ][ i ].ipiece, Player, PieceTab[ Player ][ i ].isquare, newsq ) ) {
 
                 MovTab[ Depth ].old      = PieceTab[ Player ][ i ].isquare;
@@ -739,6 +739,16 @@ static short noncapmovgen( int oldsq, PARAMTYPE *P )
     return 0;
 }
 
+static bool is_castling_move( MOVESTRUCT *amove )
+{
+	return amove->spe && ( amove->movpiece == king );
+}
+
+static bool is_en_pasant_move( MOVESTRUCT *amove )
+{
+	return amove->spe && ( amove->movpiece == pawn );
+}
+
 /** \brief Test whether a move is possible
  *
  *	Move contains a full description of a move, which
@@ -751,7 +761,7 @@ static short noncapmovgen( int oldsq, PARAMTYPE *P )
  */
 static bool IsValidMove( MOVESTRUCT *amove, MOVESTRUCT *last_move )
 {
-    if( amove->spe && ( amove->movpiece == king ) ) {		/* its a castling move */
+    if( is_castling_move(amove) ) {
 
         ENUMCASTDIR castdir = ( amove->new1 > amove->old ) ? shrt : lng;	/* which way are we castling */
 		int cast_square = ( Player == black ) ? 0x74 : 0x04;				/* get the king position, e-file */
@@ -782,7 +792,7 @@ static bool IsValidMove( MOVESTRUCT *amove, MOVESTRUCT *last_move )
 		return true;	/* move is allowed */
     }
 
-	if( amove->spe && ( amove->movpiece == pawn ) ) {			/*  It's an en passant capture capture move */
+	if( is_en_pasant_move(amove) ) {
 
 		/* Can't do ep capture if the opponents last move was not a pawn move */
 		if( last_move->movpiece != pawn )
@@ -814,7 +824,7 @@ static bool IsValidMove( MOVESTRUCT *amove, MOVESTRUCT *last_move )
 		return false;
 
 	/* if the square we are moving to is occupied by one of our pieces, we cannot move there */
-	if( amove->content != no_piece && Board[amove->new1].color != Opponent )
+	if( amove->content != no_piece && Board[amove->new1].color == Player )
 		return false;
 
 	if( amove->movpiece != pawn ) { /*  Is the move possible?  */
@@ -830,6 +840,11 @@ static bool IsValidMove( MOVESTRUCT *amove, MOVESTRUCT *last_move )
 /*
  *  castling moves
  */
+struct CASTMOVETYPE {
+    int castnew;
+    int castold;
+};
+
 static CASTMOVETYPE  CastMove[2][2] = { {{0x02, 0x04}, {0x06, 0x04}}, {{0x72, 0x74}, {0x76, 0x74}} };
 
 static short castlingmovgen( PARAMTYPE *P )
@@ -933,7 +948,7 @@ static void searchmovgen( PARAMTYPE *P )
 
 
     P->S->movgentype = norml;
-    for( index = 1; index <= PawnNo[ Opponent ]; index++ )
+    for( index = 1; index <= get_total_piece_count(Opponent); index++ )
         if( PieceTab[ Opponent ][ index ].ipiece != no_piece )
             if( MovTab[ Depth-1 ].movpiece == no_piece || PieceTab[ Opponent ][ index ].isquare != MovTab[ Depth-1 ].new1 )
                 if( capmovgen( PieceTab[ Opponent ][ index ].isquare, P ) )
@@ -948,7 +963,7 @@ static void searchmovgen( PARAMTYPE *P )
         if( castlingmovgen( P ) )
             return;      /*  castling  */
 
-        for( index = PawnNo[ Player ]; index >= 0; index-- )
+        for( index = get_total_piece_count(Player); index >= 0; index-- )
             if( PieceTab[ Player ][ index ].ipiece != no_piece )
                 if( noncapmovgen( PieceTab[ Player ][ index ].isquare, P ) )
                     return;
@@ -1000,7 +1015,7 @@ static int search( int alpha, int beta, int ply, INFTYPE *inf, MOVESTRUCT *bestl
 		return S.maxval;
 
 	/*  Test stalemate  */
-	if( (S.maxval == -( LOSEVALUE - Depth * DEPTHFACTOR ) ) && ( !Attacks( Opponent, PieceTab[ Player ][ 0 ].isquare ) ) )
+	if( (S.maxval == -( LOSEVALUE - Depth * DEPTHFACTOR ) ) && ( !Attacks( Opponent, get_king_square(Player) ) ) )
 		return 0;
 
 	if( bestline[ Depth ].movpiece != no_piece )
@@ -1096,4 +1111,32 @@ void FindMove( int maxlevel )
     if( Analysis )
         TInfo_PrintNodes( Nodes, ( getTotalTime( &ChessClock ) - calcpvtime ) );
 }
+
+
+
+
+void clear_piecetab( ENUMCOLOR color )
+{
+    for( int index = 0; index < 16; index++ ) {
+		PieceTab[color][index].ipiece = no_piece;
+		PieceTab[color][index].isquare = 0;
+    }
+}
+
+void set_piecetab_piece( ENUMCOLOR color, short index, ENUMPIECE piece )
+{
+    PieceTab[color][index].ipiece = piece;
+}
+
+void set_piecetab_square( ENUMCOLOR color, short index, int square )
+{
+    PieceTab[color][index].isquare = square;
+}
+
+int get_king_square( ENUMCOLOR color )
+{
+	return PieceTab[color][king].isquare;
+}
+
+
 

@@ -1,18 +1,20 @@
 // OWLCVT 08/22/97 02:11:38
 // ObjectWindows - (C) Copyright 1992 by Borland International
 
-#include <owl\owlpch.h>
-#pragma hdrstop
-
 #include <math.h>
 #include "wcdefs.h"
-#include "externs.h"
+//#include "externs.h"
+
+#include <cstring>
+
+#include "search.h"
+#include "board.h"
+#include "small.h"
 
 #undef max
 #undef min
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
-#define VALIDSQUARE( square )  ( !( (square) & 0x88 ) )
 
 #define EXCHANGEVALUE      32	/*  Value for exchanging pieces when ahead (not pawns)  */
 #define ISOLATEDPAWN       20	/*  Isolated pawn.  Double isolated pawn is 3 * 20  */
@@ -34,7 +36,6 @@ struct PAWNBITTYPE {
  */
 
 int                 RootValue;
-BOARDTYPE           Board[ 0x78 ];
 int                 PositionValueTable[2][7][0x78];
 
 /*
@@ -42,7 +43,7 @@ int                 PositionValueTable[2][7][0x78];
  */
 
 static int          PieceValue[7]          = { 0, 0x1000, 0x900, 0x4c0, 0x300, 0x300, 0x100 };
-static int          PieceValue[7]          = { 0, (16 << 4), (9 << 4), (5 << 4), (3 << 4), (3 << 4), (1 << 4) };
+//static int          PieceValue[7]          = { 0, (16 << 4), (9 << 4), (5 << 4), (3 << 4), (3 << 4), (1 << 4) };
 const char          pawnrank[8]            = { 0, 0, 0, 2, 4, 8, 30, 0 };
 const char          passpawnrank[8]        = { 0, 0, 10, 20, 40, 60, 70, 0 };
 const char          pawnfilefactor[8]      = { 0, 0, 2, 5, 6, 2, 0, 0 };
@@ -80,14 +81,14 @@ static int count( unsigned char b )
  * (remember PawnTable is reversed). There could be more than one pawn on the file.
  * The corresponding bit in dob will tell us if there is more than one pawn on the file.
  */
-static void InitPawnbitt( ENUMCOLOR color )
+static void InitPawnbitt( ENUMCOLOR color, unsigned char PawnTable[] )
 {
     pawnbitt[color][0].one = 0;
     pawnbitt[color][0].dob = 0;
 
     for( int sq_rank = 1; sq_rank < 7; sq_rank++ ) {
-        pawnbitt[color][0].dob |= ( pawnbitt[color][0].one & PawnTable[color][sq_rank] );
-        pawnbitt[color][0].one |= PawnTable[color][sq_rank];
+        pawnbitt[color][0].dob |= ( pawnbitt[color][0].one & PawnTable[sq_rank] );
+        pawnbitt[color][0].one |= PawnTable[sq_rank];
     }
 }
 
@@ -186,7 +187,7 @@ static int square_distance( int square1, int square2 )
 static char calc_attack_value( ENUMCOLOR color, int square, int mat_level )
 {
 	const char squarerankvalue[8] = { 0, 0, 0, 0, 3, 6, 12, 12 };
-    const char distan[8] = { 3, 2, 1, 0, 0, 1, 2, 3 };
+    const char distance_from_center[8] = { 3, 2, 1, 0, 0, 1, 2, 3 };
 
 	int rank = (color == white) ? (square >> 4) : 7 - (square >> 4);	/* calculate the rank from the colours perspective */
 	int file = square & 0x0F;
@@ -198,8 +199,8 @@ static char calc_attack_value( ENUMCOLOR color, int square, int mat_level )
 	 */
 	char rank_importance = ( ( squarerankvalue[rank] * ( mat_level + 8 ) ) >> 5 ); /* range 0..32 */
 
-	char centre_importance = max( 0, 8 - 3 * ( distan[rank] + distan[file] ) );
-	char king_importance = ( (mat_level > 0) && squares_are_neighbours( square, get_king_square( 1 - color ) ) ) ? ( ( 12 * ( mat_level + 8 ) ) >> 5 ) : 0;
+	char centre_importance = max( 0, 8 - 3 * ( distance_from_center[rank] + distance_from_center[file] ) );
+	char king_importance = ( (mat_level > 0) && squares_are_neighbours( square, get_king_square( color == white ? black : white ) ) ) ? ( ( 12 * ( mat_level + 8 ) ) >> 5 ) : 0;
 
 	return rank_importance + centre_importance + king_importance;
 }
@@ -213,7 +214,7 @@ static char calc_attack_value( ENUMCOLOR color, int square, int mat_level )
  */
 void ClearPVTable( void )
 {
-    for( ENUMPIECE piece = king; piece <= pawn; ( ( int )piece )++ )
+    for( ENUMPIECE piece = king; piece <= pawn; piece = ENUMPIECE(piece + 1) )
         for( int square = 0; square <= 0x77; square++ ) {
             PositionValueTable[ white ][ piece ][ square ] = 0;
             PositionValueTable[ black ][ piece ][ square ] = 0;
@@ -231,20 +232,20 @@ void CalcPVTable( void )
     unsigned char pawnfiletab, bit, oppasstab, behindoppass,
              leftsidetab, rightsidetab, sidetab, leftchaintab,
              rightchaintab, chaintab, leftcovertab, rightcovertab;		/*  Bit tables for static pawn structure evaluation  */
-    int           pvcontrol[2][5][0x78];										/*  Value of squares controlled from the square  */
-    int           posval;													/*  The positional value of piece  */
-    int           attval;													/*  The attack value of the square  */
-    unsigned char line;														/*  The file of the piece  */
+    //int           posval;													/*  The positional value of piece  */
+    //int           attval;													/*  The attack value of the square  */
+    unsigned char file;														/*  The file of the piece  */
     unsigned char rank;														/*  The rank of the piece  */
-    char          dist, kingdist;											/*  Distance to center, to opponents king */
-    ENUMCASTDIR   cast;														/*  Possible castlings  */
+    //char          dist;											/*  Distance to center, to opponents king */
+    //char          kingdist;											/*  Distance to center, to opponents king */
+    //ENUMCASTDIR   cast;														/*  Possible castlings  */
     short         direct;													/*  Indicates direct attack  */
     int           cnt;														/*  Counter for attack values  */
     int           strval;													/*  Pawnstructure value  */
     ENUMCOLOR     color, oppcolor;											/*  Color and opponents color  */
     ENUMPIECE     piece;												/*  Piece counter  */
     int           square;													/*  Square counter  */
-    char          dir;														/*  Direction counter  */
+    //char          dir;														/*  Direction counter  */
     int           sq;														/*  Square counter  */
     const char    distan[8] = { 3, 2, 1, 0, 0, 1, 2, 3 };	                /*  The value of a pawn is the sum of Rank and file values. The file value is equal to PawnFileFactor * (Rank Number + 2) */
 
@@ -260,12 +261,12 @@ void CalcPVTable( void )
 				material[ Board[square].color ] += PieceValue[ Board[square].piece ];
 
 		/*  Material level of the game (start game = 78 (<<4), early middle game = 43 - 32 (<<4), endgame = 0) */
-		materiallevel = material[white] >> 4 + material[black] >> 4;
+		materiallevel = (material[white] >> 4) + (material[black] >> 4);
 		losingcolor = (material[white] < material[black]) ? white : black;
 
 		/*  Set mating if weakest player has less than the equivalence of two bishops and the advantage is at least a rook for a bishop */
 		mating = ( material[losingcolor] < 2 * PieceValue[ bishop ] ) &&
-				( material[losingcolor] + PieceValue[ rook ] < material[(1 - losingcolor] + PieceValue[ bishop ] );
+				( material[losingcolor] + PieceValue[ rook ] < material[(losingcolor == white) ? black : white] + PieceValue[ bishop ] );
     }
 
 
@@ -286,6 +287,7 @@ void CalcPVTable( void )
 
 
     /*  Initialise PVControl  */
+    int           pvcontrol[2][5][0x78];										/*  Value of squares controlled from the square  */
     for( int square = 0x00; square < 0x78; ++square ) {
         if( VALIDSQUARE( square ) ) {
 			pvcontrol[ white ][ rook ][ square ] = 0;
@@ -318,10 +320,10 @@ void CalcPVTable( void )
         if( ! VALIDSQUARE( square ) )
 			continue;
 
-		for( color = white; color <= black; ( ( int )color )++ ) {
+		for( color = white; color <= black; color = ENUMCOLOR(color + 1) ) {
 
 			/* Calculate bishop and rook values */
-			for( dir = 0; dir < 8; ++dir ) {
+			for( int dir = 0; dir < 8; ++dir ) {
 
 				cnt = 0;
 				direct = 1;
@@ -342,8 +344,8 @@ void CalcPVTable( void )
 
 			/* Calculate the knight value */
 			cnt = 0;
-			for( dir = 0; dir < 8; dir++ ) {
-				sq = square + KnightDir[dir];
+			for( int dir = 0; dir < 8; dir++ ) {
+				sq = square + knight_dir[dir];
 				if( VALIDSQUARE( sq ) )
 					cnt += attackvalue[color][sq];
 			}
@@ -372,7 +374,7 @@ void CalcPVTable( void )
 
 					} else {
 						/* Penalise squares that are further away from opponents king */
-						pvcontrol[ color ][ king ][ square ] -= 4 * square_distance( square, get_king_square( 1 - color ) );
+						pvcontrol[ color ][ king ][ square ] -= 4 * square_distance( square, get_king_square( (color == white) ? black : white ) );
 
 						/* Penalise squares closer to the edge */
 						if( ( distan[ square >> 4 ] >= 2 ) || ( distan[ square & 0x0F ] == 3 ) )
@@ -410,9 +412,9 @@ void CalcPVTable( void )
 		if( ! VALIDSQUARE( square ) )
 			continue;
 
-		for( color = white; color <= black; ( ( int )color )++ ) {
+		for( color = white; color <= black; color = ENUMCOLOR(color+1) ) {
 
-			for( piece = king; piece <= pawn; ( ( int )piece )++ ) {
+			for( piece = king; piece <= pawn; piece = ENUMPIECE(piece+1) ) {
 				PositionValueTable[ color ][ piece ][ square ] =
 							( !mating || ( piece == pawn ) || (piece == king)  ) ? pvcontrol[ color ][ piece ][ square ] : 0;
 			}
@@ -442,16 +444,16 @@ void CalcPVTable( void )
         }
     }
 
-    InitPawnbitt( white );
-    InitPawnbitt( black );
+    InitPawnbitt( white, PawnTable[white] );
+    InitPawnbitt( black, PawnTable[black] );
 
     /*  Calculate pawnstructurevalue  */
     RootValue = pawnstrval( Player, 0 ) - pawnstrval( Opponent, 0 );
 
     /*  Calculate static value for pawn structure  */
-    for( color = white; color <= black; ( ( int )color )++ ) {
+    for( ENUMCOLOR color = white; color <= black; color = ENUMCOLOR(color+1) ) {
 
-        oppcolor     = ( ENUMCOLOR )( 1 - color );
+        oppcolor     = (color == white) ? black : white;
         pawnfiletab  = 0;
         leftsidetab  = 0;
         rightsidetab = 0;
@@ -531,11 +533,12 @@ void CalcPVTable( void )
     }
 
     for( square = 0x77; square >= 0; square-- ) {                                       /*  Calculate RootValue  */
-        if( VALIDSQUARE( square ) && ( Board[ square ].piece != no_piece ) )
+        if( VALIDSQUARE( square ) && ( Board[ square ].piece != no_piece ) ) {
             if( Board[ square ].color == Player )
                 RootValue += PiecePosVal( Board[ square ].piece, Player, square );
             else
                 RootValue -= PiecePosVal( Board[ square ].piece, Opponent, square );
+        }
     }
 }
 
@@ -550,7 +553,7 @@ void CalcPVTable( void )
 
 int StatEvalu( MOVESTRUCT *amove )
 {
-    const char          castvalue[2]           = { 4, 32 };  /*  Value of castling  */
+    //const char          castvalue[2]           = { 4, 32 };  /*  Value of castling  */
     const int ShortCastleValue = 32;
     const int LongCastleValue = 4;
 
@@ -585,9 +588,9 @@ int StatEvalu( MOVESTRUCT *amove )
     CalcPawnBit( black, Depth + 1 );
 
     if( ( amove->movpiece == pawn ) && ( ( amove->content != no_piece ) || amove->spe ) )
-        value += movepawnstrval( Player, amove->new1 & 7, amove->old & 7, Depth + 1 );
+        value += movepawnstrval( Player, (amove->new1 & 7), (amove->old & 7), Depth + 1 );
 
-    if( ( amove->content == pawn ) || amove->spe && ( amove->movpiece == pawn ) )
+    if( ( amove->content == pawn ) || (amove->spe && ( amove->movpiece == pawn ) ) )
         value -= decpawnstrval( Opponent, amove->new1 & 7, Depth + 1 );
 
     /*  Calculate value of move  */

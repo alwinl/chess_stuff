@@ -45,6 +45,9 @@ enum ENUMCOLOR { white, black };
 enum ENUMCASTDIR { zero, lng, shrt };
 enum ENUMLEVEL { normal, fullgametime, easygame, infinite, plysearch, matesearch, matching };
 
+
+#define VALIDSQUARE( square )  ( !( (square) & 0x88 ) )
+
 /*
  *  structs
  */
@@ -56,13 +59,13 @@ struct MOVESTRUCT {
     ENUMPIECE content;   /* evt. captured piece  */
 };
 
-struct BOARDTYPE {
-    ENUMPIECE     piece;
-    ENUMCOLOR     color;
-    short         index;
-    unsigned char attacked;
-};
-
+//struct BOARDTYPE {
+//    ENUMPIECE     piece;
+//    ENUMCOLOR     color;
+//    short         index;
+//    unsigned char attacked;
+//};
+//
 /*
 struct NODEVAL {
     unsigned long nodebase;
@@ -82,19 +85,19 @@ struct SCREENPOSTYPE {
 };
 */
 
-struct PIECETAB {
-    int isquare;
-    ENUMPIECE ipiece;
-};
+//struct PIECETAB {
+//    int isquare;
+//    ENUMPIECE ipiece;
+//};
 
 struct ATTACKTABTYPE {
     short  pieceset;               /* A set of king..pawn. gives the pieces, which can move to the square */
     int    direction;              /* The direction from the piece to the square */
 };
 
-struct CASTMOVETYPE {
-    int castnew;
-    int castold;
-};
+//struct CASTMOVETYPE {
+//    int castnew;
+//    int castold;
+//};
 
 #endif // __WCDEFS_H

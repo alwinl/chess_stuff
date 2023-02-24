@@ -50,6 +50,7 @@ HANDLE hAccel;
 bool ShowBestLine = true;
 bool Editing;
 bool SoundOn;
+static bool bNewGame;             // a new game is being set up?
 
 ENUMCOLOR ComputerColor;
 
@@ -89,7 +90,7 @@ TChessWindow::TChessWindow( PTWindowsObject AParent, LPSTR ATitle ) : TWindow( A
     WhoseTurn = player;
     CurPlayer = white;
     SoundOn = true;
-    NewGame = true;
+    bNewGame = true;
     EditingBoard =  false;
     GotStartSquare = false;
 
@@ -275,7 +276,7 @@ void TChessWindow::CMNewGame()
     EnableMenuItem( hMenu, CM_UNDO, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED );
     EnableMenuItem( hMenu, CM_REDO, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED );
 
-    NewGame = true;
+    bNewGame = true;
 
     ::NewGame();
     ::PrintBoard();
@@ -295,7 +296,7 @@ void TChessWindow::CMRestoreGame()
         return;
     }
 
-    NewGame = false;
+    bNewGame = false;
     CurPlayer = Player;
     ComputerColor = Opponent;
 
@@ -305,7 +306,7 @@ void TChessWindow::CMRestoreGame()
 
 void TChessWindow::CMSaveGame()
 {
-    if( NewGame )
+    if( bNewGame )
         SaveGameAs();
     else {
         switch( ::SaveGame( FileName ) ) {
@@ -671,7 +672,7 @@ void TChessWindow::OnEMDone( )
 
     ResetNewPos();
 
-    if( Attacks( Player, PieceTab[ Opponent ][ 0 ].isquare ) ) {
+    if( Attacks( Player, get_king_square( Opponent ) ) ) {
         Error( "Illegal King position" );
         return;
     }
@@ -781,7 +782,7 @@ void TChessWindow::SaveGameAs()
 {
     if( GetApplication()->ExecDialog( new TFileDialog( this, SD_FILESAVE, strcpy( FileName, "*.CHS" ) ) ) == IDOK ) {
 
-        NewGame = false;
+        bNewGame = false;
         switch( ::SaveGame( FileName ) ) {
         case -1:
             ::MessageBox( HWindow, "Not enough memory to perform operation", "Chess", MB_OK | MB_ICONHAND );

@@ -22,6 +22,25 @@
 #ifndef SEARCH_H_INCLUDED
 #define SEARCH_H_INCLUDED
 
+struct PIECETAB {
+    int isquare;
+    ENUMPIECE ipiece;
+};
+
+extern PIECETAB      PieceTab[][16];
+extern ENUMCOLOR     Opponent;
+extern ENUMCOLOR     Player;
+extern short         Depth;
+extern int           MainEvalu;
+extern MOVESTRUCT *  MovTab;
+
 void FindMove( int maxlevel );
+
+
+void clear_piecetab( ENUMCOLOR color );
+void set_piecetab_piece( ENUMCOLOR color, short index, ENUMPIECE piece );
+void set_piecetab_square( ENUMCOLOR color, short index, int square );
+int get_king_square( ENUMCOLOR color );
+
 
 #endif // SEARCH_H_INCLUDED

@@ -2,7 +2,12 @@
 
 #include <math.h>
 #include "wcdefs.h"
-#include "externs.h"
+//#include "externs.h"
+
+#include <cstring>
+
+#include "board.h"
+#include "search.h"
 
 /*
  *  Globals
@@ -17,58 +22,6 @@ int PawnDir[2] = {0x10, -0x10};
 
 int GeneratedMoveCount, BufPnt;
 static MOVESTRUCT GeneratedMoves[81];
-
-class GeneratedMoves
-{
-public:
-	GeneratedMoves() : generated(0), retrieved(0) { };
-
-	void reset() {
-		generated = 0;
-		retrieved = 0;
-	};
-
-	void add_move( MOVESTRUCT new_move )
-	{
-		if( generated < MAXMOVES ) {
-			GeneratedMoves[generated] = new_move;
-			++generated;
-		}
-	};
-
-	MOVESTRUCT get_move()
-	{
-		if( retrieved > generated )
-			return ZeroMove;
-
-		return GeneratedMoves[retrieved++];
-	};
-
-private:
-	const unsigned int MAXMOVES = 81;
-
-	unsigned int generated;
-	unsigned int retrieved;
-
-	MOVESTRUCT GeneratedMoves[MAXMOVES];
-};
-
-GeneratedMoves gen_move;
-
-static void clear_generated_moves()
-{
-	gen_move.reset();
-}
-
-static void add_generated_move( MOVESTRUCT new_move )
-{
-	gen_move.add_move( new_move );
-}
-
-static MOVESTRUCT get_generated_move( )
-{
-	return gen_move.get_move();
-}
 
 
 /****************************************************************************/
@@ -110,7 +63,7 @@ static int * AttackTable( void )
 }
 
 /* For pawns we need to look a rank ahead or back for various functions.
- * Going up a rank depends on the colourCASTMOVETYPE
+ * Going up a rank depends on the colour
  */
 static int pawn_rank_up( ENUMCOLOR acolor, int asquare )
 {
@@ -133,9 +86,12 @@ static bool pawn_on_square( ENUMCOLOR acolour, int asquare )
  */
 bool PieceAttacks( ENUMPIECE apiece, ENUMCOLOR acolour, int asquare, int target_square )
 {
-    if( apiece == pawn )  /*  pawn attacks  */
+	if( apiece == no_piece )	/* we need a piece in order to attack */
+		return false;
+
+	if( apiece == pawn )  /*  pawn attacks  */
 		/* go up a rank (from the pawns perspective) and look on either side */
-        return ( (pawn_rank_up( acolour, asquare ) - 1 == target_square) || (pawn_rank_up(acolour, asquare) + 1 == target_square) );
+		return ( (pawn_rank_up( acolour, asquare ) - 1 == target_square) || (pawn_rank_up(acolour, asquare) + 1 == target_square) );
 
 	int * AttackTab = AttackTable();
 
@@ -161,8 +117,6 @@ bool PieceAttacks( ENUMPIECE apiece, ENUMCOLOR acolour, int asquare, int target_
  */
 bool Attacks( ENUMCOLOR acolour, int target_square )
 {
-    int i;
-
 	/* Check if there is a pawn in a position to attack
 	 * We need to look one rank down (from the pawns perspective) and either side of the file.
 	 */
@@ -171,11 +125,9 @@ bool Attacks( ENUMCOLOR acolour, int target_square )
         return true;
 
     /*  Other attacks:  try all pieces, starting with the smallest  */
-    for( int i = OfficerNo[acolour]; i >= 0; i-- ) {
-		PIECETAB piecetab_entry = PieceTab[acolour][i];
+    for( int officer = get_officer_count(acolour); officer >= 0; officer-- ) {
 
-        if( piecetab_entry.ipiece == no_piece )
-			continue;
+		PIECETAB piecetab_entry = PieceTab[acolour][officer];
 
 		if( PieceAttacks( piecetab_entry.ipiece, acolour, piecetab_entry.isquare, target_square ) )
 			return true;
@@ -220,7 +172,7 @@ static void CapMovGen( ENUMCOLOR acolour )
     ENUMCOLOR opponent_colour = (acolour == white) ? black : white;
 
     /* generate all captures starting with captures of largest pieces */
-    for( int index = 1; index <= PawnNo[opponent_colour]; index++ ) {
+    for( int index = 1; index <= get_total_piece_count(opponent_colour); index++ ) {
 
 		PIECETAB opponent_piece = PieceTab[opponent_colour][index];
 
@@ -255,12 +207,12 @@ static void CapMovGen( ENUMCOLOR acolour )
 		}
 
 		/*  Other captures, starting with the smallest pieces  */
-		for( int i = OfficerNo[acolour]; i >= 0; i-- ) {
+		for( int officer = get_officer_count(acolour); officer >= 0; officer-- ) {
 
-			PIECETAB piecetab_entry = PieceTab[acolour][i];
+			PIECETAB piecetab_entry = PieceTab[acolour][officer];
 
-			if( (piecetab_entry.ipiece == no_piece) || ( piecetab_entry.ipiece == pawn ) )
-				continue
+			if( piecetab_entry.ipiece == pawn )
+				continue;
 
 			if( ! PieceAttacks( piecetab_entry.ipiece, acolour, piecetab_entry.isquare, cap_move.new1 ) )
 				continue;
@@ -333,7 +285,7 @@ static void NonCapMovGen( ENUMCOLOR acolour )
 {
     MOVESTRUCT new_move;
 
-    for( index = PawnNo[acolour]; index >= 0; index-- ) {
+    for( index = get_total_piece_count(acolour); index >= 0; index-- ) {
 
 		PIECETAB player_piece = PieceTab[acolour][index];
 

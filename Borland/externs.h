@@ -24,9 +24,6 @@
 
 #include "wcdefs.h"
 
-extern ENUMCOLOR     Opponent;
-extern PIECETAB      PieceTab[][16];
-extern BOARDTYPE     Board[0x78];
 extern char          WhiteSquareColors[];
 extern char          BlackSquareColors[];
 extern char          buf[];
@@ -67,10 +64,7 @@ extern WORD         MessageToPost;
 
 extern ENUMCOLOR     RunColor;
 extern ENUMCOLOR     ComputerColor;
-extern ENUMCOLOR     Player;
-extern ENUMCOLOR     ProgramColor;
 extern ENUMLEVEL     Level;
-extern MOVESTRUCT *  MovTab;
 extern MOVESTRUCT    ZeroMove;
 extern MOVESTRUCT    KeyMove;
 extern MOVESTRUCT    PlayerMove;
@@ -79,10 +73,8 @@ extern double        Nodes;
 extern double        AverageTime;
 extern double		 WantedTime;
 extern char          MaxLevel;
-extern int           MainEvalu;
 extern int           DirTab[];
 extern int           KnightDir[];
-extern short         Depth;
 extern int           MoveNo;
 extern int           RootValue;
 extern int           HintEvalu;
