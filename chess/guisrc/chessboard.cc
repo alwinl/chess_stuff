@@ -133,7 +133,7 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
     }
 
 	if( draw_floating_piece ) {
-		Gdk::Point floating_piece_source = piece_source_point( floating_piece_position, floating_piece_code );
+		Gdk::Point floating_piece_source = floating_piece_position - piece_source_offset( floating_piece_code );
 		cr->rectangle( floating_piece_position.get_x(), floating_piece_position.get_y(), SQUARE_SIZE, SQUARE_SIZE );
 		cr->set_source( pieces_image, floating_piece_source.get_x(), floating_piece_source.get_y() );
 		cr->fill();
@@ -160,23 +160,24 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
     if( board_outline.intersects( mouse_pos ) ) {
 
 		STSquare drag_start_square = point_to_square( mouse_point );
+		char piece_code = pieces.at(drag_start_square);
 
-		start_dragging( mouse_point, pieces.at(drag_start_square).code );
+		start_dragging( mouse_point, piece_code );
 
 		button_event->x = drag_start_square.file;
 		button_event->y = drag_start_square.rank;
-		button_event->state =  pieces.at(drag_start_square).code;
+		button_event->state = piece_code;
 
 		return false;
     }
 
     if( is_edit && edit_outline.intersects( mouse_pos ) ) {
 
-		start_dragging( mouse_point, point_to_edit_piece( mouse_point ) );
+		start_dragging( mouse_point, point_to_piece_code( mouse_point ) );
 
 		button_event->x = -1;
 		button_event->y = -1;
-		button_event->state = point_to_edit_piece( mouse_point );
+		button_event->state = point_to_piece_code( mouse_point );
 
 		return false;
     }
@@ -257,10 +258,10 @@ void ChessBoard::paint_pieces()
 	context->restore();
 
 	// draw the pieces
-	for( std::pair<const STSquare,STPiece>& entry : pieces ) {
+	for( std::pair<const STSquare,char>& entry : pieces ) {
 
 		Gdk::Point dest = square_to_board_point( entry.first );
-		Gdk::Point source = piece_source_point( dest, entry.second.code );
+		Gdk::Point source = dest - piece_source_offset( entry.second );
 
 		context->set_source( pieces_image, source.get_x(), source.get_y() );
 		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
@@ -345,7 +346,7 @@ void ChessBoard::paint_info()
 /**-----------------------------------------------------------------------------
  * The next set of functions update the state of the ChessBoard
  */
-void ChessBoard::set_piece_positions( std::map<STSquare,STPiece> new_pieces )
+void ChessBoard::set_piece_positions( std::map<STSquare,char> new_pieces )
 {
 	pieces = new_pieces;
 
@@ -386,18 +387,9 @@ void ChessBoard::set_edit( bool on )
 	queue_draw();
 }
 
-void ChessBoard::set_info( STInfo the_info )
+void ChessBoard::set_info( std::array<std::pair<std::string,std::string>,10>  the_info )
 {
-	info[0] = std::pair<std::string,std::string>{"Turn", the_info.turn };
-	info[1] = std::pair<std::string,std::string>{"White", the_info.white };
-	info[2] = std::pair<std::string,std::string>{"Black", the_info.black };
-	info[3] = std::pair<std::string,std::string>{"Time", the_info.time };
-	info[4] = std::pair<std::string,std::string>{"Level", the_info.level };
-	info[5] = std::pair<std::string,std::string>{"Value", the_info.value };
-	info[6] = std::pair<std::string,std::string>{"Nodes", the_info.nodes };
-	info[7] = std::pair<std::string,std::string>{"N/Sec", the_info.n_sec };
-	info[8] = std::pair<std::string,std::string>{"Depth", the_info.depth };
-	info[9] = std::pair<std::string,std::string>{"Bestline", the_info.bestline };
+	info = the_info;
 
     paint_info( );
 
@@ -548,7 +540,7 @@ Gdk::Point ChessBoard::square_to_board_point( STSquare square )
 	);
 }
 
-Gdk::Point ChessBoard::piece_source_point( Gdk::Point point, char piece_code )
+Gdk::Point ChessBoard::piece_source_offset( char piece_code )
 {
 	static std::map<char,Gdk::Point> pieces_image_offsets = {
 		// The pieces bitmap contains king through to pawn, white pieces in top row and black pieces in bottom row
@@ -569,10 +561,10 @@ Gdk::Point ChessBoard::piece_source_point( Gdk::Point point, char piece_code )
 	// To paint a particular piece we have to offset our source bitmap so that the correct bitmap
 	// overlays our square to be painted. The pieces are stored as two rows (a white and a black row)
 	// in six columns, calculable by type.
-	return point - pieces_image_offsets[piece_code];
+	return pieces_image_offsets[piece_code];
 }
 
-char ChessBoard::point_to_edit_piece( Gdk::Point point )
+char ChessBoard::point_to_piece_code( Gdk::Point point )
 {
 	//The bitmap is organised as:
 	//         KQRBNP

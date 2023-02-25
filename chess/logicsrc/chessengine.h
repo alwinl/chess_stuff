@@ -31,7 +31,7 @@
 #include "chessgame.h"
 #include "board.h"
 
-class STSquare;
+//class STSquare;
 
 /** \brief
  */

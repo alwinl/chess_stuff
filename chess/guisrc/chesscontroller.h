@@ -75,13 +75,6 @@ private:
 	void on_action_undo();
 	void on_action_redo();
 	void on_action_arrange();
-	void on_action_level_easy();
-	void on_action_level_timed();
-	void on_action_level_total_time();
-	void on_action_level_infinite();
-	void on_action_level_ply_search();
-	void on_action_level_mate_search();
-	void on_action_level_matching();
 	void on_action_twoplayer();
 	void on_action_demomode();
     void on_action_piecevalues();
@@ -90,11 +83,20 @@ private:
     void on_action_showbestline();
 	void on_action_help_about();
 	void on_action_arrange_clear();
-	void on_action_arrange_turn_white();
-	void on_action_arrange_turn_black();
 	void on_action_arrange_cancel();
 	void on_action_arrange_done();
 	void on_action_thinking_stop();
+
+	void on_action_level_easy();
+	void on_action_level_timed();
+	void on_action_level_total_time();
+	void on_action_level_infinite();
+	void on_action_level_ply_search();
+	void on_action_level_mate_search();
+	void on_action_level_matching();
+
+	void on_action_arrange_turn_white();
+	void on_action_arrange_turn_black();
 
 	// Mouse input
 	bool on_drag_start( GdkEventButton* button_event );
@@ -139,17 +141,11 @@ private:
 	std::thread * thread_move_calculator;
 	Glib::Dispatcher slot_move_calculator;
 	int timeout_counter;
+	STSquare drag_start_square;
+	STSquare drag_end_square;
+	char drag_piece_code;
+
     ChessEngine* engine;
-
-	struct DragData {
-		STSquare start_square;
-		STSquare end_square;
-		char piece_code;
-	};
-
-	DragData drag_data;
-
-
 };
 
 #endif // CHESSCONTROLLER_H

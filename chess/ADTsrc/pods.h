@@ -116,6 +116,7 @@ struct STGameState
 
 // Utility functions
 bool operator<( const STSquare lhs, const STSquare rhs );
+bool operator==( const STSquare lhs, const STSquare rhs );
 STSquare make_square( int file_in, int rank_in );
 
 std::string move_to_LAN( STMove& move_in );

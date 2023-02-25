@@ -31,6 +31,12 @@ bool operator<( const STSquare lhs, const STSquare rhs )
     return (lhs.rank * 8 + lhs.file ) < (rhs.rank * 8 + rhs.file );
 }
 
+bool operator==( const STSquare lhs, const STSquare rhs )
+{
+	return (lhs.file == rhs.file) && (lhs.rank == rhs.rank);
+}
+
+
 STSquare make_square( int file_in, int rank_in )
 {
     STSquare square;

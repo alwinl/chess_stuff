@@ -24,6 +24,39 @@
 
 #include "chessengine.h"
 
+static void push_positions( ChessBoard* board, std::map<STSquare,STPiece> positions )
+{
+	std::map<STSquare,char> new_map;
+
+	for( auto position : positions )
+		new_map.insert( std::make_pair( position.first, position.second.code ) );
+
+	board->set_piece_positions( new_map );
+}
+
+static void push_info( ChessBoard* board, STInfo the_info )
+{
+	std::array<std::pair<std::string,std::string>,10> info =
+	{
+		std::pair<std::string,std::string>{"Turn", the_info.turn },
+		std::pair<std::string,std::string>{"White", the_info.white },
+		std::pair<std::string,std::string>{"Black", the_info.black },
+		std::pair<std::string,std::string>{"Time", the_info.time },
+		std::pair<std::string,std::string>{"Level", the_info.level },
+		std::pair<std::string,std::string>{"Value", the_info.value },
+		std::pair<std::string,std::string>{"Nodes", the_info.nodes },
+		std::pair<std::string,std::string>{"N/Sec", the_info.n_sec },
+		std::pair<std::string,std::string>{"Depth", the_info.depth },
+		std::pair<std::string,std::string>{"Bestline", the_info.bestline }
+	};
+
+	board->set_info( info );
+}
+
+
+/**-----------------------------------------------------------------------------
+ * Application window
+ */
 class ChessWindow : public Gtk::ApplicationWindow
 {
 public:
@@ -46,6 +79,9 @@ ChessController::ChessController( ) : Gtk::Application( "net.dnatechnologies.che
 ChessController::~ChessController( )
 {
 	delete engine;
+
+	if( thread_move_calculator && thread_move_calculator->joinable() )
+		thread_move_calculator->join();
 }
 
 /**-----------------------------------------------------------------------------
@@ -82,11 +118,11 @@ void ChessController::bind_actions()
     add_action("reverse",      sigc::mem_fun( *this, &ChessController::on_action_reverse ) );
     add_action("showbestline", sigc::mem_fun( *this, &ChessController::on_action_showbestline ) );
 
-    add_action("about",   sigc::mem_fun( *this, &ChessController::on_action_help_about ) );
+    add_action("about", sigc::mem_fun( *this, &ChessController::on_action_help_about ) );
 
-    add_action("arrange_done", sigc::mem_fun( *this, &ChessController::on_action_arrange_done ) );
-    add_action("arrange_clear", sigc::mem_fun( *this, &ChessController::on_action_arrange_clear ) );
-    add_action("arrange_cancel",  sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
+    add_action("arrange_done",   sigc::mem_fun( *this, &ChessController::on_action_arrange_done ) );
+    add_action("arrange_clear",  sigc::mem_fun( *this, &ChessController::on_action_arrange_clear ) );
+    add_action("arrange_cancel", sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
 
     add_action("think_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
 }
@@ -171,8 +207,8 @@ void ChessController::on_action_new()
 
 	engine->new_game(  );
 
-    board->set_piece_positions( engine->get_piece_positions() );
-    board->set_info( engine->get_info() );
+	push_positions( board, engine->get_piece_positions() );
+	push_info( board, engine->get_info() );
 
 	status_bar->push( std::string("New game") );
 }
@@ -209,8 +245,8 @@ void ChessController::on_action_open()
         return;
     }
 
-    board->set_piece_positions( engine->get_piece_positions() );
-    board->set_info( engine->get_info() );
+	push_positions( board, engine->get_piece_positions() );
+	push_info( board, engine->get_info() );
 
     status_bar->push( std::string("Opened ") + dlg.get_filename() );
 }
@@ -277,8 +313,8 @@ void ChessController::on_action_quit()
 
 void ChessController::on_action_play()
 {
-    board->set_piece_positions( engine->get_piece_positions() );
-    board->set_info( engine->get_info() );
+	push_positions( board, engine->get_piece_positions() );
+	push_info( board, engine->get_info() );
 }
 
 void ChessController::on_action_hint()
@@ -291,8 +327,8 @@ void ChessController::on_action_undo()
 {
 	engine->undo();
 
-    board->set_piece_positions( engine->get_piece_positions() );
-    board->set_info( engine->get_info() );
+	push_positions( board, engine->get_piece_positions() );
+	push_info( board, engine->get_info() );
 
 	status_bar->push( std::string("Undone") );
 }
@@ -301,8 +337,8 @@ void ChessController::on_action_redo()
 {
 	engine->redo();
 
-    board->set_piece_positions( engine->get_piece_positions() );
-    board->set_info( engine->get_info() );
+	push_positions( board, engine->get_piece_positions() );
+	push_info( board, engine->get_info() );
 
 	status_bar->push( std::string("Redone") );
 }
@@ -311,7 +347,7 @@ void ChessController::on_action_arrange()
 {
 	engine->arranging_start();
 
-    board->set_piece_positions( engine->get_piece_positions() );
+	push_positions( board, engine->get_piece_positions() );
 
 	mnuGame->hide();
 	mnuArrange->show();
@@ -562,7 +598,7 @@ void ChessController::on_action_arrange_clear()
 {
 	engine->arranging_clear();
 
-    board->set_piece_positions( engine->get_piece_positions() );
+	push_positions( board, engine->get_piece_positions() );
 }
 
 void ChessController::on_action_arrange_turn_white()
@@ -585,7 +621,7 @@ void ChessController::on_action_arrange_cancel()
 {
 	engine->arranging_end( true );
 
-    board->set_piece_positions( engine->get_piece_positions( ) );
+	push_positions( board, engine->get_piece_positions() );
 
 	mnuArrange->hide();
 	mnuGame->show();
@@ -603,7 +639,7 @@ void ChessController::on_action_arrange_done()
 		return;
 	}
 
-    board->set_piece_positions( engine->get_piece_positions() );
+	push_positions( board, engine->get_piece_positions() );
 
 	mnuArrange->hide();
 	mnuGame->show();
@@ -621,49 +657,52 @@ void ChessController::on_action_thinking_stop()
  */
 bool ChessController::on_drag_start( GdkEventButton* button_event )
 {
-	drag_data.start_square.file = button_event->x;
-	drag_data.start_square.rank = button_event->y;
-	drag_data.piece_code        = button_event->state;
+	drag_start_square.file = button_event->x;
+	drag_start_square.rank = button_event->y;
+	drag_piece_code        = button_event->state;
 
 	std::map<STSquare,STPiece> save_board = engine->get_piece_positions();
-	save_board.erase( drag_data.start_square );
-	board->set_piece_positions( save_board );
+	save_board.erase( drag_start_square );
+	push_positions( board, save_board );
 
 	return true;
 }
 
 bool ChessController::on_drag_done( GdkEventButton* button_event )
 {
-	drag_data.end_square.file = button_event->x;
-	drag_data.end_square.rank = button_event->y;
+	drag_end_square.file = button_event->x;
+	drag_end_square.rank = button_event->y;
+
+	if( drag_start_square == drag_end_square ) {
+		push_positions( board, engine->get_piece_positions() );
+		return true;
+	}
 
 	// Arranging?
 	if( engine->in_edit_mode() ) {
 
-        engine->arrange_remove_piece( drag_data.start_square );
-		engine->arrange_add_piece( drag_data.end_square, drag_data.piece_code );
+        engine->arrange_remove_piece( drag_start_square );
+		engine->arrange_add_piece( drag_end_square, drag_piece_code );
 
-		board->set_piece_positions( engine->get_piece_positions() );
+		push_positions( board, engine->get_piece_positions() );
 		return true;
 	}
 
 	std::map<STSquare,STPiece> save_board = engine->get_piece_positions();
 
 	// regular move, check if this this move can be made
-	if( engine->enter_move( drag_data.start_square, drag_data.end_square ) ) {
+	if( engine->enter_move( drag_start_square, drag_end_square ) ) {
 
 		// take the piece of the start square:
-		save_board.erase( drag_data.start_square );
-		board->set_piece_positions( save_board );
+		save_board.erase( drag_start_square );
+		push_positions( board, save_board );
 
-		do_animate( drag_data.start_square, drag_data.end_square, drag_data.piece_code );
+		do_animate( drag_start_square, drag_end_square, drag_piece_code );
 
 		return true;
 	}
 
-	board->set_piece_positions( save_board );
-
-    // Not a valid move
+	push_positions( board, save_board );
 	return true;
 }
 
@@ -693,8 +732,10 @@ void ChessController::on_move_calculator_notify()
 	if( thread_move_calculator->joinable() )
 		thread_move_calculator->join();
 
-	board->set_piece_positions( engine->get_piece_positions() );
-    board->set_info( engine->get_info() );
+	thread_move_calculator = nullptr;
+
+	push_positions( board, engine->get_piece_positions() );
+	push_info( board, engine->get_info() );
 
 	mnuStop->hide();
 	mnuGame->show();
@@ -723,7 +764,7 @@ bool ChessController::on_animate_timeout()
 
 	board->animate_finish();
 
-	board->set_piece_positions( engine->get_piece_positions() );
+	push_positions( board, engine->get_piece_positions() );
 
 	// if it is the computers turn here, let the AI calculate a move
 	move_calculator_start();
@@ -769,7 +810,7 @@ bool ChessController::do_demo_move()
 	char piece = save_board.at(start_square).code;
 	// take the piece of the start square:
 	save_board.erase( start_square );
-	board->set_piece_positions( save_board );
+	push_positions( board, save_board );
 
     board->animate_start( start_square, end_square, piece );
 
@@ -788,7 +829,7 @@ bool ChessController::on_demo_move_timeout()
 
     board->animate_finish();
 
-    board->set_piece_positions( engine->get_piece_positions() );
+	push_positions( board, engine->get_piece_positions() );
 
     Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_move), 1000 );	// Wait a second, then initiate the next move
 
