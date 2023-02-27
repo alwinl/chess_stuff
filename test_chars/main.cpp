@@ -162,17 +162,10 @@ void print_board( BoardType& board )
 
 }
 
-void print_white_input_header()
+void print_input_header( eColor side )
 {
 	static const std::string INPUT = "\x1B[2;12H";
-    cout << INPUT << "White" << '?';
-    flush( cout );
-}
-
-void print_black_input_header()
-{
-	static const std::string INPUT = "\x1B[2;12H";
-    cout << INPUT << "Black" << '?';
+    cout << INPUT << ((std::string[]){"White", "Black"}[side]) << '?';
     flush( cout );
 }
 
@@ -407,41 +400,27 @@ int get_gametype()
 int main()
 {
 	TerminalSetup bf;
+	eColor current_player = white;
+	bool quit = false;
 
 	int gametype = get_gametype();
-
 	if( gametype == 0 )
 		return 0;
 
-	bool white_is_human = (gametype == 1) || (gametype == 4);
-	bool black_is_human = (gametype == 2) || (gametype == 4);
-	bool is_white_turn = true;
-	bool quit = false;
+	bool is_human[2] = { ((gametype == 1) || (gametype == 4)), ((gametype == 2) || (gametype == 4)) };
 
     while( !quit ) {
 
 		print_board( board );
 
-		if( is_white_turn ) {
-			if( white_is_human ) {
-				print_white_input_header();
-				quit = input_move( board, generate_moves( board, white ) );
-			} else {
-				sleep( 2 );
-				quit = make_move( board, generate_moves( board, white ) );
-			}
+		if( is_human[ current_player ] ) {
+			print_input_header( current_player );
+			quit = input_move( board, generate_moves( board, current_player ) );
 		} else {
-
-			if( black_is_human ) {
-				print_black_input_header();
-				quit = input_move( board, generate_moves( board, black ) );
-			} else {
-				sleep( 2 );
-				quit = make_move( board, generate_moves( board, black ) );
-			}
+			quit = make_move( board, generate_moves( board, current_player ) );
 		}
 
-		is_white_turn = ! is_white_turn;
+		current_player = eColor( current_player ^ 1 );
     }
 
     return 0;
