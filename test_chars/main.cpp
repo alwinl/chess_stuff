@@ -436,7 +436,7 @@ Move choose_move( vector<Move> moves )
 	}
 
 	row = 2;
-	for( int idx = 0; idx < moves.size(); ++idx ) {
+	for( unsigned int idx = 0; idx < moves.size(); ++idx ) {
 		set_cursor( row, 12 );
 		erase_line();
 		row++;
