@@ -507,27 +507,24 @@ bool make_move( BoardType& board, std::vector<Move> moves )
 
 int get_gametype()
 {
-	static const std::string CLS = "\x1B[2J";
-	static const std::string HOME = "\x1B[0;0H";
 	char answer;
 
 	for( ;; ) {
-		cout << CLS << HOME;
+		set_cursor( 1, 1 );
+		erase_display();
+
 		cout << "1. Human vs Computer\n"
 			 << "2. Computer vs Human\n"
 			 << "3. Computer vs Computer\n"
 			 << "4. Human vs Human\n"
-			 << "q. Quit\n"
+			 << "5. Quit\n"
 			 << "\n"
 			 << "Selection? ";
 		flush( cout );
 
 		cin >> answer;
 
-		if( std::string("qQ").find( answer ) != std::string::npos )
-			return 0;
-
-		if( std::string("1234").find( answer ) != std::string::npos )
+		if( std::string("12345").find( answer ) != std::string::npos )
 			return answer - '0';
 	}
 }
@@ -536,12 +533,10 @@ int main()
 {
 	TerminalSetup bf;
 	eColor current_player = white;
-	bool quit = false;
 
 	int gametype = get_gametype();
-	if( gametype == 0 )
-		return 0;
 
+	bool quit = ( gametype == 5 );
 	bool is_human[2] = { ((gametype == 1) || (gametype == 4)), ((gametype == 2) || (gametype == 4)) };
 
     while( !quit ) {
