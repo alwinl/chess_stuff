@@ -455,7 +455,7 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 
 		cin >> file_char;
 		if( std::string("qQ").find( file_char ) != std::string::npos )
-			break;
+			return true;
 
 		cin >> rank_char;
 
@@ -470,27 +470,28 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 		auto square_match = [new_move]( Move the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to); };
 
 		auto move_it = std::find_if( moves.begin(), moves.end(), square_match );
-		if( move_it != moves.end() ) {
-			// what if it is a promotion
-			if( (*move_it).promotion ) {
-				// we need to find all possible promotions and ask the player to select one
-				vector<Move> promotion_moves;
-				while( move_it != moves.end() ) {
-					promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
-					move_it = std::find_if( move_it, moves.end(), square_match );
-				}
+		if( move_it == moves.end() ) {
+			print_invalid_move();
+			continue;
+		}
 
-				apply_move( board, choose_move( promotion_moves ) );
-			} else
-				apply_move( board, *move_it );
-
+		// If it is not a promotion, we have all relevant information. Process the move
+		if( ! (*move_it).promotion ) {
+			apply_move( board, *move_it );
 			return false;
 		}
 
-		print_invalid_move();
-	}
+		// we need to find all possible promotions and ask the player to select one
+		vector<Move> promotion_moves;
 
-    return true;
+		while( move_it != moves.end() ) {
+			promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
+			move_it = std::find_if( move_it, moves.end(), square_match );
+		}
+
+		apply_move( board, choose_move( promotion_moves ) );
+		return false;
+	}
 }
 
 #include <experimental/random>
