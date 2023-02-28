@@ -375,7 +375,7 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 				) {
 					if( target_square / 8 == ((int[]){ 7, 0 })[piece.color] ) {		// promotion ranks
 						for( eType type = knight; type < king; type = eType(type + 1) )
-							moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type } );	// generate a promotion moves
+							moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
 					} else
 						moves.push_back( {.from = square, .to = target_square, .capture = true } );
 				}
