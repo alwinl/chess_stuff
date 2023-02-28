@@ -3,13 +3,30 @@
 #include <vector>
 #include <map>
 #include <array>
+#include <algorithm>
 
 #include <unistd.h>
 #include <stdio.h>
+#include <termios.h>
 
 using namespace std;
 
-#include <termios.h>
+void ansi_cgi( std::string cgi_sequence )
+	{ cout << "\x1B[" << cgi_sequence; }
+
+void char_color( unsigned int foreground, unsigned int background )
+	{ ansi_cgi( std::to_string( foreground ) + ';' + std::to_string( background ) + "m" ); }
+
+void set_cursor( unsigned int row, unsigned int column )
+	{ ansi_cgi( std::to_string( row ) + ';' + std::to_string( column ) + "H" ); }
+
+void restore() { char_color( 39, 49 ); }
+
+void erase_display() { ansi_cgi( "0J" ); }	/* clears from cursor to end of screen */
+void erase_line() {  ansi_cgi( "0K" ); }	/* clears from cursor to end of line */
+
+
+
 class TerminalSetup
 {
 public:
@@ -35,17 +52,13 @@ private:
 
 	void clear_screen()
 	{
-		static const std::string CLS = "\x1B[2J";
-		static const std::string HOME = "\x1B[0;0H";
-
-		cout << CLS << HOME;
+		set_cursor( 1, 1 );
+		erase_display();
 	}
 
 	void restore_screen()
 	{
-		static const std::string BOTTOMLEFT = "\x1B[10;1H";
-		cout << BOTTOMLEFT;
-		flush( cout );
+		set_cursor( 10, 1 );
 	}
 };
 
@@ -55,13 +68,15 @@ private:
 enum eColor { white, black};
 enum eType { none, pawn, knight, bishop, rook, queen, king };
 
+bool sliding_piece[] = { false, false, false, true, true, true, false };
+unsigned int direction_count[] = { 0, 0, 8, 4, 4, 8, 8 };
+
 union Piece {
 	uint16_t piece;
 	struct {
 		uint16_t reserved:8;
 		uint16_t has_moved:1;
-		uint16_t sliding:1;
-		uint16_t direction_count:2;
+		uint16_t reserved1:3;
 		uint16_t color:1;
 		uint16_t type:3;
 	};
@@ -71,22 +86,22 @@ bool operator<( const Piece lhs, const Piece rhs ) { return lhs.piece < rhs.piec
 
 eColor get_color( Piece piece ) { return eColor( piece.color ); }
 eType get_type( Piece piece ) { return eType( piece.type ); }
-unsigned int ray_directions( Piece piece ) { return piece.direction_count << 2; };
-bool is_sliding( Piece piece ) { return piece.sliding; }
+unsigned int ray_directions( Piece piece ) { return direction_count[piece.type]; };
+bool is_sliding( Piece piece ) { return sliding_piece[piece.type]; }
 
-Piece _none   = { .has_moved = false, .sliding = false, .direction_count = 0, .color = white, .type = none };
-Piece wpawn   = { .has_moved = false, .sliding = false, .direction_count = 0, .color = white, .type = pawn };
-Piece wknight = { .has_moved = false, .sliding = false, .direction_count = 2, .color = white, .type = knight };
-Piece wbishop = { .has_moved = false, .sliding = true,  .direction_count = 1, .color = white, .type = bishop };
-Piece wrook   = { .has_moved = false, .sliding = true,  .direction_count = 1, .color = white, .type = rook };
-Piece wqueen  = { .has_moved = false, .sliding = true,  .direction_count = 2, .color = white, .type = queen };
-Piece wking   = { .has_moved = false, .sliding = false, .direction_count = 2, .color = white, .type = king };
-Piece bpawn   = { .has_moved = false, .sliding = false, .direction_count = 0, .color = black, .type = pawn };
-Piece bknight = { .has_moved = false, .sliding = false, .direction_count = 2, .color = black, .type = knight };
-Piece bbishop = { .has_moved = false, .sliding = true,  .direction_count = 1, .color = black, .type = bishop };
-Piece brook   = { .has_moved = false, .sliding = true,  .direction_count = 1, .color = black, .type = rook };
-Piece bqueen  = { .has_moved = false, .sliding = true,  .direction_count = 2, .color = black, .type = queen };
-Piece bking   = { .has_moved = false, .sliding = false, .direction_count = 2, .color = black, .type = king };
+Piece _none   = { .has_moved = false, .color = white, .type = none };
+Piece wpawn   = { .has_moved = false, .color = white, .type = pawn };
+Piece wknight = { .has_moved = false, .color = white, .type = knight };
+Piece wbishop = { .has_moved = false, .color = white, .type = bishop };
+Piece wrook   = { .has_moved = false, .color = white, .type = rook };
+Piece wqueen  = { .has_moved = false, .color = white, .type = queen };
+Piece wking   = { .has_moved = false, .color = white, .type = king };
+Piece bpawn   = { .has_moved = false, .color = black, .type = pawn };
+Piece bknight = { .has_moved = false, .color = black, .type = knight };
+Piece bbishop = { .has_moved = false, .color = black, .type = bishop };
+Piece brook   = { .has_moved = false, .color = black, .type = rook };
+Piece bqueen  = { .has_moved = false, .color = black, .type = queen };
+Piece bking   = { .has_moved = false, .color = black, .type = king };
 
 typedef std::array<Piece, 64> BoardType;
 
@@ -122,56 +137,53 @@ union Move {
 	};
 };
 
-
-
+vector<Move> game_moves;
 
 void print_board( BoardType& board )
 {
-	static const std::string BLACKSQUARE = "\x1B[30;107m";
-	static const std::string WHITESQUARE = "\x1B[97;40m";
-	static const std::string RESTORE = "\x1B[39;49m";
-	static const std::string INDENT = "\x1B[20x";
-	static const std::string CLS = "\x1B[2J";
-	static const std::string HOME = "\x1B[0;0H";
-
-	array<string,14> rep = {
+	static array<string,14> rep = {
 		" ", "♙", "♘", "♗", "♖", "♕", "♔",
 		" ", "♟", "♞", "♝", "♜", "♛", "♚",
 	};
 
-	cout << CLS << HOME;
+	set_cursor( 1, 1 );
+	erase_display();
+
+    cout << " abcdefgh" << endl;
 
     for( int rank=8; rank; --rank ) {
-		cout << INDENT;
 		cout << rank;
 		for( int file=0; file<8; ++file ) {
 			int index = (rank - 1) * 8 + file;
 
 			if( (file + rank) % 2 ) {
-				cout << BLACKSQUARE << rep[ board[index].color * 7 + board[index].type ];
-				//cout << BLACKSQUARE << rep_on_black.at( board[index] );
+				char_color( 30, 107 );
+				cout << rep[ board[index].color * 7 + board[index].type ];
 			} else {
-				cout << WHITESQUARE << rep[(1 - board[index].color) * 7 + board[index].type];
-				//cout << WHITESQUARE << rep_on_white.at( board[index] );
+				char_color( 97, 40 );
+				cout << rep[(1 - board[index].color) * 7 + board[index].type];
 			}
-
 		}
-		cout << RESTORE << endl;
+		restore();
+		cout << rank << endl;
     }
-    cout << " abcdefgh" << endl;
 
+    cout << " abcdefgh" << endl;
 }
 
 void print_input_header( eColor side )
 {
-	static const std::string INPUT = "\x1B[2;12H";
-    cout << INPUT << ((std::string[]){"White", "Black"}[side]) << '?';
+	set_cursor( 2, 12 );
+	erase_line();
+
+    cout << ((std::string[]){"White", "Black"}[side]) << '?';
     flush( cout );
 }
 
 void print_move( Move & the_move )
 {
-	cout << "\x1B[2;12H";
+	set_cursor( 3, 12 );
+	erase_line();
 
 	if( the_move.promotion ) {
 
@@ -186,10 +198,76 @@ void print_move( Move & the_move )
 		cout << (char)('a' + (the_move.to % 8)) << (char)('1' + (the_move.to / 8) );
 	}
 
-
 	flush( cout );
-	getchar();
 }
+
+void print_invalid_move()
+{
+	set_cursor( 3, 12 );
+	erase_line();
+
+	cout << "Invalid move";
+	flush( cout );
+}
+
+void update_board( BoardType& board, Move the_move )
+{
+	if( the_move.promotion ) {
+		Piece promo_piece = board[the_move.from];
+
+		promo_piece.type = the_move.promo_type;
+
+		board[the_move.to] = promo_piece;
+		board[the_move.from] = _none;
+
+	} else if( the_move.castling ) {
+
+		// move the king
+		board[the_move.to] = board[the_move.from];
+		board[the_move.from] = _none;
+
+		board[the_move.to].has_moved = true;
+
+		// adjust move structure to the rook
+		if( the_move.to > the_move.from ) {	// king side
+			the_move.from += 3;
+			the_move.to -= 1;
+		} else { 							// queen side
+			the_move.from -= 4;
+			the_move.to += 1;
+		}
+
+		// move the rook
+		board[the_move.to] = board[the_move.from];
+		board[the_move.from] = _none;
+
+		board[the_move.to].has_moved = true;
+
+	} else {
+		board[the_move.to] = board[the_move.from];
+		board[the_move.from] = _none;
+
+		board[the_move.to].has_moved = true;
+	}
+}
+
+void apply_move( BoardType& board, Move the_move )
+{
+	sleep( 1 );
+
+	print_move( the_move );
+
+	sleep( 1 );
+
+	game_moves.push_back( the_move );
+
+	update_board( board, the_move );
+
+}
+
+
+
+
 
 int mailbox[120] = {
      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -233,17 +311,17 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 
 	for( uint16_t square = 0; square < 64; ++square) { /* loop over all squares (no piece list) */
 
-		Piece p = board[square];
+		Piece piece = board[square];
 
-		if( p.color != side )
+		if( piece.color != side )
 			continue;
 
-		if( p.type != pawn ) {
+		if( piece.type != pawn ) {
 
-			for( unsigned int ray = 0; ray < ray_directions(p); ++ray ) {
+			for( unsigned int ray = 0; ray < ray_directions(piece); ++ray ) {
 				uint16_t target_square = square;
 				do {
-					target_square = mailbox[ mailbox64[target_square] + offset[p.type][ray] ];	/* next square in this direction */
+					target_square = mailbox[ mailbox64[target_square] + offset[piece.type][ray] ];	/* next square in this direction */
 
 					if( target_square == (uint16_t)-1 )	/* outside of board */
 						break;
@@ -256,22 +334,22 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 						break;
 					}
 
-				} while( is_sliding(p) );
+				} while( is_sliding(piece) );
 			}
 		}
 
-		if( p.type == pawn ) {
+		if( piece.type == pawn ) {
 			// generate pawn moves
 			uint16_t target_square = square;
 
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				target_square = mailbox[ mailbox64[target_square] + ((int[]){ 10, -10 })[p.color] ];	/* next square in this direction */
+				target_square = mailbox[ mailbox64[target_square] + ((int[]){ 10, -10 })[piece.color] ];	/* next square in this direction */
 
 				if( board[target_square].type != none )	/* cannot_move */
 					break;
 
-				if( target_square / 8 == ((int[]){ 7, 0 })[p.color] ) {		// promotion ranks
+				if( target_square / 8 == ((int[]){ 7, 0 })[piece.color] ) {		// promotion ranks
 					for( eType type = knight; type < king; type = eType(type + 1) )
 						moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type } );	// generate a promotion moves
 					break;
@@ -279,14 +357,14 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 
 				moves.push_back( {.from = square, .to = target_square } );	// generate a quiet move
 
-				if( p.has_moved )
+				if( piece.has_moved )
 					break;
 			}
 
 			// capture moves
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				target_square = mailbox[ mailbox64[square] + ((int[2][2]){{9,11},{-9,-11}})[p.color][counter] ];
+				target_square = mailbox[ mailbox64[square] + ((int[2][2]){{9,11},{-9,-11}})[piece.color][counter] ];
 
 				if(    ( target_square != (uint16_t)-1 )					/* on the board... */
 					&& ( board[target_square].type != none )	/* ...something is there... */
@@ -299,23 +377,22 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 
 		}
 
-		if( p.type == king && !p.has_moved ) {
-			uint16_t rook_squares[2][2] = { {7,0}, {63, 56} };
+		if( piece.type == king && !piece.has_moved ) {
 
 			// Check king side castle
-			if( !board[rook_squares[p.color][0]].has_moved
-				&& ( board[rook_squares[p.color][0] - 1].type == none )
-				&& ( board[rook_squares[p.color][0] - 2].type == none )
+			if( (board[square + 3].type == rook) && !board[square + 3].has_moved
+				&& ( board[square + 1].type == none )
+				&& ( board[square + 2].type == none )
 			)
-				moves.push_back( {.from = square, .to = uint16_t(rook_squares[p.color][0] - 1), .castling = true } );
+				moves.push_back( {.from = square, .to = uint16_t(square + 2), .castling = true } );
 
 			// Check queen side castle
-			if( !board[rook_squares[p.color][1]].has_moved
-				&& ( board[rook_squares[p.color][1] + 1].type == none )
-				&& ( board[rook_squares[p.color][1] + 2].type == none )
-				&& ( board[rook_squares[p.color][1] + 3].type == none )
+			if( (board[square - 4].type == rook) && !board[square - 4].has_moved
+				&& ( board[square - 1].type == none )
+				&& ( board[square - 2].type == none )
+				&& ( board[square - 3].type == none )
 			)
-				moves.push_back( {.from = square, .to = uint16_t(rook_squares[p.color][1] + 2), .castling = true } );
+				moves.push_back( {.from = square, .to = uint16_t(square - 2), .castling = true } );
 		}
 	}
 
@@ -323,39 +400,41 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 }
 
 
-void apply_move( BoardType& board, Move& the_move )
-{
-	print_move( the_move );
-
-	board[the_move.to] = board[the_move.from];
-	board[the_move.from] = _none;
-
-	board[the_move.to].has_moved = true;
-}
-
-bool input_move( BoardType& board, std::vector<Move> moves )
+bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 {
     char file_char;
     char rank_char;
 	Move new_move;
 
-    cin >> file_char;
-	if( std::string("qQ").find( file_char ) != std::string::npos )
-		return true;
+	for(;;) {
+		print_input_header( player );
 
-    cin >> rank_char;
+		cin >> file_char;
+		if( std::string("qQ").find( file_char ) != std::string::npos )
+			break;
 
-    new_move.from = (rank_char - '1') * 8 + file_char - 'a';
+		cin >> rank_char;
 
-    cout << '-';
-    flush( cout );
+		new_move.from = (rank_char - '1') * 8 + file_char - 'a';
 
-    cin >> file_char >> rank_char;
-    new_move.to = (rank_char - '1') * 8 + file_char - 'a';
+		cout << '-';
+		flush( cout );
 
-    apply_move( board, new_move );
+		cin >> file_char >> rank_char;
+		new_move.to = (rank_char - '1') * 8 + file_char - 'a';
 
-    return false;
+		auto square_match = [new_move]( Move the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to); };
+
+		auto move_it = std::find_if( moves.begin(), moves.end(), square_match );
+		if( move_it != moves.end() ) {
+			apply_move( board, *move_it );
+			return false;
+		}
+
+		print_invalid_move();
+	}
+
+    return true;
 }
 
 #include <experimental/random>
@@ -413,12 +492,10 @@ int main()
 
 		print_board( board );
 
-		if( is_human[ current_player ] ) {
-			print_input_header( current_player );
-			quit = input_move( board, generate_moves( board, current_player ) );
-		} else {
+		if( is_human[ current_player ] )
+			quit = input_move( board, current_player, generate_moves( board, current_player ) );
+		else
 			quit = make_move( board, generate_moves( board, current_player ) );
-		}
 
 		current_player = eColor( current_player ^ 1 );
     }
