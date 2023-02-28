@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <termios.h>
+#include <cctype>
 
 using namespace std;
 
@@ -121,19 +122,15 @@ BoardType board = {
 
 
 union Move {
-	uint16_t move;
+	uint32_t move;
 	struct {
 		uint16_t from : 6;
 		uint16_t to : 6;
 		uint16_t promotion : 1;
-		union {
-			uint16_t promo_type : 3;
-			struct {
-				uint16_t capture : 1;
-				uint16_t castling : 1;
-				uint16_t flags : 1;
-			};
-		};
+		uint16_t promo_type : 3;
+		uint16_t capture : 1;
+		uint16_t castling : 1;
+		uint16_t flags : 1;
 	};
 };
 
@@ -182,16 +179,19 @@ void print_input_header( eColor side )
 
 void print_move( Move & the_move )
 {
-	set_cursor( 3, 12 );
-	erase_line();
-
 	if( the_move.promotion ) {
+
+		cout << (char)('a' + (the_move.from % 8)) << (char)('1' + (the_move.from / 8) );
+		cout << (the_move.capture ? " x " : " - " );
+		cout << (char)('a' + (the_move.to % 8)) << (char)('1' + (the_move.to / 8) );
+		cout << string("E NBRQK")[the_move.promo_type];
 
 	} else if( the_move.castling ) {
 
 		cout << (( the_move.to > the_move.from ) ? "O - O" : "O - O - O");
 
 	} else {
+
 		cout << string("E NBRQK")[board[the_move.from].type];
 		cout << (char)('a' + (the_move.from % 8)) << (char)('1' + (the_move.from / 8) );
 		cout << (the_move.capture ? " x " : " - " );
@@ -254,6 +254,9 @@ void update_board( BoardType& board, Move the_move )
 void apply_move( BoardType& board, Move the_move )
 {
 	sleep( 1 );
+
+	set_cursor( 3, 12 );
+	erase_line();
 
 	print_move( the_move );
 
@@ -369,8 +372,13 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 				if(    ( target_square != (uint16_t)-1 )					/* on the board... */
 					&& ( board[target_square].type != none )	/* ...something is there... */
 					&& ( board[target_square].color != side )	/* ...and its their piece */
-				)
-					moves.push_back( {.from = square, .to = target_square, .capture = true } );
+				) {
+					if( target_square / 8 == ((int[]){ 7, 0 })[piece.color] ) {		// promotion ranks
+						for( eType type = knight; type < king; type = eType(type + 1) )
+							moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type } );	// generate a promotion moves
+					} else
+						moves.push_back( {.from = square, .to = target_square, .capture = true } );
+				}
 			}
 
 			// en passant moves
@@ -399,6 +407,42 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 	return moves;
 }
 
+Move choose_move( vector<Move> moves )
+{
+	int row;
+	char answer;
+	unsigned int index;
+
+	for(;;) {
+		row = 2;
+		for( auto the_move : moves ) {
+			set_cursor( row, 12 );
+			erase_line();
+			cout << (row - 1) << ". " << string("E NBRQK")[the_move.promo_type];
+			row++;
+		}
+
+		flush( cout );
+
+		set_cursor( row, 12 );
+		cin >> answer;
+
+		if( ! std::isdigit( answer) )
+			continue;
+
+		index = answer -'1';
+		if( index < moves.size() )
+			break;
+	}
+
+	row = 2;
+	for( int idx = 0; idx < moves.size(); ++idx ) {
+		set_cursor( row, 12 );
+		erase_line();
+		row++;
+	}
+	return moves[ index ];
+}
 
 bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 {
@@ -427,7 +471,19 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 
 		auto move_it = std::find_if( moves.begin(), moves.end(), square_match );
 		if( move_it != moves.end() ) {
-			apply_move( board, *move_it );
+			// what if it is a promotion
+			if( (*move_it).promotion ) {
+				// we need to find all possible promotions and ask the player to select one
+				vector<Move> promotion_moves;
+				while( move_it != moves.end() ) {
+					promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
+					move_it = std::find_if( move_it, moves.end(), square_match );
+				}
+
+				apply_move( board, choose_move( promotion_moves ) );
+			} else
+				apply_move( board, *move_it );
+
 			return false;
 		}
 

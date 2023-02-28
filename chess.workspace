@@ -6,5 +6,6 @@
 		<Project filename="Borland/Borland.cbp" />
 		<Project filename="other/other.cbp" />
 		<Project filename="calc_square/calc_square.cbp" />
+		<Project filename="test_chars/test_chars.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
