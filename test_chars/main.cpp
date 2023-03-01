@@ -130,6 +130,8 @@ union Move {
 		uint16_t promo_type : 3;
 		uint16_t capture : 1;
 		uint16_t castling : 1;
+		uint16_t ep_candidate : 1;
+		uint16_t en_passant : 1;
 		uint16_t flags : 1;
 	};
 };
@@ -212,7 +214,17 @@ void print_invalid_move()
 
 void update_board( BoardType& board, Move the_move )
 {
-	if( the_move.promotion ) {
+	if( the_move.en_passant ) {
+		Piece attacking_piece = board[the_move.from];
+
+		board[the_move.to] = board[the_move.from];
+		board[the_move.from] = _none;
+
+		the_move.to += ( (attacking_piece.color == white) ? -8 : 8 );
+
+		board[the_move.to] = _none;
+
+	} else if( the_move.promotion ) {
 		Piece promo_piece = board[the_move.from];
 
 		promo_piece.type = the_move.promo_type;
@@ -272,35 +284,35 @@ void apply_move( BoardType& board, Move the_move )
 
 
 
-int mailbox[120] = {
-     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-     -1,  0,  1,  2,  3,  4,  5,  6,  7, -1,
-     -1,  8,  9, 10, 11, 12, 13, 14, 15, -1,
-     -1, 16, 17, 18, 19, 20, 21, 22, 23, -1,
-     -1, 24, 25, 26, 27, 28, 29, 30, 31, -1,
-     -1, 32, 33, 34, 35, 36, 37, 38, 39, -1,
-     -1, 40, 41, 42, 43, 44, 45, 46, 47, -1,
-     -1, 48, 49, 50, 51, 52, 53, 54, 55, -1,
-     -1, 56, 57, 58, 59, 60, 61, 62, 63, -1,
-     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-};
-
-int mailbox64[64] = {
-    21, 22, 23, 24, 25, 26, 27, 28,
-    31, 32, 33, 34, 35, 36, 37, 38,
-    41, 42, 43, 44, 45, 46, 47, 48,
-    51, 52, 53, 54, 55, 56, 57, 58,
-    61, 62, 63, 64, 65, 66, 67, 68,
-    71, 72, 73, 74, 75, 76, 77, 78,
-    81, 82, 83, 84, 85, 86, 87, 88,
-    91, 92, 93, 94, 95, 96, 97, 98
-};
-
 std::vector<Move> generate_moves( BoardType& board, eColor side )
 {
 	std::vector<Move> moves;
+
+	static int mailbox[120] = {
+		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		 -1,  0,  1,  2,  3,  4,  5,  6,  7, -1,
+		 -1,  8,  9, 10, 11, 12, 13, 14, 15, -1,
+		 -1, 16, 17, 18, 19, 20, 21, 22, 23, -1,
+		 -1, 24, 25, 26, 27, 28, 29, 30, 31, -1,
+		 -1, 32, 33, 34, 35, 36, 37, 38, 39, -1,
+		 -1, 40, 41, 42, 43, 44, 45, 46, 47, -1,
+		 -1, 48, 49, 50, 51, 52, 53, 54, 55, -1,
+		 -1, 56, 57, 58, 59, 60, 61, 62, 63, -1,
+		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
+
+	static int mailbox64[64] = {
+		21, 22, 23, 24, 25, 26, 27, 28,
+		31, 32, 33, 34, 35, 36, 37, 38,
+		41, 42, 43, 44, 45, 46, 47, 48,
+		51, 52, 53, 54, 55, 56, 57, 58,
+		61, 62, 63, 64, 65, 66, 67, 68,
+		71, 72, 73, 74, 75, 76, 77, 78,
+		81, 82, 83, 84, 85, 86, 87, 88,
+		91, 92, 93, 94, 95, 96, 97, 98
+	};
 
 	static int offset[7][8] = {
 		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
@@ -322,7 +334,9 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 		if( piece.type != pawn ) {
 
 			for( unsigned int ray = 0; ray < ray_directions(piece); ++ray ) {
+
 				uint16_t target_square = square;
+
 				do {
 					target_square = mailbox[ mailbox64[target_square] + offset[piece.type][ray] ];	/* next square in this direction */
 
@@ -342,23 +356,23 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 		}
 
 		if( piece.type == pawn ) {
-			// generate pawn moves
+
 			uint16_t target_square = square;
 
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				target_square = mailbox[ mailbox64[target_square] + ((int[]){ 10, -10 })[piece.color] ];	/* next square in this direction */
+				target_square = mailbox[ mailbox64[target_square] + (piece.color == white ? 10 : -10) ];	/* next square in this direction */
 
 				if( board[target_square].type != none )	/* cannot_move */
 					break;
 
-				if( target_square / 8 == ((int[]){ 7, 0 })[piece.color] ) {		// promotion ranks
+				if( target_square / 8 == (piece.color == white ? 7: 0) ) {		// promotion ranks
 					for( eType type = knight; type < king; type = eType(type + 1) )
 						moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type } );	// generate a promotion moves
 					break;
 				}
 
-				moves.push_back( {.from = square, .to = target_square } );	// generate a quiet move
+				moves.push_back( {.from = square, .to = target_square, .ep_candidate = (counter == 1) } );	// generate a quiet move
 
 				if( piece.has_moved )
 					break;
@@ -369,19 +383,28 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 
 				target_square = mailbox[ mailbox64[square] + ((int[2][2]){{9,11},{-9,-11}})[piece.color][counter] ];
 
-				if(    ( target_square != (uint16_t)-1 )					/* on the board... */
-					&& ( board[target_square].type != none )	/* ...something is there... */
-					&& ( board[target_square].color != side )	/* ...and its their piece */
-				) {
-					if( target_square / 8 == ((int[]){ 7, 0 })[piece.color] ) {		// promotion ranks
-						for( eType type = knight; type < king; type = eType(type + 1) )
-							moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
-					} else
-						moves.push_back( {.from = square, .to = target_square, .capture = true } );
-				}
-			}
+				if( target_square != (uint16_t)-1 )	{				/* on the board... */
 
-			// en passant moves
+					if( ( board[target_square].type != none ) && ( board[target_square].color != side ) ) {	/* something is there, and its their piece */
+
+						if( target_square / 8 == (piece.color == white ? 7: 0) ) {		// promotion ranks
+							for( eType type = knight; type < king; type = eType(type + 1) )
+								moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
+						} else
+							moves.push_back( {.from = square, .to = target_square, .capture = true } );
+					}
+
+					if( !game_moves.empty() && game_moves.back().ep_candidate ) {		// check en-passant
+
+						Move last_move = game_moves.back();
+						uint16_t skipped_square = last_move.to + ( (piece.color == white) ? 8 : -8 );	// To calculate the skipped square we subtract 8 for white and add 8 for black
+
+						if( skipped_square == target_square )
+							moves.push_back( {.from = square, .to = target_square, .capture = true, .en_passant = true } );
+					}
+				} /*  target_square != (uint16_t)-1 */
+
+			}
 
 		}
 
