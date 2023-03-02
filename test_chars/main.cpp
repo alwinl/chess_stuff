@@ -175,7 +175,7 @@ void print_input_header( eColor side )
 	set_cursor( 2, 12 );
 	erase_line();
 
-    cout << ((std::string[]){"White", "Black"}[side]) << '?';
+    cout << ((side == white) ? "White" :"Black") << '?';
     flush( cout );
 }
 
@@ -211,6 +211,90 @@ void print_invalid_move()
 	cout << "Invalid move";
 	flush( cout );
 }
+
+void promo_menu( bool clear)
+{
+	std::string output[] = { "1. N", "2. B", "3. R", "4. Q", "? " };
+
+	for( int row = 0; row < 5; ++row ) {
+		set_cursor( row + 2, 12 );
+		if( clear )
+			erase_line();
+		else
+			cout << output[row];
+	}
+
+	flush( cout );
+}
+
+void new_game_menu()
+{
+	set_cursor( 1, 1 );
+	erase_display();
+
+	cout << "1. Human vs Computer\n"
+		 << "2. Computer vs Human\n"
+		 << "3. Computer vs Computer\n"
+		 << "4. Human vs Human\n"
+		 << "5. Quit\n"
+		 << "\n"
+		 << "Selection? ";
+	flush( cout );
+}
+
+void print_bar()
+{
+	cout << '-';
+	flush( cout );
+}
+
+uint16_t get_square()
+{
+    char file_char;
+    char rank_char;
+
+	cin >> file_char;
+	if( (file_char == 'Q') || (file_char == 'q') )
+		return uint16_t(-1);
+
+	if( (file_char >= 'A') && (file_char <= 'H') )
+		file_char += ('a' - 'A');
+
+	if( (file_char < 'a') || (file_char > 'h') )
+		return uint16_t(64);
+
+	cin >> rank_char;
+	if( (rank_char == 'Q') || (rank_char == 'q') )
+		return uint16_t(-1);
+
+	if( (rank_char < '1') || (rank_char > '8') )
+		return uint16_t(64);
+
+	return uint16_t((rank_char - '1') * 8 + file_char - 'a');
+}
+
+unsigned int select_promo_type()
+{
+	char answer;
+
+	set_cursor( 7, 12 );
+	cin >> answer;
+
+	return ( (answer >= '1') && (answer <= '4') ) ?  answer -'1' : (unsigned int)-1;
+}
+
+unsigned int select_gametype()
+{
+	char answer;
+
+	set_cursor( 8, 12 );
+	cin >> answer;
+
+	return ( (answer >= '1') && (answer <= '5') ) ?  answer -'0' : (unsigned int)-1;
+}
+
+
+
 
 void update_board( BoardType& board, Move the_move )
 {
@@ -430,65 +514,45 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 	return moves;
 }
 
+
 Move choose_move( vector<Move> moves )
 {
-	int row;
-	char answer;
-	unsigned int index;
-
 	for(;;) {
-		row = 2;
-		for( auto the_move : moves ) {
-			set_cursor( row, 12 );
-			erase_line();
-			cout << (row - 1) << ". " << string("E NBRQK")[the_move.promo_type];
-			row++;
+		promo_menu( false );
+
+		unsigned int index;
+		if( (index = select_promo_type()) != (unsigned int) -1 ) {
+			promo_menu( true );
+			return moves[ index ];
 		}
-
-		flush( cout );
-
-		set_cursor( row, 12 );
-		cin >> answer;
-
-		if( ! std::isdigit( answer) )
-			continue;
-
-		index = answer -'1';
-		if( index < moves.size() )
-			break;
 	}
 
-	row = 2;
-	for( unsigned int idx = 0; idx < moves.size(); ++idx ) {
-		set_cursor( row, 12 );
-		erase_line();
-		row++;
-	}
-	return moves[ index ];
 }
 
 bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 {
-    char file_char;
-    char rank_char;
 	Move new_move;
+	unsigned int square;
 
 	for(;;) {
 		print_input_header( player );
 
-		cin >> file_char;
-		if( std::string("qQ").find( file_char ) != std::string::npos )
+		if( (square = get_square()) == uint16_t(-1) )
 			return true;
 
-		cin >> rank_char;
+		if( square == 64 )
+			continue;
 
-		new_move.from = (rank_char - '1') * 8 + file_char - 'a';
+		new_move.from = (uint16_t)square;
+		print_bar();
 
-		cout << '-';
-		flush( cout );
+		if( (square = get_square()) == uint16_t(-1) )
+			return true;
 
-		cin >> file_char >> rank_char;
-		new_move.to = (rank_char - '1') * 8 + file_char - 'a';
+		if( square == 64 )
+			continue;
+
+		new_move.to = (uint16_t)square;
 
 		auto square_match = [new_move]( Move the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to); };
 
@@ -506,13 +570,23 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 
 		// we need to find all possible promotions and ask the player to select one
 		vector<Move> promotion_moves;
+		unsigned int index;
 
 		while( move_it != moves.end() ) {
 			promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
 			move_it = std::find_if( move_it, moves.end(), square_match );
 		}
 
-		apply_move( board, choose_move( promotion_moves ) );
+		for(;;) {
+			promo_menu( false );
+
+			if( (index = select_promo_type()) != (unsigned int) -1 ) {
+				promo_menu( true );
+				break;
+			}
+		}
+
+		apply_move( board, promotion_moves[ index ] );
 		return false;
 	}
 }
@@ -529,27 +603,15 @@ bool make_move( BoardType& board, std::vector<Move> moves )
 	return false;
 }
 
-int get_gametype()
+unsigned int get_gametype()
 {
-	char answer;
+	unsigned int gametype;
 
 	for( ;; ) {
-		set_cursor( 1, 1 );
-		erase_display();
+		new_game_menu();
 
-		cout << "1. Human vs Computer\n"
-			 << "2. Computer vs Human\n"
-			 << "3. Computer vs Computer\n"
-			 << "4. Human vs Human\n"
-			 << "5. Quit\n"
-			 << "\n"
-			 << "Selection? ";
-		flush( cout );
-
-		cin >> answer;
-
-		if( std::string("12345").find( answer ) != std::string::npos )
-			return answer - '0';
+		if( (gametype = select_gametype()) != (unsigned int)-1 )
+			return gametype;
 	}
 }
 
@@ -558,7 +620,7 @@ int main()
 	TerminalSetup bf;
 	eColor current_player = white;
 
-	int gametype = get_gametype();
+	unsigned int gametype = get_gametype();
 
 	bool quit = ( gametype == 5 );
 	bool is_human[2] = { ((gametype == 1) || (gametype == 4)), ((gametype == 2) || (gametype == 4)) };
