@@ -69,8 +69,6 @@ BoardType board = {
 
 
 
-
-
 union Move {
 	uint32_t move;
 	struct {
@@ -94,8 +92,7 @@ public:
 	~Display() { on(); restore_screen(); };
 
 	void print_board( BoardType& board );
-	void print_input_header( eColor side );
-	void print_move( Move & the_move );
+	void print_input_header( bool is_white );
 	void print_invalid_move();
 	void promo_menu( bool clear);
 	void new_game_menu();
@@ -103,6 +100,16 @@ public:
 	uint16_t get_square();
 	unsigned int select_promo_type();
 	unsigned int select_gametype();
+
+	void print_promotion_move( uint16_t from, uint16_t to, bool is_capture, uint16_t promo_type );
+	void print_castling_move( uint16_t from, uint16_t to );
+	void print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture );
+
+	void print_board_header();
+	void print_board_footer();
+	void print_rank_header( unsigned int rank );
+	void print_rank_footer( unsigned int rank );
+	void print_square( unsigned int rank, unsigned int file, uint16_t type, bool is_white );
 
 private:
 	struct termios t;
@@ -145,76 +152,120 @@ private:
 	}
 
 	void restore_screen() { set_cursor( 10, 1 ); }
+
 };
 
 
 
 vector<Move> game_moves;
 
-void Display::print_board( BoardType& board )
+void Display::print_board_header()
+{
+	set_cursor( 1, 1 );
+	erase_display();
+
+    cout << " abcdefgh";
+}
+
+void Display::print_board_footer()
+{
+	set_cursor( 10, 1 );
+    cout << " abcdefgh";
+
+    flush( cout );
+}
+
+void Display::print_rank_header( unsigned int rank )
+{
+	set_cursor( 10 - rank, 1 );
+	cout << rank;
+}
+
+void Display::print_rank_footer( unsigned int rank )
+{
+	restore();
+	set_cursor( 10 - rank, 10 );
+	cout << rank;
+}
+
+void Display::print_square( unsigned int rank, unsigned int file, uint16_t type, bool is_white )
 {
 	static array<string,14> rep = {
 		" ", "♙", "♘", "♗", "♖", "♕", "♔",
 		" ", "♟", "♞", "♝", "♜", "♛", "♚",
 	};
 
-	set_cursor( 1, 1 );
-	erase_display();
+	bool odd = (file + rank) % 2;
 
-    cout << " abcdefgh" << endl;
+	set_cursor( 10 - rank, file + 2 );
 
-    for( int rank=8; rank; --rank ) {
-		cout << rank;
-		for( int file=0; file<8; ++file ) {
-			int index = (rank - 1) * 8 + file;
+	odd ? char_color( 30, 107 ) : char_color( 97, 40 );
 
-			if( (file + rank) % 2 ) {
-				char_color( 30, 107 );
-				cout << rep[ board[index].color * 7 + board[index].type ];
-			} else {
-				char_color( 97, 40 );
-				cout << rep[(1 - board[index].color) * 7 + board[index].type];
-			}
-		}
-		restore();
-		cout << rank << endl;
-    }
-
-    cout << " abcdefgh" << endl;
+	cout << rep[ ( odd == is_white ) ? type : type + 7 ];
 }
 
-void Display::print_input_header( eColor side )
+void Display::print_board( BoardType& board )
+{
+	print_board_header();
+
+    for( int rank=8; rank; --rank ) {
+
+		print_rank_header( rank );
+
+		for( int file=0; file<8; ++file ) {
+
+			int index = (rank - 1) * 8 + file;
+
+			print_square( rank, file, board[index].type, board[index].color == white );
+		}
+
+		print_rank_footer( rank );
+    }
+
+    print_board_footer();
+}
+
+void Display::print_input_header( bool is_white )
 {
 	set_cursor( 2, 12 );
 	erase_line();
 
-    cout << ((side == white) ? "White" :"Black") << '?';
+    cout << (is_white ? "White" :"Black") << '?';
     flush( cout );
 }
 
-void Display::print_move( Move & the_move )
+void Display::print_promotion_move( uint16_t from, uint16_t to, bool is_capture, uint16_t promo_type )
 {
 	set_cursor( 3, 12 );
 	erase_line();
 
-	if( the_move.promotion ) {
+	cout << (char)('a' + (from % 8)) << (char)('1' + (from / 8) );
+	cout << (is_capture ? " x " : " - " );
+	cout << (char)('a' + (to % 8)) << (char)('1' + (to / 8) );
+	cout << string("E NBRQK")[promo_type];
 
-		cout << (char)('a' + (the_move.from % 8)) << (char)('1' + (the_move.from / 8) );
-		cout << (the_move.capture ? " x " : " - " );
-		cout << (char)('a' + (the_move.to % 8)) << (char)('1' + (the_move.to / 8) );
-		cout << string("E NBRQK")[the_move.promo_type];
+	flush( cout );
+}
 
-	} else if( the_move.castling ) {
+void Display::print_castling_move( uint16_t from, uint16_t to )
+{
+	set_cursor( 3, 12 );
+	erase_line();
 
-		cout << (( the_move.to > the_move.from ) ? "O - O" : "O - O - O");
+	cout << (( to > from ) ? "O - O" : "O - O - O");
 
-	} else {
+	flush( cout );
+}
 
-		cout << string("E NBRQK")[board[the_move.from].type];
-		cout << (char)('a' + (the_move.from % 8)) << (char)('1' + (the_move.from / 8) );
-		cout << (the_move.capture ? " x " : " - " );
-		cout << (char)('a' + (the_move.to % 8)) << (char)('1' + (the_move.to / 8) );
-	}
+void Display::print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture )
+{
+	set_cursor( 3, 12 );
+	erase_line();
+
+	cout << string("E NBRQK")[type];
+	cout << (char)('a' + (from % 8)) << (char)('1' + (from / 8) );
+	cout << (is_capture ? " x " : " - " );
+	cout << (char)('a' + (to % 8)) << (char)('1' + (to / 8) );
 
 	flush( cout );
 }
@@ -513,21 +564,6 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 	return moves;
 }
 
-/*
-Move choose_move( vector<Move> moves )
-{
-	for(;;) {
-		promo_menu( false );
-
-		unsigned int index;
-		if( (index = select_promo_type()) != (unsigned int) -1 ) {
-			promo_menu( true );
-			return moves[ index ];
-		}
-	}
-
-}
-*/
 class ChessGame
 {
 public:
@@ -556,7 +592,7 @@ bool ChessGame::input_move( BoardType& board, eColor player, std::vector<Move> m
 	unsigned int square;
 
 	for(;;) {
-		disp.print_input_header( player );
+		disp.print_input_header( player == white );
 
 		if( (square = disp.get_square()) == uint16_t(-1) )
 			return true;
@@ -626,9 +662,13 @@ bool ChessGame::make_move( BoardType& board, std::vector<Move> moves )
 
 void ChessGame::apply_move( BoardType& board, Move the_move )
 {
-	sleep( 1 );
-
-	disp.print_move( the_move );
+	if( the_move.promotion ) {
+		disp.print_promotion_move( the_move.from, the_move.to, the_move.capture, the_move.promo_type );
+	} else if( the_move.castling ) {
+		disp.print_castling_move( the_move.from, the_move.to );
+	} else {
+		disp.print_regular_move( board[the_move.from].type, the_move.from, the_move.to, the_move.capture );
+	}
 
 	sleep( 1 );
 
