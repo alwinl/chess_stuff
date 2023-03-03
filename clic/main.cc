@@ -91,7 +91,6 @@ public:
 	Display() { off(); clear_screen(); };
 	~Display() { on(); restore_screen(); };
 
-	void print_board( BoardType& board );
 	void print_input_header( bool is_white );
 	void print_invalid_move();
 	void promo_menu( bool clear);
@@ -202,27 +201,6 @@ void Display::print_square( unsigned int rank, unsigned int file, uint16_t type,
 	odd ? char_color( 30, 107 ) : char_color( 97, 40 );
 
 	cout << rep[ ( odd == is_white ) ? type : type + 7 ];
-}
-
-void Display::print_board( BoardType& board )
-{
-	print_board_header();
-
-    for( int rank=8; rank; --rank ) {
-
-		print_rank_header( rank );
-
-		for( int file=0; file<8; ++file ) {
-
-			int index = (rank - 1) * 8 + file;
-
-			print_square( rank, file, board[index].type, board[index].color == white );
-		}
-
-		print_rank_footer( rank );
-    }
-
-    print_board_footer();
 }
 
 void Display::print_input_header( bool is_white )
@@ -362,6 +340,26 @@ unsigned int Display::select_gametype()
 
 
 
+void print_board( BoardType& board, Display& display )
+{
+	display.print_board_header();
+
+    for( int rank=8; rank; --rank ) {
+
+		display.print_rank_header( rank );
+
+		for( int file=0; file<8; ++file ) {
+
+			int index = (rank - 1) * 8 + file;
+
+			display.print_square( rank, file, board[index].type, board[index].color == white );
+		}
+
+		display.print_rank_footer( rank );
+    }
+
+    display.print_board_footer();
+}
 
 void update_board( BoardType& board, Move the_move )
 {
@@ -698,7 +696,7 @@ bool ChessGame::game_loop()
 {
 	bool quit;
 
-	disp.print_board( board );
+	print_board( board, disp );
 
 	if( is_human[ current_player ] )
 		quit = input_move( board, current_player, generate_moves( board, current_player ) );
