@@ -12,56 +12,6 @@
 
 using namespace std;
 
-void ansi_cgi( std::string cgi_sequence )
-	{ cout << "\x1B[" << cgi_sequence; }
-
-void char_color( unsigned int foreground, unsigned int background )
-	{ ansi_cgi( std::to_string( foreground ) + ';' + std::to_string( background ) + "m" ); }
-
-void set_cursor( unsigned int row, unsigned int column )
-	{ ansi_cgi( std::to_string( row ) + ';' + std::to_string( column ) + "H" ); }
-
-void restore() { char_color( 39, 49 ); }
-
-void erase_display() { ansi_cgi( "0J" ); }	/* clears from cursor to end of screen */
-void erase_line() {  ansi_cgi( "0K" ); }	/* clears from cursor to end of line */
-
-
-
-class TerminalSetup
-{
-public:
-	TerminalSetup() { off(); clear_screen(); };
-	~TerminalSetup() { on(); restore_screen(); };
-
-private:
-	struct termios t;
-
-	void off()
-	{
-		tcgetattr(STDIN_FILENO, &t); //get the current terminal I/O structure
-		t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
-		tcsetattr(STDIN_FILENO, TCSANOW, &t); //Apply the new settings
-	}
-
-	void on()
-	{
-		tcgetattr(STDIN_FILENO, &t); //get the current terminal I/O structure
-		t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
-		tcsetattr(STDIN_FILENO, TCSANOW, &t); //Apply the new settings
-	}
-
-	void clear_screen()
-	{
-		set_cursor( 1, 1 );
-		erase_display();
-	}
-
-	void restore_screen()
-	{
-		set_cursor( 10, 1 );
-	}
-};
 
 
 
@@ -136,9 +86,72 @@ union Move {
 	};
 };
 
+
+class Display
+{
+public:
+	Display() { off(); clear_screen(); };
+	~Display() { on(); restore_screen(); };
+
+	void print_board( BoardType& board );
+	void print_input_header( eColor side );
+	void print_move( Move & the_move );
+	void print_invalid_move();
+	void promo_menu( bool clear);
+	void new_game_menu();
+	void print_bar();
+	uint16_t get_square();
+	unsigned int select_promo_type();
+	unsigned int select_gametype();
+
+private:
+	struct termios t;
+
+	void off()
+	{
+		tcgetattr(STDIN_FILENO, &t); //get the current terminal I/O structure
+		t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
+		tcsetattr(STDIN_FILENO, TCSANOW, &t); //Apply the new settings
+	}
+
+	void on()
+	{
+		tcgetattr(STDIN_FILENO, &t); //get the current terminal I/O structure
+		t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
+		tcsetattr(STDIN_FILENO, TCSANOW, &t); //Apply the new settings
+	}
+
+
+	void ansi_cgi( std::string cgi_sequence )
+		{ cout << "\x1B[" << cgi_sequence; }
+
+	void char_color( unsigned int foreground, unsigned int background )
+		{ ansi_cgi( std::to_string( foreground ) + ';' + std::to_string( background ) + "m" ); }
+
+	void set_cursor( unsigned int row, unsigned int column )
+		{ ansi_cgi( std::to_string( row ) + ';' + std::to_string( column ) + "H" ); }
+
+	void restore() { char_color( 39, 49 ); }
+
+	void erase_display() { ansi_cgi( "0J" ); }	/* clears from cursor to end of screen */
+	void erase_line() {  ansi_cgi( "0K" ); }	/* clears from cursor to end of line */
+
+
+
+	void clear_screen()
+	{
+		set_cursor( 1, 1 );
+		erase_display();
+	}
+
+	void restore_screen() { set_cursor( 10, 1 ); }
+};
+
+
+
 vector<Move> game_moves;
 
-void print_board( BoardType& board )
+void Display::print_board( BoardType& board )
 {
 	static array<string,14> rep = {
 		" ", "♙", "♘", "♗", "♖", "♕", "♔",
@@ -170,7 +183,7 @@ void print_board( BoardType& board )
     cout << " abcdefgh" << endl;
 }
 
-void print_input_header( eColor side )
+void Display::print_input_header( eColor side )
 {
 	set_cursor( 2, 12 );
 	erase_line();
@@ -179,8 +192,11 @@ void print_input_header( eColor side )
     flush( cout );
 }
 
-void print_move( Move & the_move )
+void Display::print_move( Move & the_move )
 {
+	set_cursor( 3, 12 );
+	erase_line();
+
 	if( the_move.promotion ) {
 
 		cout << (char)('a' + (the_move.from % 8)) << (char)('1' + (the_move.from / 8) );
@@ -203,7 +219,7 @@ void print_move( Move & the_move )
 	flush( cout );
 }
 
-void print_invalid_move()
+void Display::print_invalid_move()
 {
 	set_cursor( 3, 12 );
 	erase_line();
@@ -212,7 +228,7 @@ void print_invalid_move()
 	flush( cout );
 }
 
-void promo_menu( bool clear)
+void Display::promo_menu( bool clear)
 {
 	std::string output[] = { "1. N", "2. B", "3. R", "4. Q", "? " };
 
@@ -227,7 +243,7 @@ void promo_menu( bool clear)
 	flush( cout );
 }
 
-void new_game_menu()
+void Display::new_game_menu()
 {
 	set_cursor( 1, 1 );
 	erase_display();
@@ -242,13 +258,13 @@ void new_game_menu()
 	flush( cout );
 }
 
-void print_bar()
+void Display::print_bar()
 {
 	cout << '-';
 	flush( cout );
 }
 
-uint16_t get_square()
+uint16_t Display::get_square()
 {
     char file_char;
     char rank_char;
@@ -273,7 +289,7 @@ uint16_t get_square()
 	return uint16_t((rank_char - '1') * 8 + file_char - 'a');
 }
 
-unsigned int select_promo_type()
+unsigned int Display::select_promo_type()
 {
 	char answer;
 
@@ -283,11 +299,11 @@ unsigned int select_promo_type()
 	return ( (answer >= '1') && (answer <= '4') ) ?  answer -'1' : (unsigned int)-1;
 }
 
-unsigned int select_gametype()
+unsigned int Display::select_gametype()
 {
 	char answer;
 
-	set_cursor( 8, 12 );
+	set_cursor( 7, 12 );
 	cin >> answer;
 
 	return ( (answer >= '1') && (answer <= '5') ) ?  answer -'0' : (unsigned int)-1;
@@ -345,23 +361,6 @@ void update_board( BoardType& board, Move the_move )
 
 		board[the_move.to].has_moved = true;
 	}
-}
-
-void apply_move( BoardType& board, Move the_move )
-{
-	sleep( 1 );
-
-	set_cursor( 3, 12 );
-	erase_line();
-
-	print_move( the_move );
-
-	sleep( 1 );
-
-	game_moves.push_back( the_move );
-
-	update_board( board, the_move );
-
 }
 
 
@@ -514,7 +513,7 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 	return moves;
 }
 
-
+/*
 Move choose_move( vector<Move> moves )
 {
 	for(;;) {
@@ -528,25 +527,47 @@ Move choose_move( vector<Move> moves )
 	}
 
 }
+*/
+class ChessGame
+{
+public:
+	ChessGame() {};
+	~ChessGame() {};
 
-bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
+	bool setup();
+	bool game_loop();
+
+private:
+	Display disp;
+	eColor current_player = white;
+	unsigned int gametype = -1;
+	bool is_human[2];
+
+	bool input_move( BoardType& board, eColor player, std::vector<Move> moves );
+	bool make_move( BoardType& board, std::vector<Move> moves );
+	void apply_move( BoardType& board, Move the_move );
+};
+
+
+
+bool ChessGame::input_move( BoardType& board, eColor player, std::vector<Move> moves )
 {
 	Move new_move;
 	unsigned int square;
 
 	for(;;) {
-		print_input_header( player );
+		disp.print_input_header( player );
 
-		if( (square = get_square()) == uint16_t(-1) )
+		if( (square = disp.get_square()) == uint16_t(-1) )
 			return true;
 
 		if( square == 64 )
 			continue;
 
 		new_move.from = (uint16_t)square;
-		print_bar();
+		disp.print_bar();
 
-		if( (square = get_square()) == uint16_t(-1) )
+		if( (square = disp.get_square()) == uint16_t(-1) )
 			return true;
 
 		if( square == 64 )
@@ -558,7 +579,7 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 
 		auto move_it = std::find_if( moves.begin(), moves.end(), square_match );
 		if( move_it == moves.end() ) {
-			print_invalid_move();
+			disp.print_invalid_move();
 			continue;
 		}
 
@@ -578,10 +599,10 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 		}
 
 		for(;;) {
-			promo_menu( false );
+			disp.promo_menu( false );
 
-			if( (index = select_promo_type()) != (unsigned int) -1 ) {
-				promo_menu( true );
+			if( (index = disp.select_promo_type()) != (unsigned int) -1 ) {
+				disp.promo_menu( true );
 				break;
 			}
 		}
@@ -593,7 +614,7 @@ bool input_move( BoardType& board, eColor player, std::vector<Move> moves )
 
 #include <experimental/random>
 
-bool make_move( BoardType& board, std::vector<Move> moves )
+bool ChessGame::make_move( BoardType& board, std::vector<Move> moves )
 {
 	int size = moves.size();
     int random_number = std::experimental::randint( 0, size - 1 );
@@ -603,24 +624,64 @@ bool make_move( BoardType& board, std::vector<Move> moves )
 	return false;
 }
 
-unsigned int get_gametype()
+void ChessGame::apply_move( BoardType& board, Move the_move )
 {
-	unsigned int gametype;
+	sleep( 1 );
 
-	for( ;; ) {
-		new_game_menu();
+	disp.print_move( the_move );
 
-		if( (gametype = select_gametype()) != (unsigned int)-1 )
-			return gametype;
+	sleep( 1 );
+
+	game_moves.push_back( the_move );
+
+	update_board( board, the_move );
+
+}
+
+
+
+bool ChessGame::setup()
+{
+	while( gametype == (unsigned int )-1 ) {
+		disp.new_game_menu();
+		gametype = disp.select_gametype();
 	}
+
+	bool quit = ( gametype == 5 );
+	is_human[0] = ((gametype == 1) || (gametype == 4));
+	is_human[1] = ((gametype == 2) || (gametype == 4));
+
+	return quit;
+}
+
+bool ChessGame::game_loop()
+{
+	bool quit;
+
+	disp.print_board( board );
+
+	if( is_human[ current_player ] )
+		quit = input_move( board, current_player, generate_moves( board, current_player ) );
+	else
+		quit = make_move( board, generate_moves( board, current_player ) );
+
+	current_player = eColor( current_player ^ 1 );
+
+    return quit;
 }
 
 int main()
 {
-	TerminalSetup bf;
+#if 0
+	Display bf;
 	eColor current_player = white;
 
-	unsigned int gametype = get_gametype();
+	unsigned int gametype = -1;
+
+	while( gametype == (unsigned int )-1 ) {
+		new_game_menu();
+		gametype = select_gametype();
+	}
 
 	bool quit = ( gametype == 5 );
 	bool is_human[2] = { ((gametype == 1) || (gametype == 4)), ((gametype == 2) || (gametype == 4)) };
@@ -636,6 +697,14 @@ int main()
 
 		current_player = eColor( current_player ^ 1 );
     }
+#else
+	ChessGame game;
 
+	bool quit = game.setup();
+
+    while( !quit ) {
+		quit = game.game_loop();
+    }
+#endif
     return 0;
 }
