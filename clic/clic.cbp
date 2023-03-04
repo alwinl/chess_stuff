@@ -32,7 +32,17 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="board.cc" />
+		<Unit filename="board.h" />
+		<Unit filename="chessgame.cc" />
+		<Unit filename="chessgame.h" />
+		<Unit filename="display.cc" />
+		<Unit filename="display.h" />
 		<Unit filename="main.cc" />
+		<Unit filename="move.cc" />
+		<Unit filename="move.h" />
+		<Unit filename="piece.cc" />
+		<Unit filename="piece.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

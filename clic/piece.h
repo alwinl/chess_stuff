@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,15 +31,14 @@ public:
 
 	Piece( eType _type = none, eColor _color = white  ) { piece = 0; color = _color; type = _type; }
 
-	bool is_color( eColor test_color ) { return color == test_color; }
-	eType get_type() { return eType( type ); }
-	unsigned int ray_directions();
+	bool is_color( eColor test_color ) const { return color == test_color; }
+	bool is_sliding() const {	return (type == bishop) || (type == rook) || (type == queen); }
+	bool is_of_type( eType test_type ) const { return type == test_type; }
+	bool has_moved() const { return hasmoved; }
+	eType get_type() const { return eType( type ); }
 
-	unsigned int get_ray_offset( unsigned int ray );
-
-	bool is_sliding() {	return (type == bishop) || (type == rook) || (type == queen); }
-	bool is_of_type( eType test_type ) { return type == test_type; }
-	bool has_moved() { return hasmoved; }
+	unsigned int ray_directions() const;
+	unsigned int get_ray_offset( unsigned int ray ) const;
 
 	void promote_pawn( eType new_type ) { type = new_type; }
 	void moved() { hasmoved = true; }

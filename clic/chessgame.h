@@ -17,16 +17,33 @@
  * MA 02110-1301, USA.
  */
 
-#include "chessgame.h"
+#ifndef CHESSGAME_H
+#define CHESSGAME_H
 
-int main()
+#include <vector>
+
+#include "move.h"
+#include "board.h"
+#include "display.h"
+#include "piece.h"
+
+class ChessGame
 {
-	ChessGame game;
+public:
+	bool setup();
+	bool game_loop();
 
-	bool quit = game.setup();
+private:
+	Display disp;
+	eColor current_player = white;
+	unsigned int gametype = -1;
+	bool is_human[2];
+	Board board;
+	std::vector<Move> game_moves;
 
-    while( !quit )
-		quit = game.game_loop();
+	bool input_move( eColor player, std::vector<Move> moves );
+	bool make_move( std::vector<Move> moves );
+	void apply_move( Move the_move );
+};
 
-    return 0;
-}
+#endif // CHESSGAME_H

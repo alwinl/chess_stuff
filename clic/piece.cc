@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,14 @@
 
 #include "piece.h"
 
-unsigned int Piece::ray_directions()
+unsigned int Piece::ray_directions() const
 {
 	static unsigned int directions[] = { 0, 0, 8, 4, 4, 8, 8 };
 
 	return directions[type];
 }
 
-unsigned int Piece::get_ray_offset( unsigned int ray )
+unsigned int Piece::get_ray_offset( unsigned int ray ) const
 {
 	static int offset[7][8] = {
 		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */

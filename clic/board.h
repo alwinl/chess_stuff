@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public:
 	void update_board( Move the_move );
 	std::vector<Move> generate_moves( eColor side, uint16_t ep_square );
 
-	Piece::eType get_type_from_square( unsigned int square ) { return position[square].get_type(); }
+	Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
 
 private:
 	std::array<Piece, 64> position;
