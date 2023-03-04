@@ -161,6 +161,17 @@ void Display::print_bar()
 	flush( cout );
 }
 
+void Display::print_total_possible_moves( unsigned int no_of_moves )
+{
+	set_cursor( 5, 12 );
+	erase_line();
+
+	cout << "Generated moves " << no_of_moves;
+
+	flush( cout );
+}
+
+
 uint16_t Display::get_square()
 {
     char file_char;

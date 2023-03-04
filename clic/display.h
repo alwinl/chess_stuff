@@ -45,6 +45,8 @@ public:
 	void print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture );
 	void print_invalid_move();
 
+	void print_total_possible_moves( unsigned int no_of_moves );
+
 	void print_input_header( bool is_white );
 	void promo_menu( bool clear);
 	void new_game_menu();
