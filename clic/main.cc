@@ -20,60 +20,7 @@ using namespace std;
 
 
 
-
-enum eColor { white, black};
-
-class Piece
-{
-public:
-	enum eType { none, pawn, knight, bishop, rook, queen, king };
-
-	Piece( eColor _color, eType _type ) { piece = 0; color = _color; type = _type; }
-
-	bool is_color( eColor test_color ) { return color == test_color; }
-	eType get_type() { return eType( type ); }
-	unsigned int ray_directions() { return ((unsigned int[]){ 0, 0, 8, 4, 4, 8, 8 })[type]; };
-
-	unsigned int get_ray_offset( unsigned int ray );
-
-	bool is_sliding() {	return (type == bishop) || (type == rook) || (type == queen); }
-	bool is_of_type( eType test_type ) { return type == test_type; }
-	bool has_moved() { return hasmoved; }
-
-	void promote_pawn( eType new_type ) { type = new_type; }
-	void moved() { hasmoved = true; }
-
-	bool operator<( const Piece rhs ) { return piece < rhs.piece; }
-
-protected:
-	union {
-		uint16_t piece;
-		struct {
-			uint16_t reserved:8;
-			uint16_t hasmoved:1;
-			uint16_t reserved1:3;
-			uint16_t color:1;
-			uint16_t type:3;
-		};
-	};
-};
-
-
-unsigned int Piece::get_ray_offset( unsigned int ray )
-{
-	static int offset[7][8] = {
-		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
-		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
-		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
-		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
-		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
-		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
-		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
-	};
-
-	return offset[type][ray];
-}
-
+#include "piece.h"
 
 
 Piece _none   = Piece( white, Piece::none );
