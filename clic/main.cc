@@ -10,49 +10,86 @@
 #include <termios.h>
 #include <cctype>
 
+
+#include "display.h"
+
+
 using namespace std;
 
 
 
 
 
+
 enum eColor { white, black};
-enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-bool sliding_piece[] = { false, false, false, true, true, true, false };
-unsigned int direction_count[] = { 0, 0, 8, 4, 4, 8, 8 };
+class Piece
+{
+public:
+	enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-union Piece {
-	uint16_t piece;
-	struct {
-		uint16_t reserved:8;
-		uint16_t has_moved:1;
-		uint16_t reserved1:3;
-		uint16_t color:1;
-		uint16_t type:3;
+	Piece( eColor _color, eType _type ) { piece = 0; color = _color; type = _type; }
+
+	bool is_color( eColor test_color ) { return color == test_color; }
+	eType get_type() { return eType( type ); }
+	unsigned int ray_directions() { return ((unsigned int[]){ 0, 0, 8, 4, 4, 8, 8 })[type]; };
+
+	unsigned int get_ray_offset( unsigned int ray );
+
+	bool is_sliding() {	return (type == bishop) || (type == rook) || (type == queen); }
+	bool is_of_type( eType test_type ) { return type == test_type; }
+	bool has_moved() { return hasmoved; }
+
+	void promote_pawn( eType new_type ) { type = new_type; }
+	void moved() { hasmoved = true; }
+
+	bool operator<( const Piece rhs ) { return piece < rhs.piece; }
+
+protected:
+	union {
+		uint16_t piece;
+		struct {
+			uint16_t reserved:8;
+			uint16_t hasmoved:1;
+			uint16_t reserved1:3;
+			uint16_t color:1;
+			uint16_t type:3;
+		};
 	};
 };
 
-bool operator<( const Piece lhs, const Piece rhs ) { return lhs.piece < rhs.piece; }
 
-eColor get_color( Piece piece ) { return eColor( piece.color ); }
-eType get_type( Piece piece ) { return eType( piece.type ); }
-unsigned int ray_directions( Piece piece ) { return direction_count[piece.type]; };
-bool is_sliding( Piece piece ) { return sliding_piece[piece.type]; }
+unsigned int Piece::get_ray_offset( unsigned int ray )
+{
+	static int offset[7][8] = {
+		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
+		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
+		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
+		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
+		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
+		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
+		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
+	};
 
-Piece _none   = { .has_moved = false, .color = white, .type = none };
-Piece wpawn   = { .has_moved = false, .color = white, .type = pawn };
-Piece wknight = { .has_moved = false, .color = white, .type = knight };
-Piece wbishop = { .has_moved = false, .color = white, .type = bishop };
-Piece wrook   = { .has_moved = false, .color = white, .type = rook };
-Piece wqueen  = { .has_moved = false, .color = white, .type = queen };
-Piece wking   = { .has_moved = false, .color = white, .type = king };
-Piece bpawn   = { .has_moved = false, .color = black, .type = pawn };
-Piece bknight = { .has_moved = false, .color = black, .type = knight };
-Piece bbishop = { .has_moved = false, .color = black, .type = bishop };
-Piece brook   = { .has_moved = false, .color = black, .type = rook };
-Piece bqueen  = { .has_moved = false, .color = black, .type = queen };
-Piece bking   = { .has_moved = false, .color = black, .type = king };
+	return offset[type][ray];
+}
+
+
+
+Piece _none   = Piece( white, Piece::none );
+Piece wpawn   = Piece( white, Piece::pawn );
+Piece wknight = Piece( white, Piece::knight );
+Piece wbishop = Piece( white, Piece::bishop );
+Piece wrook   = Piece( white, Piece::rook );
+Piece wqueen  = Piece( white, Piece::queen );
+Piece wking   = Piece( white, Piece::king );
+Piece bpawn   = Piece( black, Piece::pawn );
+Piece bknight = Piece( black, Piece::knight );
+Piece bbishop = Piece( black, Piece::bishop );
+Piece brook   = Piece( black, Piece::rook );
+Piece bqueen  = Piece( black, Piece::queen );
+Piece bking   = Piece( black, Piece::king );
+
 
 typedef std::array<Piece, 64> BoardType;
 
@@ -68,28 +105,30 @@ BoardType board = {
 };
 
 
-
-union Move {
-	uint32_t move;
-	struct {
-		uint16_t from : 6;
-		uint16_t to : 6;
-		uint16_t promotion : 1;
-		uint16_t promo_type : 3;
-		uint16_t capture : 1;
-		uint16_t castling : 1;
-		uint16_t ep_candidate : 1;
-		uint16_t en_passant : 1;
-		uint16_t flags : 1;
+class Move
+{
+public:
+	union {
+		uint32_t move;
+		struct {
+			uint16_t from : 6;
+			uint16_t to : 6;
+			uint16_t promotion : 1;
+			uint16_t promo_type : 3;
+			uint16_t capture : 1;
+			uint16_t castling : 1;
+			uint16_t ep_candidate : 1;
+			uint16_t en_passant : 1;
+			uint16_t flags : 12;
+		};
 	};
+
 };
 
 
 
 
 vector<Move> game_moves;
-
-#include "display.h"
 
 void print_board( BoardType& board, Display& display )
 {
@@ -103,7 +142,7 @@ void print_board( BoardType& board, Display& display )
 
 			int index = (rank - 1) * 8 + file;
 
-			display.print_square( rank, file, board[index].type, board[index].color == white );
+			display.print_square( rank, file, board[index].get_type(), board[index].is_color( white ) );
 		}
 
 		display.print_rank_footer( rank );
@@ -120,14 +159,14 @@ void update_board( BoardType& board, Move the_move )
 		board[the_move.to] = board[the_move.from];
 		board[the_move.from] = _none;
 
-		the_move.to += ( (attacking_piece.color == white) ? -8 : 8 );
+		the_move.to += ( attacking_piece.is_color( white ) ? -8 : 8 );
 
 		board[the_move.to] = _none;
 
 	} else if( the_move.promotion ) {
 		Piece promo_piece = board[the_move.from];
 
-		promo_piece.type = the_move.promo_type;
+		promo_piece.promote_pawn( Piece::eType(the_move.promo_type) );
 
 		board[the_move.to] = promo_piece;
 		board[the_move.from] = _none;
@@ -138,7 +177,7 @@ void update_board( BoardType& board, Move the_move )
 		board[the_move.to] = board[the_move.from];
 		board[the_move.from] = _none;
 
-		board[the_move.to].has_moved = true;
+		board[the_move.to].moved();
 
 		// adjust move structure to the rook
 		if( the_move.to > the_move.from ) {	// king side
@@ -153,13 +192,13 @@ void update_board( BoardType& board, Move the_move )
 		board[the_move.to] = board[the_move.from];
 		board[the_move.from] = _none;
 
-		board[the_move.to].has_moved = true;
+		board[the_move.to].moved();
 
 	} else {
 		board[the_move.to] = board[the_move.from];
 		board[the_move.from] = _none;
 
-		board[the_move.to].has_moved = true;
+		board[the_move.to].moved();
 	}
 }
 
@@ -197,114 +236,120 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 		91, 92, 93, 94, 95, 96, 97, 98
 	};
 
-	static int offset[7][8] = {
-		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
-		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
-		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
-		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
-		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
-		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
-		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
-	};
+//	static int offset[7][8] = {
+//		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
+//		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
+//		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
+//		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
+//		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
+//		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
+//		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
+//	};
 
 	for( uint16_t square = 0; square < 64; ++square) { /* loop over all squares (no piece list) */
 
 		Piece piece = board[square];
 
-		if( piece.color != side )
+		if( ! piece.is_color( side ) )
 			continue;
 
-		if( piece.type != pawn ) {
+		if( ! piece.is_of_type( Piece::pawn ) ) {
 
-			for( unsigned int ray = 0; ray < ray_directions(piece); ++ray ) {
+			for( unsigned int ray = 0; ray < piece.ray_directions(); ++ray ) {
 
 				uint16_t target_square = square;
 
 				do {
-					target_square = mailbox[ mailbox64[target_square] + offset[piece.type][ray] ];	/* next square in this direction */
+					target_square = mailbox[ mailbox64[target_square] + piece.get_ray_offset( ray ) ];	/* next square in this direction */
 
 					if( target_square == (uint16_t)-1 )	/* outside of board */
 						break;
 
-					if( board[target_square].type == none )	/* quiet move */
+					if( board[target_square].is_of_type( Piece::none ) )	/* quiet move */
 						moves.push_back( {.from = square, .to = target_square } );
 					else {
-						if( board[target_square].color != side )
+						if( ! board[target_square].is_color( side ) )
 							moves.push_back( {.from = square, .to = target_square, .capture = true } );
 						break;
 					}
 
-				} while( is_sliding(piece) );
+				} while( piece.is_sliding() );
 			}
 		}
 
-		if( piece.type == pawn ) {
+		if( piece.is_of_type( Piece::pawn ) ) {
 
 			uint16_t target_square = square;
 
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				target_square = mailbox[ mailbox64[target_square] + (piece.color == white ? 10 : -10) ];	/* next square in this direction */
+				target_square = mailbox[ mailbox64[target_square] + (piece.is_color( white ) ? 10 : -10) ];	/* next square in this direction */
 
-				if( board[target_square].type != none )	/* cannot_move */
+				if( ! board[target_square].is_of_type( Piece::none ) )	/* cannot_move */
 					break;
 
-				if( target_square / 8 == (piece.color == white ? 7: 0) ) {		// promotion ranks
-					for( eType type = knight; type < king; type = eType(type + 1) )
+				if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
+					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType(type + 1) )
 						moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type } );	// generate a promotion moves
 					break;
 				}
 
 				moves.push_back( {.from = square, .to = target_square, .ep_candidate = (counter == 1) } );	// generate a quiet move
 
-				if( piece.has_moved )
+				if( piece.has_moved() )
 					break;
 			}
 
 			// capture moves
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				target_square = mailbox[ mailbox64[square] + ((int[2][2]){{9,11},{-9,-11}})[piece.color][counter] ];
+				unsigned int offset = ((counter == 0) ? 9 : 11);
 
-				if( target_square != (uint16_t)-1 )	{				/* on the board... */
+				if( piece.is_color( black ) )
+					offset *= -1;
 
-					if( ( board[target_square].type != none ) && ( board[target_square].color != side ) ) {	/* something is there, and its their piece */
+				target_square = mailbox[ mailbox64[square] + offset ];
 
-						if( target_square / 8 == (piece.color == white ? 7: 0) ) {		// promotion ranks
-							for( eType type = knight; type < king; type = eType(type + 1) )
-								moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
-						} else
-							moves.push_back( {.from = square, .to = target_square, .capture = true } );
-					}
+				if( target_square == (uint16_t)-1 )				/* off the board... */
+					continue;
 
-					if( !game_moves.empty() && game_moves.back().ep_candidate ) {		// check en-passant
+				if( !board[target_square].is_of_type( Piece::none ) && ! board[target_square].is_color( side ) ) {	/* something is there, and its their piece */
 
-						Move last_move = game_moves.back();
-						uint16_t skipped_square = last_move.to + ( (piece.color == white) ? 8 : -8 );	// To calculate the skipped square we subtract 8 for white and add 8 for black
+					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
+						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
+							moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
+					} else
+						moves.push_back( {.from = square, .to = target_square, .capture = true } );
+				}
 
-						if( skipped_square == target_square )
-							moves.push_back( {.from = square, .to = target_square, .capture = true, .en_passant = true } );
-					}
-				} /*  target_square != (uint16_t)-1 */
+				if( !game_moves.empty() && game_moves.back().ep_candidate ) {		// check en-passant
 
+					Move last_move = game_moves.back();
+					uint16_t skipped_square = last_move.to + ( piece.is_color( white ) ? 8 : -8 );	// To calculate the skipped square we subtract 8 for white and add 8 for black
+
+					if( skipped_square == target_square )
+						moves.push_back( {.from = square, .to = target_square, .capture = true, .en_passant = true } );
+				}
 			}
 
 		}
 
-		if( piece.type == king && !piece.has_moved ) {
+		if( piece.is_of_type( Piece::king ) && !piece.has_moved() ) {
 
 			// Check king side castle
-			if( (board[square + 3].type == rook) && !board[square + 3].has_moved
-				&& ( board[square + 1].type == none )
-				&& ( board[square + 2].type == none )
+			if(   !board[square + 3].has_moved()
+				&& board[square + 3].is_of_type(Piece::rook)
+				&& board[square + 1].is_of_type(Piece::none)
+				&& board[square + 2].is_of_type(Piece::none)
 			)
 				moves.push_back( {.from = square, .to = uint16_t(square + 2), .castling = true } );
 
 			// Check queen side castle
-			if( (board[square - 4].type == rook) && !board[square - 4].has_moved
-				&& ( board[square - 1].type == none )
-				&& ( board[square - 2].type == none )
-				&& ( board[square - 3].type == none )
+			if(   !board[square - 4].has_moved()
+				&& board[square - 4].is_of_type(Piece::rook)
+				&& board[square - 1].is_of_type(Piece::none)
+				&& board[square - 2].is_of_type(Piece::none)
+				&& board[square - 3].is_of_type(Piece::none)
 			)
 				moves.push_back( {.from = square, .to = uint16_t(square - 2), .castling = true } );
 		}
@@ -416,7 +461,7 @@ void ChessGame::apply_move( BoardType& board, Move the_move )
 	} else if( the_move.castling ) {
 		disp.print_castling_move( the_move.from, the_move.to );
 	} else {
-		disp.print_regular_move( board[the_move.from].type, the_move.from, the_move.to, the_move.capture );
+		disp.print_regular_move( board[the_move.from].get_type(), the_move.from, the_move.to, the_move.capture );
 	}
 
 	sleep( 1 );
@@ -449,10 +494,14 @@ bool ChessGame::game_loop()
 
 	print_board( board, disp );
 
+	std::vector<Move> moves = generate_moves( board, current_player );
+
+	disp.print_total_possible_moves( moves.size() );
+
 	if( is_human[ current_player ] )
-		quit = input_move( board, current_player, generate_moves( board, current_player ) );
+		quit = input_move( board, current_player, moves );
 	else
-		quit = make_move( board, generate_moves( board, current_player ) );
+		quit = make_move( board, moves );
 
 	current_player = eColor( current_player ^ 1 );
 
@@ -462,30 +511,9 @@ bool ChessGame::game_loop()
 int main()
 {
 #if 0
-	Display bf;
-	eColor current_player = white;
-
-	unsigned int gametype = -1;
-
-	while( gametype == (unsigned int )-1 ) {
-		new_game_menu();
-		gametype = select_gametype();
-	}
-
-	bool quit = ( gametype == 5 );
-	bool is_human[2] = { ((gametype == 1) || (gametype == 4)), ((gametype == 2) || (gametype == 4)) };
-
-    while( !quit ) {
-
-		print_board( board );
-
-		if( is_human[ current_player ] )
-			quit = input_move( board, current_player, generate_moves( board, current_player ) );
-		else
-			quit = make_move( board, generate_moves( board, current_player ) );
-
-		current_player = eColor( current_player ^ 1 );
-    }
+	cout << "uint16_t = " << sizeof( uint16_t ) << endl;
+	cout << "Piece = " << sizeof( Piece ) << endl;
+	cout << "Move = " << sizeof( Move ) << endl;
 #else
 	ChessGame game;
 
