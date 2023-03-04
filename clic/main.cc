@@ -12,45 +12,28 @@
 
 
 #include "display.h"
+#include "piece.h"
 
 
 using namespace std;
 
 
+class Move;
 
+class Board
+{
+public:
+	Board();
 
+	void print_board( Display& display );
+	void update_board( Move the_move );
+	std::vector<Move> generate_moves( eColor side );
 
-#include "piece.h"
+	Piece::eType get_type_from_square( unsigned int square ) { return position[square].get_type(); }
 
-
-Piece _none   = Piece( white, Piece::none );
-Piece wpawn   = Piece( white, Piece::pawn );
-Piece wknight = Piece( white, Piece::knight );
-Piece wbishop = Piece( white, Piece::bishop );
-Piece wrook   = Piece( white, Piece::rook );
-Piece wqueen  = Piece( white, Piece::queen );
-Piece wking   = Piece( white, Piece::king );
-Piece bpawn   = Piece( black, Piece::pawn );
-Piece bknight = Piece( black, Piece::knight );
-Piece bbishop = Piece( black, Piece::bishop );
-Piece brook   = Piece( black, Piece::rook );
-Piece bqueen  = Piece( black, Piece::queen );
-Piece bking   = Piece( black, Piece::king );
-
-
-typedef std::array<Piece, 64> BoardType;
-
-BoardType board = {
-	wrook, wknight, wbishop, wqueen, wking, wbishop, wknight, wrook,
-	wpawn, wpawn, wpawn, wpawn, wpawn, wpawn, wpawn, wpawn,
-	_none, _none, _none, _none, _none, _none, _none, _none,
-	_none, _none, _none, _none, _none, _none, _none, _none,
-	_none, _none, _none, _none, _none, _none, _none, _none,
-	_none, _none, _none, _none, _none, _none, _none, _none,
-	bpawn, bpawn, bpawn, bpawn, bpawn, bpawn, bpawn, bpawn,
-	brook, bknight, bbishop, bqueen, bking, bbishop, bknight, brook,
+private:
+	std::array<Piece, 64> position;
 };
-
 
 class Move
 {
@@ -74,10 +57,38 @@ public:
 
 
 
+Board::Board()
+{
+	Piece _none   = Piece( Piece::none  , white );
+	Piece wpawn   = Piece( Piece::pawn  , white );
+	Piece wknight = Piece( Piece::knight, white );
+	Piece wbishop = Piece( Piece::bishop, white );
+	Piece wrook   = Piece( Piece::rook  , white );
+	Piece wqueen  = Piece( Piece::queen , white );
+	Piece wking   = Piece( Piece::king  , white );
+	Piece bpawn   = Piece( Piece::pawn  , black );
+	Piece bknight = Piece( Piece::knight, black );
+	Piece bbishop = Piece( Piece::bishop, black );
+	Piece brook   = Piece( Piece::rook  , black );
+	Piece bqueen  = Piece( Piece::queen , black );
+	Piece bking   = Piece( Piece::king  , black );
+
+	position = {
+		wrook, wknight, wbishop, wqueen, wking, wbishop, wknight, wrook,
+		wpawn, wpawn, wpawn, wpawn, wpawn, wpawn, wpawn, wpawn,
+		_none, _none, _none, _none, _none, _none, _none, _none,
+		_none, _none, _none, _none, _none, _none, _none, _none,
+		_none, _none, _none, _none, _none, _none, _none, _none,
+		_none, _none, _none, _none, _none, _none, _none, _none,
+		bpawn, bpawn, bpawn, bpawn, bpawn, bpawn, bpawn, bpawn,
+		brook, bknight, bbishop, bqueen, bking, bbishop, bknight, brook,
+	};
+}
+
 
 vector<Move> game_moves;
 
-void print_board( BoardType& board, Display& display )
+void Board::print_board( Display& display )
 {
 	display.print_board_header();
 
@@ -89,7 +100,7 @@ void print_board( BoardType& board, Display& display )
 
 			int index = (rank - 1) * 8 + file;
 
-			display.print_square( rank, file, board[index].get_type(), board[index].is_color( white ) );
+			display.print_square( rank, file, position[index].get_type(), position[index].is_color( white ) );
 		}
 
 		display.print_rank_footer( rank );
@@ -98,33 +109,33 @@ void print_board( BoardType& board, Display& display )
     display.print_board_footer();
 }
 
-void update_board( BoardType& board, Move the_move )
+void Board::update_board( Move the_move )
 {
 	if( the_move.en_passant ) {
-		Piece attacking_piece = board[the_move.from];
+		Piece attacking_piece = position[the_move.from];
 
-		board[the_move.to] = board[the_move.from];
-		board[the_move.from] = _none;
+		position[the_move.to] = position[the_move.from];
+		position[the_move.from] = Piece( Piece::none );
 
 		the_move.to += ( attacking_piece.is_color( white ) ? -8 : 8 );
 
-		board[the_move.to] = _none;
+		position[the_move.to] = Piece();
 
 	} else if( the_move.promotion ) {
-		Piece promo_piece = board[the_move.from];
+		Piece promo_piece = position[the_move.from];
 
 		promo_piece.promote_pawn( Piece::eType(the_move.promo_type) );
 
-		board[the_move.to] = promo_piece;
-		board[the_move.from] = _none;
+		position[the_move.to] = promo_piece;
+		position[the_move.from] = Piece( Piece::none );
 
 	} else if( the_move.castling ) {
 
 		// move the king
-		board[the_move.to] = board[the_move.from];
-		board[the_move.from] = _none;
+		position[the_move.to] = position[the_move.from];
+		position[the_move.from] = Piece( Piece::none );
 
-		board[the_move.to].moved();
+		position[the_move.to].moved();
 
 		// adjust move structure to the rook
 		if( the_move.to > the_move.from ) {	// king side
@@ -136,16 +147,16 @@ void update_board( BoardType& board, Move the_move )
 		}
 
 		// move the rook
-		board[the_move.to] = board[the_move.from];
-		board[the_move.from] = _none;
+		position[the_move.to] = position[the_move.from];
+		position[the_move.from] = Piece( Piece::none );
 
-		board[the_move.to].moved();
+		position[the_move.to].moved();
 
 	} else {
-		board[the_move.to] = board[the_move.from];
-		board[the_move.from] = _none;
+		position[the_move.to] = position[the_move.from];
+		position[the_move.from] = Piece( Piece::none );
 
-		board[the_move.to].moved();
+		position[the_move.to].moved();
 	}
 }
 
@@ -153,7 +164,7 @@ void update_board( BoardType& board, Move the_move )
 
 
 
-std::vector<Move> generate_moves( BoardType& board, eColor side )
+std::vector<Move> Board::generate_moves( eColor side )
 {
 	std::vector<Move> moves;
 
@@ -183,19 +194,9 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 		91, 92, 93, 94, 95, 96, 97, 98
 	};
 
-//	static int offset[7][8] = {
-//		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
-//		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
-//		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
-//		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
-//		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
-//		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
-//		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
-//	};
-
 	for( uint16_t square = 0; square < 64; ++square) { /* loop over all squares (no piece list) */
 
-		Piece piece = board[square];
+		Piece piece = position[square];
 
 		if( ! piece.is_color( side ) )
 			continue;
@@ -212,10 +213,10 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 					if( target_square == (uint16_t)-1 )	/* outside of board */
 						break;
 
-					if( board[target_square].is_of_type( Piece::none ) )	/* quiet move */
+					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
 						moves.push_back( {.from = square, .to = target_square } );
 					else {
-						if( ! board[target_square].is_color( side ) )
+						if( ! position[target_square].is_color( side ) )
 							moves.push_back( {.from = square, .to = target_square, .capture = true } );
 						break;
 					}
@@ -232,7 +233,7 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 
 				target_square = mailbox[ mailbox64[target_square] + (piece.is_color( white ) ? 10 : -10) ];	/* next square in this direction */
 
-				if( ! board[target_square].is_of_type( Piece::none ) )	/* cannot_move */
+				if( ! position[target_square].is_of_type( Piece::none ) )	/* cannot_move */
 					break;
 
 				if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
@@ -260,7 +261,7 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 				if( target_square == (uint16_t)-1 )				/* off the board... */
 					continue;
 
-				if( !board[target_square].is_of_type( Piece::none ) && ! board[target_square].is_color( side ) ) {	/* something is there, and its their piece */
+				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side ) ) {	/* something is there, and its their piece */
 
 					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
 						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
@@ -284,19 +285,19 @@ std::vector<Move> generate_moves( BoardType& board, eColor side )
 		if( piece.is_of_type( Piece::king ) && !piece.has_moved() ) {
 
 			// Check king side castle
-			if(   !board[square + 3].has_moved()
-				&& board[square + 3].is_of_type(Piece::rook)
-				&& board[square + 1].is_of_type(Piece::none)
-				&& board[square + 2].is_of_type(Piece::none)
+			if(   !position[square + 3].has_moved()
+				&& position[square + 3].is_of_type(Piece::rook)
+				&& position[square + 1].is_of_type(Piece::none)
+				&& position[square + 2].is_of_type(Piece::none)
 			)
 				moves.push_back( {.from = square, .to = uint16_t(square + 2), .castling = true } );
 
 			// Check queen side castle
-			if(   !board[square - 4].has_moved()
-				&& board[square - 4].is_of_type(Piece::rook)
-				&& board[square - 1].is_of_type(Piece::none)
-				&& board[square - 2].is_of_type(Piece::none)
-				&& board[square - 3].is_of_type(Piece::none)
+			if(   !position[square - 4].has_moved()
+				&& position[square - 4].is_of_type(Piece::rook)
+				&& position[square - 1].is_of_type(Piece::none)
+				&& position[square - 2].is_of_type(Piece::none)
+				&& position[square - 3].is_of_type(Piece::none)
 			)
 				moves.push_back( {.from = square, .to = uint16_t(square - 2), .castling = true } );
 		}
@@ -319,15 +320,16 @@ private:
 	eColor current_player = white;
 	unsigned int gametype = -1;
 	bool is_human[2];
+	Board board;
 
-	bool input_move( BoardType& board, eColor player, std::vector<Move> moves );
-	bool make_move( BoardType& board, std::vector<Move> moves );
-	void apply_move( BoardType& board, Move the_move );
+	bool input_move( eColor player, std::vector<Move> moves );
+	bool make_move( std::vector<Move> moves );
+	void apply_move( Move the_move );
 };
 
 
 
-bool ChessGame::input_move( BoardType& board, eColor player, std::vector<Move> moves )
+bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 {
 	Move new_move;
 	unsigned int square;
@@ -362,7 +364,7 @@ bool ChessGame::input_move( BoardType& board, eColor player, std::vector<Move> m
 
 		// If it is not a promotion, we have all relevant information. Process the move
 		if( ! (*move_it).promotion ) {
-			apply_move( board, *move_it );
+			apply_move( *move_it );
 			return false;
 		}
 
@@ -384,39 +386,38 @@ bool ChessGame::input_move( BoardType& board, eColor player, std::vector<Move> m
 			}
 		}
 
-		apply_move( board, promotion_moves[ index ] );
+		apply_move( promotion_moves[ index ] );
 		return false;
 	}
 }
 
 #include <experimental/random>
 
-bool ChessGame::make_move( BoardType& board, std::vector<Move> moves )
+bool ChessGame::make_move( std::vector<Move> moves )
 {
 	int size = moves.size();
     int random_number = std::experimental::randint( 0, size - 1 );
 
-    apply_move( board, moves[random_number] );
+    apply_move( moves[random_number] );
 
 	return false;
 }
 
-void ChessGame::apply_move( BoardType& board, Move the_move )
+void ChessGame::apply_move( Move the_move )
 {
 	if( the_move.promotion ) {
 		disp.print_promotion_move( the_move.from, the_move.to, the_move.capture, the_move.promo_type );
 	} else if( the_move.castling ) {
 		disp.print_castling_move( the_move.from, the_move.to );
 	} else {
-		disp.print_regular_move( board[the_move.from].get_type(), the_move.from, the_move.to, the_move.capture );
+		disp.print_regular_move( board.get_type_from_square( the_move.from ), the_move.from, the_move.to, the_move.capture );
 	}
 
 	sleep( 1 );
 
 	game_moves.push_back( the_move );
 
-	update_board( board, the_move );
-
+	board.update_board( the_move );
 }
 
 
@@ -439,16 +440,16 @@ bool ChessGame::game_loop()
 {
 	bool quit;
 
-	print_board( board, disp );
+	board.print_board( disp );
 
-	std::vector<Move> moves = generate_moves( board, current_player );
+	std::vector<Move> moves = board.generate_moves( current_player );
 
 	disp.print_total_possible_moves( moves.size() );
 
 	if( is_human[ current_player ] )
-		quit = input_move( board, current_player, moves );
+		quit = input_move( current_player, moves );
 	else
-		quit = make_move( board, moves );
+		quit = make_move( moves );
 
 	current_player = eColor( current_player ^ 1 );
 
