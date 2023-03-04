@@ -29,7 +29,7 @@ class Piece
 public:
 	enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-	Piece( eColor _color, eType _type ) { piece = 0; color = _color; type = _type; }
+	Piece( eColor _color = white, eType _type = none ) { piece = 0; color = _color; type = _type; }
 
 	bool is_color( eColor test_color ) { return color == test_color; }
 	eType get_type() { return eType( type ); }
