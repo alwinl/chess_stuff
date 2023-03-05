@@ -50,10 +50,11 @@ bool ChessGame::game_loop()
 	if( !game_moves.empty() && game_moves.back().ep_candidate )
 		ep_square = game_moves.back().to + (( current_player == white ) ? 8 : -8);
 
-	std::vector<Move> moves = board.generate_moves( current_player, ep_square );	// grabs all pseudo legal moves
+//	std::vector<Move> moves = board.generate_moves( current_player, ep_square );	// grabs all pseudo legal moves
+//
+//	moves.erase(remove_if(moves.begin(), moves.end(), [&](Move& amove) { return board.illegal_move(amove); }), moves.end());	// filter out illegal moves
 
-	moves.erase(remove_if(moves.begin(), moves.end(), [&](Move& amove) { return board.illegal_move(amove); }), moves.end());	// filter out illegal moves
-
+	std::vector<Move> moves = board.generate_legal_moves( current_player, ep_square );	// grabs all pseudo legal moves
 	if( moves.empty() ) {
 		// checkmate
 		return true;

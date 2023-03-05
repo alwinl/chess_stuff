@@ -39,6 +39,9 @@ public:
 
 	bool illegal_move( Move& amove );
 
+	std::vector<Move> generate_legal_moves( eColor side, uint16_t ep_square );
+
+
 	Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
 
 private:

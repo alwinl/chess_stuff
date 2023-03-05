@@ -291,4 +291,13 @@ bool Board::illegal_move( Move& amove )
 
 }
 
+std::vector<Move> Board::generate_legal_moves( eColor side, uint16_t ep_square )
+{
+	std::vector<Move> moves = generate_moves( side, ep_square );	// grabs all pseudo legal moves
+
+	moves.erase(remove_if(moves.begin(), moves.end(), [this](Move& amove) { return this->illegal_move(amove); }), moves.end());	// filter out illegal moves
+
+	return moves;
+}
+
 
