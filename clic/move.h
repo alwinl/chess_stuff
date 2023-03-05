@@ -36,7 +36,8 @@ public:
 			uint16_t castling : 1;
 			uint16_t ep_candidate : 1;
 			uint16_t en_passant : 1;
-			uint16_t flags : 12;
+			uint16_t king_capture : 1;
+			uint16_t flags : 11;
 		};
 	};
 

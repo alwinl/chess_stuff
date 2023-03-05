@@ -19,6 +19,8 @@
 
 #include "board.h"
 
+#include <algorithm>
+
 #include "move.h"
 #include "display.h"
 
@@ -179,8 +181,12 @@ std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square )
 					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
 						moves.push_back( {.from = square, .to = target_square } );
 					else {
-						if( ! position[target_square].is_color( side ) )
-							moves.push_back( {.from = square, .to = target_square, .capture = true } );
+						if( ! position[target_square].is_color( side ) ) {
+							if( position[target_square].is_of_type( Piece::king ) )
+								moves.push_back( {.from = square, .to = target_square, .capture = true, .king_capture = true } );
+							else
+								moves.push_back( {.from = square, .to = target_square, .capture = true } );
+						}
 						break;
 					}
 
@@ -227,23 +233,22 @@ std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square )
 				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side ) ) {	/* something is there, and its their piece */
 
 					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
-						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
-							moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
-					} else
-						moves.push_back( {.from = square, .to = target_square, .capture = true } );
+						if( position[target_square].is_of_type( Piece::king ) )
+							for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
+								moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true, .king_capture = true } );	// generate a promotion moves
+						else
+							for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
+								moves.push_back( {.from = square, .to = target_square, .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion moves
+					} else {
+						if( position[target_square].is_of_type( Piece::king ) )
+							moves.push_back( {.from = square, .to = target_square, .capture = true, .king_capture = true } );
+						else
+							moves.push_back( {.from = square, .to = target_square, .capture = true } );
+					}
 				}
 
 				if( ep_square == target_square )
 					moves.push_back( {.from = square, .to = target_square, .capture = true, .en_passant = true } );
-
-//				if( !game_moves.empty() && game_moves.back().ep_candidate ) {		// check en-passant
-//
-//					Move last_move = game_moves.back();
-//					uint16_t skipped_square = last_move.to + ( side == white ) ? 8 : -8 );	// To calculate the skipped square we subtract 8 for white and add 8 for black
-//
-//					if( skipped_square == target_square )
-//						moves.push_back( {.from = square, .to = target_square, .capture = true, .en_passant = true } );
-//				}
 			}
 
 		}
@@ -271,4 +276,19 @@ std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square )
 
 	return moves;
 }
+
+bool Board::illegal_move( Move& amove )
+{
+	// Deduce the color of the player making this move
+	eColor player = (position[amove.from].is_color( white ) ? white : black );
+	Board test_board(*this);
+
+	test_board.update_board( amove );
+
+	std::vector<Move> opponent_moves = test_board.generate_moves( eColor(player ^ 1), (uint16_t)-1 );
+
+	return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Move& opp_move) { return opp_move.king_capture; }) != opponent_moves.end() );
+
+}
+
 

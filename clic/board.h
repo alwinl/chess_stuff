@@ -37,6 +37,8 @@ public:
 	void update_board( Move the_move );
 	std::vector<Move> generate_moves( eColor side, uint16_t ep_square );
 
+	bool illegal_move( Move& amove );
+
 	Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
 
 private:
