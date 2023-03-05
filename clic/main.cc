@@ -17,16 +17,15 @@
  * MA 02110-1301, USA.
  */
 
+#ifdef TESTING
+#include "testclic.h"
+#define AppClass TestClic
+#else
 #include "chessgame.h"
+#define AppClass ChessGame
+#endif
 
-int main()
+int main( int argc, char *argv[] )
 {
-	ChessGame game;
-
-	bool quit = game.setup();
-
-    while( !quit )
-		quit = game.game_loop();
-
-    return 0;
+    return AppClass().run( argc, argv );
 }

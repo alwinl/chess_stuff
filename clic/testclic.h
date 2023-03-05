@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,14 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef CHESSGAME_H
-#define CHESSGAME_H
+#ifndef TESTCLIC_H
+#define TESTCLIC_H
 
-#include <vector>
-
-#include "move.h"
-#include "board.h"
-#include "display.h"
-#include "piece.h"
-
-class ChessGame
+class TestClic
 {
 public:
-	int run( int argc, char *argv[] );
-
-private:
-	Display disp;
-	eColor current_player = white;
-	unsigned int gametype = -1;
-	bool is_human[2];
-	Board board;
-	std::vector<Move> game_moves;
-
-	bool setup();
-	bool game_loop();
-
-	bool input_move( eColor player, std::vector<Move> moves );
-	bool make_move( std::vector<Move> moves );
-	void apply_move( Move the_move );
+	/* called from main function */;
+	int run(  int argc, char *argv[] );
 };
 
-#endif // CHESSGAME_H
+#endif // TESTCLIC_H

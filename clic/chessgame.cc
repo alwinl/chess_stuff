@@ -25,6 +25,16 @@
 
 #include <experimental/random>
 
+int ChessGame::run( int argc, char *argv[] )
+{
+	bool quit = setup();
+
+    while( !quit )
+		quit = game_loop();
+
+    return 0;
+}
+
 bool ChessGame::setup()
 {
 	while( gametype == (unsigned int )-1 ) {
