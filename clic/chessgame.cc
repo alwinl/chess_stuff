@@ -50,11 +50,7 @@ bool ChessGame::game_loop()
 	if( !game_moves.empty() && game_moves.back().ep_candidate )
 		ep_square = game_moves.back().to + (( current_player == white ) ? 8 : -8);
 
-//	std::vector<Move> moves = board.generate_moves( current_player, ep_square );	// grabs all pseudo legal moves
-//
-//	moves.erase(remove_if(moves.begin(), moves.end(), [&](Move& amove) { return board.illegal_move(amove); }), moves.end());	// filter out illegal moves
-
-	std::vector<Move> moves = board.generate_legal_moves( current_player, ep_square );	// grabs all pseudo legal moves
+	std::vector<Move> moves = board.generate_legal_moves( current_player, ep_square );	// grabs all legal moves
 	if( moves.empty() ) {
 		// checkmate
 		return true;
@@ -114,14 +110,14 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 		}
 
 		// we need to find all possible promotions and ask the player to select one
-		std::vector<Move> promotion_moves;
 		unsigned int index;
-
-		while( move_it != moves.end() ) {
-			promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
-			move_it = std::find_if( move_it, moves.end(), square_match );
-		}
-
+//		std::vector<Move> promotion_moves;
+//
+//		while( move_it != moves.end() ) {
+//			promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
+//			move_it = std::find_if( move_it, moves.end(), square_match );
+//		}
+//
 		for(;;) {
 			disp.promo_menu( false );
 
@@ -130,8 +126,17 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 				break;
 			}
 		}
+//
+//		apply_move( promotion_moves[ index ] );
 
-		apply_move( promotion_moves[ index ] );
+		new_move.promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
+
+		auto promo_match = [new_move]( Move the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to) && (new_move.promo_type == the_move.promo_type); };
+
+		move_it = std::find_if( moves.begin(), moves.end(), promo_match );
+
+		apply_move( *move_it );
+
 		return false;
 	}
 }

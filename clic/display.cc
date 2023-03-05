@@ -131,9 +131,8 @@ void Display::promo_menu( bool clear)
 
 	for( int row = 0; row < 5; ++row ) {
 		set_cursor( row + 2, 12 );
-		if( clear )
-			erase_line();
-		else
+		erase_line();
+		if( !clear )
 			cout << output[row];
 	}
 
