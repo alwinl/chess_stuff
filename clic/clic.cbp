@@ -53,6 +53,12 @@
 		<Unit filename="move.h" />
 		<Unit filename="piece.cc" />
 		<Unit filename="piece.h" />
+		<Unit filename="testboard.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="testboard.h">
+			<Option target="Test" />
+		</Unit>
 		<Unit filename="testclic.cc">
 			<Option target="Test" />
 		</Unit>
@@ -60,7 +66,7 @@
 			<Option target="Test" />
 		</Unit>
 		<Extensions>
-			<lib_finder disable_auto="1">
+			<lib_finder disable_auto="0">
 				<lib name="cppunit" />
 			</lib_finder>
 		</Extensions>

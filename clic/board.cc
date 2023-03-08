@@ -37,6 +37,8 @@ void Board::process_placement( std::string PiecePlacement )
 	unsigned int rank = 7;
 	unsigned int file = 0;
 
+	position.fill( Piece( Piece::none ) );
+
     for( char& code : PiecePlacement ) {
 
         if( (code > '0') && (code < '9') ) {       // Character can either be a number (squares to skip)
@@ -51,8 +53,37 @@ void Board::process_placement( std::string PiecePlacement )
     }
 }
 
+std::string Board::piece_placement() const
+{
+	std::string placement;
 
-void Board::print_board( Display& display )
+    for( int rank=7; rank >= 0; --rank ) {
+
+        int blanks = 0;
+
+        for( int file=0; file < 8; ++file ) {
+
+			if( position[rank * 8 + file] != Piece( Piece::none ) ) {
+                if( blanks ) {
+					placement += std::to_string( blanks );
+                    blanks = 0;
+                }
+                placement += position[rank * 8 + file].get_code();
+			} else
+                ++blanks;
+        }
+
+        if( blanks )
+			placement += std::to_string( blanks );
+
+        if( rank )
+            placement += "/";
+    }
+
+    return placement;
+}
+
+void Board::print_board( Display& display ) const
 {
 	display.print_board_header();
 
@@ -128,7 +159,7 @@ void Board::update_board( Move the_move )
 
 
 
-std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square )
+std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square ) const
 {
 	std::vector<Move> moves;
 
@@ -276,7 +307,7 @@ std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square )
 	return moves;
 }
 
-bool Board::illegal_move( Move& amove )
+bool Board::illegal_move( Move& amove ) const
 {
 	// Deduce the color of the player making this move
 	eColor player = (position[amove.from].is_color( white ) ? white : black );
@@ -290,7 +321,7 @@ bool Board::illegal_move( Move& amove )
 
 }
 
-std::vector<Move> Board::generate_legal_moves( eColor side, uint16_t ep_square )
+std::vector<Move> Board::generate_legal_moves( eColor side, uint16_t ep_square ) const
 {
 	std::vector<Move> moves = generate_moves( side, ep_square );	// grabs all pseudo legal moves
 
@@ -298,5 +329,3 @@ std::vector<Move> Board::generate_legal_moves( eColor side, uint16_t ep_square )
 
 	return moves;
 }
-
-

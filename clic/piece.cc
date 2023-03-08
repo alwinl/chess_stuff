@@ -63,4 +63,9 @@ unsigned int Piece::get_ray_offset( unsigned int ray ) const
 	return offset[type][ray];
 }
 
+char Piece::get_code() const
+{
+	return ( color == white ) ? (std::string(" PNBRQK"))[type] : (std::string(" pnbrqk"))[type];
+}
+
 

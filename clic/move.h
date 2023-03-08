@@ -25,6 +25,9 @@
 class Move
 {
 public:
+	bool operator==( const Move rhs ) const { return move == rhs.move; }
+
+public:
 	union {
 		uint32_t move;
 		struct {

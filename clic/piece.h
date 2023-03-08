@@ -37,6 +37,7 @@ public:
 	bool is_of_type( eType test_type ) const { return type == test_type; }
 	bool has_moved() const { return hasmoved; }
 	eType get_type() const { return eType( type ); }
+	char get_code() const;
 
 	unsigned int ray_directions() const;
 	unsigned int get_ray_offset( unsigned int ray ) const;
@@ -44,7 +45,8 @@ public:
 	void promote_pawn( eType new_type ) { type = new_type; }
 	void moved() { hasmoved = true; }
 
-	bool operator<( const Piece rhs ) { return piece < rhs.piece; }
+	bool operator<( const Piece rhs ) const { return piece < rhs.piece; }
+	bool operator!=( const Piece rhs ) const { return piece != rhs.piece; }
 
 protected:
 	union {
