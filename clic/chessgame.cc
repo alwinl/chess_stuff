@@ -121,13 +121,7 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 
 		// we need to find all possible promotions and ask the player to select one
 		unsigned int index;
-//		std::vector<Move> promotion_moves;
-//
-//		while( move_it != moves.end() ) {
-//			promotion_moves.push_back( *(move_it++) ); // push first, then advance iterator
-//			move_it = std::find_if( move_it, moves.end(), square_match );
-//		}
-//
+
 		for(;;) {
 			disp.promo_menu( false );
 
@@ -136,8 +130,6 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 				break;
 			}
 		}
-//
-//		apply_move( promotion_moves[ index ] );
 
 		new_move.promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
 
