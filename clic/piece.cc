@@ -19,6 +19,28 @@
 
 #include "piece.h"
 
+#include <map>
+#include <string>
+
+using namespace std;
+
+Piece::Piece( char code )
+{
+	static map<char,Piece::eType> code_to_type {
+		{ 'p', Piece::pawn }, { 'P', Piece::pawn },
+		{ 'n', Piece::knight }, { 'N', Piece::knight },
+		{ 'b', Piece::bishop }, { 'B', Piece::bishop },
+		{ 'r', Piece::rook }, { 'R', Piece::rook },
+		{ 'q', Piece::queen }, { 'Q', Piece::queen },
+		{ 'k', Piece::king }, { 'K', Piece::king }
+	};
+
+	hasmoved = false;
+	color = ((string("KQRBNP").find( code ) != string::npos) ? white : black );
+	type = code_to_type.at( code );
+}
+
+
 unsigned int Piece::ray_directions() const
 {
 	static unsigned int directions[] = { 0, 0, 8, 4, 4, 8, 8 };

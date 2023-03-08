@@ -24,32 +24,31 @@
 #include "move.h"
 #include "display.h"
 
-Board::Board()
+Board::Board( std::string PiecePlacement )
 {
-	Piece _none   = Piece( Piece::none  , white );
-	Piece wpawn   = Piece( Piece::pawn  , white );
-	Piece wknight = Piece( Piece::knight, white );
-	Piece wbishop = Piece( Piece::bishop, white );
-	Piece wrook   = Piece( Piece::rook  , white );
-	Piece wqueen  = Piece( Piece::queen , white );
-	Piece wking   = Piece( Piece::king  , white );
-	Piece bpawn   = Piece( Piece::pawn  , black );
-	Piece bknight = Piece( Piece::knight, black );
-	Piece bbishop = Piece( Piece::bishop, black );
-	Piece brook   = Piece( Piece::rook  , black );
-	Piece bqueen  = Piece( Piece::queen , black );
-	Piece bking   = Piece( Piece::king  , black );
+	if( PiecePlacement.empty() )
+		PiecePlacement = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-	position = {
-		wrook, wknight, wbishop, wqueen, wking, wbishop, wknight, wrook,
-		wpawn, wpawn, wpawn, wpawn, wpawn, wpawn, wpawn, wpawn,
-		_none, _none, _none, _none, _none, _none, _none, _none,
-		_none, _none, _none, _none, _none, _none, _none, _none,
-		_none, _none, _none, _none, _none, _none, _none, _none,
-		_none, _none, _none, _none, _none, _none, _none, _none,
-		bpawn, bpawn, bpawn, bpawn, bpawn, bpawn, bpawn, bpawn,
-		brook, bknight, bbishop, bqueen, bking, bbishop, bknight, brook,
-	};
+	process_placement( PiecePlacement );
+}
+
+void Board::process_placement( std::string PiecePlacement )
+{
+	unsigned int rank = 7;
+	unsigned int file = 0;
+
+    for( char& code : PiecePlacement ) {
+
+        if( (code > '0') && (code < '9') ) {       // Character can either be a number (squares to skip)
+           file += (code - '0' );
+        } else if( code == '/' ) {                      // ... or an end of rank indicator
+            --rank;
+            file = 0;
+        } else {								  // or an piece designator
+        	position[rank * 8 + file] = Piece( code );
+            ++file;
+        }
+    }
 }
 
 

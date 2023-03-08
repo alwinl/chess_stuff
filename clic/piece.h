@@ -29,7 +29,8 @@ class Piece
 public:
 	enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-	Piece( eType _type = none, eColor _color = white  ) { piece = 0; color = _color; type = _type; }
+	Piece( eType _type = none, eColor _color = white  ) { hasmoved = false; color = _color; type = _type; }
+	Piece( char code );
 
 	bool is_color( eColor test_color ) const { return color == test_color; }
 	bool is_sliding() const {	return (type == bishop) || (type == rook) || (type == queen); }
@@ -49,11 +50,10 @@ protected:
 	union {
 		uint16_t piece;
 		struct {
-			uint16_t reserved:8;
 			uint16_t hasmoved:1;
-			uint16_t reserved1:3;
 			uint16_t color:1;
 			uint16_t type:3;
+			uint16_t reserved:11;
 		};
 	};
 };

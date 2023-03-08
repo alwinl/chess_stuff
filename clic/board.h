@@ -20,6 +20,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <string>
 #include <vector>
 #include <array>
 
@@ -31,7 +32,7 @@ class Display;
 class Board
 {
 public:
-	Board();
+	Board( std::string PiecePlacement = "" );
 
 	void print_board( Display& display );
 	void update_board( Move the_move );
@@ -46,6 +47,8 @@ public:
 
 private:
 	std::array<Piece, 64> position;
+
+	void process_placement( std::string PiecePlacement );
 };
 
 #endif // BOARD_H
