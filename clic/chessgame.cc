@@ -60,7 +60,7 @@ bool ChessGame::game_loop()
 	if( !game_moves.empty() && game_moves.back().ep_candidate )
 		ep_square = game_moves.back().to + (( current_player == white ) ? 8 : -8);
 
-	std::vector<Move> moves = board.generate_legal_moves( current_player, ep_square );	// grabs all legal moves
+	std::vector<Ply> moves = board.generate_legal_moves( current_player, ep_square );	// grabs all legal moves
 	if( moves.empty() ) {
 		// checkmate
 		return true;
@@ -80,9 +80,9 @@ bool ChessGame::game_loop()
 
 
 
-bool ChessGame::input_move( eColor player, std::vector<Move> moves )
+bool ChessGame::input_move( eColor player, std::vector<Ply> moves )
 {
-	Move new_move;
+	Ply new_move;
 	unsigned int square;
 
 	for(;;) {
@@ -105,7 +105,7 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 
 		new_move.to = (uint16_t)square;
 
-		auto square_match = [new_move]( Move the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to); };
+		auto square_match = [new_move]( Ply the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to); };
 
 		auto move_it = std::find_if( moves.begin(), moves.end(), square_match );
 		if( move_it == moves.end() ) {
@@ -133,7 +133,7 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 
 		new_move.promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
 
-		auto promo_match = [new_move]( Move the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to) && (new_move.promo_type == the_move.promo_type); };
+		auto promo_match = [new_move]( Ply the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to) && (new_move.promo_type == the_move.promo_type); };
 
 		move_it = std::find_if( moves.begin(), moves.end(), promo_match );
 
@@ -143,7 +143,7 @@ bool ChessGame::input_move( eColor player, std::vector<Move> moves )
 	}
 }
 
-bool ChessGame::make_move( std::vector<Move> moves )
+bool ChessGame::make_move( std::vector<Ply> moves )
 {
 	int size = moves.size();
     int random_number = std::experimental::randint( 0, size - 1 );
@@ -153,7 +153,7 @@ bool ChessGame::make_move( std::vector<Move> moves )
 	return false;
 }
 
-void ChessGame::apply_move( Move the_move )
+void ChessGame::apply_move( Ply the_move )
 {
 	disp.print_move( the_move.print_LAN() );
 

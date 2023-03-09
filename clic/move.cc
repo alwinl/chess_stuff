@@ -22,7 +22,7 @@
 
 using namespace std;
 
-std::string Move::print_LAN( )
+std::string Ply::print_LAN( )
 {
 	if( castling )
 		return (( to > from ) ? "O - O" : "O - O - O");

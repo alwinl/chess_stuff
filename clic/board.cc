@@ -104,7 +104,7 @@ void Board::print_board( Display& display ) const
     display.print_board_footer();
 }
 
-void Board::update_board( Move the_move )
+void Board::update_board( Ply the_move )
 {
 	if( the_move.en_passant ) {
 		Piece attacking_piece = position[the_move.from];
@@ -159,9 +159,9 @@ void Board::update_board( Move the_move )
 
 
 
-std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square ) const
+std::vector<Ply> Board::generate_moves( eColor side, uint16_t ep_square ) const
 {
-	std::vector<Move> moves;
+	std::vector<Ply> moves;
 
 	static int mailbox[120] = {
 		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -307,7 +307,7 @@ std::vector<Move> Board::generate_moves( eColor side, uint16_t ep_square ) const
 	return moves;
 }
 
-bool Board::illegal_move( Move& amove ) const
+bool Board::illegal_move( Ply& amove ) const
 {
 	// Deduce the color of the player making this move
 	eColor player = (position[amove.from].is_color( white ) ? white : black );
@@ -315,17 +315,17 @@ bool Board::illegal_move( Move& amove ) const
 
 	test_board.update_board( amove );
 
-	std::vector<Move> opponent_moves = test_board.generate_moves( eColor(player ^ 1), (uint16_t)-1 );
+	std::vector<Ply> opponent_moves = test_board.generate_moves( eColor(player ^ 1), (uint16_t)-1 );
 
-	return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Move& opp_move) { return opp_move.king_capture; }) != opponent_moves.end() );
+	return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Ply& opp_move) { return opp_move.king_capture; }) != opponent_moves.end() );
 
 }
 
-std::vector<Move> Board::generate_legal_moves( eColor side, uint16_t ep_square ) const
+std::vector<Ply> Board::generate_legal_moves( eColor side, uint16_t ep_square ) const
 {
-	std::vector<Move> moves = generate_moves( side, ep_square );	// grabs all pseudo legal moves
+	std::vector<Ply> moves = generate_moves( side, ep_square );	// grabs all pseudo legal moves
 
-	moves.erase(remove_if(moves.begin(), moves.end(), [this](Move& amove) { return this->illegal_move(amove); }), moves.end());	// filter out illegal moves
+	moves.erase(remove_if(moves.begin(), moves.end(), [this](Ply& amove) { return this->illegal_move(amove); }), moves.end());	// filter out illegal moves
 
 	return moves;
 }

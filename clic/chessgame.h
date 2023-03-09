@@ -38,14 +38,14 @@ private:
 	unsigned int gametype = -1;
 	bool is_human[2];
 	Board board;
-	std::vector<Move> game_moves;
+	std::vector<Ply> game_moves;
 
 	bool setup();
 	bool game_loop();
 
-	bool input_move( eColor player, std::vector<Move> moves );
-	bool make_move( std::vector<Move> moves );
-	void apply_move( Move the_move );
+	bool input_move( eColor player, std::vector<Ply> moves );
+	bool make_move( std::vector<Ply> moves );
+	void apply_move( Ply the_move );
 };
 
 #endif // CHESSGAME_H

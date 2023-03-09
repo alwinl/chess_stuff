@@ -23,10 +23,10 @@
 #include <cstdint>
 #include <string>
 
-class Move
+class Ply
 {
 public:
-	bool operator==( const Move rhs ) const { return move == rhs.move; };
+	bool operator==( const Ply rhs ) const { return move == rhs.move; };
 	std::string print_LAN();
 
 public:

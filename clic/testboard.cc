@@ -78,7 +78,7 @@ void TestBoard::read_write_FEN()
 void TestBoard::test_pawn_first_move()
 {
 	Board board("8/8/8/8/8/8/4P3/8");
-	vector<Move> moves = board.generate_legal_moves( white, (uint16_t)-1 );
+	vector<Ply> moves = board.generate_legal_moves( white, (uint16_t)-1 );
 
 	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
 
@@ -88,10 +88,10 @@ void TestBoard::test_pawn_first_move()
 //			}
 //	);
 
-	vector<Move> expected = { {.from = 12, .to = 20 }, {.from = 12, .to = 28, .ep_candidate = 1 } };
+	vector<Ply> expected = { {.from = 12, .to = 20 }, {.from = 12, .to = 28, .ep_candidate = 1 } };
 
 	for_each( expected.begin(), expected.end(),
-		[moves](Move& ex_move ) {
+		[moves](Ply& ex_move ) {
 			CPPUNIT_ASSERT( find( moves.begin(), moves.end(), ex_move ) != moves.end() );
 		}
 	);
