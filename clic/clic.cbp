@@ -49,10 +49,10 @@
 		<Unit filename="display.cc" />
 		<Unit filename="display.h" />
 		<Unit filename="main.cc" />
-		<Unit filename="move.cc" />
-		<Unit filename="move.h" />
 		<Unit filename="piece.cc" />
 		<Unit filename="piece.h" />
+		<Unit filename="ply.cc" />
+		<Unit filename="ply.h" />
 		<Unit filename="testboard.cc">
 			<Option target="Test" />
 		</Unit>

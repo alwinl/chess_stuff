@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include "move.h"
+#include "ply.h"
 #include "board.h"
 #include "display.h"
 #include "piece.h"

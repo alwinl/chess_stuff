@@ -20,7 +20,7 @@
 #include "testboard.h"
 
 #include "board.h"
-#include "move.h"
+#include "ply.h"
 
 #include <vector>
 
@@ -78,7 +78,7 @@ void TestBoard::read_write_FEN()
 void TestBoard::test_pawn_first_move()
 {
 	Board board("8/8/8/8/8/8/4P3/8");
-	vector<Ply> moves = board.generate_legal_moves( white, (uint16_t)-1 );
+	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
 
 	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
 

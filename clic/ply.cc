@@ -17,7 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#include "move.h"
+#include "ply.h"
 #include "piece.h"
 
 using namespace std;

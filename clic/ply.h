@@ -17,8 +17,8 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef MOVE_H
-#define MOVE_H
+#ifndef PLY_H
+#define PLY_H
 
 #include <cstdint>
 #include <string>
@@ -26,12 +26,12 @@
 class Ply
 {
 public:
-	bool operator==( const Ply rhs ) const { return move == rhs.move; };
+	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
 	std::string print_LAN();
 
 public:
 	union {
-		uint32_t move;
+		uint32_t ply;
 		struct {
 			uint16_t from : 6;
 			uint16_t to : 6;
@@ -51,4 +51,4 @@ public:
 
 };
 
-#endif // MOVE_H
+#endif // PLY_H

@@ -35,18 +35,18 @@ public:
 	Board( std::string PiecePlacement = "" );
 
 	void print_board( Display& display ) const;
-	void update_board( Ply the_move );
+	void update_board( Ply a_ply );
 
 	std::string piece_placement() const;
 	Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
 
-	std::vector<Ply> generate_legal_moves( eColor side, uint16_t ep_square ) const;
+	std::vector<Ply> generate_legal_plys( eColor side, uint16_t ep_square ) const;
 
 private:
 	std::array<Piece, 64> position;
 
-	bool illegal_move( Ply& amove ) const;
-	std::vector<Ply> generate_moves( eColor side, uint16_t ep_square ) const;
+	bool illegal_move( Ply& a_ply ) const;
+	std::vector<Ply> generate_plys( eColor side, uint16_t ep_square ) const;
 
 	void process_placement( std::string PiecePlacement );
 };

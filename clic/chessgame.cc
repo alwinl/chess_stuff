@@ -60,7 +60,7 @@ bool ChessGame::game_loop()
 	if( !game_moves.empty() && game_moves.back().ep_candidate )
 		ep_square = game_moves.back().to + (( current_player == white ) ? 8 : -8);
 
-	std::vector<Ply> moves = board.generate_legal_moves( current_player, ep_square );	// grabs all legal moves
+	std::vector<Ply> moves = board.generate_legal_plys( current_player, ep_square );	// grabs all legal moves
 	if( moves.empty() ) {
 		// checkmate
 		return true;
