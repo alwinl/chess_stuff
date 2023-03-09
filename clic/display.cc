@@ -26,6 +26,21 @@
 
 using namespace std;
 
+Display::Display()
+{
+	off();
+
+	set_cursor( cout, 1, 1 );	// initialise the screen
+	erase_display( cout );
+}
+
+Display::~Display()
+{
+	set_cursor( cout, 10, 1 );	// restore the screen
+
+	on();
+}
+
 void Display::print_board_header()
 {
 	set_cursor( cout, 1, 1 );
@@ -78,6 +93,17 @@ void Display::print_input_header( bool is_white )
 
     cout << (is_white ? "White" :"Black") << '?';
     flush( cout );
+}
+
+
+void Display::print_move( std::string the_move )
+{
+	set_cursor( cout, 3, 12 );
+	erase_line( cout );
+
+	cout << the_move;
+
+	flush( cout );
 }
 
 void Display::print_promotion_move( uint16_t from, uint16_t to, bool is_capture, uint16_t promo_type )
@@ -217,34 +243,28 @@ unsigned int Display::select_gametype()
 }
 
 
+
+
+
 void Display::off()
 {
-	tcgetattr(STDIN_FILENO, &t); //get the current terminal I/O structure
+	tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
 	t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
-	tcsetattr(STDIN_FILENO, TCSANOW, &t); //Apply the new settings
+	tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
 }
 
 void Display::on()
 {
-	tcgetattr(STDIN_FILENO, &t); //get the current terminal I/O structure
+	tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
 	t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
-	tcsetattr(STDIN_FILENO, TCSANOW, &t); //Apply the new settings
-}
-
-Display::Display()
-{
-	off();
-	clear_screen();
-}
-
-Display::~Display()
-{
-	on();
-	restore_screen();
+	tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
 }
 
 ostream& Display::ansi_cgi( ostream& os, std::string cgi_sequence )
 	{ os << "\x1B[" << cgi_sequence; return os; }
+
+ostream& Display::erase_display( ostream& os ) { return ansi_cgi( os, "0J" ); }	/* clears from cursor to end of screen */
+ostream& Display::erase_line( ostream& os ) {  return ansi_cgi( os, "0K" ); }	/* clears from cursor to end of line */
 
 ostream& Display::char_color( ostream& os, unsigned int foreground, unsigned int background )
 	{ return ansi_cgi( os, std::to_string( foreground ) + ';' + std::to_string( background ) + "m" ); }
@@ -254,15 +274,4 @@ ostream& Display::set_cursor( ostream& os, unsigned int row, unsigned int column
 
 ostream& Display::restore( ostream& os ) { return char_color( os, 39, 49 ); }
 
-ostream& Display::erase_display( ostream& os ) { return ansi_cgi( os, "0J" ); }	/* clears from cursor to end of screen */
-ostream& Display::erase_line( ostream& os ) {  return ansi_cgi( os, "0K" ); }	/* clears from cursor to end of line */
 
-
-
-void Display::clear_screen()
-{
-	set_cursor( cout, 1, 1 );
-	erase_display( cout );
-}
-
-void Display::restore_screen() { set_cursor( cout, 10, 1 ); }

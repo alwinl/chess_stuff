@@ -41,6 +41,8 @@ public:
 	void print_rank_footer( unsigned int rank );
 	void print_square( unsigned int rank, unsigned int file, uint16_t type, bool is_white );
 
+	void print_move( std::string the_move );
+
 	void print_promotion_move( uint16_t from, uint16_t to, bool is_capture, uint16_t promo_type );
 	void print_castling_move( uint16_t from, uint16_t to );
 	void print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture );
@@ -66,7 +68,6 @@ private:
 
 	std::ostream& erase_display( std::ostream& os );	/* clears from cursor to end of screen */
 	std::ostream& erase_line( std::ostream& os );	/* clears from cursor to end of line */
-	void clear_screen();
 	void restore_screen();
 };
 

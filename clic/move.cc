@@ -18,4 +18,35 @@
  */
 
 #include "move.h"
+#include "piece.h"
+
+using namespace std;
+
+std::string Move::print_LAN( )
+{
+	if( castling )
+		return (( to > from ) ? "O - O" : "O - O - O");
+
+	string result;
+
+	if( type != Piece::pawn )
+		result += string("E NBRQK")[type];
+
+	result += (char)('a' + (from % 8));
+	result += (char)('1' + (from / 8) );
+	result += (capture ? 'x' : '-' );
+	result += (char)('a' + (to % 8));
+	result += (char)('1' + (to / 8) );
+
+	if( promotion )
+		result += string("E NBRQK")[promo_type];
+
+	if( check )
+		result += '+'; // "†";
+
+	if( checkmate)
+		result += '#'; // "‡";
+
+	return result;
+}
 

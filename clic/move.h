@@ -21,11 +21,13 @@
 #define MOVE_H
 
 #include <cstdint>
+#include <string>
 
 class Move
 {
 public:
-	bool operator==( const Move rhs ) const { return move == rhs.move; }
+	bool operator==( const Move rhs ) const { return move == rhs.move; };
+	std::string print_LAN();
 
 public:
 	union {
@@ -33,6 +35,7 @@ public:
 		struct {
 			uint16_t from : 6;
 			uint16_t to : 6;
+			uint16_t type : 3;
 			uint16_t promotion : 1;
 			uint16_t promo_type : 3;
 			uint16_t capture : 1;
@@ -40,7 +43,9 @@ public:
 			uint16_t ep_candidate : 1;
 			uint16_t en_passant : 1;
 			uint16_t king_capture : 1;
-			uint16_t flags : 11;
+			uint16_t check : 1;
+			uint16_t checkmate : 1;
+			uint16_t flags : 6;
 		};
 	};
 

@@ -155,13 +155,7 @@ bool ChessGame::make_move( std::vector<Move> moves )
 
 void ChessGame::apply_move( Move the_move )
 {
-	if( the_move.promotion ) {
-		disp.print_promotion_move( the_move.from, the_move.to, the_move.capture, the_move.promo_type );
-	} else if( the_move.castling ) {
-		disp.print_castling_move( the_move.from, the_move.to );
-	} else {
-		disp.print_regular_move( board.get_type_from_square( the_move.from ), the_move.from, the_move.to, the_move.capture );
-	}
+	disp.print_move( the_move.print_LAN() );
 
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 
