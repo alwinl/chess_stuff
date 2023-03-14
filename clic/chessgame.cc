@@ -69,9 +69,9 @@ bool ChessGame::game_loop()
 	disp.print_total_possible_moves( moves.size() );
 
 	if( is_human[ current_player ] )
-		quit = input_move( current_player, moves );
+		quit = human_move( current_player, moves );
 	else
-		quit = make_move( moves );
+		quit = ai_move( moves );
 
 	current_player = eColor( current_player ^ 1 );
 
@@ -80,7 +80,7 @@ bool ChessGame::game_loop()
 
 
 
-bool ChessGame::input_move( eColor player, std::vector<Ply> moves )
+bool ChessGame::human_move( eColor player, std::vector<Ply> moves )
 {
 	unsigned int square_from;
 	unsigned int square_to;
@@ -140,7 +140,7 @@ bool ChessGame::input_move( eColor player, std::vector<Ply> moves )
 	}
 }
 
-bool ChessGame::make_move( std::vector<Ply> moves )
+bool ChessGame::ai_move( std::vector<Ply> moves )
 {
 	int size = moves.size();
     int random_number = std::experimental::randint( 0, size - 1 );

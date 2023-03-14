@@ -43,8 +43,8 @@ private:
 	bool setup();
 	bool game_loop();
 
-	bool input_move( eColor player, std::vector<Ply> moves );
-	bool make_move( std::vector<Ply> moves );
+	bool human_move( eColor player, std::vector<Ply> moves );
+	bool ai_move( std::vector<Ply> moves );
 	void apply_move( Ply the_move );
 };
 
