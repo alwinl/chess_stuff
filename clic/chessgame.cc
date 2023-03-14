@@ -57,8 +57,8 @@ bool ChessGame::game_loop()
 
 	uint16_t ep_square = (uint16_t)-1;
 
-	if( !game_moves.empty() && game_moves.back().ep_candidate )
-		ep_square = game_moves.back().to + (( current_player == white ) ? 8 : -8);
+	if( !game_moves.empty() && game_moves.back().is_ep_candidate() )
+		ep_square = game_moves.back().get_ep_square( current_player == white );
 
 	std::vector<Ply> moves = board.generate_legal_plys( current_player, ep_square );	// grabs all legal moves
 	if( moves.empty() ) {
@@ -82,39 +82,36 @@ bool ChessGame::game_loop()
 
 bool ChessGame::input_move( eColor player, std::vector<Ply> moves )
 {
-	Ply new_move;
-	unsigned int square;
+	unsigned int square_from;
+	unsigned int square_to;
 
 	for(;;) {
 		disp.print_input_header( player == white );
 
-		if( (square = disp.get_square()) == uint16_t(-1) )
+		if( (square_from = disp.get_square()) == uint16_t(-1) )
 			return true;
 
-		if( square == 64 )
+		if( square_from == 64 )
 			continue;
 
-		new_move.from = (uint16_t)square;
 		disp.print_bar();
 
-		if( (square = disp.get_square()) == uint16_t(-1) )
+		if( (square_to = disp.get_square()) == uint16_t(-1) )
 			return true;
 
-		if( square == 64 )
+		if( square_to == 64 )
 			continue;
 
-		new_move.to = (uint16_t)square;
+		Ply new_move = Ply( square_from, square_to );
 
-		auto square_match = [new_move]( Ply the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to); };
-
-		auto move_it = std::find_if( moves.begin(), moves.end(), square_match );
+		auto move_it = std::find_if( moves.begin(), moves.end(), [new_move]( Ply the_move ) { return the_move.check_square_match( new_move ); } );
 		if( move_it == moves.end() ) {
 			disp.print_invalid_move();
 			continue;
 		}
 
 		// If it is not a promotion, we have all relevant information. Process the move
-		if( ! (*move_it).promo_type != Piece::none ) {
+		if( (*move_it).check_promo_match( Piece::none ) ) {
 			apply_move( *move_it );
 			return false;
 		}
@@ -131,11 +128,11 @@ bool ChessGame::input_move( eColor player, std::vector<Ply> moves )
 			}
 		}
 
-		new_move.promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
+		Piece::eType promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
 
-		auto promo_match = [new_move]( Ply the_move ) { return (new_move.from == the_move.from) && (new_move.to == the_move.to) && (new_move.promo_type == the_move.promo_type); };
+		new_move = Ply( square_from, square_to, Piece::none, Piece::none, promo_type );
 
-		move_it = std::find_if( moves.begin(), moves.end(), promo_match );
+		move_it = std::find_if( moves.begin(), moves.end(), [new_move]( Ply the_move ) { return the_move.check_promo_match( new_move ); } );
 
 		apply_move( *move_it );
 

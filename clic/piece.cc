@@ -40,6 +40,14 @@ Piece::Piece( char code )
 	type = code_to_type.at( code );
 }
 
+Piece Piece::make_promo_piece( Piece::eType new_type ) const
+{
+	Piece new_piece( *this );
+
+	new_piece.type = new_type;
+
+	return new_piece;
+}
 
 unsigned int Piece::ray_directions() const
 {

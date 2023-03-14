@@ -28,13 +28,29 @@
 class Ply
 {
 public:
+	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type = Piece::none, Piece::eType target_square_type = Piece::none, Piece::eType promo_type = Piece::none );
 	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
-	std::string print_LAN();
+	std::string print_LAN() const;
 
-	static Ply standard_move( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type );
 	static Ply ep_move( uint16_t current_square, uint16_t target_square );
 
-public:
+	uint16_t square_from() const { return from; };
+	uint16_t square_to() const { return to; };
+	bool is_ep_candidate() const { return ep_candidate == 1; };
+	bool is_ep_capture() const { return en_passant == 1; };
+	bool is_castling() const { return castling == 1; }
+	bool is_kingcapture() const { return king_capture == 1; }
+
+	uint16_t get_castling_rook_square_from( ) const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
+	uint16_t get_castling_rook_square_to( )   const { return to + (  ( to > from ) ? -1 : +1 ); };
+	uint16_t get_ep_square( bool is_white )   const { return to + ( is_white ? -8 : 8 ); }
+	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
+
+	bool check_square_match( Ply rhs ) const { return (from == rhs.from) && (to == rhs.to); }
+	bool check_promo_match( Ply rhs ) const { return (promo_type == rhs.promo_type); }
+	bool check_promo_match( Piece::eType rhs_promo_type ) const { return (promo_type == rhs_promo_type); }
+
+private:
 	union {
 		uint32_t ply;
 		struct {

@@ -82,11 +82,14 @@ void TestBoard::test_pawn_first_move()
 
 	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
 
-	vector<Ply> expected = { {.from = 12, .to = 20, .type = Piece::pawn }, {.from = 12, .to = 28, .type = Piece::pawn, .ep_candidate = 1 } };
+	vector<string> expected = { "e2-e4", "e2-e3" };
 
 	for_each( expected.begin(), expected.end(),
-		[moves](Ply& ex_move ) {
-			CPPUNIT_ASSERT( find( moves.begin(), moves.end(), ex_move ) != moves.end() );
+		[moves](string& ex_move ) {
+			auto iter = find_if( moves.begin(), moves.end(), [ex_move](const Ply& gen_move) { return gen_move.print_LAN() == ex_move; });
+
+			if( iter == moves.end() )
+				CPPUNIT_ASSERT_EQUAL( ex_move, string("(none)") );
 		}
 	);
 }
@@ -98,12 +101,33 @@ void TestBoard::test_pawn_capture()
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
 
-	vector<Ply> expected = { {.from = 12, .to = 20, .type = Piece::pawn }, {.from = 12, .to = 28, .type = Piece::pawn, .ep_candidate = 1 },
-							 {.from = 12, .to = 19, .type = Piece::pawn, .capture = 1 }, {.from = 12, .to = 21, .type = Piece::pawn, .capture = 1 } };
+	vector<string> expected = { "e2-e4", "e2-e3", "e2xd3", "e2xf3" };
 
 	for_each( expected.begin(), expected.end(),
-		[moves](Ply& ex_move ) {
-			CPPUNIT_ASSERT( find( moves.begin(), moves.end(), ex_move ) != moves.end() );
+		[moves](string& ex_move ) {
+			auto iter = find_if( moves.begin(), moves.end(), [ex_move](const Ply& gen_move) { return gen_move.print_LAN() == ex_move; });
+
+			if( iter == moves.end() )
+				CPPUNIT_ASSERT_EQUAL( ex_move, string("(none)") );
+		}
+	);
+}
+
+void TestBoard::test_pawn_promotion()
+{
+	Board board("8/P7/8/8/8/8/8/8");
+	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+
+	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
+
+	vector<string> expected = { "a7-a8N", "a7-a8B", "a7-a8R", "a7-a8Q" };
+
+	for_each( expected.begin(), expected.end(),
+		[moves](string& ex_move ) {
+			auto iter = find_if( moves.begin(), moves.end(), [ex_move](const Ply& gen_move) { return gen_move.print_LAN() == ex_move; });
+
+			if( iter == moves.end() )
+				CPPUNIT_ASSERT_EQUAL( ex_move, string("(none)") );
 		}
 	);
 }
