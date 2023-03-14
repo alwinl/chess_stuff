@@ -311,3 +311,30 @@ std::vector<Ply> Board::generate_legal_plys( eColor side, uint16_t ep_square ) c
 
 	return moves;
 }
+
+
+int Board::evaluate( eColor side)
+{
+	int score;
+
+	unsigned int material[2] = { 0, 0 };
+
+	for( uint16_t square = 0; square < 64; ++square)
+		if( ! position[square].is_of_type( Piece::none ) )
+			material[position[square].is_color(white) ? 0 : 1 ] += Piece::material_value[ position[square].get_type() ];
+
+	score = material[0] - material[1];
+
+	return (side == white) ? score : -score;
+}
+
+Board Board::make( Ply a_ply )
+{
+	Board new_board( *this );
+
+	new_board.update_board( a_ply );
+
+	return new_board;
+}
+
+

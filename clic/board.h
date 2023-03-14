@@ -42,6 +42,9 @@ public:
 
 	std::vector<Ply> generate_legal_plys( eColor side, uint16_t ep_square ) const;
 
+	int evaluate( eColor side);
+	Board make( Ply a_ply );
+
 private:
 	std::array<Piece, 64> position;
 
