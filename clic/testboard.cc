@@ -82,19 +82,11 @@ void TestBoard::test_pawn_first_move()
 
 	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
 
-//	for_each( moves.begin(), moves.end(),
-//			[](Move& move) {
-//				cout << "{ .from = " << move.from << ", .to = " << move.to << " }" << endl;
-//			}
-//	);
-
-	vector<Ply> expected = { {.from = 12, .to = 20 }, {.from = 12, .to = 28, .ep_candidate = 1 } };
+	vector<Ply> expected = { {.from = 12, .to = 20, .type = Piece::pawn }, {.from = 12, .to = 28, .type = Piece::pawn, .ep_candidate = 1 } };
 
 	for_each( expected.begin(), expected.end(),
 		[moves](Ply& ex_move ) {
 			CPPUNIT_ASSERT( find( moves.begin(), moves.end(), ex_move ) != moves.end() );
 		}
 	);
-
-
 }

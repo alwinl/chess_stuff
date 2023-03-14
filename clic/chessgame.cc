@@ -114,7 +114,7 @@ bool ChessGame::input_move( eColor player, std::vector<Ply> moves )
 		}
 
 		// If it is not a promotion, we have all relevant information. Process the move
-		if( ! (*move_it).promotion ) {
+		if( ! (*move_it).promo_type != Piece::none ) {
 			apply_move( *move_it );
 			return false;
 		}

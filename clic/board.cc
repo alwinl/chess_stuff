@@ -116,7 +116,7 @@ void Board::update_board( Ply a_ply )
 
 		position[a_ply.to] = Piece();
 
-	} else if( a_ply.promotion ) {
+	} else if( a_ply.promo_type != Piece::none ) {
 		Piece promo_piece = position[a_ply.from];
 
 		promo_piece.promote_pawn( Piece::eType(a_ply.promo_type) );
@@ -209,14 +209,10 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 						break;
 
 					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
-						plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type() } );
+						plys.push_back( Ply::standard_move( square, target_square, piece.get_type(), position[target_square].get_type(), Piece::none ) );
 					else {
-						if( ! position[target_square].is_color( side ) ) {
-							if( position[target_square].is_of_type( Piece::king ) )
-								plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .capture = true, .king_capture = true } );
-							else
-								plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .capture = true } );
-						}
+						if( ! position[target_square].is_color( side ) )
+							plys.push_back( Ply::standard_move( square, target_square, piece.get_type(), position[target_square].get_type(), Piece::none ) );
 						break;
 					}
 
@@ -237,11 +233,11 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 
 				if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
 					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType(type + 1) )
-						plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .promotion = true, .promo_type = type } );	// generate a promotion plys
+						plys.push_back( Ply::standard_move( square, target_square, Piece::pawn, Piece::none, type ) );	// generate a promotion plys
 					break;
 				}
 
-				plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .ep_candidate = (counter == 1) } );	// generate a quiet ply
+				plys.push_back( Ply::standard_move( square, target_square, Piece::pawn, Piece::none, Piece::none ) );
 
 				if( piece.has_moved() )
 					break;
@@ -263,22 +259,14 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side ) ) {	/* something is there, and its their piece */
 
 					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
-						if( position[target_square].is_of_type( Piece::king ) )
-							for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
-								plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .promotion = true, .promo_type = type, .capture = true, .king_capture = true } );	// generate a promotion plys
-						else
-							for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
-								plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .promotion = true, .promo_type = type, .capture = true } );	// generate a promotion plys
-					} else {
-						if( position[target_square].is_of_type( Piece::king ) )
-							plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .capture = true, .king_capture = true } );
-						else
-							plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .capture = true } );
-					}
+						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
+							plys.push_back( Ply::standard_move( square, target_square, Piece::pawn, position[target_square].get_type(), type ) );	// generate a promotion plys
+					} else
+						plys.push_back( Ply::standard_move( square, target_square, Piece::pawn, position[target_square].get_type(), Piece::none ) );
 				}
 
 				if( ep_square == target_square )
-					plys.push_back( {.from = square, .to = target_square, .type = position[square].get_type(), .capture = true, .en_passant = true } );
+					plys.push_back( Ply::ep_move( square, target_square ) );
 			}
 
 		}
@@ -291,7 +279,7 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 				&& position[square + 1].is_of_type(Piece::none)
 				&& position[square + 2].is_of_type(Piece::none)
 			)
-				plys.push_back( {.from = square, .to = uint16_t(square + 2), .type = position[square].get_type(), .castling = true } );
+				plys.push_back( Ply::standard_move( square, uint16_t(square + 2), Piece::king, Piece::none, Piece::none ) );
 
 			// Check queen side castle
 			if(   !position[square - 4].has_moved()
@@ -300,7 +288,7 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 				&& position[square - 2].is_of_type(Piece::none)
 				&& position[square - 3].is_of_type(Piece::none)
 			)
-				plys.push_back( {.from = square, .to = uint16_t(square - 2), .type = position[square].get_type(), .castling = true } );
+				plys.push_back( Ply::standard_move( square, uint16_t(square - 2), Piece::king, Piece::none, Piece::none ) );
 		}
 	}
 

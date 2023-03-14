@@ -22,6 +22,47 @@
 
 using namespace std;
 
+
+Ply Ply::standard_move( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type )
+{
+	Ply new_ply;
+
+	new_ply.ply = 0;
+
+	new_ply.from  = current_square;
+	new_ply.to  = target_square;
+	new_ply.type = current_type;
+
+	//		uint16_t promotion : 1;
+	new_ply.promo_type = promo_type;
+	new_ply.capture  = ( target_square_type != Piece::none );
+	new_ply.castling  = ((current_type == Piece::king) && (std::abs( current_square - target_square) == 2 ));
+	new_ply.ep_candidate =  ((current_type == Piece::pawn) && (std::abs( current_square - target_square) == 16 ));
+	//		uint16_t en_passant : 1;
+	new_ply.king_capture = ( target_square_type == Piece::king );
+	//		uint16_t check : 1;
+	//		uint16_t checkmate : 1;
+
+	return new_ply;
+}
+
+Ply Ply::ep_move( uint16_t current_square, uint16_t target_square )
+{
+	Ply new_ply;
+
+	new_ply.ply = 0;
+
+	new_ply.from  = current_square;
+	new_ply.to  = target_square;
+	new_ply.type = Piece::pawn;
+
+	new_ply.capture  = true;
+	new_ply.en_passant = true;
+
+	return new_ply;
+}
+
+
 std::string Ply::print_LAN( )
 {
 	if( castling )
@@ -38,7 +79,7 @@ std::string Ply::print_LAN( )
 	result += (char)('a' + (to % 8));
 	result += (char)('1' + (to / 8) );
 
-	if( promotion )
+	if( promo_type != Piece::none )
 		result += string("E NBRQK")[promo_type];
 
 	if( check )

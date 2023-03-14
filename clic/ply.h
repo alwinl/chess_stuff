@@ -23,11 +23,16 @@
 #include <cstdint>
 #include <string>
 
+#include "piece.h"
+
 class Ply
 {
 public:
 	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
 	std::string print_LAN();
+
+	static Ply standard_move( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type );
+	static Ply ep_move( uint16_t current_square, uint16_t target_square );
 
 public:
 	union {
@@ -36,7 +41,6 @@ public:
 			uint16_t from : 6;
 			uint16_t to : 6;
 			uint16_t type : 3;
-			uint16_t promotion : 1;
 			uint16_t promo_type : 3;
 			uint16_t capture : 1;
 			uint16_t castling : 1;
@@ -45,7 +49,7 @@ public:
 			uint16_t king_capture : 1;
 			uint16_t check : 1;
 			uint16_t checkmate : 1;
-			uint16_t flags : 6;
+			uint16_t flags : 7;
 		};
 	};
 
