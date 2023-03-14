@@ -29,7 +29,7 @@ class Piece
 public:
 	enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-	static constexpr unsigned int material_value[] = { 0, 100, 300, 300, 500, 900, 20000 };		// Claude Shannon
+	static constexpr unsigned int material_value[] = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
 
 	Piece( eType _type = none, eColor _color = white  ) { hasmoved = false; color = _color; type = _type; }
 	Piece( char code );
