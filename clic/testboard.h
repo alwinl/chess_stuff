@@ -30,12 +30,14 @@ public:
 
     CPPUNIT_TEST( read_write_FEN );
     CPPUNIT_TEST( test_pawn_first_move );
+    CPPUNIT_TEST( test_pawn_capture );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
     void read_write_FEN();
 	void test_pawn_first_move();
+	void test_pawn_capture();
 };
 
 #endif // TESTBOARD_H

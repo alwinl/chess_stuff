@@ -90,3 +90,20 @@ void TestBoard::test_pawn_first_move()
 		}
 	);
 }
+
+void TestBoard::test_pawn_capture()
+{
+	Board board("8/8/8/8/8/3p1p2/4P3/8");
+	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+
+	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
+
+	vector<Ply> expected = { {.from = 12, .to = 20, .type = Piece::pawn }, {.from = 12, .to = 28, .type = Piece::pawn, .ep_candidate = 1 },
+							 {.from = 12, .to = 19, .type = Piece::pawn, .capture = 1 }, {.from = 12, .to = 21, .type = Piece::pawn, .capture = 1 } };
+
+	for_each( expected.begin(), expected.end(),
+		[moves](Ply& ex_move ) {
+			CPPUNIT_ASSERT( find( moves.begin(), moves.end(), ex_move ) != moves.end() );
+		}
+	);
+}
