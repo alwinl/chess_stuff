@@ -40,6 +40,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c17" />
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="board.cc" />
@@ -51,6 +52,7 @@
 		<Unit filename="main.cc" />
 		<Unit filename="piece.cc" />
 		<Unit filename="piece.h" />
+		<Unit filename="piece_square_tables.cc" />
 		<Unit filename="ply.cc" />
 		<Unit filename="ply.h" />
 		<Unit filename="testboard.cc">
@@ -63,6 +65,12 @@
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="testclic.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="testevaluation.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="testevaluation.h">
 			<Option target="Test" />
 		</Unit>
 		<Extensions>
