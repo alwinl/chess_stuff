@@ -34,6 +34,7 @@ public:
     CPPUNIT_TEST( test_queen_asymmetry );
     CPPUNIT_TEST( standard_board_eval_is_zero );
     CPPUNIT_TEST( check_all_first_moves );
+    CPPUNIT_TEST( test_alpha_beta );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -44,6 +45,7 @@ private:
 	void test_queen_asymmetry();
 	void standard_board_eval_is_zero();
 	void check_all_first_moves();
+	void test_alpha_beta();
 };
 
 #endif // TESTEVALUATION_H

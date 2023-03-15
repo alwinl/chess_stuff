@@ -20,6 +20,7 @@
 #include "board.h"
 
 #include <algorithm>
+#include <limits>
 
 #include "ply.h"
 #include "display.h"
@@ -334,5 +335,88 @@ Board Board::make( Ply a_ply )
 
 	return new_board;
 }
+
+int Board::alpha_beta_max( int alpha, int beta, int depth_left )
+{
+	if( ! depth_left )
+		return evaluate( white );
+
+	std::vector<Ply> plys = generate_legal_plys( white, (uint16_t)-1 );	// grabs all legal moves
+
+	sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs){ return make( lhs ).evaluate( white ) > make( rhs ).evaluate( white ); } );
+
+	for( Ply& ply : plys ) {
+		int score = make(ply).alpha_beta_min( alpha, beta, depth_left - 1 );
+
+		if( score >= beta )
+			return beta;
+
+		if( score > alpha )
+			alpha = score;
+	}
+
+	return alpha;
+}
+
+int Board::alpha_beta_min( int alpha, int beta, int depth_left )
+{
+	if( ! depth_left )
+		return evaluate( black );
+
+	std::vector<Ply> plys = generate_legal_plys( black, (uint16_t)-1 );	// grabs all legal moves
+
+	sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs){ return make( lhs ).evaluate( black ) < make( rhs ).evaluate( black ); } );
+
+	for( Ply& ply : plys ) {
+		int score = make(ply).alpha_beta_max( alpha, beta, depth_left - 1 );
+
+		if( score <= alpha )
+			return alpha;
+
+		if( score < beta )
+			beta = score;
+	}
+
+	return beta;
+}
+
+int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color )
+{
+	if( ! depth_left )
+		return evaluate( color );
+
+	std::vector<Ply> plys = generate_legal_plys( color, (uint16_t)-1 );	// grabs all legal moves
+
+	int score;
+
+	if( color == white ) {		// maximiser
+
+		score = std::numeric_limits<int>::min();
+		for( Ply& ply : plys ) {
+			score = std::max( score, make(ply).alpha_beta( alpha, beta, depth_left - 1, black) );
+			if( score > beta )
+				break;
+			alpha = std::max( alpha, score );
+		}
+
+	} else {					// minimiser
+		score = std::numeric_limits<int>::max();
+		for( Ply& ply : plys ) {
+			score = std::min( score, make(ply).alpha_beta( alpha, beta, depth_left - 1, white) );
+			if( score < alpha )
+				break;
+			beta = std::min( beta, score );
+		}
+	}
+
+	return score;
+}
+
+int Board::search_ply( Ply& ply, int depth, eColor color )
+{
+	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth, color );
+}
+
+
 
 

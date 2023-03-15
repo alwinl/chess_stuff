@@ -159,3 +159,19 @@ void TestEvaluation::check_all_first_moves()
 
 	for_each( plys.begin(), plys.end(), [&board, color](Ply& ply) { cout << ply.print_LAN() << ": score " << board.make( ply ).evaluate( color ) << endl; } );
 }
+
+void TestEvaluation::test_alpha_beta()
+{
+	Board board;
+	eColor color = white;
+
+	vector<Ply> plys = board.generate_legal_plys( color, (uint16_t)-1 );
+
+	sort( plys.begin(), plys.end(), [&board, color](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( color ) > board.make( rhs ).evaluate( color ); } );
+
+	cout << endl;
+	for( Ply& ply: plys ) {
+		cout << ply.print_LAN() << ": " << board.search_ply( ply, 1, black ) << ", "  << board.search_ply( ply, 2, black ) << ", "  << board.search_ply( ply, 3, black ) << endl;
+	}
+	cout << endl;
+}

@@ -47,6 +47,8 @@ public:
 
 	static uint16_t parse_square( std::string SAN ) { return (SAN[1] - '1') * 8 + (SAN[0] - 'a'); };
 
+	int search_ply( Ply& ply, int depth_left, eColor color );
+
 private:
 	std::array<Piece, 64> position;
 
@@ -54,6 +56,12 @@ private:
 	std::vector<Ply> generate_plys( eColor side, uint16_t ep_square ) const;
 
 	void process_placement( std::string PiecePlacement );
+
+	int alpha_beta_max( int alpha, int beta, int depth_left );
+	int alpha_beta_min( int alpha, int beta, int depth_left );
+
+	int alpha_beta( int alpha, int beta, int depth_left, eColor color );
+
 };
 
 #endif // BOARD_H

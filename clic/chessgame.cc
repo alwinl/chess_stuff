@@ -71,7 +71,7 @@ bool ChessGame::game_loop()
 	if( is_human[ current_player ] )
 		quit = human_move( current_player, plys );
 	else
-		quit = ai_move( board, current_player, plys );
+		quit = ai_move( current_player, plys );
 
 	current_player = eColor( current_player ^ 1 );
 
@@ -140,9 +140,19 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 	}
 }
 
-bool ChessGame::ai_move( Board& board, eColor player, std::vector<Ply> plys )
+bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 {
-	sort( plys.begin(), plys.end(), [&board, player](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( player ) > board.make( rhs ).evaluate( player ); } );
+	sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( current_player ) > board.make( rhs ).evaluate( current_player ); } );
+
+//	if( player == white ) {
+//		for( Ply& ply : plys ) {
+//
+//		}
+//
+//	} else {
+//
+//	}
+
 
     apply_move( plys[0] );
 
