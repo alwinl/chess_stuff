@@ -24,6 +24,8 @@
 
 enum eColor { white, black};
 
+extern int* square_tables[];
+
 class Piece
 {
 public:
@@ -40,6 +42,8 @@ public:
 	bool has_moved() const { return hasmoved; }
 	eType get_type() const { return eType( type ); }
 	char get_code() const;
+
+	unsigned int get_score( uint16_t square ) const;
 
 	unsigned int ray_directions() const;
 	unsigned int get_ray_offset( unsigned int ray ) const;

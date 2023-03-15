@@ -60,18 +60,18 @@ bool ChessGame::game_loop()
 	if( !game_moves.empty() && game_moves.back().is_ep_candidate() )
 		ep_square = game_moves.back().get_ep_square( current_player == white );
 
-	std::vector<Ply> moves = board.generate_legal_plys( current_player, ep_square );	// grabs all legal moves
-	if( moves.empty() ) {
+	std::vector<Ply> plys = board.generate_legal_plys( current_player, ep_square );	// grabs all legal moves
+	if( plys.empty() ) {
 		// checkmate
 		return true;
 	}
 
-	disp.print_total_possible_moves( moves.size() );
+	disp.print_total_possible_moves( plys.size() );
 
 	if( is_human[ current_player ] )
-		quit = human_move( current_player, moves );
+		quit = human_move( current_player, plys );
 	else
-		quit = ai_move( moves );
+		quit = ai_move( board, current_player, plys );
 
 	current_player = eColor( current_player ^ 1 );
 
@@ -80,7 +80,7 @@ bool ChessGame::game_loop()
 
 
 
-bool ChessGame::human_move( eColor player, std::vector<Ply> moves )
+bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 {
 	unsigned int square_from;
 	unsigned int square_to;
@@ -102,17 +102,17 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> moves )
 		if( square_to == 64 )
 			continue;
 
-		Ply new_move = Ply( square_from, square_to );
+		Ply new_ply = Ply( square_from, square_to );
 
-		auto move_it = std::find_if( moves.begin(), moves.end(), [new_move]( Ply the_move ) { return the_move.check_square_match( new_move ); } );
-		if( move_it == moves.end() ) {
+		auto ply_it = std::find_if( plys.begin(), plys.end(), [new_ply]( Ply ply ) { return ply.check_square_match( new_ply ); } );
+		if( ply_it == plys.end() ) {
 			disp.print_invalid_move();
 			continue;
 		}
 
 		// If it is not a promotion, we have all relevant information. Process the move
-		if( (*move_it).check_promo_match( Piece::none ) ) {
-			apply_move( *move_it );
+		if( (*ply_it).check_promo_match( Piece::none ) ) {
+			apply_move( *ply_it );
 			return false;
 		}
 
@@ -130,35 +130,34 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> moves )
 
 		Piece::eType promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
 
-		new_move = Ply( square_from, square_to, Piece::none, Piece::none, promo_type );
+		new_ply = Ply( square_from, square_to, Piece::none, Piece::none, promo_type );
 
-		move_it = std::find_if( moves.begin(), moves.end(), [new_move]( Ply the_move ) { return the_move.check_promo_match( new_move ); } );
+		ply_it = std::find_if( plys.begin(), plys.end(), [new_ply]( Ply the_ply ) { return the_ply.check_promo_match( new_ply ); } );	// should always find one
 
-		apply_move( *move_it );
+		apply_move( *ply_it );
 
 		return false;
 	}
 }
 
-bool ChessGame::ai_move( std::vector<Ply> moves )
+bool ChessGame::ai_move( Board& board, eColor player, std::vector<Ply> plys )
 {
-	int size = moves.size();
-    int random_number = std::experimental::randint( 0, size - 1 );
+	sort( plys.begin(), plys.end(), [&board, player](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( player ) > board.make( rhs ).evaluate( player ); } );
 
-    apply_move( moves[random_number] );
+    apply_move( plys[0] );
 
 	return false;
 }
 
-void ChessGame::apply_move( Ply the_move )
+void ChessGame::apply_move( Ply ply )
 {
-	disp.print_move( the_move.print_LAN() );
+	disp.print_move( ply.print_LAN() );
 
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 
-	game_moves.push_back( the_move );
+	game_moves.push_back( ply );
 
-	board.update_board( the_move );
+	board.update_board( ply );
 }
 
 

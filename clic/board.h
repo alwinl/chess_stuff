@@ -45,6 +45,8 @@ public:
 	int evaluate( eColor side);
 	Board make( Ply a_ply );
 
+	static uint16_t parse_square( std::string SAN ) { return (SAN[1] - '1') * 8 + (SAN[0] - 'a'); };
+
 private:
 	std::array<Piece, 64> position;
 

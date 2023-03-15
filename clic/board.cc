@@ -315,17 +315,15 @@ std::vector<Ply> Board::generate_legal_plys( eColor side, uint16_t ep_square ) c
 
 int Board::evaluate( eColor side)
 {
-	int score;
-
-	unsigned int material[2] = { 0, 0 };
+	unsigned int score[2] = { 0, 0 };
 
 	for( uint16_t square = 0; square < 64; ++square)
-		if( ! position[square].is_of_type( Piece::none ) )
-			material[position[square].is_color(white) ? 0 : 1 ] += Piece::material_value[ position[square].get_type() ];
+		if( ! position[square].is_of_type( Piece::none ) ) {
+			unsigned int index = position[square].is_color( white ) ? white : black;
+			score[index] += position[square].get_score( square );
+		}
 
-	score = material[0] - material[1];
-
-	return (side == white) ? score : -score;
+	return score[side] - score[side ^ 1];
 }
 
 Board Board::make( Ply a_ply )

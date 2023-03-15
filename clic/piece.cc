@@ -76,4 +76,12 @@ char Piece::get_code() const
 	return ( color == white ) ? (std::string(" PNBRQK"))[type] : (std::string(" pnbrqk"))[type];
 }
 
+unsigned int Piece::get_score( uint16_t square ) const
+{
+	if( color == white )
+		square ^= 56;
+
+	return material_value[type] + square_tables[type][square];
+}
+
 
