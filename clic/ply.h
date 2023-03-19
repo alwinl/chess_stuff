@@ -65,7 +65,7 @@ private:
 			uint16_t king_capture : 1;
 			uint16_t check : 1;
 			uint16_t checkmate : 1;
-			uint16_t flags : 7;
+			uint16_t flags : 6;
 		};
 	};
 
