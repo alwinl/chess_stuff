@@ -35,6 +35,7 @@ public:
     CPPUNIT_TEST( standard_board_eval_is_zero );
     CPPUNIT_TEST( check_all_first_moves );
     CPPUNIT_TEST( test_alpha_beta );
+    CPPUNIT_TEST( queen_should_not_capture_rook );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -46,6 +47,7 @@ private:
 	void standard_board_eval_is_zero();
 	void check_all_first_moves();
 	void test_alpha_beta();
+	void queen_should_not_capture_rook();
 };
 
 #endif // TESTEVALUATION_H

@@ -142,7 +142,23 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 
 bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 {
-	sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( current_player ) > board.make( rhs ).evaluate( current_player ); } );
+//	map<Ply, int> ply_eval;
+//
+//	for( auto ply : plys ) {
+//		ply_eval.insert( pair<Ply, int>( ply, board.make( ply ).evaluate()) );
+//	}
+
+	sort( plys.begin(), plys.end(),
+		[this](const Ply& lhs, const Ply& rhs)
+		{
+			if( current_player == white )
+				return board.make( lhs ).evaluate() > board.make( rhs ).evaluate();
+			else
+				return board.make( lhs ).evaluate() < board.make( rhs ).evaluate();
+		}
+	);
+
+
 
 //	if( player == white ) {
 //		for( Ply& ply : plys ) {

@@ -33,17 +33,19 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestEvaluation );
 
 void TestEvaluation::test_square_parsing()
 {
-//	cout << endl;
-//
-//	for( unsigned char rank = '8'; rank >= '1'; --rank ) {
-//		for( unsigned char file = 'a'; file <= 'h'; ++file ) {
-//			string SAN;
-//			SAN.push_back( file );
-//			SAN.push_back( rank );
-//			cout << SAN << '=' << setw(2) << Board::parse_square( SAN ) << ' ';
-//		}
-//		cout << endl;
-//	}
+	unsigned int expected_square = 0;
+
+	for( unsigned char rank = '1'; rank <= 'h'; ++rank ) {
+		for( unsigned char file = 'a'; file <= 'h'; ++file ) {
+			string SAN;
+			SAN.push_back( file );
+			SAN.push_back( rank );
+
+			unsigned int square = Board::parse_square( SAN );
+			CPPUNIT_ASSERT_EQUAL_MESSAGE( "Calculated square does not match parsed square", expected_square, square );
+			++expected_square;
+		}
+	}
 }
 
 void TestEvaluation::piece_scores_depend_on_color()
@@ -53,8 +55,6 @@ void TestEvaluation::piece_scores_depend_on_color()
 		Piece white_piece( string("PNBRQK")[i] );
 		Piece black_piece( string("pnbrqk")[i] );
 
-		unsigned int expected_square = 0;
-
 		for( unsigned char rank = '1'; rank <= 'h'; ++rank ) {
 			for( unsigned char file = 'a'; file <= 'h'; ++file ) {
 				string SAN;
@@ -62,8 +62,6 @@ void TestEvaluation::piece_scores_depend_on_color()
 				SAN.push_back( rank );
 
 				unsigned int square = Board::parse_square( SAN );
-				CPPUNIT_ASSERT_EQUAL_MESSAGE( "Calculated square does not match parsed square", expected_square, square );
-				++expected_square;
 
 				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ), black_piece.get_score( square ^ 56 ) );
 			};
@@ -144,34 +142,55 @@ void TestEvaluation::standard_board_eval_is_zero()
 {
 	Board board;
 
-	CPPUNIT_ASSERT_EQUAL( board.evaluate(white), 0);
-	CPPUNIT_ASSERT_EQUAL( board.evaluate(black), 0);
+	CPPUNIT_ASSERT_EQUAL( board.evaluate(), 0);
 }
 
 void TestEvaluation::check_all_first_moves()
 {
 	Board board;
-	eColor color = white;
+	//eColor color = white;
 
-	vector<Ply> plys = board.generate_legal_plys( color, (uint16_t)-1 );
+	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
 
-	sort( plys.begin(), plys.end(), [&board, color](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( color ) > board.make( rhs ).evaluate( color ); } );
+	sort( plys.begin(), plys.end(), [&board](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( ) > board.make( rhs ).evaluate( ); } );
 
-	for_each( plys.begin(), plys.end(), [&board, color](Ply& ply) { cout << ply.print_LAN() << ": score " << board.make( ply ).evaluate( color ) << endl; } );
+	for_each( plys.begin(), plys.end(), [&board](Ply& ply) { cout << ply.print_LAN() << ": score " << board.make( ply ).evaluate() << endl; } );
 }
 
 void TestEvaluation::test_alpha_beta()
 {
 	Board board;
-	eColor color = white;
+	//eColor color = white;
 
-	vector<Ply> plys = board.generate_legal_plys( color, (uint16_t)-1 );
+	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
 
-	sort( plys.begin(), plys.end(), [&board, color](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( color ) > board.make( rhs ).evaluate( color ); } );
+	sort( plys.begin(), plys.end(), [&board](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate() > board.make( rhs ).evaluate(); } );
 
 	cout << endl;
 	for( Ply& ply: plys ) {
-		cout << ply.print_LAN() << ": " << board.search_ply( ply, 1, black ) << ", "  << board.search_ply( ply, 2, black ) << ", "  << board.search_ply( ply, 3, black ) << endl;
+		cout << ply.print_LAN() << ": "
+			<< board.search_ply( ply, 1, black ) << ", "
+			<< board.search_ply( ply, 2, black ) << ", "
+			<< board.search_ply( ply, 3, black ) << endl;
 	}
 	cout << endl;
+}
+
+void TestEvaluation::queen_should_not_capture_rook()
+{
+	Board board( "4k3/8/6p1/5r2/8/3Q4/8/4K3" );
+
+	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
+
+	sort( plys.begin(), plys.end(), [&board](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate() > board.make( rhs ).evaluate(); } );
+
+	cout << endl;
+	for( Ply& ply: plys ) {
+		cout << ply.print_LAN() << ": "
+			<< board.search_ply( ply, 1, black ) << ", "
+			<< board.search_ply( ply, 2, black ) << ", "
+			<< board.search_ply( ply, 3, black ) << endl;
+	}
+	cout << endl;
+
 }
