@@ -166,6 +166,11 @@ bool ChessEngine::arranging_end( bool canceled )
     return true;
 }
 
+std::string ChessEngine::arrange_to_fen()
+{
+	return arrange_board.export_as_FEN();
+}
+
 
 
 

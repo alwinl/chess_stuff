@@ -123,6 +123,13 @@ void DialogInput::dlg_setup( std::string title, std::string prompt, int value )
     txtEntry->set_text( std::to_string( value ) );
 }
 
+void DialogInput::dlg_setup( std::string title, std::string prompt, std::string value )
+{
+    set_title( title );
+    lblPrompt->set_text( prompt );
+    txtEntry->set_text( value );
+}
+
 int DialogInput::get_input()
 {
     return std::stoi( txtEntry->get_text() );

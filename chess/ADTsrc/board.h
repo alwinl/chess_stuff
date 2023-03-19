@@ -34,6 +34,7 @@ public:
 
 	Board standard_opening_board();
 	Board build_from_FEN( std::string FEN );
+	std::string export_as_FEN();
 
 	Board add_piece( STSquare square, STPiece new_piece );
 	Board remove_piece( STSquare square );

@@ -123,6 +123,7 @@ void ChessController::bind_actions()
     add_action("arrange_done",   sigc::mem_fun( *this, &ChessController::on_action_arrange_done ) );
     add_action("arrange_clear",  sigc::mem_fun( *this, &ChessController::on_action_arrange_clear ) );
     add_action("arrange_cancel", sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
+    add_action("arrange_makeFEN", sigc::mem_fun( *this, &ChessController::on_action_arrange_make_fen ) );
 
     add_action("think_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
 }
@@ -645,6 +646,16 @@ void ChessController::on_action_arrange_done()
 	mnuGame->show();
 
 	board->set_edit( false );
+}
+
+void ChessController::on_action_arrange_make_fen()
+{
+	std::string FEN = engine->arrange_to_fen();
+
+	dlgTimeInput->dlg_setup( "Arrange", "FEN Setup:", FEN );
+	dlgTimeInput->run();
+	dlgTimeInput->hide();
+	//Gtk::MessageDialog( *view, FEN, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true ).run();
 }
 
 void ChessController::on_action_thinking_stop()

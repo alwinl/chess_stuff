@@ -42,6 +42,11 @@ Board Board::build_from_FEN( std::string FEN )
 	return *this;
 }
 
+std::string Board::export_as_FEN()
+{
+	return FENTranslator().to_FEN( pieces );
+}
+
 Board Board::add_piece( STSquare square, STPiece new_piece )
 {
 	if( square.file != -1 )

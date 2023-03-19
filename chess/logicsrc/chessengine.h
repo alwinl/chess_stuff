@@ -74,6 +74,7 @@ public:
 	STInfo get_info() { return info; }
 	std::map<STSquare,STPiece> get_piece_positions( );
 
+	std::string arrange_to_fen();
 
 	int get_timed_level_value() { return 120; };
 	int get_total_time_level_value() { return 60; };

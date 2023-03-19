@@ -85,6 +85,7 @@ private:
 	void on_action_arrange_clear();
 	void on_action_arrange_cancel();
 	void on_action_arrange_done();
+	void on_action_arrange_make_fen();
 	void on_action_thinking_stop();
 
 	void on_action_level_easy();

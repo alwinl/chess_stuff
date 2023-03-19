@@ -702,6 +702,15 @@
                             <property name="use-underline">True</property>
                           </object>
                         </child>
+                        <child>
+                          <object class="GtkMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="action-name">app.arrange_makeFEN</property>
+                            <property name="label" translatable="yes">_Make FEN</property>
+                            <property name="use-underline">True</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>

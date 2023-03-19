@@ -66,6 +66,7 @@ public:
     DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
 
     void dlg_setup( std::string title, std::string prompt, int value );
+    void dlg_setup( std::string title, std::string prompt, std::string value );
     int get_input();
 
 private:
