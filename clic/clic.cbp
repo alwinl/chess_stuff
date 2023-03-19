@@ -73,6 +73,12 @@
 		<Unit filename="testevaluation.h">
 			<Option target="Test" />
 		</Unit>
+		<Unit filename="testobjectsizes.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="testobjectsizes.h">
+			<Option target="Test" />
+		</Unit>
 		<Extensions>
 			<lib_finder disable_auto="0">
 				<lib name="cppunit" />
