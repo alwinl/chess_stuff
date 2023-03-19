@@ -81,9 +81,9 @@ void Display::print_square( unsigned int rank, unsigned int file, uint16_t type,
 
 	set_cursor( cout, 10 - rank, file + 2 );
 
-	odd ? char_color( cout, 30, 107 ) : char_color( cout, 97, 40 );
+	odd ? char_color( cout, 97, 40 ) : char_color( cout, 30, 107 );
 
-	cout << rep[ ( odd == is_white ) ? type : type + 7 ];
+	cout << rep[ ( odd == is_white ) ? type + 7 : type ];
 }
 
 void Display::print_input_header( bool is_white )
