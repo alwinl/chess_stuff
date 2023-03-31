@@ -45,8 +45,6 @@ public:
 	int evaluate();
 	Board make( Ply a_ply );
 
-	static uint16_t parse_square( std::string SAN ) { return (SAN[1] - '1') * 8 + (SAN[0] - 'a'); };
-
 	int search_ply( Ply& ply, int depth_left, eColor color );
 
 private:

@@ -41,7 +41,7 @@ void TestEvaluation::test_square_parsing()
 			SAN.push_back( file );
 			SAN.push_back( rank );
 
-			unsigned int square = Board::parse_square( SAN );
+			unsigned int square = parse_square( SAN );
 			CPPUNIT_ASSERT_EQUAL_MESSAGE( "Calculated square does not match parsed square", expected_square, square );
 			++expected_square;
 		}
@@ -61,7 +61,7 @@ void TestEvaluation::piece_scores_depend_on_color()
 				SAN.push_back( file );
 				SAN.push_back( rank );
 
-				unsigned int square = Board::parse_square( SAN );
+				unsigned int square = parse_square( SAN );
 
 				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ), black_piece.get_score( square ^ 56 ) );
 			};
@@ -86,7 +86,7 @@ void TestEvaluation::square_table_values()
 	};
 
 	for( auto entry : test_set )
-		CPPUNIT_ASSERT_EQUAL( get<value>(entry), Piece( get<piece_code>(entry) ).get_score( Board::parse_square( get<square>(entry) )));
+		CPPUNIT_ASSERT_EQUAL( get<value>(entry), Piece( get<piece_code>(entry) ).get_score( parse_square( get<square>(entry) )));
 }
 
 template<typename T>
@@ -118,12 +118,12 @@ void TestEvaluation::test_queen_asymmetry()
 			SAN.push_back( file );
 			SAN.push_back( '2' + index );
 
-			white_result.push_back( Piece('Q').get_score( Board::parse_square( SAN ) ) );
+			white_result.push_back( Piece('Q').get_score( parse_square( SAN ) ) );
 
 			SAN.pop_back();
 			SAN.push_back( '7' - index );
 
-			black_result.push_back( Piece('q').get_score( Board::parse_square( SAN ) ) );
+			black_result.push_back( Piece('q').get_score( parse_square( SAN ) ) );
 		}
 
 		stringstream ss;

@@ -48,6 +48,10 @@ private:
 	void check_all_first_moves();
 	void test_alpha_beta();
 	void queen_should_not_capture_rook();
+
+	uint16_t parse_square( std::string SAN ) { return (SAN[1] - '1') * 8 + (SAN[0] - 'a'); };
+
+
 };
 
 #endif // TESTEVALUATION_H
