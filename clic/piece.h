@@ -48,7 +48,6 @@ public:
 	unsigned int ray_directions() const;
 	unsigned int get_ray_offset( unsigned int ray ) const;
 
-	void promote_pawn( eType new_type ) { type = new_type; }
 	Piece make_promo_piece( Piece::eType new_type ) const;
 	void moved() { hasmoved = true; }
 

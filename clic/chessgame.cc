@@ -23,8 +23,6 @@
 #include <chrono>
 #include <thread>
 
-#include <experimental/random>
-
 int ChessGame::run( int argc, char *argv[] )
 {
 	bool quit = setup();
@@ -142,12 +140,6 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 
 bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 {
-//	map<Ply, int> ply_eval;
-//
-//	for( auto ply : plys ) {
-//		ply_eval.insert( pair<Ply, int>( ply, board.make( ply ).evaluate()) );
-//	}
-
 	sort( plys.begin(), plys.end(),
 		[this](const Ply& lhs, const Ply& rhs)
 		{
@@ -157,18 +149,6 @@ bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 				return board.evaluate_ply( lhs, 0, white ) < board.evaluate_ply( rhs, 0, white );	// colour does not matter as depth = 0
 		}
 	);
-
-
-
-//	if( player == white ) {
-//		for( Ply& ply : plys ) {
-//
-//		}
-//
-//	} else {
-//
-//	}
-
 
     apply_move( plys[0] );
 
