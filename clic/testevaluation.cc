@@ -19,9 +19,10 @@
 
 #include "testevaluation.h"
 
-#include <set>
+#include <vector>
+#include <string>
 #include <tuple>
-#include <iomanip>
+#include <sstream>
 
 #include "piece.h"
 #include "board.h"
@@ -69,11 +70,21 @@ void TestEvaluation::piece_scores_depend_on_color()
 	}
 }
 
+template<typename T>
+std::ostream& operator<<( std::ostream& os, const std::vector<T> t )
+{
+    os << "[";
+    for( size_t i = 0; i < t.size(); ++i )
+        os << t[i] << (i == t.size() - 1 ? "" : ",");
+
+    return os << "]";
+}
+
 void TestEvaluation::square_table_values()
 {
 	enum { piece_code, square, value };
 
-	set<tuple<char, string, unsigned int>> test_set = {
+	vector<tuple<char, string, unsigned int>> test_set = {
 		{ 'P', "e2", 80 },
 		{ 'p', "e2", 150 },
 		{ 'K', "e1", 20000 },
@@ -85,18 +96,21 @@ void TestEvaluation::square_table_values()
 		{ 'Q', "a4", 900 },
 	};
 
-	for( auto entry : test_set )
-		CPPUNIT_ASSERT_EQUAL( get<value>(entry), Piece( get<piece_code>(entry) ).get_score( parse_square( get<square>(entry) )));
-}
+	vector<int> expected;
+	vector<int> actual;
 
-template<typename T>
-std::ostream& operator<<( std::ostream& os, const std::vector<T> t )
-{
-    os << "[";
-    for( std::size_t i = 0; i < t.size(); ++i )
-        os << t[i] << (i == t.size() - 1 ? "" : ",");
+	for( auto entry : test_set ) {
+		expected.push_back( get<value>(entry) );
+		actual.push_back( Piece( get<piece_code>(entry) ).get_score( parse_square( get<square>(entry) ) ) );
+	}
 
-    return os << "]";
+	stringstream expected_string;
+	stringstream actual_string;
+
+	expected_string << expected;
+	actual_string << actual;
+
+	CPPUNIT_ASSERT_EQUAL( expected_string.str(), actual_string.str() );
 }
 
 // there are only 3 asymmetric lines: queen table ranks 2, 3 and 4 (black 7, 6 and 5)
@@ -148,27 +162,41 @@ void TestEvaluation::standard_board_eval_is_zero()
 void TestEvaluation::check_all_first_moves()
 {
 	Board board;
-	//eColor color = white;
 
 	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
 
-	sort( plys.begin(), plys.end(), [&board](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate( ) > board.make( rhs ).evaluate( ); } );
+	sort( plys.begin(), plys.end(),
+		[&board](const Ply& lhs, const Ply& rhs)
+		{
+			return board.evaluate_ply( lhs, 0, white ) > board.evaluate_ply( rhs, 0, white );
+		}
+	);
 
-	for_each( plys.begin(), plys.end(), [&board](Ply& ply) { cout << ply.print_LAN() << ": score " << board.make( ply ).evaluate() << endl; } );
+	for_each( plys.begin(), plys.end(),
+		[&board](Ply& ply)
+		{
+			cout << ply.print_LAN() << ": score " << board.evaluate_ply( ply, 0, white ) << endl;
+		}
+	);
 }
 
 void TestEvaluation::test_alpha_beta()
 {
 	Board board;
-	//eColor color = white;
 
 	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
 
-	sort( plys.begin(), plys.end(), [&board](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate() > board.make( rhs ).evaluate(); } );
+	sort( plys.begin(), plys.end(),
+		[&board](const Ply& lhs, const Ply& rhs)
+		{
+			return board.evaluate_ply( lhs, 3, black ) > board.evaluate_ply( rhs, 3, black );
+		}
+	);
 
 	cout << endl;
 	for( Ply& ply: plys ) {
 		cout << ply.print_LAN() << ": "
+			<< board.evaluate_ply( ply, 0, black ) << ", "
 			<< board.evaluate_ply( ply, 1, black ) << ", "
 			<< board.evaluate_ply( ply, 2, black ) << ", "
 			<< board.evaluate_ply( ply, 3, black ) << endl;
@@ -182,7 +210,12 @@ void TestEvaluation::queen_should_not_capture_rook()
 
 	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
 
-	sort( plys.begin(), plys.end(), [&board](const Ply& lhs, const Ply& rhs){ return board.make( lhs ).evaluate() > board.make( rhs ).evaluate(); } );
+	sort( plys.begin(), plys.end(),
+		[&board](const Ply& lhs, const Ply& rhs)
+		{
+			return board.evaluate_ply( lhs, 3, black ) > board.evaluate_ply( rhs, 3, black );
+		}
+	);
 
 	cout << endl;
 	for( Ply& ply: plys ) {
