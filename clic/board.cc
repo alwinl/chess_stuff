@@ -314,7 +314,7 @@ std::vector<Ply> Board::generate_legal_plys( eColor side, uint16_t ep_square ) c
 }
 
 
-int Board::evaluate()
+int Board::evaluate() const
 {
 	unsigned int score[2] = { 0, 0 };
 
@@ -327,7 +327,7 @@ int Board::evaluate()
 	return score[white] - score[black];
 }
 
-Board Board::make( Ply a_ply )
+Board Board::make( Ply a_ply ) const
 {
 	Board new_board( *this );
 
@@ -340,7 +340,7 @@ Board Board::make( Ply a_ply )
  *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
  *	Beta is the best value that the minimizer currently can guarantee at that level or below.
  */
-int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color )
+int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color ) const
 {
 	if( ! depth_left )
 		return evaluate();
@@ -373,7 +373,7 @@ int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color )
 	return best_score;
 }
 
-int Board::evaluate_ply( Ply& ply, int depth, eColor color )
+int Board::evaluate_ply( const Ply& ply, int depth, eColor color ) const
 {
 	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth, color );
 }

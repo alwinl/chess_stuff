@@ -152,9 +152,9 @@ bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 		[this](const Ply& lhs, const Ply& rhs)
 		{
 			if( current_player == white )
-				return board.make( lhs ).evaluate() > board.make( rhs ).evaluate();
+				return board.evaluate_ply( lhs, 0, white ) > board.evaluate_ply( rhs, 0, white );	// colour does not matter as depth = 0
 			else
-				return board.make( lhs ).evaluate() < board.make( rhs ).evaluate();
+				return board.evaluate_ply( lhs, 0, white ) < board.evaluate_ply( rhs, 0, white );	// colour does not matter as depth = 0
 		}
 	);
 

@@ -42,10 +42,10 @@ public:
 
 	std::vector<Ply> generate_legal_plys( eColor side, uint16_t ep_square ) const;
 
-	int evaluate();
-	Board make( Ply a_ply );
+	int evaluate() const;
+	Board make( Ply a_ply ) const;
 
-	int evaluate_ply( Ply& ply, int depth_left, eColor color );
+	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;
 
 private:
 	std::array<Piece, 64> position;
@@ -55,7 +55,7 @@ private:
 
 	void process_placement( std::string PiecePlacement );
 
-	int alpha_beta( int alpha, int beta, int depth_left, eColor color );
+	int alpha_beta( int alpha, int beta, int depth_left, eColor color ) const;
 
 };
 
