@@ -35,7 +35,7 @@ void TestEvaluation::test_square_parsing()
 {
 	unsigned int expected_square = 0;
 
-	for( unsigned char rank = '1'; rank <= 'h'; ++rank ) {
+	for( unsigned char rank = '1'; rank <= '8'; ++rank ) {
 		for( unsigned char file = 'a'; file <= 'h'; ++file ) {
 			string SAN;
 			SAN.push_back( file );
@@ -55,7 +55,7 @@ void TestEvaluation::piece_scores_depend_on_color()
 		Piece white_piece( string("PNBRQK")[i] );
 		Piece black_piece( string("pnbrqk")[i] );
 
-		for( unsigned char rank = '1'; rank <= 'h'; ++rank ) {
+		for( unsigned char rank = '1'; rank <= '8'; ++rank ) {
 			for( unsigned char file = 'a'; file <= 'h'; ++file ) {
 				string SAN;
 				SAN.push_back( file );
