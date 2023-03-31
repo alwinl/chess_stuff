@@ -373,7 +373,7 @@ int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color )
 	return best_score;
 }
 
-int Board::search_ply( Ply& ply, int depth, eColor color )
+int Board::evaluate_ply( Ply& ply, int depth, eColor color )
 {
 	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth, color );
 }

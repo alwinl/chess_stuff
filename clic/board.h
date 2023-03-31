@@ -45,7 +45,7 @@ public:
 	int evaluate();
 	Board make( Ply a_ply );
 
-	int search_ply( Ply& ply, int depth_left, eColor color );
+	int evaluate_ply( Ply& ply, int depth_left, eColor color );
 
 private:
 	std::array<Piece, 64> position;

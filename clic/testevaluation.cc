@@ -169,9 +169,9 @@ void TestEvaluation::test_alpha_beta()
 	cout << endl;
 	for( Ply& ply: plys ) {
 		cout << ply.print_LAN() << ": "
-			<< board.search_ply( ply, 1, black ) << ", "
-			<< board.search_ply( ply, 2, black ) << ", "
-			<< board.search_ply( ply, 3, black ) << endl;
+			<< board.evaluate_ply( ply, 1, black ) << ", "
+			<< board.evaluate_ply( ply, 2, black ) << ", "
+			<< board.evaluate_ply( ply, 3, black ) << endl;
 	}
 	cout << endl;
 }
@@ -187,9 +187,9 @@ void TestEvaluation::queen_should_not_capture_rook()
 	cout << endl;
 	for( Ply& ply: plys ) {
 		cout << ply.print_LAN() << ": "
-			<< board.search_ply( ply, 1, black ) << ", "
-			<< board.search_ply( ply, 2, black ) << ", "
-			<< board.search_ply( ply, 3, black ) << endl;
+			<< board.evaluate_ply( ply, 1, black ) << ", "
+			<< board.evaluate_ply( ply, 2, black ) << ", "
+			<< board.evaluate_ply( ply, 3, black ) << endl;
 	}
 	cout << endl;
 
