@@ -162,6 +162,8 @@ void Display::promo_menu( bool clear)
 			cout << output[row];
 	}
 
+	set_cursor( cout, 7, 12 );
+
 	flush( cout );
 }
 
@@ -177,6 +179,9 @@ void Display::new_game_menu()
 		 << "5. Quit\n"
 		 << "\n"
 		 << "Selection? ";
+
+	set_cursor( cout, 7, 12 );
+
 	flush( cout );
 }
 
@@ -226,7 +231,6 @@ unsigned int Display::select_promo_type()
 {
 	char answer;
 
-	set_cursor( cout, 7, 12 );
 	cin >> answer;
 
 	return ( (answer >= '1') && (answer <= '4') ) ?  answer -'1' : (unsigned int)-1;
@@ -236,7 +240,6 @@ unsigned int Display::select_gametype()
 {
 	char answer;
 
-	set_cursor( cout, 7, 12 );
 	cin >> answer;
 
 	return ( (answer >= '1') && (answer <= '5') ) ?  answer -'0' : (unsigned int)-1;
