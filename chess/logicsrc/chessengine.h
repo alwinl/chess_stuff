@@ -71,7 +71,7 @@ public:
 	void redo();
 	void stop_thinking();
 
-	STInfo get_info() { return info; }
+	std::array<std::pair<std::string,std::string>,10> get_info();
 	std::map<STSquare,STPiece> get_piece_positions( );
 
 	std::string arrange_to_fen();

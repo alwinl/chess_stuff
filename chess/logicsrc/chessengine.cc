@@ -374,6 +374,24 @@ bool ChessEngine::set_level_matching()
 	return true;
 }
 
+std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
+{
+	std::array<std::pair<std::string,std::string>,10> std_info =
+	{
+		std::pair<std::string,std::string>{"Turn", info.turn },
+		std::pair<std::string,std::string>{"White", info.white },
+		std::pair<std::string,std::string>{"Black", info.black },
+		std::pair<std::string,std::string>{"Time", info.time },
+		std::pair<std::string,std::string>{"Level", info.level },
+		std::pair<std::string,std::string>{"Value", info.value },
+		std::pair<std::string,std::string>{"Nodes", info.nodes },
+		std::pair<std::string,std::string>{"N/Sec", info.n_sec },
+		std::pair<std::string,std::string>{"Depth", info.depth },
+		std::pair<std::string,std::string>{"Bestline", info.bestline }
+	};
+
+	return std_info;
+}
 
 void ChessEngine::CalculatePawnTable()
 {

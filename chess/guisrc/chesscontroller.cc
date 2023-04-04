@@ -41,26 +41,6 @@ static void push_positions( ChessBoard* board, std::map<STSquare,STPiece> positi
 	board->set_piece_positions( new_positions );
 }
 
-static void push_info( ChessBoard* board, STInfo the_info )
-{
-	std::array<std::pair<std::string,std::string>,10> info =
-	{
-		std::pair<std::string,std::string>{"Turn", the_info.turn },
-		std::pair<std::string,std::string>{"White", the_info.white },
-		std::pair<std::string,std::string>{"Black", the_info.black },
-		std::pair<std::string,std::string>{"Time", the_info.time },
-		std::pair<std::string,std::string>{"Level", the_info.level },
-		std::pair<std::string,std::string>{"Value", the_info.value },
-		std::pair<std::string,std::string>{"Nodes", the_info.nodes },
-		std::pair<std::string,std::string>{"N/Sec", the_info.n_sec },
-		std::pair<std::string,std::string>{"Depth", the_info.depth },
-		std::pair<std::string,std::string>{"Bestline", the_info.bestline }
-	};
-
-	board->set_info( info );
-}
-
-
 /**-----------------------------------------------------------------------------
  * Application window
  */
@@ -216,7 +196,7 @@ void ChessController::on_action_new()
 	engine->new_game(  );
 
 	push_positions( board, engine->get_piece_positions() );
-	push_info( board, engine->get_info() );
+	board->set_info( engine->get_info() );
 
 	status_bar->push( std::string("New game") );
 }
@@ -254,7 +234,7 @@ void ChessController::on_action_open()
     }
 
 	push_positions( board, engine->get_piece_positions() );
-	push_info( board, engine->get_info() );
+	board->set_info( engine->get_info() );
 
     status_bar->push( std::string("Opened ") + dlg.get_filename() );
 }
@@ -322,7 +302,7 @@ void ChessController::on_action_quit()
 void ChessController::on_action_play()
 {
 	push_positions( board, engine->get_piece_positions() );
-	push_info( board, engine->get_info() );
+	board->set_info( engine->get_info() );
 }
 
 void ChessController::on_action_hint()
@@ -336,7 +316,7 @@ void ChessController::on_action_undo()
 	engine->undo();
 
 	push_positions( board, engine->get_piece_positions() );
-	push_info( board, engine->get_info() );
+	board->set_info( engine->get_info() );
 
 	status_bar->push( std::string("Undone") );
 }
@@ -346,7 +326,7 @@ void ChessController::on_action_redo()
 	engine->redo();
 
 	push_positions( board, engine->get_piece_positions() );
-	push_info( board, engine->get_info() );
+	board->set_info( engine->get_info() );
 
 	status_bar->push( std::string("Redone") );
 }
@@ -752,7 +732,7 @@ void ChessController::on_move_calculator_notify()
 	thread_move_calculator = nullptr;
 
 	push_positions( board, engine->get_piece_positions() );
-	push_info( board, engine->get_info() );
+	board->set_info( engine->get_info() );
 
 	mnuStop->hide();
 	mnuGame->show();
