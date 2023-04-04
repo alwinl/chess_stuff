@@ -45,6 +45,7 @@ public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
     void set_piece_positions( std::map<STSquare,char> new_pieces );
+    //void set_new_piece_positions( std::array<char, 64> _new_pieces );
 	void set_info( std::array<std::pair<std::string,std::string>,10> info );
 	void set_colours( std::array<std::string,4> new_colours );
 	void set_edit( bool on );
@@ -70,6 +71,7 @@ private:
 
 	void paint_board();
 	void paint_pieces();
+	//void paint_new_pieces();
 	void paint_edit_pieces();
 	void paint_info();
 
@@ -77,13 +79,11 @@ private:
 	void update_dragging( Gdk::Point new_point );
 	void stop_dragging();
 
-	STSquare   adjust_for_reverse( STSquare square );
 	STSquare   point_to_square( Gdk::Point point );
 	Gdk::Point square_to_point( STSquare square );
-	Gdk::Point square_to_board_point( STSquare square );
 
-	Gdk::Point piece_source_offset( char piece_code );
-	char       point_to_piece_code( Gdk::Point point );
+	Gdk::Point piececode_to_editpoint( char piece_code );
+	char       editpoint_to_piececode( Gdk::Point point );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
@@ -109,6 +109,7 @@ private:
 	bool is_edit = false;
 
 	std::map<STSquare,char> pieces;
+	//std::array<char, 64> new_pieces;
 	std::array<std::pair<std::string,std::string>,10> info;
 
 	Gdk::Point floating_piece_position;

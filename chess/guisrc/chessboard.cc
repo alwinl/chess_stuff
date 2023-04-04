@@ -133,7 +133,7 @@ bool ChessBoard::on_draw( const Cairo::RefPtr<Cairo::Context>& cr )
     }
 
 	if( draw_floating_piece ) {
-		Gdk::Point floating_piece_source = floating_piece_position - piece_source_offset( floating_piece_code );
+		Gdk::Point floating_piece_source = floating_piece_position - piececode_to_editpoint( floating_piece_code );
 		cr->rectangle( floating_piece_position.get_x(), floating_piece_position.get_y(), SQUARE_SIZE, SQUARE_SIZE );
 		cr->set_source( pieces_image, floating_piece_source.get_x(), floating_piece_source.get_y() );
 		cr->fill();
@@ -173,11 +173,14 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
     if( is_edit && edit_outline.intersects( mouse_pos ) ) {
 
-		start_dragging( mouse_point, point_to_piece_code( mouse_point ) );
+    	Gdk::Point edit_point = mouse_point - Gdk::Point( edit_outline.get_x(), edit_outline.get_y() );	// Make the point relative to the edit "widget"
+		char piece_code = editpoint_to_piececode( edit_point );
+
+		start_dragging( mouse_point, piece_code );
 
 		button_event->x = -1;
 		button_event->y = -1;
-		button_event->state = point_to_piece_code( mouse_point );
+		button_event->state = piece_code;
 
 		return false;
     }
@@ -260,14 +263,36 @@ void ChessBoard::paint_pieces()
 	// draw the pieces
 	for( std::pair<const STSquare,char>& entry : pieces ) {
 
-		Gdk::Point dest = square_to_board_point( entry.first );
-		Gdk::Point source = dest - piece_source_offset( entry.second );
+		Gdk::Point dest = square_to_point( entry.first ) - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+		Gdk::Point source = dest - piececode_to_editpoint( entry.second );
 
 		context->set_source( pieces_image, source.get_x(), source.get_y() );
 		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
 		context->fill();
 	}
 }
+
+//void ChessBoard::paint_new_pieces()
+//{
+//	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create( pieces_overlay );
+//
+//	context->save();
+//	context->set_operator( Cairo::OPERATOR_CLEAR );
+//	context->paint();
+//	context->restore();
+//
+//	// draw the pieces
+//	for( int index = 0; index < 64; ++index ) {
+//
+//		Gdk::Point dest = index_to_board_point( index ) - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+//		Gdk::Point source = dest - piece_source_offset( new_pieces[index] );
+//
+//		context->set_source( pieces_image, source.get_x(), source.get_y() );
+//		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
+//		context->fill();
+//	}
+//
+//}
 
 void ChessBoard::paint_edit_pieces()
 {
@@ -354,6 +379,16 @@ void ChessBoard::set_piece_positions( std::map<STSquare,char> new_pieces )
 
     queue_draw();
 }
+
+//void ChessBoard::set_new_piece_positions( std::array<char, 64> _new_pieces )
+//{
+//	new_pieces = _new_pieces;
+//
+//	paint_new_pieces();
+//
+//	queue_draw();
+//}
+
 
 void ChessBoard::set_colours( std::array<std::string,4> new_colours )
 {
@@ -498,8 +533,45 @@ void ChessBoard::highlight_finish()
 /**-----------------------------------------------------------------------------
  * The following set of functions are utility functions
  */
-STSquare ChessBoard::adjust_for_reverse( STSquare square )
+#if 0
+uint16_t ChessBoard::point_to_square( Gdk::Point point )
 {
+	point = point - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+	point = point - Gdk::Point( 1, 1 );
+
+	uint16_t square = point.get_x() / SQUARE_SIZE + 8 * point.get_y() / SQUARE_SIZE;
+
+	if( is_reversed )
+		square ^= 56;
+
+	return square;
+}
+
+Gdk::Point ChessBoard::square_to_point( uint16_t square )
+{
+	if( is_reversed )
+		square ^= 56;
+
+	Gdk::Point new_point( (square % 8) * SQUARE_SIZE, (square / 8) * SQUARE_SIZE );
+
+	point = point + Gdk::Point( 1, 1 );
+	point = point + Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+
+	return new_point;
+}
+
+#endif // 0
+
+
+
+
+STSquare ChessBoard::point_to_square( Gdk::Point point )
+{
+	point = point - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+	point = point - Gdk::Point( 1, 1 );
+
+	STSquare square{ .file = point.get_x() / SQUARE_SIZE, .rank = point.get_y() / SQUARE_SIZE };
+
 	if( is_reversed )
 		square.file = 7 - square.file;
 	else
@@ -508,72 +580,37 @@ STSquare ChessBoard::adjust_for_reverse( STSquare square )
 	return square;
 }
 
-STSquare ChessBoard::point_to_square( Gdk::Point point )
-{
-	STSquare square;
-
-    square.file = (point.get_x() - (board_outline.get_x() - 1) ) / SQUARE_SIZE;
-    square.rank = (point.get_y() - (board_outline.get_y() - 1) ) / SQUARE_SIZE;
-
-    square = adjust_for_reverse( square );
-
-	return square;
-}
 
 Gdk::Point ChessBoard::square_to_point( STSquare square )
 {
-    square = adjust_for_reverse( square );
+	if( is_reversed )
+		square.file = 7 - square.file;
+	else
+		square.rank = 7 - square.rank;
 
-	return Gdk::Point(
-		board_outline.get_x() + 1 + square.file * SQUARE_SIZE,
-		board_outline.get_y() + 1 + square.rank * SQUARE_SIZE
-	);
+	Gdk::Point point = Gdk::Point( square.file * SQUARE_SIZE, square.rank * SQUARE_SIZE );
+
+	point = point + Gdk::Point( 1, 1 );
+	point = point + Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+
+	return point;
 }
 
-Gdk::Point ChessBoard::square_to_board_point( STSquare square )
+//The bitmap is organised as:
+//         KQRBNP
+//         kqrbnp
+Gdk::Point ChessBoard::piececode_to_editpoint( char piece_code )
 {
-	square = adjust_for_reverse( square );
-
-	return Gdk::Point(
-		1 + square.file * SQUARE_SIZE,
-		1 + square.rank * SQUARE_SIZE
-	);
-}
-
-Gdk::Point ChessBoard::piece_source_offset( char piece_code )
-{
-	static std::map<char,Gdk::Point> pieces_image_offsets = {
-		// The pieces bitmap contains king through to pawn, white pieces in top row and black pieces in bottom row
-		{ 'K', Gdk::Point( 0 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 ) },
-		{ 'Q', Gdk::Point( 1 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 ) },
-		{ 'R', Gdk::Point( 2 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 ) },
-		{ 'B', Gdk::Point( 3 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 ) },
-		{ 'N', Gdk::Point( 4 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 ) },
-		{ 'P', Gdk::Point( 5 * SQUARE_SIZE + 1, 0 * SQUARE_SIZE + 1 ) },
-		{ 'k', Gdk::Point( 0 * SQUARE_SIZE + 1, 1 * SQUARE_SIZE + 1 ) },
-		{ 'q', Gdk::Point( 1 * SQUARE_SIZE + 1, 1 * SQUARE_SIZE + 1 ) },
-		{ 'r', Gdk::Point( 2 * SQUARE_SIZE + 1, 1 * SQUARE_SIZE + 1 ) },
-		{ 'b', Gdk::Point( 3 * SQUARE_SIZE + 1, 1 * SQUARE_SIZE + 1 ) },
-		{ 'n', Gdk::Point( 4 * SQUARE_SIZE + 1, 1 * SQUARE_SIZE + 1 ) },
-		{ 'p', Gdk::Point( 5 * SQUARE_SIZE + 1, 1 * SQUARE_SIZE + 1 ) },
-	};
-
-	// To paint a particular piece we have to offset our source bitmap so that the correct bitmap
-	// overlays our square to be painted. The pieces are stored as two rows (a white and a black row)
-	// in six columns, calculable by type.
-	return pieces_image_offsets[piece_code];
-}
-
-char ChessBoard::point_to_piece_code( Gdk::Point point )
-{
-	//The bitmap is organised as:
-	//         KQRBNP
-	//         kqrbnp
 	static std::string piece_chars = "KQRBNPkqrbnp";
 
-	// to find out which piece we got, we need to calculate how many squares in and down the point falls
-	int col = (point.get_x() - edit_outline.get_x()) / SQUARE_SIZE;
-	int row = (point.get_y() - edit_outline.get_y()) / SQUARE_SIZE;
+	unsigned int index = piece_chars.find( piece_code );
 
-	return piece_chars[ row * 6 + col ];
+	return Gdk::Point( (index % 6) * SQUARE_SIZE + 1, (index / 6) * SQUARE_SIZE + 1 );
+}
+
+char ChessBoard::editpoint_to_piececode( Gdk::Point point )
+{
+	static std::string piece_chars = "KQRBNPkqrbnp";
+
+	return piece_chars[ (point.get_x() / SQUARE_SIZE) + 6 * (point.get_y() / SQUARE_SIZE) ];
 }
