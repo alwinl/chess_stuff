@@ -37,8 +37,6 @@ class DialogColours;
 class DialogPieceValues;
 class DialogInput;
 
-struct STSquare;
-
 /**-----------------------------------------------------------------------------
  * \brief Main application object
  *
@@ -109,9 +107,9 @@ private:
 	void on_move_calculator_notify();
 
 	// Animation of moves, highlights and demo
-    void do_animate( STSquare start_square, STSquare end_square, char piece );
+    void do_animate( uint16_t start_square, uint16_t end_square, char piece );
 	bool on_animate_timeout();
-	void do_highlight( STSquare square );
+	void do_highlight( uint16_t square );
 	bool on_highlight_timeout();
     bool do_demo_move();
     bool on_demo_move_timeout();

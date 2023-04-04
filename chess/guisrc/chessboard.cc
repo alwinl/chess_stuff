@@ -159,13 +159,15 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 
     if( board_outline.intersects( mouse_pos ) ) {
 
-		STSquare drag_start_square = point_to_square( mouse_point );
-		char piece_code = pieces.at(drag_start_square);
+		uint16_t drag_start_square = point_to_square( mouse_point );
+		char piece_code = pieces[drag_start_square];
+
+		if( piece_code == ' ' )
+			return true;
 
 		start_dragging( mouse_point, piece_code );
 
-		button_event->x = drag_start_square.file;
-		button_event->y = drag_start_square.rank;
+		button_event->x = drag_start_square;
 		button_event->state = piece_code;
 
 		return false;
@@ -179,7 +181,6 @@ bool ChessBoard::on_button_press_event( GdkEventButton* button_event )
 		start_dragging( mouse_point, piece_code );
 
 		button_event->x = -1;
-		button_event->y = -1;
 		button_event->state = piece_code;
 
 		return false;
@@ -208,15 +209,12 @@ bool ChessBoard::on_button_release_event( GdkEventButton* release_event )
     Gdk::Rectangle mouse_pos = Gdk::Rectangle( release_event->x, release_event->y, 1, 1 );
 
 	if( board_outline.intersects( mouse_pos ) ) {
-        STSquare drag_end_square = point_to_square( Gdk::Point(release_event->x, release_event->y) );
-		release_event->x = drag_end_square.file;
-		release_event->y = drag_end_square.rank;
+		release_event->x = point_to_square( Gdk::Point(release_event->x, release_event->y) );
 		return false;		// keep processing
 	}
 
 	if( is_edit ) {
 		release_event->x = -1;
-		release_event->y = -1;
         return false;		// keep processing
 	}
 
@@ -261,38 +259,19 @@ void ChessBoard::paint_pieces()
 	context->restore();
 
 	// draw the pieces
-	for( std::pair<const STSquare,char>& entry : pieces ) {
+	for( int index = 0; index < 64; ++index ) {
 
-		Gdk::Point dest = square_to_point( entry.first ) - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
-		Gdk::Point source = dest - piececode_to_editpoint( entry.second );
+		if( pieces[index] == ' ' )
+			continue;
+
+		Gdk::Point dest = square_to_point( index ) - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
+		Gdk::Point source = dest - piececode_to_editpoint( pieces[index] );
 
 		context->set_source( pieces_image, source.get_x(), source.get_y() );
 		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
 		context->fill();
 	}
 }
-
-//void ChessBoard::paint_new_pieces()
-//{
-//	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create( pieces_overlay );
-//
-//	context->save();
-//	context->set_operator( Cairo::OPERATOR_CLEAR );
-//	context->paint();
-//	context->restore();
-//
-//	// draw the pieces
-//	for( int index = 0; index < 64; ++index ) {
-//
-//		Gdk::Point dest = index_to_board_point( index ) - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
-//		Gdk::Point source = dest - piece_source_offset( new_pieces[index] );
-//
-//		context->set_source( pieces_image, source.get_x(), source.get_y() );
-//		context->rectangle( dest.get_x(), dest.get_y(), SQUARE_SIZE, SQUARE_SIZE );
-//		context->fill();
-//	}
-//
-//}
 
 void ChessBoard::paint_edit_pieces()
 {
@@ -371,24 +350,14 @@ void ChessBoard::paint_info()
 /**-----------------------------------------------------------------------------
  * The next set of functions update the state of the ChessBoard
  */
-void ChessBoard::set_piece_positions( std::map<STSquare,char> new_pieces )
+void ChessBoard::set_piece_positions( std::array<char,64> new_pieces )
 {
 	pieces = new_pieces;
 
 	paint_pieces();
 
-    queue_draw();
+	queue_draw();
 }
-
-//void ChessBoard::set_new_piece_positions( std::array<char, 64> _new_pieces )
-//{
-//	new_pieces = _new_pieces;
-//
-//	paint_new_pieces();
-//
-//	queue_draw();
-//}
-
 
 void ChessBoard::set_colours( std::array<std::string,4> new_colours )
 {
@@ -422,7 +391,7 @@ void ChessBoard::set_edit( bool on )
 	queue_draw();
 }
 
-void ChessBoard::set_info( std::array<std::pair<std::string,std::string>,10>  the_info )
+void ChessBoard::set_info( std::array<std::pair<std::string,std::string>,10> the_info )
 {
 	info = the_info;
 
@@ -473,16 +442,13 @@ void ChessBoard::stop_dragging()
  * Animation functionality
  *
  */
-void ChessBoard::animate_start( STSquare& start_square, STSquare& end_square, char piece )
+void ChessBoard::animate_start( uint16_t start_square, uint16_t end_square, char piece )
 {
-	Gdk::Point end_point = square_to_point( end_square );
-
 	floating_piece_position = square_to_point( start_square );
 	floating_piece_code = piece;
 	draw_floating_piece = true;
 
-	annimate_delta = (end_point - floating_piece_position) / 10;
-
+	annimate_delta = (square_to_point( end_square ) - floating_piece_position) / 10;
 	is_animating = true;
 
 	// make the first step
@@ -511,7 +477,7 @@ void ChessBoard::animate_finish()
  *
  */
 
-void ChessBoard::highlight_start( STSquare square )
+void ChessBoard::highlight_start( uint16_t square )
 {
 	highlight_pos = square_to_point( square );
 	draw_highlight = true;
@@ -533,13 +499,12 @@ void ChessBoard::highlight_finish()
 /**-----------------------------------------------------------------------------
  * The following set of functions are utility functions
  */
-#if 0
 uint16_t ChessBoard::point_to_square( Gdk::Point point )
 {
 	point = point - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
 	point = point - Gdk::Point( 1, 1 );
 
-	uint16_t square = point.get_x() / SQUARE_SIZE + 8 * point.get_y() / SQUARE_SIZE;
+	uint16_t square = point.get_x() / SQUARE_SIZE + 8 * (7 - (point.get_y() / SQUARE_SIZE));
 
 	if( is_reversed )
 		square ^= 56;
@@ -552,43 +517,7 @@ Gdk::Point ChessBoard::square_to_point( uint16_t square )
 	if( is_reversed )
 		square ^= 56;
 
-	Gdk::Point new_point( (square % 8) * SQUARE_SIZE, (square / 8) * SQUARE_SIZE );
-
-	point = point + Gdk::Point( 1, 1 );
-	point = point + Gdk::Point( board_outline.get_x(), board_outline.get_y() );
-
-	return new_point;
-}
-
-#endif // 0
-
-
-
-
-STSquare ChessBoard::point_to_square( Gdk::Point point )
-{
-	point = point - Gdk::Point( board_outline.get_x(), board_outline.get_y() );
-	point = point - Gdk::Point( 1, 1 );
-
-	STSquare square{ .file = point.get_x() / SQUARE_SIZE, .rank = point.get_y() / SQUARE_SIZE };
-
-	if( is_reversed )
-		square.file = 7 - square.file;
-	else
-		square.rank = 7 - square.rank;
-
-	return square;
-}
-
-
-Gdk::Point ChessBoard::square_to_point( STSquare square )
-{
-	if( is_reversed )
-		square.file = 7 - square.file;
-	else
-		square.rank = 7 - square.rank;
-
-	Gdk::Point point = Gdk::Point( square.file * SQUARE_SIZE, square.rank * SQUARE_SIZE );
+	Gdk::Point point( (square % 8) * SQUARE_SIZE, (7 - (square / 8)) * SQUARE_SIZE );
 
 	point = point + Gdk::Point( 1, 1 );
 	point = point + Gdk::Point( board_outline.get_x(), board_outline.get_y() );

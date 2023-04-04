@@ -24,14 +24,21 @@
 
 #include "chessengine.h"
 
+static uint16_t convert_square( STSquare square )
+{
+	return square.file + 8 * square.rank;
+}
+
 static void push_positions( ChessBoard* board, std::map<STSquare,STPiece> positions )
 {
-	std::map<STSquare,char> new_map;
+	std::array<char, 64> new_positions;
+
+	new_positions.fill( ' ' );
 
 	for( auto position : positions )
-		new_map.insert( std::make_pair( position.first, position.second.code ) );
+		new_positions[ position.first.file + 8 * position.first.rank ] = position.second.code;
 
-	board->set_piece_positions( new_map );
+	board->set_piece_positions( new_positions );
 }
 
 static void push_info( ChessBoard* board, STInfo the_info )
@@ -320,7 +327,7 @@ void ChessController::on_action_play()
 
 void ChessController::on_action_hint()
 {
-	do_highlight( engine->hint() );
+	do_highlight( convert_square( engine->hint() ) );
 
 }
 
@@ -655,7 +662,6 @@ void ChessController::on_action_arrange_make_fen()
 	dlgTimeInput->dlg_setup( "Arrange", "FEN Setup:", FEN );
 	dlgTimeInput->run();
 	dlgTimeInput->hide();
-	//Gtk::MessageDialog( *view, FEN, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true ).run();
 }
 
 void ChessController::on_action_thinking_stop()
@@ -668,8 +674,8 @@ void ChessController::on_action_thinking_stop()
  */
 bool ChessController::on_drag_start( GdkEventButton* button_event )
 {
-	drag_start_square.file = button_event->x;
-	drag_start_square.rank = button_event->y;
+	drag_start_square.file = uint16_t(button_event->x) % 8;
+	drag_start_square.rank = uint16_t(button_event->x) / 8;
 	drag_piece_code        = button_event->state;
 
 	std::map<STSquare,STPiece> save_board = engine->get_piece_positions();
@@ -681,8 +687,8 @@ bool ChessController::on_drag_start( GdkEventButton* button_event )
 
 bool ChessController::on_drag_done( GdkEventButton* button_event )
 {
-	drag_end_square.file = button_event->x;
-	drag_end_square.rank = button_event->y;
+	drag_end_square.file = uint16_t(button_event->x) % 8;
+	drag_end_square.rank = uint16_t(button_event->x) / 8;
 
 	if( drag_start_square == drag_end_square ) {
 		push_positions( board, engine->get_piece_positions() );
@@ -708,7 +714,7 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 		save_board.erase( drag_start_square );
 		push_positions( board, save_board );
 
-		do_animate( drag_start_square, drag_end_square, drag_piece_code );
+		do_animate( convert_square(drag_start_square), convert_square(drag_end_square), drag_piece_code );
 
 		return true;
 	}
@@ -758,7 +764,7 @@ void ChessController::on_move_calculator_notify()
 /**-----------------------------------------------------------------------------
  * Animation of moves, highlights and demo
  */
-void ChessController::do_animate( STSquare start_square, STSquare end_square, char piece )
+void ChessController::do_animate( uint16_t start_square, uint16_t end_square, char piece )
 {
     board->animate_start( start_square, end_square, piece );
 
@@ -783,7 +789,7 @@ bool ChessController::on_animate_timeout()
 	return false;
 }
 
-void ChessController::do_highlight( STSquare square )
+void ChessController::do_highlight( uint16_t square )
 {
 	board->highlight_start( square );
 
@@ -823,7 +829,7 @@ bool ChessController::do_demo_move()
 	save_board.erase( start_square );
 	push_positions( board, save_board );
 
-    board->animate_start( start_square, end_square, piece );
+    board->animate_start( convert_square( start_square ), convert_square( end_square ), piece );
 
     timeout_counter = 10;
     Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_demo_move_timeout), 100 );

@@ -22,11 +22,9 @@
 
 #include <gtkmm.h>
 
-#include <map>
 #include <string>
 #include <array>
-
-#include "pods.h"
+#include <utility>
 
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
@@ -44,19 +42,18 @@ private:
 public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
-    void set_piece_positions( std::map<STSquare,char> new_pieces );
-    //void set_new_piece_positions( std::array<char, 64> _new_pieces );
+    void set_piece_positions( std::array<char,64> new_pieces );
 	void set_info( std::array<std::pair<std::string,std::string>,10> info );
 	void set_colours( std::array<std::string,4> new_colours );
 	void set_edit( bool on );
     void toggle_reverse();
     void toggle_bestline();
 
-	void highlight_start( STSquare square );
+	void highlight_start( uint16_t square );
 	void highlight_continue();
 	void highlight_finish();
 
-	void animate_start( STSquare& start_square, STSquare& end_square, char piece );
+	void animate_start( uint16_t start_square, uint16_t end_square, char piece );
 	void animate_continue();
 	void animate_finish();
 
@@ -71,7 +68,6 @@ private:
 
 	void paint_board();
 	void paint_pieces();
-	//void paint_new_pieces();
 	void paint_edit_pieces();
 	void paint_info();
 
@@ -79,11 +75,10 @@ private:
 	void update_dragging( Gdk::Point new_point );
 	void stop_dragging();
 
-	STSquare   point_to_square( Gdk::Point point );
-	Gdk::Point square_to_point( STSquare square );
-
+	Gdk::Point square_to_point( uint16_t square );
+	uint16_t point_to_square( Gdk::Point point );
 	Gdk::Point piececode_to_editpoint( char piece_code );
-	char       editpoint_to_piececode( Gdk::Point point );
+	char editpoint_to_piececode( Gdk::Point point );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
@@ -108,8 +103,7 @@ private:
 	bool is_reversed = false;
 	bool is_edit = false;
 
-	std::map<STSquare,char> pieces;
-	//std::array<char, 64> new_pieces;
+	std::array<char,64> pieces;
 	std::array<std::pair<std::string,std::string>,10> info;
 
 	Gdk::Point floating_piece_position;
