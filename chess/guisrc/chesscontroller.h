@@ -26,9 +26,6 @@
 #include <vector>
 #include <thread>
 
-#include "pods.h"
-
-
 class ChessEngine;
 
 class ChessWindow;
@@ -140,8 +137,8 @@ private:
 	std::thread * thread_move_calculator;
 	Glib::Dispatcher slot_move_calculator;
 	int timeout_counter;
-	STSquare drag_start_square;
-	STSquare drag_end_square;
+	uint16_t drag_start_square;
+	uint16_t drag_end_square;
 	char drag_piece_code;
 
     ChessEngine* engine;

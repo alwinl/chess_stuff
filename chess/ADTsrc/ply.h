@@ -35,8 +35,8 @@ public:
 
     void add_comment( std::string the_comment ) { comment = the_comment; }
 
-    STSquare get_start_square() const { return start_square; }
-    STSquare get_end_square() const { return end_square; }
+    uint16_t get_start_square() const { return start_square; }
+    uint16_t get_end_square() const { return end_square; }
 
 protected:
 
@@ -45,8 +45,8 @@ private:
 	int moveno;
 	std::string SAN;
 	std::string comment;
-	STSquare start_square;
-	STSquare end_square;
+	uint16_t start_square;
+	uint16_t end_square;
 };
 
 #endif // PLY_H

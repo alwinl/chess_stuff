@@ -35,6 +35,12 @@
 
 using namespace std;
 
+static STSquare convert_square( uint16_t square )
+{
+	return make_square( square % 8, square / 8 );
+}
+
+
 
 ChessEngine::ChessEngine()
 {
@@ -91,13 +97,13 @@ void ChessEngine::new_game( )
 
 
 
-bool ChessEngine::enter_move( STSquare start_square, STSquare end_square )
+bool ChessEngine::enter_move( uint16_t start_square, uint16_t end_square )
 {
     static int test = 0;
 
     if( (++test) % 2 ) {
 
-        current_board.move_piece( start_square, end_square );
+        current_board.move_piece( convert_square(start_square), convert_square(end_square) );
         return true;
 
     } else {
@@ -106,9 +112,9 @@ bool ChessEngine::enter_move( STSquare start_square, STSquare end_square )
     //return true;
 }
 
-STSquare ChessEngine::hint()
+uint16_t ChessEngine::hint()
 {
-    STSquare square = make_square( 3, 3 );
+    uint16_t square = 3 + 8 * 3;
 
 
     return square;
@@ -129,7 +135,7 @@ void ChessEngine::arranging_clear()
     arrange_board.clear_all();
 }
 
-void ChessEngine::arrange_add_piece( STSquare square, char piece )
+void ChessEngine::arrange_add_piece( uint16_t square, char piece )
 {
     STPiece new_piece;
 
@@ -137,12 +143,12 @@ void ChessEngine::arrange_add_piece( STSquare square, char piece )
     new_piece.is_white = ( string("KQRBNP").find( piece ) != std::string::npos );
     new_piece.is_dragging = false;
 
-    arrange_board.add_piece( square, new_piece );
+    arrange_board.add_piece( convert_square(square), new_piece );
 }
 
-void ChessEngine::arrange_remove_piece(STSquare square )
+void ChessEngine::arrange_remove_piece(uint16_t square )
 {
-    arrange_board.remove_piece( square );
+    arrange_board.remove_piece( convert_square(square) );
 }
 
 void ChessEngine::arrange_turn( eTurns new_turn )
@@ -177,9 +183,16 @@ std::string ChessEngine::arrange_to_fen()
 
 
 
-std::map<STSquare,STPiece> ChessEngine::get_piece_positions( )
+std::array<char, 64> ChessEngine::get_piece_positions( )
 {
-    return is_arranging ? arrange_board.get_pieces() : current_board.get_pieces();
+	std::array<char, 64> new_positions;
+
+	new_positions.fill( ' ' );
+
+	for( auto position : is_arranging ? arrange_board.get_pieces() : current_board.get_pieces() )
+		new_positions[ position.first.file + 8 * position.first.rank ] = position.second.code;
+
+	return new_positions;
 }
 
 

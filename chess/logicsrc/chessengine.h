@@ -31,8 +31,6 @@
 #include "chessgame.h"
 #include "board.h"
 
-//class STSquare;
-
 /** \brief
  */
 class ChessEngine
@@ -42,7 +40,7 @@ public:
     ChessEngine();
     ~ChessEngine();
 
-    bool enter_move( STSquare start_square, STSquare end_square );
+    bool enter_move( uint16_t start_square, uint16_t end_square );
     void cancel_move();
     void calculate_move();
 
@@ -52,13 +50,13 @@ public:
 
 	void arranging_start();
 	void arranging_clear();
-	void arrange_add_piece( STSquare square, char piece );
-	void arrange_remove_piece( STSquare square );
+	void arrange_add_piece( uint16_t square, char piece );
+	void arrange_remove_piece( uint16_t square );
 	void arrange_turn( eTurns new_turn );
 	bool arranging_end( bool canceled );
 	bool in_edit_mode() { return is_arranging; }
 
-    STSquare hint();
+    uint16_t hint();
 
     void new_game();
     bool can_quit();
@@ -72,7 +70,7 @@ public:
 	void stop_thinking();
 
 	std::array<std::pair<std::string,std::string>,10> get_info();
-	std::map<STSquare,STPiece> get_piece_positions( );
+	std::array<char, 64> get_piece_positions( );
 
 	std::string arrange_to_fen();
 
