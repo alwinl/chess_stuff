@@ -35,7 +35,6 @@ public:
 private:
 	Display disp;
 	eColor current_player = white;
-	unsigned int gametype = -1;
 	bool is_human[2];
 	Board board;
 	std::vector<Ply> game_moves;

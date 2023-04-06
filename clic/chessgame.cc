@@ -35,6 +35,8 @@ int ChessGame::run( int argc, char *argv[] )
 
 bool ChessGame::setup()
 {
+	unsigned int gametype = -1;
+
 	while( gametype == (unsigned int )-1 ) {
 		disp.new_game_menu();
 		gametype = disp.select_gametype();
