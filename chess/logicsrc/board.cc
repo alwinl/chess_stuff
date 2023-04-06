@@ -23,26 +23,15 @@
 #include "fentranslator.h"
 #include "pods.h"
 
-Board::Board()
+Board::Board( std::string PiecePlacement )
 {
-	//ctor
+	if( PiecePlacement.empty() )
+		PiecePlacement = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+
+	pieces = FENTranslator().from_FEN( PiecePlacement );
 }
 
-Board Board::standard_opening_board()
-{
-	pieces = FENTranslator().from_FEN( "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" );
-
-	return *this;
-}
-
-Board Board::build_from_FEN( std::string FEN )
-{
-	pieces = FENTranslator().from_FEN( FEN );
-
-	return *this;
-}
-
-std::string Board::export_as_FEN()
+std::string Board::piece_placement() const
 {
 	return FENTranslator().to_FEN( pieces );
 }

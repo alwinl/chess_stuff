@@ -88,7 +88,7 @@ void ChessEngine::new_game( )
 
     multi_player = false;
 
-    current_board.standard_opening_board();
+    current_board = Board();
 }
 
 
@@ -171,7 +171,7 @@ bool ChessEngine::arranging_end( bool canceled )
 
 std::string ChessEngine::arrange_to_fen()
 {
-	return arrange_board.export_as_FEN();
+	return arrange_board.piece_placement();
 }
 
 

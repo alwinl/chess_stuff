@@ -56,18 +56,6 @@
 		<ExtraCommands>
 			<Add before="glib-compile-resources --target=guisrc/resources.c --sourcedir=guisrc --generate-source guisrc/chess.gresource.xml" />
 		</ExtraCommands>
-		<Unit filename="ADTsrc/board.cc" />
-		<Unit filename="ADTsrc/board.h" />
-		<Unit filename="ADTsrc/chessgame.cc" />
-		<Unit filename="ADTsrc/chessgame.h" />
-		<Unit filename="ADTsrc/pgnparser.cc" />
-		<Unit filename="ADTsrc/pgnparser.h" />
-		<Unit filename="ADTsrc/pgntoken.cc" />
-		<Unit filename="ADTsrc/pgntoken.h" />
-		<Unit filename="ADTsrc/ply.cc" />
-		<Unit filename="ADTsrc/ply.h" />
-		<Unit filename="ADTsrc/pods.cc" />
-		<Unit filename="ADTsrc/pods.h" />
 		<Unit filename="chessmain.cc" />
 		<Unit filename="game.pgn" />
 		<Unit filename="guisrc/appui.glade">
@@ -119,10 +107,25 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="logicsrc/board.cc" />
+		<Unit filename="logicsrc/board.h" />
 		<Unit filename="logicsrc/chessengine.cc" />
 		<Unit filename="logicsrc/chessengine.h" />
+		<Unit filename="logicsrc/chessgame.cc" />
+		<Unit filename="logicsrc/chessgame.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
+		<Unit filename="logicsrc/pgnparser.cc" />
+		<Unit filename="logicsrc/pgnparser.h" />
+		<Unit filename="logicsrc/pgntoken.cc" />
+		<Unit filename="logicsrc/pgntoken.h" />
+		<Unit filename="logicsrc/piece.cc" />
+		<Unit filename="logicsrc/piece.h" />
+		<Unit filename="logicsrc/piece_square_tables.cc" />
+		<Unit filename="logicsrc/ply.cc" />
+		<Unit filename="logicsrc/ply.h" />
+		<Unit filename="logicsrc/pods.cc" />
+		<Unit filename="logicsrc/pods.h" />
 		<Unit filename="logictest/testapplication.cc" />
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />

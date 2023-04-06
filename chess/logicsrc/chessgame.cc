@@ -26,7 +26,7 @@ using namespace std;
 
 ChessGame::ChessGame( )
 {
-    initial = Board().standard_opening_board();
+    initial = Board();
     moves.clear();
     tag_pairs.clear();
 }
@@ -51,7 +51,7 @@ void ChessGame::set_alternate_starting_position()
 	if( (*SetUp_it).second != "1" )
 		return;
 
-	initial = Board().build_from_FEN( (*FEN_it).second );
+	initial = Board( (*FEN_it).second );
 }
 
 

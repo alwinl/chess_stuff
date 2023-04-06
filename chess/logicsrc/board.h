@@ -24,17 +24,17 @@
 
 #include <map>
 #include <string>
+#include <array>
 
 #include "pods.h"
+
+#include "piece.h"
 
 class Board
 {
 public:
-	Board();
-
-	Board standard_opening_board();
-	Board build_from_FEN( std::string FEN );
-	std::string export_as_FEN();
+	Board( std::string PiecePlacement = "" );
+	std::string piece_placement() const;
 
 	Board add_piece( STSquare square, STPiece new_piece );
 	Board remove_piece( STSquare square );
@@ -51,6 +51,7 @@ public:
 
 private:
 	std::map<STSquare,STPiece> pieces;
+	std::array<Piece,64> position;
 
     bool is_white_move;             // is it whites next move?
 
@@ -63,7 +64,6 @@ private:
 
     int halfmove_clock;             // Number of half moves since last capture or pawn advance
     int fullmove_number;             // The number of the move, start at one increment after black move
-
 };
 
 #endif // BOARD_H
