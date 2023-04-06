@@ -123,10 +123,6 @@
 		<Unit filename="logicsrc/chessengine.h" />
 		<Unit filename="logicsrc/fentranslator.cc" />
 		<Unit filename="logicsrc/fentranslator.h" />
-		<Unit filename="logicsrc/gameloader.cc" />
-		<Unit filename="logicsrc/gameloader.h" />
-		<Unit filename="logicsrc/movegenerator.cc" />
-		<Unit filename="logicsrc/movegenerator.h" />
 		<Unit filename="logictest/testapplication.cc" />
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />

@@ -21,10 +21,7 @@
 
 #include "chessengine.h"
 #include "chessgame.h"
-#include "timeinputter.h"
 #include "pgnparser.h"
-
-#include "fentranslator.h"
 
 #include <chrono>
 #include <thread>
@@ -416,9 +413,6 @@ void ChessEngine::CalculatePawnTable()
         PawnTable[ 1 ][ rank ] = 0;
     }
 
-    //FENTranslator translator;
-
-    //map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
     map<STSquare,STPiece> pieces = current_board.get_pieces();
 
     for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
@@ -438,11 +432,6 @@ void ChessEngine::CalculatePawnTable()
 
 void ChessEngine::CalcMaterial()
 {
-
-
-    //FENTranslator translator;
-
-    //map<STSquare,STPiece> pieces = translator.from_FEN( current_state.piece_positions );
     map<STSquare,STPiece> pieces = current_board.get_pieces();
 
     int material = 0;
