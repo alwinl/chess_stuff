@@ -340,6 +340,7 @@ void ChessController::on_action_level_easy()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Easy") );
 }
 
@@ -366,6 +367,7 @@ void ChessController::on_action_level_timed()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Timed") );
 }
 
@@ -392,6 +394,7 @@ void ChessController::on_action_level_total_time()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Total Time") );
 }
 
@@ -409,6 +412,7 @@ void ChessController::on_action_level_infinite()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Inifnite") );
 }
 
@@ -426,6 +430,7 @@ void ChessController::on_action_level_ply_search()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Ply Search") );
 }
 
@@ -443,6 +448,7 @@ void ChessController::on_action_level_mate_search()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Mate Search") );
 }
 
@@ -462,6 +468,7 @@ void ChessController::on_action_level_matching()
 		return;
 	}
 
+	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Matching") );
 }
 
@@ -640,9 +647,11 @@ bool ChessController::on_drag_start( GdkEventButton* button_event )
 	drag_start_square = button_event->x;
 	drag_piece_code = button_event->state;
 
-	std::array<char, 64> save_board = engine->get_piece_positions();
-	save_board[drag_start_square] = ' ';
-	board->set_piece_positions( save_board );
+	if( drag_start_square != (uint16_t)-1 ) {
+		std::array<char, 64> save_board = engine->get_piece_positions();
+		save_board[drag_start_square] = ' ';
+		board->set_piece_positions( save_board );
+	}
 
 	return true;
 }
@@ -659,8 +668,11 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 	// Arranging?
 	if( engine->in_edit_mode() ) {
 
-        engine->arrange_remove_piece( drag_start_square );
-		engine->arrange_add_piece( drag_end_square, drag_piece_code );
+		if( drag_start_square != (uint16_t)-1 )
+			engine->arrange_remove_piece( drag_start_square );
+
+		if( drag_end_square != (uint16_t)-1 )
+			engine->arrange_add_piece( drag_end_square, drag_piece_code );
 
 		board->set_piece_positions( engine->get_piece_positions() );
 		return true;
@@ -772,26 +784,26 @@ bool ChessController::on_highlight_timeout()
 
 bool ChessController::do_demo_move()
 {
-    Ply ply;
-
-    if( ! engine->get_next_ply( ply ) ) {
-        mnuStop->hide();
-        mnuGame->show();
-        return false;
-    }
-
-    uint16_t start_square = ply.get_start_square();
-    uint16_t end_square = ply.get_end_square();
-
-	std::array<char, 64> save_board = engine->get_piece_positions();
-	char piece = save_board[start_square];
-	save_board[start_square] = ' ';
-	board->set_piece_positions( save_board );
-
-    board->animate_start( start_square, end_square, piece );
-
-    timeout_counter = 10;
-    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_demo_move_timeout), 100 );
+//    Ply ply;
+//
+//    if( ! engine->get_next_ply( ply ) ) {
+//        mnuStop->hide();
+//        mnuGame->show();
+//        return false;
+//    }
+//
+//    uint16_t start_square = ply.square_from();
+//    uint16_t end_square = ply.square_to();
+//
+//	std::array<char, 64> save_board = engine->get_piece_positions();
+//	char piece = save_board[start_square];
+//	save_board[start_square] = ' ';
+//	board->set_piece_positions( save_board );
+//
+//    board->animate_start( start_square, end_square, piece );
+//
+//    timeout_counter = 10;
+//    Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::on_demo_move_timeout), 100 );
 
     return false;
 }
