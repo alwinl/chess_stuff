@@ -38,7 +38,7 @@ public:
 	void update_board( Ply a_ply );
 
 	std::string piece_placement() const;
-	Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
+	//Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
 
 	std::vector<Ply> generate_legal_plys( eColor side, uint16_t ep_square ) const;
 
