@@ -33,6 +33,7 @@ class ChessBoard;
 class DialogColours;
 class DialogPieceValues;
 class DialogInput;
+class DialogNewGame;
 
 /**-----------------------------------------------------------------------------
  * \brief Main application object
@@ -117,6 +118,7 @@ private:
     DialogPieceValues * dlgPieceValues;
     DialogColours * dlgColours;
     DialogInput * dlgTimeInput;
+    DialogNewGame * dlgNewGame;
     Gtk::Statusbar * status_bar;
 	Gtk::RadioMenuItem *chkLevelEasy;
 	Gtk::RadioMenuItem *chkLevelTimed;

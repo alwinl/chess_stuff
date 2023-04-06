@@ -74,4 +74,20 @@ private:
     Gtk::Entry * txtEntry;
 };
 
+class DialogNewGame : public Gtk::Dialog
+{
+public:
+    DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
+
+    int get_choice() const { return choice; }
+
+private:
+	void on_human_vs_AI();
+	void on_AI_vs_human();
+	void on_AI_vs_AI();
+	void on_human_vs_human();
+
+	int choice;
+};
+
 #endif // DIALOGS_H

@@ -58,7 +58,7 @@ public:
 
     uint16_t hint();
 
-    void new_game();
+    void new_game( int game_type );
     bool can_quit();
 
     bool open_file( std::string filename );

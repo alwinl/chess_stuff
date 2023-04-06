@@ -134,3 +134,49 @@ int DialogInput::get_input()
 {
     return std::stoi( txtEntry->get_text() );
 }
+
+DialogNewGame::DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
+	: Gtk::Dialog( cobject )
+{
+	set_transient_for( parent );
+
+	Gtk::Button * button;
+
+	ui_model->get_widget( "btnHumanvsAI", button );
+	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_human_vs_AI) );
+
+	ui_model->get_widget( "btnAIvsHuman", button );
+	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_AI_vs_human) );
+
+	ui_model->get_widget( "btnAIvsAI", button );
+	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_AI_vs_AI) );
+
+	ui_model->get_widget( "btnHumanvsHuman", button );
+	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_human_vs_human) );
+}
+
+
+void DialogNewGame::on_human_vs_AI()
+{
+	choice = 1;
+	response( Gtk::ResponseType::RESPONSE_OK );
+}
+
+void DialogNewGame::on_AI_vs_human()
+{
+	choice = 2;
+	response( Gtk::ResponseType::RESPONSE_OK );
+}
+
+void DialogNewGame::on_AI_vs_AI()
+{
+	choice = 3;
+	response( Gtk::ResponseType::RESPONSE_OK );
+}
+
+void DialogNewGame::on_human_vs_human()
+{
+	choice = 4;
+	response( Gtk::ResponseType::RESPONSE_OK );
+}
+

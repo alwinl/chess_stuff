@@ -65,7 +65,7 @@ ChessEngine::~ChessEngine()
 }
 
 
-void ChessEngine::new_game( )
+void ChessEngine::new_game( int game_type )
 {
     game = ChessGame();
 

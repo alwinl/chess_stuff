@@ -75,13 +75,13 @@ public:
 private:
     Board initial;
     std::vector<Ply> moves;
-	eColor current_player = white;
-	bool is_human[2];
 
     std::map<std::string, std::string> tag_pairs;
 
 	void set_alternate_starting_position();
 
+//	eColor current_player = white;
+//	bool is_human[2];
 //    bool is_white_move;             // is it whites next move?
 //
 //    bool white_can_castle_kingside;

@@ -128,6 +128,7 @@ void ChessController::get_widgets()
     ui_model->get_widget_derived( "dlgPieceValue", dlgPieceValues, *view );
     ui_model->get_widget_derived( "dlgColours", dlgColours, *view );
 	ui_model->get_widget_derived("dlgInput", dlgTimeInput, *view );
+	ui_model->get_widget_derived("dlgNewGame", dlgNewGame, *view );
 
 	ui_model->get_widget( "chkLevelEasy", chkLevelEasy );
 	ui_model->get_widget( "chkLevelTimed", chkLevelTimed );
@@ -176,10 +177,18 @@ void ChessController::on_action_new()
 {
 	status_bar->push( std::string("") );
 
-	engine->new_game(  );
-
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
+
+	if( dlgNewGame->run() == Gtk::RESPONSE_CANCEL ) {
+		dlgNewGame->hide();
+        return;
+	}
+
+	dlgNewGame->hide();
+
+	engine->new_game( dlgNewGame->get_choice() );
+
 
 	status_bar->push( std::string("New game") );
 }
@@ -637,6 +646,7 @@ void ChessController::on_action_arrange_make_fen()
 void ChessController::on_action_thinking_stop()
 {
 	engine->stop_thinking();
+	slot_move_calculator.emit();
 }
 
 /**-----------------------------------------------------------------------------
