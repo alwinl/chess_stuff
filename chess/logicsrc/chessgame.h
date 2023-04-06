@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <map>
 
 #include "pods.h"
 
@@ -74,9 +75,25 @@ public:
 private:
     Board initial;
     std::vector<Ply> moves;
+	eColor current_player = white;
+	bool is_human[2];
+
     std::map<std::string, std::string> tag_pairs;
 
 	void set_alternate_starting_position();
+
+//    bool is_white_move;             // is it whites next move?
+//
+//    bool white_can_castle_kingside;
+//    bool white_can_castle_queenside;
+//    bool black_can_castle_kingside;
+//    bool black_can_castle_queenside;
+//
+//    STSquare en_passant_target;		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
+//
+//    int halfmove_clock;             // Number of half moves since last capture or pawn advance
+//    int fullmove_number;             // The number of the move, start at one increment after black move
+
 
 };
 

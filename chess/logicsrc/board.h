@@ -22,13 +22,11 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <map>
 #include <string>
 #include <array>
 
-#include "pods.h"
-
 #include "piece.h"
+#include "ply.h"
 
 class Board
 {
@@ -36,34 +34,19 @@ public:
 	Board( std::string PiecePlacement = "" );
 	std::string piece_placement() const;
 
-	Board add_piece( STSquare square, STPiece new_piece );
-	Board remove_piece( STSquare square );
-	Board clear_all();
-
-	Board move_piece( STSquare old_square, STSquare new_square );
-	Board capture_piece( STSquare old_square, STSquare new_square );
-
-	Board set_white_move( bool on );
-
+	Board add_piece( uint16_t square, char code );
+	Board remove_piece( uint16_t square );
 	bool is_valid();
 
-	std::map<STSquare,STPiece> get_pieces() { return pieces; }
+	void update_board( Ply a_ply );
+
+
+	std::array<Piece,64> get_pieces() { return position; }
 
 private:
-	std::map<STSquare,STPiece> pieces;
 	std::array<Piece,64> position;
 
-    bool is_white_move;             // is it whites next move?
-
-    bool white_can_castle_kingside;
-    bool white_can_castle_queenside;
-    bool black_can_castle_kingside;
-    bool black_can_castle_queenside;
-
-    STSquare en_passant_target;		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
-
-    int halfmove_clock;             // Number of half moves since last capture or pawn advance
-    int fullmove_number;             // The number of the move, start at one increment after black move
+	void process_placement( std::string PiecePlacement );
 };
 
 #endif // BOARD_H

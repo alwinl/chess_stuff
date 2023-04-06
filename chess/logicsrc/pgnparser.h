@@ -32,7 +32,8 @@ class PGNToken;
 class PGNParser
 {
 public:
-    ChessGame do_parse( std::istream& is );
+    ChessGame load( std::istream& is );
+    void save( std::ostream& is, ChessGame& game );
 
 private:
 	std::vector<PGNToken> tokenise( std::istream& is );

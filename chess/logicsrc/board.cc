@@ -20,95 +20,123 @@
  */
 
 #include "board.h"
-#include "fentranslator.h"
-#include "pods.h"
+
+using namespace std;
 
 Board::Board( std::string PiecePlacement )
 {
 	if( PiecePlacement.empty() )
 		PiecePlacement = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-	pieces = FENTranslator().from_FEN( PiecePlacement );
+	process_placement( PiecePlacement );
+}
+
+void Board::process_placement( std::string PiecePlacement )
+{
+	unsigned int rank = 7;
+	unsigned int file = 0;
+
+	position.fill( Piece( Piece::none ) );
+
+    for( char& code : PiecePlacement ) {
+
+        if( (code > '0') && (code < '9') ) {       // Character can either be a number (squares to skip)
+           file += (code - '0' );
+        } else if( code == '/' ) {                      // ... or an end of rank indicator
+            --rank;
+            file = 0;
+        } else {								  // or an piece designator
+        	position[rank * 8 + file] = Piece( code );
+            ++file;
+        }
+    }
 }
 
 std::string Board::piece_placement() const
 {
-	return FENTranslator().to_FEN( pieces );
+	string placement;
+
+    for( int rank=7; rank >= 0; --rank ) {
+
+        int blanks = 0;
+
+        for( int file=0; file < 8; ++file ) {
+
+			if( ! position[rank * 8 + file].is_of_type( Piece::none ) ) {
+                if( blanks ) {
+					placement += to_string( blanks );
+                    blanks = 0;
+                }
+                placement += position[rank * 8 + file].get_code();
+			} else
+                ++blanks;
+        }
+
+        if( blanks )
+			placement += to_string( blanks );
+
+        if( rank )
+            placement += "/";
+    }
+
+    return placement;
 }
 
-Board Board::add_piece( STSquare square, STPiece new_piece )
+Board Board::add_piece( uint16_t square, char code )
 {
-	if( square.file != -1 )
-		pieces.insert( std::pair<STSquare, STPiece>( square, new_piece) );
-
+	position[ square ] = Piece( code );
 	return *this;
 }
 
-Board Board::remove_piece( STSquare square )
+Board Board::remove_piece( uint16_t square )
 {
-	std::map<STSquare,STPiece>::iterator it = pieces.find( square );
-	if( it != pieces.end() )
-		pieces.erase( it );
-
+	position[ square ] = Piece::none;
 	return *this;
 }
 
-Board Board::clear_all()
+void Board::update_board( Ply a_ply )
 {
-	pieces.clear();
+	uint16_t to = a_ply.square_to();
+	uint16_t from = a_ply.square_from();
 
-    is_white_move = true;             // is it whites next move?
+	if( a_ply.is_ep_capture() ) {
 
-    white_can_castle_kingside =
-    white_can_castle_queenside =
-    black_can_castle_kingside =
-    black_can_castle_queenside = true;
+		uint16_t ep_square = a_ply.get_ep_square( position[from].is_color( white ) );
 
-    //STSquare en_passant_target = make_square( -1, -1 );		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
+		position[to] = position[from];
+		position[from] = Piece( Piece::none );
 
-    halfmove_clock = 0;             // Number of half moves since last capture or pawn advance
-    fullmove_number = 0;             // The number of the move, start at one increment after black move
+		position[ ep_square ] = Piece( Piece::none );
 
-	return *this;
-}
+	} else if( ! a_ply.check_promo_match( Piece::none ) ) {
 
+		position[to] = position[from].make_promo_piece( a_ply.get_promo_type() );
+		position[from] = Piece( Piece::none );
 
-Board Board::move_piece( STSquare old_square, STSquare new_square )
-{
-	std::map<STSquare,STPiece>::iterator it_from = pieces.find( old_square );
-	std::map<STSquare,STPiece>::iterator it_to = pieces.find( new_square );
+	} else if( a_ply.is_castling() ) {
 
-	if( (it_from == pieces.end()) || (it_to != pieces.end()) )
-		return *this;		// cannot move, throw an exception
+		// move the king
+		position[to] = position[from];
+		position[from] = Piece( Piece::none );
 
-	// this really should be transactional maybe use swap
-	pieces.insert( std::pair<STSquare, STPiece>( new_square, (*it_from).second ) );
-	pieces.erase( it_from );
+		position[to].moved();
 
-	return *this;
-}
+		// reuse for rook
+		to = a_ply.get_castling_rook_square_to();
+		from = a_ply.get_castling_rook_square_from();
 
-Board Board::capture_piece( STSquare old_square, STSquare new_square )
-{
-	std::map<STSquare,STPiece>::iterator it_from = pieces.find( old_square );
-	std::map<STSquare,STPiece>::iterator it_to = pieces.find( new_square );
+		// move the rook
+		position[to] = position[from];
+		position[from] = Piece( Piece::none );
 
-	if( (it_from == pieces.end()) || (it_to == pieces.end()) )
-		return *this;		// cannot capture, throw an exception
+		position[to].moved();
 
-	// this really should be transactional maybe use swap
-	pieces.erase( it_to );
-	pieces.insert( std::pair<STSquare, STPiece>( new_square, (*it_from).second ) );
-	pieces.erase( it_from );
+	} else {
+		position[to] = position[from];
+		position[from] = Piece( Piece::none );
 
-	return *this;
-}
-
-Board Board::set_white_move( bool on )
-{
-	is_white_move = on;
-
-	return *this;
+		position[to].moved();
+	}
 }
 
 bool Board::is_valid()
@@ -116,17 +144,16 @@ bool Board::is_valid()
     int KingCount[2]  = { 0, 0 };
     int TotalCount[2] = { 0, 0 };
 
-    for( std::map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
+    for( auto it = position.begin(); it != position.end(); it++ ) {
 
-        int colour_idx = (*it).second.is_white ? 0 : 1;
+        int colour_idx = (*it).is_color( white ) ? 0 : 1;
 
         TotalCount[ colour_idx ]++;
 
-        if( std::string("Kk").find( (*it).second.code ) != std::string::npos )
+        if( (*it).is_of_type( Piece::king ) )
             KingCount[ colour_idx ]++;
     }
 
     return ( TotalCount[ 0 ] <= 16 ) && ( KingCount[ 0 ] == 1 )
                  && ( TotalCount[ 1 ] <= 16 ) && ( KingCount[ 1 ] == 1 );
 }
-

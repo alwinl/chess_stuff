@@ -57,12 +57,12 @@ void ChessGame::set_alternate_starting_position()
 
 void ChessGame::add_white_move( unsigned int moveno, std::string the_move )
 {
-	moves.push_back( Ply( Ply::Colour::WHITE, moveno, the_move ) );
+	//moves.push_back( Ply( Ply::Colour::WHITE, moveno, the_move ) );
 }
 
 void ChessGame::add_black_move( unsigned int moveno, std::string the_move )
 {
-	moves.push_back( Ply( Ply::Colour::BLACK, moveno, the_move ) );
+	//moves.push_back( Ply( Ply::Colour::BLACK, moveno, the_move ) );
 }
 
 void ChessGame::add_comment( std::string the_comment )
@@ -70,8 +70,8 @@ void ChessGame::add_comment( std::string the_comment )
 	if( moves.empty() )
 		return;		// ignore comments before any movetext at the moment
 
-	std::vector<Ply>::iterator it = std::prev( moves.end(), 1);
+	//std::vector<Ply>::iterator it = std::prev( moves.end(), 1);
 
-	(*it).add_comment( the_comment );
+	//(*it).add_comment( the_comment );
 }
 

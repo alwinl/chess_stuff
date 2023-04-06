@@ -69,7 +69,7 @@ void TestPNGParser::tokenise()
 	//collector.debugging = true;
 
 	std::cout << std::endl;
-	PGNParser().do_parse( is );
+	PGNParser().load( is );
 }
 
 void TestPNGParser::parse_it()
@@ -80,7 +80,7 @@ void TestPNGParser::parse_it()
 	//GameADTTest collector;
 
 	std::cout << std::endl;
-	PGNParser().do_parse( is );
+	PGNParser().load( is );
 }
 
 void TestPNGParser::ProcessGameFile()
@@ -91,7 +91,7 @@ void TestPNGParser::ProcessGameFile()
 	//GameADTTest collector;
 
 	std::cout << std::endl;
-	PGNParser().do_parse( is );
+	PGNParser().load( is );
 
 }
 
@@ -101,5 +101,5 @@ void TestPNGParser::test_game_data()
 	//GameADTTest collector;
 
 	std::cout << std::endl;
-    PGNParser().do_parse( is );
+    PGNParser().load( is );
 }

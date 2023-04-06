@@ -35,6 +35,8 @@ Piece::Piece( char code )
 		{ 'k', Piece::king }, { 'K', Piece::king }
 	};
 
+	piece = 0;
+
 	hasmoved = false;
 	color = ((string("KQRBNP").find( code ) != string::npos) ? white : black );
 	type = code_to_type.at( code );

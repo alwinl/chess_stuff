@@ -32,12 +32,6 @@
 
 using namespace std;
 
-static STSquare convert_square( uint16_t square )
-{
-	return make_square( square % 8, square / 8 );
-}
-
-
 
 ChessEngine::ChessEngine()
 {
@@ -100,7 +94,7 @@ bool ChessEngine::enter_move( uint16_t start_square, uint16_t end_square )
 
     if( (++test) % 2 ) {
 
-        current_board.move_piece( convert_square(start_square), convert_square(end_square) );
+        current_board.update_board( Ply( start_square, end_square ) );
         return true;
 
     } else {
@@ -121,36 +115,38 @@ void ChessEngine::cancel_move( )
 {
 }
 
+
+
+
 void ChessEngine::arranging_start()
 {
-    arrange_board.clear_all();
+    arrange_board = Board( "8/8/8/8/8/8/8/8" );
     is_arranging = true;
 }
 
 void ChessEngine::arranging_clear()
 {
-    arrange_board.clear_all();
+    arrange_board = Board( "8/8/8/8/8/8/8/8" );
 }
 
 void ChessEngine::arrange_add_piece( uint16_t square, char piece )
 {
-    STPiece new_piece;
-
-    new_piece.code = piece;
-    new_piece.is_white = ( string("KQRBNP").find( piece ) != std::string::npos );
-    new_piece.is_dragging = false;
-
-    arrange_board.add_piece( convert_square(square), new_piece );
+    arrange_board.add_piece( square, piece );
 }
 
 void ChessEngine::arrange_remove_piece(uint16_t square )
 {
-    arrange_board.remove_piece( convert_square(square) );
+    arrange_board.remove_piece( square );
 }
 
 void ChessEngine::arrange_turn( eTurns new_turn )
 {
-    arrange_board.set_white_move( new_turn == TURNWHITE );
+    //arrange_board.set_white_move( new_turn == TURNWHITE );
+}
+
+std::string ChessEngine::arrange_to_fen()
+{
+	return arrange_board.piece_placement();
 }
 
 bool ChessEngine::arranging_end( bool canceled )
@@ -169,11 +165,6 @@ bool ChessEngine::arranging_end( bool canceled )
     return true;
 }
 
-std::string ChessEngine::arrange_to_fen()
-{
-	return arrange_board.piece_placement();
-}
-
 
 
 
@@ -183,11 +174,10 @@ std::string ChessEngine::arrange_to_fen()
 std::array<char, 64> ChessEngine::get_piece_positions( )
 {
 	std::array<char, 64> new_positions;
+	std::array<Piece,64> piece_positions = is_arranging ? arrange_board.get_pieces() : current_board.get_pieces();
 
-	new_positions.fill( ' ' );
-
-	for( auto position : is_arranging ? arrange_board.get_pieces() : current_board.get_pieces() )
-		new_positions[ position.first.file + 8 * position.first.rank ] = position.second.code;
+	for( int i=0; i<64; ++i )
+		new_positions[i] = piece_positions[i].get_code();
 
 	return new_positions;
 }
@@ -203,7 +193,7 @@ bool ChessEngine::open_file( std::string filename )
 	if( !is.good() )
 		return false;
 
-	game = PGNParser().do_parse( is );
+	game = PGNParser().load( is );
 
 	is.close();
 	return true;
@@ -219,7 +209,7 @@ bool ChessEngine::save_file( )
 	if( !os.good() )
 		return false;
 
-    //game_loader->save_file( game );
+	PGNParser().save( os, game );
 
     os.close();
 
@@ -236,7 +226,7 @@ bool ChessEngine::save_file_as( std::string filename )
 	if( !os.good() )
 		return false;
 
-    //game_loader->save_file_as( game );
+	PGNParser().save( os, game );
 
     game_filename = filename;
 
@@ -265,122 +255,85 @@ void ChessEngine::stop_thinking()
 {
 
 }
-#if 0
-void ChessEngine::change_level( eLevels new_level )
-{
-    if( multi_player ) {
-        info.level = "Two Player";
-        return;
-    }
-
-    #if 0
-    switch( new_level ) {
-    case EASY:
-        info.level = "Easy";
-        break;
-
-    case TIMED:
-        if( !time_inputter->time_per_move( 120 ) )
-            return;
-
-        level_time = time_inputter->get_time();
-
-        // model->set_level_info(      "%1.0f sec / move", level_time
-        break;
-
-    case TOTALTIME:
-        if( !time_inputter->total_game_time( 60 ) )
-            return;
-
-        level_time = time_inputter->get_time();
-        // model->set_level_info(      "%2.2f min / game", AverageTime )
-        break;
-
-    case INFINITE:
-        info.level = "Infinite";
-        break;
-
-    case PLAYSEARCH:
-        //sprintf( info_string, "Ply-Depth = %d", MaxLevel );
-        break;
-
-    case MATESEARCH:
-        info.level = "MateSearch";
-        break;
-
-    case MATCHING:
-        info.level = "Match users time";
-        break;
-
-    default:
-        break;
-
-    }
-#endif // 0
-
-    if( new_level)
-        level = new_level;
-
-    // new level is (eLevels)level
-
-
-    /*
-    	model->set_level_info(
-        if( MultiMove ) {
-            TInfo->SetLevelText( "Two Player" );
-            return;
-        }
-
-        char info_string[80];
-
-        switch( Level ) {
-        case normal       : sprintf( info_string, "%1.0f sec / move", AverageTime ); break;
-        case fullgametime : sprintf( info_string, "%2.2f min / game", AverageTime ); break;
-        case easygame     : strcpy( info_string, "Easy" );                           break;
-        case infinite     : strcpy( info_string, "Infinite" );                       break;
-        case plysearch    : sprintf( info_string, "Ply-Depth = %d", MaxLevel );      break;
-        case matesearch   : strcpy( info_string, "MateSearch" );                     break;
-        case matching     : strcpy( info_string, "Match users time" );               break;
-        }
-
-        TInfo->SetLevelText( info_string );
-    */
-
-}
-#endif // 0
 
 bool ChessEngine::set_level_easy()
 {
+    if( multi_player )
+		return false;
+
+	level = EASY;
+	info.level = "Easy";
+
 	return true;
 }
 
 bool ChessEngine::set_level_timed( int timeout )
 {
+    if( multi_player )
+		return false;
+
+	level = TIMED;
+	level_time = timeout;
+	info.level = to_string( timeout ) + " sec/move";
+
 	return true;
 }
 
 bool ChessEngine::set_level_total_time( int timeout )
 {
+    if( multi_player )
+		return false;
+
+	level = TOTALTIME;
+	level_time = timeout;
+    info.level = to_string( timeout ) + " min/game";
+
 	return true;
 }
 
 bool ChessEngine::set_level_infinite()
 {
+    if( multi_player )
+		return false;
+
+	level = INFINITE;
+    info.level = "Infinite";
+
 	return true;
 }
 
 bool ChessEngine::set_level_ply_search()
 {
+	static unsigned int MaxLevel = 6;
+
+    if( multi_player )
+		return false;
+
+	level = PLYSEARCH;
+    info.level = "Ply-Depth = " + to_string( MaxLevel );
+
 	return true;
 }
 
 bool ChessEngine::set_level_mate_search()
 {
+    if( multi_player )
+		return false;
+
+	level = MATESEARCH;
+	info.level = "MateSearch";
+
 	return true;
 }
 
 bool ChessEngine::set_level_matching()
 {
+    if( multi_player )
+		return false;
+
+	level = MATCHING;
+	info.level = "Match users time";
+
 	return true;
 }
 
@@ -401,52 +354,6 @@ std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
 	};
 
 	return std_info;
-}
-
-void ChessEngine::CalculatePawnTable()
-{
-    unsigned char PawnTable[2][8];
-
-    /*  Calculate PawnTable (indicates which squares contain pawns )  */
-    for( unsigned char rank = 0; rank < 8; rank++ ) {
-        PawnTable[ 0 ][ rank ] = 0;
-        PawnTable[ 1 ][ rank ] = 0;
-    }
-
-    map<STSquare,STPiece> pieces = current_board.get_pieces();
-
-    for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
-
-        STSquare square = (*it).first;
-        STPiece piece = (*it).second;
-
-        if( piece.code == 'P' ) {		// white pawn
-            PawnTable[0][square.rank] |= (1 << square.file);
-        }
-        else if( piece.code == 'p' ) {		// black pawn
-            PawnTable[1][7- square.rank] |= (1 << square.file);
-        }
-    }
-
-}
-
-void ChessEngine::CalcMaterial()
-{
-    map<STSquare,STPiece> pieces = current_board.get_pieces();
-
-    int material = 0;
-    int totalMaterial = 0;
-
-    for( map<STSquare,STPiece>::iterator it = pieces.begin(); it != pieces.end(); it++ ) {
-
-        STPiece piece = (*it).second;
-
-
-
-        material += piece_values.at( piece.code ); //piece_values_object->get_piece_value( piece.code );
-        totalMaterial += abs( piece_values.at( piece.code ) );
-
-    }
 }
 
 #include <unistd.h>

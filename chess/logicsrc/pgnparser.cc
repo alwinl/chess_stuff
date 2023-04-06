@@ -31,7 +31,7 @@
 
 #include "ply.h"
 
-ChessGame PGNParser::do_parse( std::istream& is )
+ChessGame PGNParser::load( std::istream& is )
 {
 	std::vector<PGNToken> tokens = tokenise( is );
 
@@ -41,6 +41,12 @@ ChessGame PGNParser::do_parse( std::istream& is )
 
     return build_game( tokens );
 }
+
+void PGNParser::save( std::ostream& is, ChessGame& game )
+{
+
+}
+
 
 std::vector<PGNToken> PGNParser::tokenise( std::istream& is )
 {
