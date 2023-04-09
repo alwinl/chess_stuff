@@ -21,7 +21,6 @@
 
 #include "chessengine.h"
 #include "chessgame.h"
-#include "pgnparser.h"
 
 #include <chrono>
 #include <thread>
@@ -193,7 +192,7 @@ bool ChessEngine::open_file( std::string filename )
 	if( !is.good() )
 		return false;
 
-	game = PGNParser().load( is );
+	game.load_game( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
 
 	is.close();
 	return true;
@@ -209,7 +208,7 @@ bool ChessEngine::save_file( )
 	if( !os.good() )
 		return false;
 
-	PGNParser().save( os, game );
+	os << game.save_game();
 
     os.close();
 
@@ -226,7 +225,7 @@ bool ChessEngine::save_file_as( std::string filename )
 	if( !os.good() )
 		return false;
 
-	PGNParser().save( os, game );
+	os << game.save_game();
 
     game_filename = filename;
 

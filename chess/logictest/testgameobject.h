@@ -34,12 +34,14 @@ public:
 	CPPUNIT_TEST_SUITE( TestGameObject );
 
     CPPUNIT_TEST( create_object );
+    CPPUNIT_TEST( save_load );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
 
     void create_object();
+    void save_load();
 };
 
 #endif // TESTGAMEOBJECT_H

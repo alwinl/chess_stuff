@@ -27,56 +27,37 @@
 #include <utility>
 #include <map>
 
-#include "pods.h"
+//#include "pods.h"
 
 #include "board.h"
 #include "ply.h"
 
-/**-----------------------------------------------------------------------------
- * \brief Top level application model (ADT)
- *
- * The model consists of a list of game states described in FEN
- * For convenience the model also keeps a list of moves in LAN
- * This class encapsulates the storage requirements of the application
- *
- * We need to be able to to the following:
- *
- * Commands (in):
- *
- * reset/initialise for a standard/new game
- * load a game from permanent storage.
- * store a game to permanent storage.
- *
- * reset/initialise a completely empty board (for editing, custom set-up)
- * insert a piece at a given position (for editing)     Validation required
- * remove a piece from a given position (for editing)
- *
- * add a move.                  We have to validate the move to add
- * remove last added move.
- *
- * Queries (out):
- * Return current piece positions/ single piece position
- * Return info/state information
- *
- */
+class ChessGameVisitorBase
+{
+public:
+	virtual void process_tag_pair( std::string tag, std::string value ) = 0;
+	virtual void process_ply( Ply ply ) = 0;
+};
+
 class ChessGame
 {
 public:
 	ChessGame( );
 
+	void load_game( std::string pgn_string );
+	std::string save_game();
+
 	void add_tag_pair( std::string tag, std::string value );
-    void add_white_move( unsigned int moveno, std::string the_move );
-    void add_black_move( unsigned int moveno, std::string the_move );
-    void add_comment( std::string the_comment );
+	void add_ply( eColor color, std::string SAN, Board& current );
 
-
-	//std::string get_tag_value( std::string key );
+	void visit_tag_pairs( ChessGameVisitorBase* processor );
+	void visit_plys( ChessGameVisitorBase* processor );
 
 private:
     Board initial;
-    std::vector<Ply> moves;
+    std::vector<Ply> plys;
 
-    std::map<std::string, std::string> tag_pairs;
+    std::vector<std::pair<std::string, std::string> > tag_pairs;
 
 	void set_alternate_starting_position();
 

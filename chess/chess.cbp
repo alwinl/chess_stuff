@@ -113,12 +113,6 @@
 		<Unit filename="logicsrc/chessengine.h" />
 		<Unit filename="logicsrc/chessgame.cc" />
 		<Unit filename="logicsrc/chessgame.h" />
-		<Unit filename="logicsrc/fentranslator.cc" />
-		<Unit filename="logicsrc/fentranslator.h" />
-		<Unit filename="logicsrc/pgnparser.cc" />
-		<Unit filename="logicsrc/pgnparser.h" />
-		<Unit filename="logicsrc/pgntoken.cc" />
-		<Unit filename="logicsrc/pgntoken.h" />
 		<Unit filename="logicsrc/piece.cc" />
 		<Unit filename="logicsrc/piece.h" />
 		<Unit filename="logicsrc/piece_square_tables.cc" />
@@ -130,35 +124,10 @@
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />
 		</Unit>
-		<Unit filename="logictest/testfilenamechooser.h">
-			<Option target="Test" />
-		</Unit>
 		<Unit filename="logictest/testgameobject.cc">
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="logictest/testgameobject.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpgnparser.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpgnparser.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpgntoken.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testpgntoken.h" />
-		<Unit filename="logictest/testpiecevalues.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/teststhalvemove.cc">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/teststhalvemove.h">
-			<Option target="Test" />
-		</Unit>
-		<Unit filename="logictest/testtimeinputter.h">
 			<Option target="Test" />
 		</Unit>
 		<Extensions>

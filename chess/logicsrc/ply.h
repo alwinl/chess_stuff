@@ -34,6 +34,7 @@ public:
 
 	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
 	std::string print_LAN() const;
+	std::string print_SAN() const;
 
 	static Ply ep_move( uint16_t current_square, uint16_t target_square );
 

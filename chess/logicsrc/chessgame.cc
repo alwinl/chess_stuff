@@ -21,19 +21,57 @@
 
 #include "chessgame.h"
 
+#include <regex>
+
 using namespace std;
 
 
 ChessGame::ChessGame( )
 {
     initial = Board();
-    moves.clear();
+    plys.clear();
     tag_pairs.clear();
+}
+
+void ChessGame::load_game( std::string pgn_string )
+{
+	regex re_tvpair( "\\[(.*) \"(.*)\"\\]\\n" );
+	smatch tvpair_match;
+
+	tag_pairs.clear();
+	plys.clear();
+    initial = Board();
+
+	while( regex_search( pgn_string, tvpair_match, re_tvpair ) ) {
+		add_tag_pair( tvpair_match[1], tvpair_match[2] );
+		pgn_string = tvpair_match.suffix();
+	}
+
+	regex re_movetext( "(\\d*)\\.\\s(\\S*)\\s(\\S*)?" );
+	smatch movetext_match;
+
+	Board current;
+
+	while( regex_search( pgn_string, movetext_match, re_movetext ) ) {
+
+		if( movetext_match[2] != "..." )
+			add_ply( white, movetext_match[2], current );
+
+		if( movetext_match[3] != "" )
+			add_ply( black, movetext_match[3], current );
+
+		pgn_string = movetext_match.suffix();
+	}
+}
+
+void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
+{
+
 }
 
 void ChessGame::add_tag_pair( std::string tag, std::string value )
 {
-	tag_pairs.insert( std::pair<std::string, std::string>(tag, value) );
+	tag_pairs.push_back( make_pair(tag, value) );
 
 	// http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm chapter 9.7 Alternative starting positions
 	if( (tag == "SetUp") || ( tag == "FEN" ) )
@@ -42,8 +80,8 @@ void ChessGame::add_tag_pair( std::string tag, std::string value )
 
 void ChessGame::set_alternate_starting_position()
 {
-	map<std::string,std::string>::iterator SetUp_it = tag_pairs.find( "SetUp" );
-	map<std::string,std::string>::iterator FEN_it = tag_pairs.find( "FEN" );
+	auto SetUp_it = find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "SetUp";} );
+	auto FEN_it = find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "FEN";} );
 
 	if( (SetUp_it == tag_pairs.end() ) || (FEN_it == tag_pairs.end() ) )
 		return;
@@ -54,24 +92,29 @@ void ChessGame::set_alternate_starting_position()
 	initial = Board( (*FEN_it).second );
 }
 
-
-void ChessGame::add_white_move( unsigned int moveno, std::string the_move )
+std::string ChessGame::save_game()
 {
-	//moves.push_back( Ply( Ply::Colour::WHITE, moveno, the_move ) );
+	string result;
+
+	for( auto tag_pair : tag_pairs )
+		result += "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
+
+	result += "\n";
+
+//	for( auto ply : plys ) {
+//	}
+
+	return result;
 }
 
-void ChessGame::add_black_move( unsigned int moveno, std::string the_move )
+void ChessGame::visit_tag_pairs( ChessGameVisitorBase* processor )
 {
-	//moves.push_back( Ply( Ply::Colour::BLACK, moveno, the_move ) );
+	for( auto tag_pair : tag_pairs )
+		processor->process_tag_pair( tag_pair.first, tag_pair.second );
 }
 
-void ChessGame::add_comment( std::string the_comment )
+void ChessGame::visit_plys( ChessGameVisitorBase* processor )
 {
-	if( moves.empty() )
-		return;		// ignore comments before any movetext at the moment
-
-	//std::vector<Ply>::iterator it = std::prev( moves.end(), 1);
-
-	//(*it).add_comment( the_comment );
+	for( auto ply : plys )
+		processor->process_ply( ply );
 }
-

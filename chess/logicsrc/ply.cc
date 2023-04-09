@@ -96,3 +96,37 @@ std::string Ply::print_LAN( ) const
 	return result;
 }
 
+std::string Ply::print_SAN() const
+{
+	if( castling )
+		return (( to > from ) ? "O-O" : "O-O-O");
+
+	string result;
+
+	if( type != Piece::pawn )
+		result += string("E NBRQK")[type];
+
+	// insert either file or rank if there are two pieces that can make this move
+
+	if( capture ) {
+		if( type == Piece::pawn )
+			result += (char)('a' + (from % 8));
+		result += 'x';
+	}
+
+	result += (char)('a' + (to % 8));
+	result += (char)('1' + (to / 8) );
+
+	if( promo_type != Piece::none )
+		result += string("E NBRQK")[promo_type];
+
+	if( check )
+		result += '+'; // "†";
+
+	if( checkmate)
+		result += '#'; // "‡";
+
+	return result;
+}
+
+

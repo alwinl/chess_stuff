@@ -22,7 +22,8 @@
 #include "testgameobject.h"
 
 #include "chessgame.h"
-#include "pods.h"
+
+using namespace std;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestGameObject );
 
@@ -39,4 +40,31 @@ void TestGameObject::create_object()
     ChessGame game = ChessGame();
 
     CPPUNIT_ASSERT(true);
+}
+
+void TestGameObject::save_load()
+{
+	ChessGame game;
+
+	ifstream is( "game.pgn" );
+
+	if( !is.good() )
+		CPPUNIT_FAIL( "cannot open 'game.pgn'");
+
+	game.load_game( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
+
+    is.close();
+
+    string actual = "\"" + game.save_game() + "\"";
+    string expected =
+		"\"[Event \"F/S Return Match\"]\n"
+		"[Site \"Belgrade, Serbia JUG\"]\n"
+		"[Date \"1992.11.04\"]\n"
+		"[Round \"29\"]\n"
+		"[White \"Fischer, Robert J.\"]\n"
+		"[Black \"Spassky, Boris V.\"]\n"
+		"[Result \"1/2-1/2\"]\n"
+		"\n\"";
+
+    CPPUNIT_ASSERT_EQUAL( expected, actual );
 }
