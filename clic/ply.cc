@@ -55,7 +55,7 @@ Ply Ply::ep_move( uint16_t current_square, uint16_t target_square )
 std::string Ply::print_LAN( ) const
 {
 	if( castling )
-		return (( to > from ) ? "O - O" : "O - O - O");
+		return (( to > from ) ? "O-O" : "O-O-O");
 
 	string result;
 

@@ -29,6 +29,7 @@ class Ply
 {
 public:
 	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type = Piece::none, Piece::eType target_square_type = Piece::none, Piece::eType promo_type = Piece::none );
+
 	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
 	std::string print_LAN() const;
 
