@@ -29,7 +29,7 @@
 #include "pods.h"
 
 #include "chessgame.h"
-#include "board.h"
+#include "gamestate.h"
 
 /** \brief
  */
@@ -40,7 +40,7 @@ public:
     ChessEngine();
     ~ChessEngine();
 
-    bool enter_move( uint16_t start_square, uint16_t end_square );
+    bool enter_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
     void cancel_move();
     void calculate_move();
 
@@ -49,10 +49,13 @@ public:
 	bool get_next_ply( Ply& ply ) { return false; };
 
 	void arranging_start();
-	void arranging_clear();
 	void arrange_add_piece( uint16_t square, char piece );
 	void arrange_remove_piece( uint16_t square );
-	void arrange_turn( eTurns new_turn );
+	void arrange_set_turn( eColor active_color );
+	void arrange_set_castle_rights( std::string castle_rights );
+	void arrange_set_ep_square( uint16_t square );
+	void arrange_set_halvemoves( uint16_t number );
+	void arrange_set_fullmoves( uint16_t number );
 	bool arranging_end( bool canceled );
 	bool in_edit_mode() { return is_arranging; }
 
@@ -85,10 +88,6 @@ public:
 	bool set_level_mate_search();
 	bool set_level_matching();
 
-
-	void CalculatePawnTable();
-	void CalcMaterial();
-
 	std::array<std::string,4> get_colour_values() const { return colours; };
 	bool set_colour_values( std::array<std::string,4> new_colours ) { colours = new_colours; return true; };
 
@@ -98,13 +97,12 @@ public:
 private:
 	ChessGame game;
 
-	Board current_board;
-	Board arrange_board;
+	GameState current_state;
+	GameState arrange_state;
     STInfo info;
 
     std::string game_filename;
 
-    STGameState last_state;
     bool is_arranging;
     bool multi_player;
     eLevels level;
@@ -114,6 +112,8 @@ private:
 	std::map<char, int> piece_values;
 
 
+	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;
+	int alpha_beta( GameState& state, int alpha, int beta, int depth_left, eColor color ) const;
 };
 
 #endif // CHESSENGINE_H

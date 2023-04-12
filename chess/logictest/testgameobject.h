@@ -35,6 +35,7 @@ public:
 
     CPPUNIT_TEST( create_object );
     CPPUNIT_TEST( save_load );
+	//CPPUNIT_TEST( print_plys );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -42,6 +43,8 @@ private:
 
     void create_object();
     void save_load();
+	void print_plys();
+
 };
 
 #endif // TESTGAMEOBJECT_H

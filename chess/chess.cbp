@@ -107,12 +107,12 @@
 			<Option target="Debug" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="logicsrc/board.cc" />
-		<Unit filename="logicsrc/board.h" />
 		<Unit filename="logicsrc/chessengine.cc" />
 		<Unit filename="logicsrc/chessengine.h" />
 		<Unit filename="logicsrc/chessgame.cc" />
 		<Unit filename="logicsrc/chessgame.h" />
+		<Unit filename="logicsrc/gamestate.cc" />
+		<Unit filename="logicsrc/gamestate.h" />
 		<Unit filename="logicsrc/piece.cc" />
 		<Unit filename="logicsrc/piece.h" />
 		<Unit filename="logicsrc/piece_square_tables.cc" />

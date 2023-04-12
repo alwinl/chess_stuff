@@ -81,25 +81,26 @@ void ChessEngine::new_game( int game_type )
 
     multi_player = false;
 
-    current_board = Board();
+    current_state = GameState();
 }
 
 
 
 
-bool ChessEngine::enter_move( uint16_t start_square, uint16_t end_square )
+bool ChessEngine::enter_move( uint16_t start_square, uint16_t end_square, char promo_piece )
 {
-    static int test = 0;
+	vector<Ply> plys = current_state.generate_legal_plys();	// grabs all legal moves
 
-    if( (++test) % 2 ) {
+	if( plys.empty() ) // checkmate
+		return false;
 
-        current_board.update_board( Ply( start_square, end_square ) );
-        return true;
+	auto ply_it = std::find_if( plys.begin(), plys.end(), [start_square, end_square, promo_piece]( Ply ply ) { return ply.check_match( start_square, end_square, promo_piece ); } );
+	if( ply_it == plys.end() )
+		return false;
 
-    } else {
-        return false;
-    }
-    //return true;
+	current_state = current_state.make( *ply_it );
+
+	return true;
 }
 
 uint16_t ChessEngine::hint()
@@ -115,38 +116,39 @@ void ChessEngine::cancel_move( )
 }
 
 
-
+/**-----------------------------------------------------------------------------
+ *	Board editing (create a custom state)
+ */
 
 void ChessEngine::arranging_start()
 {
-    arrange_board = Board( "8/8/8/8/8/8/8/8" );
+    arrange_state = GameState( "8/8/8/8/8/8/8/8 w KQkq - 0 1" );
     is_arranging = true;
 }
 
-void ChessEngine::arranging_clear()
-{
-    arrange_board = Board( "8/8/8/8/8/8/8/8" );
-}
-
 void ChessEngine::arrange_add_piece( uint16_t square, char piece )
-{
-    arrange_board.add_piece( square, piece );
-}
+	{ arrange_state.set_piece( square, piece ); }
 
 void ChessEngine::arrange_remove_piece(uint16_t square )
-{
-    arrange_board.remove_piece( square );
-}
+	{ arrange_state.set_piece( square, ' ' ); }
 
-void ChessEngine::arrange_turn( eTurns new_turn )
-{
-    //arrange_board.set_white_move( new_turn == TURNWHITE );
-}
+void ChessEngine::arrange_set_turn( eColor active_color )
+	{ arrange_state.set_active_color( active_color ); }
+
+void ChessEngine::arrange_set_castle_rights( std::string castle_rights )
+	{ /*arrange_state.set_active_color( active_color );*/ }
+
+void ChessEngine::arrange_set_ep_square( uint16_t square )
+	{ /*arrange_state.set_active_color( active_color );*/ }
+
+void ChessEngine::arrange_set_halvemoves( uint16_t number )
+	{ /*arrange_state.set_active_color( active_color );*/ }
+
+void ChessEngine::arrange_set_fullmoves( uint16_t number )
+	{ /*arrange_state.set_active_color( active_color );*/ }
 
 std::string ChessEngine::arrange_to_fen()
-{
-	return arrange_board.piece_placement();
-}
+	{ return arrange_state.FEN(); }
 
 bool ChessEngine::arranging_end( bool canceled )
 {
@@ -155,10 +157,10 @@ bool ChessEngine::arranging_end( bool canceled )
         return true;
     }
 
-    if( !arrange_board.is_valid() )
+    if( !arrange_state.is_valid() )
         return false;
 
-    current_board = arrange_board;
+    current_state = arrange_state;
 
     is_arranging = false;
     return true;
@@ -173,7 +175,7 @@ bool ChessEngine::arranging_end( bool canceled )
 std::array<char, 64> ChessEngine::get_piece_positions( )
 {
 	std::array<char, 64> new_positions;
-	std::array<Piece,64> piece_positions = is_arranging ? arrange_board.get_pieces() : current_board.get_pieces();
+	std::array<Piece,64> piece_positions = is_arranging ? arrange_state.get_pieces() : current_state.get_pieces();
 
 	for( int i=0; i<64; ++i )
 		new_positions[i] = piece_positions[i].get_code();
@@ -378,28 +380,49 @@ void ChessEngine::do_demo()
 
 }
 
-#if 0
-/*  Calculate attack values of a square (importance of a square)  */
-int ChessEngine::calc_attack_value( STSquare square )
-{
-    const unsigned char squarerankvalue[8]     = { 0, 0, 0, 0, 3, 6, 12, 12 };
-    const char    distan[8] = { 3, 2, 1, 0, 0, 1, 2, 3 };
 
-    return ( ( squarerankvalue[ square.rank ] * ( materiallevel + 8 ) ) >> 5 ) /*  Rank importance  */
-           + max( 0, 8 - 3 * ( distan[ square.rank ] + distan[ square.file ] ) ); /*  centre importance */
+/*
+ *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
+ *	Beta is the best value that the minimizer currently can guarantee at that level or below.
+ */
+int ChessEngine::alpha_beta( GameState& state, int alpha, int beta, int depth_left, eColor color ) const
+{
+	if( ! depth_left )
+		return state.evaluate();
+
+	vector<Ply> plys = state.generate_legal_plys();	// grabs all legal moves
+
+	int best_score;
+
+	if( color == white ) {		// maximiser
+		best_score = numeric_limits<int>::min();
+		for( Ply& ply : plys ) {
+			GameState new_state = state.make(ply);
+			best_score = max( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, black ) );
+			alpha = max( alpha, best_score );
+
+			if( beta <= alpha )
+				break;
+		}
+
+	} else {					// minimiser
+		best_score = numeric_limits<int>::max();
+		for( Ply& ply : plys ) {
+			GameState new_state = state.make(ply);
+			best_score = min( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, white ) );
+			beta = min( beta, best_score );
+
+			if( beta <= alpha )
+				break;
+		}
+	}
+
+	return best_score;
 }
 
-
-
-
-int bit_count( unsigned char n )
+int ChessEngine::evaluate_ply( const Ply& ply, int depth, eColor color ) const
 {
-    static const char split_lookup[] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4 };
+	GameState state_to_evaluate = current_state.make( ply );
 
-    return split_lookup[n&0xF] + split_lookup[n>>4];
+	return alpha_beta( state_to_evaluate, numeric_limits<int>::min(), numeric_limits<int>::max(), depth, color );
 }
-
-
-
-#endif // 0
-

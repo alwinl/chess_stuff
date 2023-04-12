@@ -583,7 +583,7 @@ void ChessController::on_action_help_about()
 
 void ChessController::on_action_arrange_clear()
 {
-	engine->arranging_clear();
+	engine->arranging_start();
 
 	board->set_piece_positions( engine->get_piece_positions() );
 }
@@ -593,7 +593,7 @@ void ChessController::on_action_arrange_turn_white()
 	if( !chkTurnWhite->get_active() )
 		return;
 
-	engine->arrange_turn( TURNWHITE );
+	engine->arrange_set_turn( eColor::white );
 }
 
 void ChessController::on_action_arrange_turn_black()
@@ -601,7 +601,7 @@ void ChessController::on_action_arrange_turn_black()
 	if( !chkTurnBlack->get_active() )
 		return;
 
-	engine->arrange_turn( TURNBLACK );
+	engine->arrange_set_turn( eColor::black );
 }
 
 void ChessController::on_action_arrange_cancel()

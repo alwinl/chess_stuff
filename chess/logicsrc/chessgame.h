@@ -29,7 +29,7 @@
 
 //#include "pods.h"
 
-#include "board.h"
+#include "gamestate.h"
 #include "ply.h"
 
 class ChessGameVisitorBase
@@ -48,34 +48,19 @@ public:
 	std::string save_game();
 
 	void add_tag_pair( std::string tag, std::string value );
-	void add_ply( eColor color, std::string SAN, Board& current );
+	void add_ply( Ply ply );
 
 	void visit_tag_pairs( ChessGameVisitorBase* processor );
 	void visit_plys( ChessGameVisitorBase* processor );
 
 private:
-    Board initial;
+    GameState initial;
     std::vector<Ply> plys;
 
     std::vector<std::pair<std::string, std::string> > tag_pairs;
 
+	void add_ply( eColor color, std::string SAN, GameState& current );
 	void set_alternate_starting_position();
-
-//	eColor current_player = white;
-//	bool is_human[2];
-//    bool is_white_move;             // is it whites next move?
-//
-//    bool white_can_castle_kingside;
-//    bool white_can_castle_queenside;
-//    bool black_can_castle_kingside;
-//    bool black_can_castle_queenside;
-//
-//    STSquare en_passant_target;		//  If a pawn has just made a two-square move, this is the position "behind" the pawn
-//
-//    int halfmove_clock;             // Number of half moves since last capture or pawn advance
-//    int fullmove_number;             // The number of the move, start at one increment after black move
-
-
 };
 
 #endif // APPMODEL_H

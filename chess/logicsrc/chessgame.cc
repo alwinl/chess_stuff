@@ -22,13 +22,15 @@
 #include "chessgame.h"
 
 #include <regex>
+#include <numeric>
+#include <stdexcept>
 
 using namespace std;
 
 
 ChessGame::ChessGame( )
 {
-    initial = Board();
+    initial = GameState();
     plys.clear();
     tag_pairs.clear();
 }
@@ -40,7 +42,7 @@ void ChessGame::load_game( std::string pgn_string )
 
 	tag_pairs.clear();
 	plys.clear();
-    initial = Board();
+    initial = GameState();
 
 	while( regex_search( pgn_string, tvpair_match, re_tvpair ) ) {
 		add_tag_pair( tvpair_match[1], tvpair_match[2] );
@@ -50,23 +52,109 @@ void ChessGame::load_game( std::string pgn_string )
 	regex re_movetext( "(\\d*)\\.\\s(\\S*)\\s(\\S*)?" );
 	smatch movetext_match;
 
-	Board current;
+	GameState current;
 
 	while( regex_search( pgn_string, movetext_match, re_movetext ) ) {
 
-		if( movetext_match[2] != "..." )
+		if( movetext_match[2] != "..." ) {
 			add_ply( white, movetext_match[2], current );
+			current = current.make( plys.back() );
+		}
 
-		if( movetext_match[3] != "" )
+		if( movetext_match[3] != "" ) {
 			add_ply( black, movetext_match[3], current );
+			current = current.make( plys.back() );
+		}
 
 		pgn_string = movetext_match.suffix();
 	}
 }
 
-void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
+void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 {
+	// result
+	if( SAN == "1-0" || SAN == "0-1" || SAN == "1/2-1/2" )
+		return;
 
+	if( SAN == "O-O" ) {
+		if( color == white )
+			plys.push_back( Ply( 4, 6, Piece::king ) );
+		else
+			plys.push_back( Ply( 4^56, 6^56, Piece::king ) );
+		return;
+	}
+
+	if( SAN == "O-O-O" ) {
+		if( color == white )
+			plys.push_back( Ply( 4, 2, Piece::king ) );
+		else
+			plys.push_back( Ply( 4^56, 2^56, Piece::king ) );
+		return;
+	}
+
+	vector<Ply> legal_plys = current.generate_legal_plys();
+
+	Piece::eType current_type = ( SAN[0] >= 'a' && SAN[0] <= 'h' ) ? Piece::pawn : Piece(SAN[0]).get_type();
+
+	size_t length = SAN.size();
+
+	Piece::eType promo_type = Piece::none;
+	uint16_t target_square;
+	unsigned int pos;
+
+	for( pos = length-1; pos != 0; --pos ) {
+
+		if( string("QRBN").find( SAN[pos] ) != string::npos )
+			promo_type = Piece( SAN[pos] ).get_type();
+
+		if( SAN[pos] >= '1' && SAN[pos] <= '8' ) {
+			target_square = (SAN[pos-1] - 'a') + (SAN[pos] - '1') * 8;
+			pos -= 2;
+			break;
+		}
+	}
+
+	Piece::eType target_square_type = (current.get_pieces())[target_square].get_type();
+
+	Ply test_ply( (uint16_t)-1, target_square, current_type, target_square_type, promo_type );
+
+	vector<Ply> filtered_plys;
+
+	copy_if( legal_plys.begin(), legal_plys.end(), back_inserter( filtered_plys), [test_ply]( Ply the_ply ) { return the_ply.check_san_match( test_ply ); } );
+
+	if( filtered_plys.empty() )
+		throw( domain_error( "Cannot find legal ply") );
+
+	if( filtered_plys.size() == 1 ) {
+		plys.push_back( filtered_plys[0] );
+		return;
+	}
+
+	// find departing file and/or rank
+	unsigned int file = (unsigned int)-1;
+	unsigned int rank = (unsigned int)-1;
+
+	for( ; pos != 0; --pos ) {
+		if( SAN[pos] >= '1' && SAN[pos] <= '8' )
+			rank = SAN[pos] - '1';
+
+		if( SAN[pos] >= 'a' && SAN[pos] <= 'h' )
+			file = SAN[pos] - 'a';
+	}
+
+	auto ply_it(
+		find_if( filtered_plys.begin(), filtered_plys.end(),
+			[file, rank]( Ply ply )
+			{
+				return( ((file == (unsigned int)-1) || (file == (ply.square_from() % 8) )) && ((rank == (unsigned int)-1) || (rank == (ply.square_from() / 8))) );
+			}
+		)
+	);
+
+	if( ply_it == filtered_plys.end() )
+		throw( domain_error( "Cannot find matching ply") );
+
+	plys.push_back( *ply_it );
 }
 
 void ChessGame::add_tag_pair( std::string tag, std::string value )
@@ -80,8 +168,8 @@ void ChessGame::add_tag_pair( std::string tag, std::string value )
 
 void ChessGame::set_alternate_starting_position()
 {
-	auto SetUp_it = find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "SetUp";} );
-	auto FEN_it = find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "FEN";} );
+	auto SetUp_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "SetUp";} ) );
+	auto FEN_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "FEN";} ) );
 
 	if( (SetUp_it == tag_pairs.end() ) || (FEN_it == tag_pairs.end() ) )
 		return;
@@ -89,32 +177,55 @@ void ChessGame::set_alternate_starting_position()
 	if( (*SetUp_it).second != "1" )
 		return;
 
-	initial = Board( (*FEN_it).second );
+	initial = GameState( (*FEN_it).second );
 }
 
 std::string ChessGame::save_game()
 {
-	string result;
-
-	for( auto tag_pair : tag_pairs )
-		result += "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
+	string result = accumulate( tag_pairs.begin(), tag_pairs.end(), string(""),
+		[]( string collector, pair<string,string>& tag_pair )
+		{
+			return move(collector) + "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
+		}
+	);
 
 	result += "\n";
 
-//	for( auto ply : plys ) {
-//	}
+	GameState temp_state( initial );
+
+	for( unsigned int i = 0; i < plys.size(); ++i ) {
+
+		if( !(i%2) )				// even is white move
+			result += to_string( i/2 + 1 ) + ". ";
+
+		vector<Ply> valid_plys = temp_state.generate_legal_plys();
+
+		result += plys[i].print_SAN( valid_plys ) + " ";
+
+		temp_state = temp_state.make( plys[i] );
+	}
+
+	auto result_it = find_if( tag_pairs.begin(), tag_pairs.end(), [](pair<string,string>& tp) { return tp.first == "Result"; } );
+
+	if( result_it == tag_pairs.end() )
+		throw( domain_error( "Cannot find game result") );
+
+	result += (*result_it).second;
 
 	return result;
 }
 
+void ChessGame::add_ply( Ply ply )
+{
+	plys.push_back( ply );
+}
+
 void ChessGame::visit_tag_pairs( ChessGameVisitorBase* processor )
 {
-	for( auto tag_pair : tag_pairs )
-		processor->process_tag_pair( tag_pair.first, tag_pair.second );
+	for_each( tag_pairs.begin(), tag_pairs.end(), [processor]( auto tag_pair ) { processor->process_tag_pair( tag_pair.first, tag_pair.second ); } );
 }
 
 void ChessGame::visit_plys( ChessGameVisitorBase* processor )
 {
-	for( auto ply : plys )
-		processor->process_ply( ply );
+	for_each( plys.begin(), plys.end(), [processor]( auto ply ) { processor->process_ply( ply ); } );
 }
