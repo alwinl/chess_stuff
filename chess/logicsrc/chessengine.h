@@ -69,9 +69,6 @@ public:
 	void redo();
 	void stop_thinking();
 
-	int get_timed_level_value() { return 120; };
-	int get_total_time_level_value() { return 60; };
-
 	bool set_level_easy();
 	bool set_level_timed( int timeout );
 	bool set_level_total_time( int timeout );
@@ -100,7 +97,8 @@ private:
     bool is_arranging = false;
     bool multi_player = false;
     eLevels level;
-    int level_time;
+    int level_total_time = 60;
+    int level_timed = 120;
     std::array<std::string,4> colours;
 	std::map<char, int> piece_values;
 

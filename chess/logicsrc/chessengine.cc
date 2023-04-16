@@ -214,7 +214,7 @@ bool ChessEngine::set_level_timed( int timeout )
 		return false;
 
 	level = TIMED;
-	level_time = timeout;
+	level_timed = timeout;
 	info.level = to_string( timeout ) + " sec/move";
 
 	return true;
@@ -226,7 +226,7 @@ bool ChessEngine::set_level_total_time( int timeout )
 		return false;
 
 	level = TOTALTIME;
-	level_time = timeout;
+	level_total_time = timeout;
     info.level = to_string( timeout ) + " min/game";
 
 	return true;

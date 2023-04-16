@@ -358,7 +358,7 @@ void ChessController::on_action_level_timed()
 	if( ! chkLevelTimed->get_active() )
 		return;
 
-	dlgTimeInput->dlg_setup( "Timed Level", "Seconds per move:", engine->get_timed_level_value() );
+	dlgTimeInput->dlg_setup( "Timed Level", "Seconds per move:", 120 );
 
 	if( dlgTimeInput->run() != Gtk::RESPONSE_OK ) {
 		dlgTimeInput->hide();
@@ -385,7 +385,7 @@ void ChessController::on_action_level_total_time()
 	if( ! chkLevelTotalTime->get_active() )
 		return;
 
-	dlgTimeInput->dlg_setup( "Total Time Level", "Minutes per game:", engine->get_total_time_level_value() );
+	dlgTimeInput->dlg_setup( "Total Time Level", "Minutes per game:", 60 );
 
 	if( dlgTimeInput->run() != Gtk::RESPONSE_OK ) {
 		dlgTimeInput->hide();
