@@ -24,8 +24,6 @@
 
 enum eColor { white, black};
 
-extern int* square_tables[];
-
 class Piece
 {
 public:

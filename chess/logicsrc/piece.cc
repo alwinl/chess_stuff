@@ -24,6 +24,8 @@
 
 using namespace std;
 
+extern int* square_tables[];
+
 Piece::Piece( char code )
 {
 	static map<char,Piece::eType> code_to_type {
