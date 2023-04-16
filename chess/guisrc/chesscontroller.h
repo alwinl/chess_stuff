@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <array>
 
 class ChessEngine;
 
@@ -142,6 +143,7 @@ private:
 	uint16_t drag_start_square;
 	uint16_t drag_end_square;
 	char drag_piece_code;
+    std::array<std::string,4> colours;
 
     ChessEngine* engine;
 };

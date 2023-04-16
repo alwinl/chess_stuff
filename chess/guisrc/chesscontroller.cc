@@ -44,6 +44,14 @@ ChessController::ChessController( ) : Gtk::Application( "net.dnatechnologies.che
 	engine = new ChessEngine;
 
 	thread_move_calculator = nullptr;
+
+	colours = {
+		"rgb(78,154,6)",
+		"rgb(0,0,0)",
+		"rgb(238,238,236)",
+		"rgb(85,87,83)",
+	};
+
 }
 
 ChessController::~ChessController( )
@@ -158,7 +166,7 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
-	board->set_colours( engine->get_colour_values() );
+	board->set_colours( colours );
 
 	chkLevelEasy->set_active();
 	chkTurnWhite->set_active();
@@ -525,7 +533,7 @@ void ChessController::on_action_colours()
 {
 	status_bar->push( std::string("") );
 
-	dlgColours->set_colours( engine->get_colour_values() );
+	dlgColours->set_colours( colours );
 
     if( dlgColours->run() != Gtk::RESPONSE_OK ) {
 		dlgColours->hide();
@@ -534,16 +542,9 @@ void ChessController::on_action_colours()
 
     dlgColours->hide();
 
-	if( ! engine->set_colour_values( dlgColours->get_colours() ) ) {
+    colours = dlgColours->get_colours();
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
-
-		Gtk::MessageDialog( *view, "Error changing colours.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
-
-	board->set_colours( dlgColours->get_colours() );
+	board->set_colours( colours );
 
 	status_bar->push( std::string("Changed colours") );
 }
@@ -706,46 +707,8 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 	return true;
 }
 
-
 /**-----------------------------------------------------------------------------
- * AI move calculator
- */
-void ChessController::move_calculator_start()
-{
-	mnuGame->hide();
-	mnuStop->show();
-
-	board->computer_is_thinking( true );
-
-	thread_move_calculator = new std::thread( sigc::mem_fun(*this, &ChessController::move_calculator_thread) );
-}
-
-void ChessController::move_calculator_thread()
-{
-	engine->calculate_move();
-
-	slot_move_calculator.emit();
-}
-
-void ChessController::on_move_calculator_notify()
-{
-	if( thread_move_calculator->joinable() )
-		thread_move_calculator->join();
-
-	thread_move_calculator = nullptr;
-
-	board->set_piece_positions( engine->get_piece_positions() );
-	board->set_info( engine->get_info() );
-
-	mnuStop->hide();
-	mnuGame->show();
-
-	board->computer_is_thinking( false );
-}
-
-
-/**-----------------------------------------------------------------------------
- * Animation of moves, highlights and demo
+ * Animation of moves, highlights
  */
 void ChessController::do_animate( uint16_t start_square, uint16_t end_square, char piece )
 {
@@ -791,6 +754,44 @@ bool ChessController::on_highlight_timeout()
 
 	return false;
 }
+
+
+/**-----------------------------------------------------------------------------
+ * AI move calculator
+ */
+void ChessController::move_calculator_start()
+{
+	mnuGame->hide();
+	mnuStop->show();
+
+	board->computer_is_thinking( true );
+
+	thread_move_calculator = new std::thread( sigc::mem_fun(*this, &ChessController::move_calculator_thread) );
+}
+
+void ChessController::move_calculator_thread()
+{
+	engine->calculate_move();
+
+	slot_move_calculator.emit();
+}
+
+void ChessController::on_move_calculator_notify()
+{
+	if( thread_move_calculator->joinable() )
+		thread_move_calculator->join();
+
+	thread_move_calculator = nullptr;
+
+	board->set_piece_positions( engine->get_piece_positions() );
+	board->set_info( engine->get_info() );
+
+	mnuStop->hide();
+	mnuGame->show();
+
+	board->computer_is_thinking( false );
+}
+
 
 bool ChessController::do_demo_move()
 {

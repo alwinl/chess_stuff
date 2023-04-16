@@ -80,9 +80,6 @@ public:
 	std::array<std::pair<std::string,std::string>,10> get_info();
 	std::array<char, 64> get_piece_positions( );
 
-	std::array<std::string,4> get_colour_values() const { return colours; };
-	bool set_colour_values( std::array<std::string,4> new_colours ) { colours = new_colours; return true; };
-
 	std::map<char, int> get_piece_values() const { return piece_values; };
 	bool set_piece_values( std::map<char, int> new_values ) { piece_values = new_values; return true; };
 
@@ -99,7 +96,6 @@ private:
     eLevels level;
     int level_total_time = 60;
     int level_timed = 120;
-    std::array<std::string,4> colours;
 	std::map<char, int> piece_values;
 
 
