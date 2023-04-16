@@ -35,13 +35,13 @@ using namespace std;
 ChessEngine::ChessEngine()
 {
     is_arranging = false;
-
+ // 9 << 8 // 5 << 8  // 3 << 8  // 3 << 8  // 1 << 8
 	piece_values = {
-		{ 'Q', 2304 }, // 9 << 8
-		{ 'R', 1280 }, // 5 << 8
-		{ 'B', 768 },  // 3 << 8
-		{ 'N', 768 },  // 3 << 8
-		{ 'P', 256 },  // 1 << 8
+		{ 'Q', 2304 },
+		{ 'R', 1280 },
+		{ 'B', 768 },
+		{ 'N', 768 },
+		{ 'P', 256 },
 		{ 'K', 0 },
 		{ 'q', -2304 },
 		{ 'r', -1280 },
@@ -57,10 +57,6 @@ ChessEngine::ChessEngine()
 		"rgb(238,238,236)",
 		"rgb(85,87,83)",
 	};
-}
-
-ChessEngine::~ChessEngine()
-{
 }
 
 
@@ -87,7 +83,7 @@ void ChessEngine::new_game( int game_type )
 
 
 
-bool ChessEngine::enter_move( uint16_t start_square, uint16_t end_square, char promo_piece )
+bool ChessEngine::human_move( uint16_t start_square, uint16_t end_square, char promo_piece )
 {
 	vector<Ply> plys = current_state.generate_legal_plys();	// grabs all legal moves
 
@@ -111,44 +107,15 @@ uint16_t ChessEngine::hint()
     return square;
 }
 
-void ChessEngine::cancel_move( )
-{
-}
-
 
 /**-----------------------------------------------------------------------------
- *	Board editing (create a custom state)
+ *	State editing (create a custom state)
  */
-
 void ChessEngine::arranging_start()
 {
     arrange_state = GameState( "8/8/8/8/8/8/8/8 w KQkq - 0 1" );
     is_arranging = true;
 }
-
-void ChessEngine::arrange_add_piece( uint16_t square, char piece )
-	{ arrange_state.set_piece( square, piece ); }
-
-void ChessEngine::arrange_remove_piece(uint16_t square )
-	{ arrange_state.set_piece( square, ' ' ); }
-
-void ChessEngine::arrange_set_turn( eColor active_color )
-	{ arrange_state.set_active_color( active_color ); }
-
-void ChessEngine::arrange_set_castle_rights( std::string castle_rights )
-	{ /*arrange_state.set_active_color( active_color );*/ }
-
-void ChessEngine::arrange_set_ep_square( uint16_t square )
-	{ /*arrange_state.set_active_color( active_color );*/ }
-
-void ChessEngine::arrange_set_halvemoves( uint16_t number )
-	{ /*arrange_state.set_active_color( active_color );*/ }
-
-void ChessEngine::arrange_set_fullmoves( uint16_t number )
-	{ /*arrange_state.set_active_color( active_color );*/ }
-
-std::string ChessEngine::arrange_to_fen()
-	{ return arrange_state.FEN(); }
 
 bool ChessEngine::arranging_end( bool canceled )
 {
@@ -166,24 +133,9 @@ bool ChessEngine::arranging_end( bool canceled )
     return true;
 }
 
-
-
-
-
-
-
-std::array<char, 64> ChessEngine::get_piece_positions( )
-{
-	std::array<char, 64> new_positions;
-	std::array<Piece,64> piece_positions = is_arranging ? arrange_state.get_pieces() : current_state.get_pieces();
-
-	for( int i=0; i<64; ++i )
-		new_positions[i] = piece_positions[i].get_code();
-
-	return new_positions;
-}
-
-
+/**-----------------------------------------------------------------------------
+ *	Persistance
+ */
 bool ChessEngine::open_file( std::string filename )
 {
 	if( filename.empty() )
@@ -200,13 +152,14 @@ bool ChessEngine::open_file( std::string filename )
 	return true;
 }
 
-bool ChessEngine::save_file( )
+bool ChessEngine::save_file( std::string filename )
 {
-	if( game_filename.empty() )
+	if( filename.empty() && game_filename.empty() )
 		return false;
 
-	std::ofstream os( game_filename.c_str() );
+	string tmp_name( filename.empty() ? game_filename : filename );
 
+	std::ofstream os( tmp_name.c_str() );
 	if( !os.good() )
 		return false;
 
@@ -214,24 +167,7 @@ bool ChessEngine::save_file( )
 
     os.close();
 
-    return true;
-}
-
-bool ChessEngine::save_file_as( std::string filename )
-{
-	if( filename.empty() )
-		return false;
-
-	std::ofstream os( filename.c_str() );
-
-	if( !os.good() )
-		return false;
-
-	os << game.save_game();
-
-    game_filename = filename;
-
-    os.close();
+	game_filename = tmp_name;
 
     return true;
 }
@@ -256,6 +192,10 @@ void ChessEngine::stop_thinking()
 {
 
 }
+
+
+
+
 
 bool ChessEngine::set_level_easy()
 {
@@ -336,6 +276,19 @@ bool ChessEngine::set_level_matching()
 	info.level = "Match users time";
 
 	return true;
+}
+
+
+
+std::array<char, 64> ChessEngine::get_piece_positions( )
+{
+	std::array<char, 64> new_positions;
+	std::array<Piece,64> piece_positions = is_arranging ? arrange_state.get_pieces() : current_state.get_pieces();
+
+	for( int i=0; i<64; ++i )
+		new_positions[i] = piece_positions[i].get_code();
+
+	return new_positions;
 }
 
 std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()

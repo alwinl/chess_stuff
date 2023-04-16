@@ -235,7 +235,7 @@ void ChessController::on_action_save()
 {
 	status_bar->push( std::string("") );
 
-	if( ! engine->save_file( ) ) {
+	if( ! engine->save_file( "" ) ) {
 
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
@@ -269,7 +269,7 @@ void ChessController::on_action_save_as()
 
     dlg.hide();
 
-    if( ! engine->save_file_as( dlg.get_filename() ) ) {
+    if( ! engine->save_file( dlg.get_filename() ) ) {
 
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
@@ -691,7 +691,7 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 	std::array<char, 64> save_board = engine->get_piece_positions();
 
 	// regular move, check if this this move can be made
-	if( engine->enter_move( drag_start_square, drag_end_square ) ) {
+	if( engine->human_move( drag_start_square, drag_end_square ) ) {
 
 		// take the piece of the start square:
 		save_board[ drag_start_square ] = ' ';

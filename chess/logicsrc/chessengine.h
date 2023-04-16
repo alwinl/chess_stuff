@@ -36,12 +36,9 @@
 class ChessEngine
 {
 public:
-    /** Default constructor */
     ChessEngine();
-    ~ChessEngine();
 
-    bool enter_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
-    void cancel_move();
+    bool human_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
     void calculate_move();
 
 	bool toggle_multiplayer();
@@ -49,13 +46,14 @@ public:
 	bool get_next_ply( Ply& ply ) { return false; };
 
 	void arranging_start();
-	void arrange_add_piece( uint16_t square, char piece );
-	void arrange_remove_piece( uint16_t square );
-	void arrange_set_turn( eColor active_color );
-	void arrange_set_castle_rights( std::string castle_rights );
-	void arrange_set_ep_square( uint16_t square );
-	void arrange_set_halvemoves( uint16_t number );
-	void arrange_set_fullmoves( uint16_t number );
+	void arrange_add_piece( uint16_t square, char piece ) { if( is_arranging ) arrange_state.set_piece( square, piece ); }
+	void arrange_remove_piece(uint16_t square ) { if( is_arranging ) arrange_state.set_piece( square, ' ' ); }
+	void arrange_set_turn( eColor active_color ) { if( is_arranging ) arrange_state.set_active_color( active_color ); }
+	void arrange_set_castle_rights( std::string castle_rights ) { if( is_arranging ) arrange_state.set_castle_rights( castle_rights ); }
+	void arrange_set_ep_square( uint16_t square ) { if( is_arranging ) arrange_state.set_ep_square( square ); }
+	void arrange_set_halvemoves( uint16_t number ) { if( is_arranging ) arrange_state.set_halvemoves( number ); }
+	void arrange_set_fullmoves( uint16_t number ) { if( is_arranging ) arrange_state.set_fullmoves( number ); }
+	std::string arrange_to_fen() { return arrange_state.FEN(); }
 	bool arranging_end( bool canceled );
 	bool in_edit_mode() { return is_arranging; }
 
@@ -65,17 +63,11 @@ public:
     bool can_quit();
 
     bool open_file( std::string filename );
-    bool save_file( );
-    bool save_file_as( std::string filename );
+    bool save_file( std::string filename );
 
 	void undo();
 	void redo();
 	void stop_thinking();
-
-	std::array<std::pair<std::string,std::string>,10> get_info();
-	std::array<char, 64> get_piece_positions( );
-
-	std::string arrange_to_fen();
 
 	int get_timed_level_value() { return 120; };
 	int get_total_time_level_value() { return 60; };
@@ -87,6 +79,9 @@ public:
 	bool set_level_ply_search();
 	bool set_level_mate_search();
 	bool set_level_matching();
+
+	std::array<std::pair<std::string,std::string>,10> get_info();
+	std::array<char, 64> get_piece_positions( );
 
 	std::array<std::string,4> get_colour_values() const { return colours; };
 	bool set_colour_values( std::array<std::string,4> new_colours ) { colours = new_colours; return true; };
@@ -102,12 +97,10 @@ private:
     STInfo info;
 
     std::string game_filename;
-
-    bool is_arranging;
-    bool multi_player;
+    bool is_arranging = false;
+    bool multi_player = false;
     eLevels level;
     int level_time;
-
     std::array<std::string,4> colours;
 	std::map<char, int> piece_values;
 
