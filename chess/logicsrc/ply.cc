@@ -141,7 +141,7 @@ std::string Ply::print_SAN( std::vector<Ply>& legal_plys ) const
 	result += (char)('1' + (to / 8) );
 
 	if( promo_type != Piece::none )
-		result += string("E NBRQK")[promo_type];
+		result += "=" + string("E NBRQK")[promo_type];
 
 	if( check )
 		result += '+'; // "†";
