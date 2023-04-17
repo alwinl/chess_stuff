@@ -26,8 +26,6 @@
 #include <map>
 #include <array>
 
-#include "pods.h"
-
 #include "chessgame.h"
 #include "gamestate.h"
 
@@ -84,16 +82,32 @@ public:
 	bool set_piece_values( std::map<char, int> new_values ) { piece_values = new_values; return true; };
 
 private:
+	enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLYSEARCH, MATESEARCH, MATCHING, LEVELCOUNT };
+
+	struct STInfo
+	{
+		std::string turn;	/* either "black" or "white" */
+		std::string white;	/* the last move white made. Format: minutes:seconds movenumber movestring */
+		std::string black;	/* the last move black made. Format: minutes:seconds movenumber movestring */
+		std::string time;
+		std::string level;
+		std::string value;
+		std::string nodes;
+		std::string n_sec;
+		std::string depth;
+		std::string bestline;
+	};
+
 	ChessGame game;
 
 	GameState current_state;
 	GameState arrange_state;
     STInfo info;
 
-    std::string game_filename;
+    std::string game_filename = "";
     bool is_arranging = false;
     bool multi_player = false;
-    eLevels level;
+    eLevels level = EASY;
     int level_total_time = 60;
     int level_timed = 120;
 	std::map<char, int> piece_values;

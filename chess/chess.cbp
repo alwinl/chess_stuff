@@ -118,8 +118,6 @@
 		<Unit filename="logicsrc/piece_square_tables.cc" />
 		<Unit filename="logicsrc/ply.cc" />
 		<Unit filename="logicsrc/ply.h" />
-		<Unit filename="logicsrc/pods.cc" />
-		<Unit filename="logicsrc/pods.h" />
 		<Unit filename="logictest/testapplication.cc" />
 		<Unit filename="logictest/testapplication.h">
 			<Option target="Test" />

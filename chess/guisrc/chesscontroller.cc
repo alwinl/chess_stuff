@@ -166,15 +166,17 @@ void ChessController::on_activate()
     add_window( *view );
     view->show();
 
+	status_bar->push( std::string("") );
+
 	board->set_colours( colours );
+	board->set_piece_positions( engine->get_piece_positions() );
+	board->set_info( engine->get_info() );
 
 	chkLevelEasy->set_active();
 	chkTurnWhite->set_active();
 
 	mnuArrange->hide();
 	mnuStop->hide();
-
-    on_action_new();
 }
 
 
@@ -185,9 +187,6 @@ void ChessController::on_action_new()
 {
 	status_bar->push( std::string("") );
 
-	board->set_piece_positions( engine->get_piece_positions() );
-	board->set_info( engine->get_info() );
-
 	if( dlgNewGame->run() == Gtk::RESPONSE_CANCEL ) {
 		dlgNewGame->hide();
         return;
@@ -197,6 +196,8 @@ void ChessController::on_action_new()
 
 	engine->new_game( dlgNewGame->get_choice() );
 
+	board->set_piece_positions( engine->get_piece_positions() );
+	board->set_info( engine->get_info() );
 
 	status_bar->push( std::string("New game") );
 }
