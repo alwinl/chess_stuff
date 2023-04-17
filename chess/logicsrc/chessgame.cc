@@ -32,7 +32,16 @@ ChessGame::ChessGame( )
 {
     initial = GameState();
     plys.clear();
-    tag_pairs.clear();
+
+    tag_pairs = vector<pair<string,string>>{
+    	pair<string,string>( "Event", "Unknown" ),
+    	pair<string,string>( "Site", "Unknown" ),
+    	pair<string,string>( "Date", "Unknown" ),
+    	pair<string,string>( "Round", "Unknown" ),
+    	pair<string,string>( "White", "Unknown" ),
+    	pair<string,string>( "Black", "Unknown" ),
+    	pair<string,string>( "Result", "*" ),
+    };
 }
 
 void ChessGame::load_game( std::string pgn_string )
@@ -57,12 +66,12 @@ void ChessGame::load_game( std::string pgn_string )
 	while( regex_search( pgn_string, movetext_match, re_movetext ) ) {
 
 		if( movetext_match[2] != "..." ) {
-			add_ply( white, movetext_match[2], current );
+			add_ply( eColor::white, movetext_match[2], current );
 			current = current.make( plys.back() );
 		}
 
 		if( movetext_match[3] != "" ) {
-			add_ply( black, movetext_match[3], current );
+			add_ply( eColor::black, movetext_match[3], current );
 			current = current.make( plys.back() );
 		}
 
@@ -77,7 +86,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 		return;
 
 	if( SAN == "O-O" ) {
-		if( color == white )
+		if( color == eColor::white )
 			plys.push_back( Ply( 4, 6, Piece::king ) );
 		else
 			plys.push_back( Ply( 4^56, 6^56, Piece::king ) );
@@ -85,7 +94,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 	}
 
 	if( SAN == "O-O-O" ) {
-		if( color == white )
+		if( color == eColor::white )
 			plys.push_back( Ply( 4, 2, Piece::king ) );
 		else
 			plys.push_back( Ply( 4^56, 2^56, Piece::king ) );
@@ -159,7 +168,12 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 
 void ChessGame::add_tag_pair( std::string tag, std::string value )
 {
-	tag_pairs.push_back( make_pair(tag, value) );
+	auto it( find_if( tag_pairs.begin(), tag_pairs.end(), [tag]( auto tag_pair ) { return tag_pair.first == tag;} ) );
+
+	if( it != tag_pairs.end() )
+		(*it).second = value;
+	else
+		tag_pairs.push_back( make_pair(tag, value) );
 
 	// http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm chapter 9.7 Alternative starting positions
 	if( (tag == "SetUp") || ( tag == "FEN" ) )
