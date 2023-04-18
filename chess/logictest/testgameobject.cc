@@ -27,14 +27,6 @@ using namespace std;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestGameObject );
 
-TestGameObject::TestGameObject()
-{
-}
-
-TestGameObject::~TestGameObject()
-{
-}
-
 void TestGameObject::create_object()
 {
     ChessGame game = ChessGame();
@@ -69,47 +61,11 @@ void TestGameObject::save_load()
 		"4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4 Nbd7 "
 		"11. c4 c6 12. cxb5 axb5 13. Nc3 Bb7 14. Bg5 b4 15. Nb1 h6 16. Bh4 c5 17. dxe5 "
 		"Nxe4 18. Bxe7 Qxe7 19. exd6 Qf6 20. Nbd2 Nxd6 21. Nc4 Nxc4 22. Bxc4 Nb6 "
-		"23. Ne5 Rae8 24. Bxf7 Rxf7 25. Nxf7 Rxe1 26. Qxe1 Kxf7 27. Qe3 Qg5 28. Qxg5 "
-		//"23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7 27. Qe3 Qg5 28. Qxg5 "
+		"23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7 27. Qe3 Qg5 28. Qxg5 "
 		"hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33. f3 Bc8 34. Kf2 Bf5 "
-		"35. Ra7 g6 36. Ra6 Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6 "
-		//"35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6 "
+		"35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6 "
 		"Nf2 42. g4 Bd3 43. Re6 1/2-1/2\"";
 
     CPPUNIT_ASSERT_EQUAL( expected, actual );
 }
 
-class PrintPlys : public ChessGameVisitorBase
-{
-public:
-	virtual void process_tag_pair( std::string tag, std::string value ) {}
-	virtual void process_ply( Ply ply )
-	{
-		vector<Ply> legal_moves( running_state.generate_legal_plys() );
-		cout << ply.print_SAN( legal_moves ) << "\n";
-		running_state = running_state.make(ply);
-	}
-
-private:
-	GameState running_state;
-};
-
-
-void TestGameObject::print_plys()
-{
-	ChessGame game;
-
-	ifstream is( "game.pgn" );
-
-	if( !is.good() )
-		CPPUNIT_FAIL( "cannot open 'game.pgn'");
-
-	game.load_game( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
-
-    is.close();
-
-    PrintPlys printer;
-
-	game.visit_plys( &printer );
-
-}

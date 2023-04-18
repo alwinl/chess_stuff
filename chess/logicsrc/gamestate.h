@@ -25,6 +25,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <map>
 
 #include "piece.h"
 #include "ply.h"
@@ -49,14 +50,13 @@ public:
 	GameState make( Ply a_ply ) const;
 
 	std::array<Piece,64> get_pieces() { return position; }
+	eColor get_current_colour() const { return current_player; };
 
 private:
 	std::array<Piece,64> position;
-    bool is_white_move;
-    bool white_can_castle_kingside = false;
-    bool white_can_castle_queenside = false;
-    bool black_can_castle_kingside = false;
-    bool black_can_castle_queenside = false;
+    eColor current_player;
+    std::map<eColor,bool> can_castle_kingside;
+    std::map<eColor,bool> can_castle_queenside;
     uint16_t en_passant_target = (uint16_t)-1;
     int halfmove_clock = 0;             // Number of half moves since last capture or pawn advance
     int fullmove_number = 1;             // The number of the move, start at one increment after black move
@@ -76,7 +76,6 @@ private:
 	std::string halvemoves() const;
 	std::string fullmoves() const;
 
-	bool illegal_move( Ply& a_ply ) const;
 	std::vector<Ply> generate_plys() const;
 };
 

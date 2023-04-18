@@ -37,7 +37,7 @@ public:
     ChessEngine();
 
     bool human_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
-    void calculate_move();
+    void AI_move();
 
 	bool toggle_multiplayer();
 	void do_demo();
@@ -111,10 +111,11 @@ private:
     int level_total_time = 60;
     int level_timed = 120;
 	std::map<char, int> piece_values;
+	std::map<eColor,std::string> last_ply;
 
 
 	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;
-	int alpha_beta( GameState& state, int alpha, int beta, int depth_left, eColor color ) const;
+	int alpha_beta( GameState state, int alpha, int beta, int depth_left, eColor color ) const;
 };
 
 #endif // CHESSENGINE_H

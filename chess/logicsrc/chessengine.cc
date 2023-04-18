@@ -50,6 +50,8 @@ ChessEngine::ChessEngine()
 		{ 'p', -256 },
 		{ 'k', 0 },
 	};
+
+	last_ply = std::map<eColor,std::string> { {eColor::white, ""}, {eColor::black, ""} };
 }
 
 
@@ -87,17 +89,27 @@ bool ChessEngine::human_move( uint16_t start_square, uint16_t end_square, char p
 	if( ply_it == plys.end() )
 		return false;
 
+	last_ply[ current_state.get_current_colour() ] = (*ply_it).print_LAN();
+	game.add_ply( *ply_it );
+
 	current_state = current_state.make( *ply_it );
 
 	return true;
 }
 
-uint16_t ChessEngine::hint()
+void ChessEngine::AI_move()
 {
-    uint16_t square = 3 + 8 * 3;
+    std::vector<Ply> plys = current_state.generate_legal_plys();
 
+	if( current_state.get_current_colour() == eColor::white )
+		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.make(lhs).evaluate() > current_state.make(rhs).evaluate(); } );
+	else
+		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.make(lhs).evaluate() < current_state.make(rhs).evaluate(); } );
 
-    return square;
+	last_ply[ current_state.get_current_colour() ] = (*(plys.begin())).print_LAN();
+	game.add_ply( *(plys.begin()) );
+
+	current_state = current_state.make( *(plys.begin()) );
 }
 
 
@@ -179,6 +191,14 @@ void ChessEngine::undo()
 void ChessEngine::redo()
 {
 
+}
+
+uint16_t ChessEngine::hint()
+{
+    uint16_t square = 3 + 8 * 3;
+
+
+    return square;
 }
 
 void ChessEngine::stop_thinking()
@@ -271,46 +291,6 @@ bool ChessEngine::set_level_matching()
 	return true;
 }
 
-
-
-std::array<char, 64> ChessEngine::get_piece_positions( )
-{
-	std::array<char, 64> new_positions;
-	std::array<Piece,64> piece_positions = is_arranging ? arrange_state.get_pieces() : current_state.get_pieces();
-
-	for( int i=0; i<64; ++i )
-		new_positions[i] = piece_positions[i].get_code();
-
-	return new_positions;
-}
-
-std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
-{
-	std::array<std::pair<std::string,std::string>,10> std_info =
-	{
-		std::pair<std::string,std::string>{"Turn", info.turn },
-		std::pair<std::string,std::string>{"White", info.white },
-		std::pair<std::string,std::string>{"Black", info.black },
-		std::pair<std::string,std::string>{"Time", info.time },
-		std::pair<std::string,std::string>{"Level", info.level },
-		std::pair<std::string,std::string>{"Value", info.value },
-		std::pair<std::string,std::string>{"Nodes", info.nodes },
-		std::pair<std::string,std::string>{"N/Sec", info.n_sec },
-		std::pair<std::string,std::string>{"Depth", info.depth },
-		std::pair<std::string,std::string>{"Bestline", info.bestline }
-	};
-
-	return std_info;
-}
-
-#include <unistd.h>
-void ChessEngine::calculate_move()
-{
-    unsigned int microsecond = 1000000;
-
-    usleep( 5 * microsecond );
-}
-
 bool ChessEngine::toggle_multiplayer()
 {
     multi_player = !multi_player;
@@ -327,11 +307,50 @@ void ChessEngine::do_demo()
 }
 
 
+
+std::array<char, 64> ChessEngine::get_piece_positions( )
+{
+	std::array<char, 64> new_positions;
+	std::array<Piece,64> piece_positions = is_arranging ? arrange_state.get_pieces() : current_state.get_pieces();
+
+	for( int i=0; i<64; ++i )
+		new_positions[i] = piece_positions[i].get_code();
+
+	return new_positions;
+}
+
+std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
+{
+	string level_string = (multi_player) ? "Two Player" : (vector<string>{ "Easy", "Timed", "Total Time", "Infinite", "Ply Search", "Mate Search", "Matching" })[level];
+
+	std::array<std::pair<std::string,std::string>,10> std_info =
+	{
+		std::pair<std::string,std::string>{"Turn", (current_state.get_current_colour() == eColor::white) ? "White" : "Black" },
+		std::pair<std::string,std::string>{"White", last_ply[eColor::white] },
+		std::pair<std::string,std::string>{"Black", last_ply[eColor::black] },
+		std::pair<std::string,std::string>{"Time", info.time },
+		std::pair<std::string,std::string>{"Level", level_string },
+		std::pair<std::string,std::string>{"Value", info.value },
+		std::pair<std::string,std::string>{"Nodes", info.nodes },
+		std::pair<std::string,std::string>{"N/Sec", info.n_sec },
+		std::pair<std::string,std::string>{"Depth", info.depth },
+		std::pair<std::string,std::string>{"Bestline", info.bestline }
+	};
+
+	return std_info;
+}
+
+
+int ChessEngine::evaluate_ply( const Ply& ply, int depth, eColor color ) const
+{
+	return alpha_beta( current_state.make( ply ), numeric_limits<int>::min(), numeric_limits<int>::max(), depth, color );
+}
+
 /*
  *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
  *	Beta is the best value that the minimizer currently can guarantee at that level or below.
  */
-int ChessEngine::alpha_beta( GameState& state, int alpha, int beta, int depth_left, eColor color ) const
+int ChessEngine::alpha_beta( GameState state, int alpha, int beta, int depth_left, eColor color ) const
 {
 	if( ! depth_left )
 		return state.evaluate();
@@ -340,11 +359,11 @@ int ChessEngine::alpha_beta( GameState& state, int alpha, int beta, int depth_le
 
 	int best_score;
 
-	if( color == white ) {		// maximiser
+	if( color == eColor::white ) {		// maximiser
 		best_score = numeric_limits<int>::min();
 		for( Ply& ply : plys ) {
 			GameState new_state = state.make(ply);
-			best_score = max( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, black ) );
+			best_score = max( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, eColor::black ) );
 			alpha = max( alpha, best_score );
 
 			if( beta <= alpha )
@@ -355,7 +374,7 @@ int ChessEngine::alpha_beta( GameState& state, int alpha, int beta, int depth_le
 		best_score = numeric_limits<int>::max();
 		for( Ply& ply : plys ) {
 			GameState new_state = state.make(ply);
-			best_score = min( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, white ) );
+			best_score = min( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, eColor::white ) );
 			beta = min( beta, best_score );
 
 			if( beta <= alpha )
@@ -366,9 +385,3 @@ int ChessEngine::alpha_beta( GameState& state, int alpha, int beta, int depth_le
 	return best_score;
 }
 
-int ChessEngine::evaluate_ply( const Ply& ply, int depth, eColor color ) const
-{
-	GameState state_to_evaluate = current_state.make( ply );
-
-	return alpha_beta( state_to_evaluate, numeric_limits<int>::min(), numeric_limits<int>::max(), depth, color );
-}

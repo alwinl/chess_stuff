@@ -698,6 +698,7 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 		// take the piece of the start square:
 		save_board[ drag_start_square ] = ' ';
 		board->set_piece_positions( save_board );
+		board->set_info( engine->get_info() );
 
 		do_animate( drag_start_square, drag_end_square, drag_piece_code );
 
@@ -729,6 +730,7 @@ bool ChessController::on_animate_timeout()
 	board->animate_finish();
 
 	board->set_piece_positions( engine->get_piece_positions() );
+	board->set_info( engine->get_info() );
 
 	// if it is the computers turn here, let the AI calculate a move
 	move_calculator_start();
@@ -772,7 +774,7 @@ void ChessController::move_calculator_start()
 
 void ChessController::move_calculator_thread()
 {
-	engine->calculate_move();
+	engine->AI_move();
 
 	slot_move_calculator.emit();
 }

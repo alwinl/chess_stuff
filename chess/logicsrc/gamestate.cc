@@ -107,42 +107,41 @@ std::string GameState::piece_placement() const
 
 void GameState::process_active_color( std::string active_color )
 {
-    is_white_move = (active_color == "w" );
+    current_player = (active_color == "w" ) ? eColor::white : eColor::black;
 }
 
 std::string GameState::active_color() const
 {
-	return is_white_move ? "w" : "b";
+	return (current_player == eColor::white) ? "w" : "b";
 }
 
 void GameState::process_castling( std::string castle_rights )
 {
-	white_can_castle_kingside =
-	white_can_castle_queenside =
-	black_can_castle_kingside =
-	black_can_castle_queenside = false;
+	can_castle_kingside = map<eColor,bool> { { eColor::white, false}, {eColor::black, false} };
+	can_castle_queenside = map<eColor,bool> { { eColor::white, false}, {eColor::black, false} };
 
     if( castle_rights == "-" )
 		return;
 
 	for( char& ch : castle_rights ) {
 		switch( ch ) {
-		case 'K': white_can_castle_kingside = true;
-		case 'Q': white_can_castle_queenside = true;
-		case 'k': black_can_castle_kingside = true;
-		case 'q': black_can_castle_queenside = true;
+		case 'K': can_castle_kingside[eColor::white] = true;
+		case 'Q': can_castle_queenside[eColor::white] = true;
+		case 'k': can_castle_kingside[eColor::black] = true;
+		case 'q': can_castle_queenside[eColor::black] = true;
 		}
 	}
+
 }
 
 std::string GameState::castle_rights() const
 {
 	string result;
 
-	if( white_can_castle_kingside ) result += 'K';
-	if( white_can_castle_queenside ) result += 'Q';
-	if( black_can_castle_kingside ) result += 'k';
-	if( black_can_castle_queenside ) result += 'q';
+	if( can_castle_kingside.at(eColor::white) ) result += 'K';
+	if( can_castle_queenside.at(eColor::white) ) result += 'Q';
+	if( can_castle_kingside.at(eColor::black) ) result += 'k';
+	if( can_castle_queenside.at(eColor::black) ) result += 'q';
 
 	return result.empty() ? "-" : result;
 }
@@ -206,23 +205,23 @@ GameState GameState::set_piece( uint16_t square, char code )
 
 GameState GameState::set_active_color( eColor color )
 {
-	is_white_move = (color == eColor::white);
+	current_player = color;
 	return *this;
 }
 
 GameState GameState::set_castle_rights( std::string castle_rights )
 {
-	white_can_castle_kingside =
-	white_can_castle_queenside =
-	black_can_castle_kingside =
-	black_can_castle_queenside = false;
+	can_castle_kingside[eColor::white] =
+	can_castle_queenside[eColor::white] =
+	can_castle_kingside[eColor::black] =
+	can_castle_queenside[eColor::black] = false;
 
 	for( char& ch : castle_rights ) {
 		switch( ch ) {
-		case 'K': white_can_castle_kingside = true;
-		case 'Q': white_can_castle_queenside = true;
-		case 'k': black_can_castle_kingside = true;
-		case 'q': black_can_castle_queenside = true;
+		case 'K': can_castle_kingside[eColor::white] = true;
+		case 'Q': can_castle_queenside[eColor::white] = true;
+		case 'k': can_castle_kingside[eColor::black] = true;
+		case 'q': can_castle_queenside[eColor::black] = true;
 		}
 	}
 	return *this;
@@ -248,21 +247,27 @@ GameState GameState::set_fullmoves( uint16_t number )
 
 bool GameState::is_valid()
 {
-    int KingCount[2]  = { 0, 0 };
-    int TotalCount[2] = { 0, 0 };
+	struct Counts {
+		int KingCount;
+		int TotalCount;
+	};
+	map<eColor,Counts> counts = { {eColor::white, { 0, 0} }, {eColor::black, {0,0} } };
 
     for( auto it = position.begin(); it != position.end(); it++ ) {
 
-        int colour_idx = (*it).is_color( white ) ? 0 : 1;
+		if( (*it).is_of_type( Piece::none) )
+			continue;
 
-        TotalCount[ colour_idx ]++;
+		Counts& cc = counts.at( (*it).get_color() );
 
-        if( (*it).is_of_type( Piece::king ) )
-            KingCount[ colour_idx ]++;
+		++cc.TotalCount;
+
+		if( (*it).is_of_type( Piece::king ) )
+			++cc.KingCount;
     }
 
-    return ( TotalCount[ 0 ] <= 16 ) && ( KingCount[ 0 ] == 1 )
-                 && ( TotalCount[ 1 ] <= 16 ) && ( KingCount[ 1 ] == 1 );
+    return ( counts.at(eColor::white).TotalCount <= 16 ) && ( counts.at(eColor::white).KingCount == 1 )
+		&& ( counts.at(eColor::black).TotalCount <= 16 ) && ( counts.at(eColor::black).KingCount == 1 );
 }
 
 
@@ -298,8 +303,6 @@ GameState GameState::make( Ply a_ply ) const
 		new_board.position[to] = position[from];
 		new_board.position[from] = Piece( Piece::none );
 
-		new_board.position[to].moved();
-
 		// reuse for rook
 		to = a_ply.get_castling_rook_square_to();
 		from = a_ply.get_castling_rook_square_from();
@@ -308,24 +311,27 @@ GameState GameState::make( Ply a_ply ) const
 		new_board.position[to] = position[from];
 		new_board.position[from] = Piece( Piece::none );
 
-		new_board.position[to].moved();
+		new_board.can_castle_kingside[current_player] = false;
+		new_board.can_castle_queenside[current_player] = false;
 
 	} else {
 		new_board.position[to] = position[from];
 		new_board.position[from] = Piece( Piece::none );
 
-		new_board.position[to].moved();
+		if( current_player == eColor::white ) {
+			if( (from == 0) || (from == 4) ) new_board.can_castle_queenside[eColor::white] = false;
+			if( (from == 7) || (from == 4) ) new_board.can_castle_kingside[eColor::white]  = false;
+		} else {
+			if( (from == (0^56)) || (from == (4^56)) ) new_board.can_castle_queenside[eColor::black] = false;
+			if( (from == (7^56)) || (from == (4^56)) ) new_board.can_castle_kingside[eColor::black]  = false;
+		}
 	}
 
-	new_board.is_white_move = !is_white_move;
-//    bool white_can_castle_kingside = false;
-//    bool white_can_castle_queenside = false;
-//    bool black_can_castle_kingside = false;
-//    bool black_can_castle_queenside = false;
+	new_board.current_player = (current_player == eColor::white) ? eColor::black : eColor::white;
 	new_board.en_passant_target = a_ply.get_ep_square();
 
     new_board.halfmove_clock = a_ply.halfclock_needs_reset() ? 0 : halfmove_clock + 1;
-    if( !is_white_move )
+    if( current_player == eColor::black )
 		new_board.fullmove_number = fullmove_number + 1;             // The number of the move, start at one increment after black move
 
 	return new_board;
@@ -334,7 +340,6 @@ GameState GameState::make( Ply a_ply ) const
 std::vector<Ply> GameState::generate_plys() const
 {
 	vector<Ply> plys;
-	eColor side = is_white_move ? eColor::white : eColor::black;
 
 	static int mailbox[120] = {
 		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -366,7 +371,7 @@ std::vector<Ply> GameState::generate_plys() const
 
 		Piece piece = position[square];
 
-		if( ! piece.is_color( side ) || piece.is_of_type( Piece::none ) )
+		if( ! piece.is_color( current_player ) || piece.is_of_type( Piece::none ) )
 			continue;
 
 		if( ! piece.is_of_type( Piece::pawn ) ) {
@@ -384,7 +389,7 @@ std::vector<Ply> GameState::generate_plys() const
 					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
 						plys.push_back( Ply(square, target_square, piece.get_type()) );
 					else {
-						if( ! position[target_square].is_color( side ) )
+						if( ! position[target_square].is_color( current_player ) )
 							plys.push_back( Ply(square, target_square, piece.get_type(), position[target_square].get_type()) );
 						break;
 					}
@@ -399,12 +404,12 @@ std::vector<Ply> GameState::generate_plys() const
 
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				target_square = mailbox[ mailbox64[target_square] + (piece.is_color( white ) ? 10 : -10) ];	/* next square in this direction */
+				target_square = mailbox[ mailbox64[target_square] + (piece.is_color( eColor::white ) ? 10 : -10) ];	/* next square in this direction */
 
 				if( ! position[target_square].is_of_type( Piece::none ) )	/* cannot_move */
 					break;
 
-				if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
+				if( target_square / 8 == (piece.is_color( eColor::white ) ? 7: 0) ) {		// promotion ranks
 					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType(type + 1) )
 						plys.push_back( Ply( square, target_square, Piece::pawn, Piece::none, type ) );	// generate a promotion plys
 					break;
@@ -412,7 +417,7 @@ std::vector<Ply> GameState::generate_plys() const
 
 				plys.push_back( Ply( square, target_square, Piece::pawn ) );
 
-				if( piece.has_moved() )
+				if( square / 8 != (piece.is_color( eColor::white ) ? 1 : 6) )		// start ranks
 					break;
 			}
 
@@ -421,7 +426,7 @@ std::vector<Ply> GameState::generate_plys() const
 
 				unsigned int offset = ((counter == 0) ? 9 : 11);
 
-				if( piece.is_color( black ) )
+				if( piece.is_color( eColor::black ) )
 					offset *= -1;
 
 				target_square = mailbox[ mailbox64[square] + offset ];
@@ -429,11 +434,11 @@ std::vector<Ply> GameState::generate_plys() const
 				if( target_square == (uint16_t)-1 )				/* off the board... */
 					continue;
 
-				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side ) ) {	/* something is there, and its their piece */
+				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( current_player ) ) {	/* something is there, and its their piece */
 
-					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
+					if( target_square / 8 == (piece.is_color( eColor::white ) ? 7: 0) ) {		// promotion ranks
 						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
-							plys.push_back( Ply( square, target_square, Piece::pawn, position[target_square].get_type(), type ) );	// generate a promotion plys
+							plys.push_back( Ply( square, target_square, Piece::pawn, position[target_square].get_type(), type ) );	// generate promotion plys
 					} else
 						plys.push_back( Ply( square, target_square, Piece::pawn, position[target_square].get_type() ) );
 				}
@@ -444,19 +449,15 @@ std::vector<Ply> GameState::generate_plys() const
 
 		}
 
-		if( piece.is_of_type( Piece::king ) && !piece.has_moved() ) {
+		if( piece.is_of_type( Piece::king ) ) {
 
-			// Check king side castle
-			if(   !position[square + 3].has_moved()
-				&& position[square + 3].is_of_type(Piece::rook)
+			if( can_castle_kingside.at( current_player )
 				&& position[square + 1].is_of_type(Piece::none)
 				&& position[square + 2].is_of_type(Piece::none)
 			)
 				plys.push_back( Ply( square, uint16_t(square + 2), Piece::king ) );
 
-			// Check queen side castle
-			if(   !position[square - 4].has_moved()
-				&& position[square - 4].is_of_type(Piece::rook)
+			if( can_castle_queenside.at( current_player )
 				&& position[square - 1].is_of_type(Piece::none)
 				&& position[square - 2].is_of_type(Piece::none)
 				&& position[square - 3].is_of_type(Piece::none)
@@ -468,79 +469,39 @@ std::vector<Ply> GameState::generate_plys() const
 	return plys;
 }
 
-bool GameState::illegal_move( Ply& a_ply ) const
-{
-	GameState test_board = make( a_ply );
-
-	vector<Ply> opponent_moves = test_board.generate_plys();
-
-	return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Ply& opp_move) { return opp_move.is_kingcapture(); }) != opponent_moves.end() );
-
-}
-
 std::vector<Ply> GameState::generate_legal_plys() const
 {
 	vector<Ply> moves = generate_plys();	// grabs all pseudo legal moves
 
-	moves.erase( remove_if(moves.begin(), moves.end(), [this](Ply& a_ply) { return this->illegal_move(a_ply); }), moves.end() );	// filter out illegal moves
+	// Filter out illegal moves
+	auto illegal_move = [this](Ply& a_ply)
+	{
+		vector<Ply> opponent_moves = make( a_ply ).generate_plys();
+		return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Ply& opp_move) { return opp_move.is_kingcapture(); }) != opponent_moves.end() );
+	};
+	moves.erase( remove_if(moves.begin(), moves.end(), illegal_move ), moves.end() );
+
+	// Mark check (checkmate) plys
+	auto mark_check = [this](Ply& a_ply)
+	{
+		GameState test = make( a_ply );
+		test.current_player = current_player;
+		vector<Ply> plys = test.generate_plys();
+		if( find_if( plys.begin(), plys.end(), [](Ply& ply) { return ply.is_kingcapture(); }) != plys.end() )
+			a_ply.set_check();
+	};
+	for_each( moves.begin(), moves.end(), mark_check );
 
 	return moves;
 }
 
-
 int GameState::evaluate() const
 {
-	unsigned int score[2] = { 0, 0 };
+	map<eColor,int> score = { {eColor::white, 0}, {eColor::black, 0} };
 
 	for( uint16_t square = 0; square < 64; ++square)
-		if( ! position[square].is_of_type( Piece::none ) ) {
-			unsigned int index = position[square].is_color( white ) ? white : black;
-			score[index] += position[square].get_score( square );
-		}
+		if( ! position[square].is_of_type( Piece::none ) )
+			score.at( position[square].get_color() ) += position[square].get_score( square );
 
-	return score[white] - score[black];
+	return score.at(eColor::white) - score.at(eColor::black);
 }
-
-///*
-// *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
-// *	Beta is the best value that the minimizer currently can guarantee at that level or below.
-// */
-//int GameState::alpha_beta( int alpha, int beta, int depth_left, eColor color ) const
-//{
-//	if( ! depth_left )
-//		return evaluate();
-//
-//	vector<Ply> plys = generate_legal_plys();	// grabs all legal moves
-//
-//	int best_score;
-//
-//	if( color == white ) {		// maximiser
-//		best_score = numeric_limits<int>::min();
-//		for( Ply& ply : plys ) {
-//			best_score = max( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1, black ) );
-//			alpha = max( alpha, best_score );
-//
-//			if( beta <= alpha )
-//				break;
-//		}
-//
-//	} else {					// minimiser
-//		best_score = numeric_limits<int>::max();
-//		for( Ply& ply : plys ) {
-//			best_score = min( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1, white ) );
-//			beta = min( beta, best_score );
-//
-//			if( beta <= alpha )
-//				break;
-//		}
-//	}
-//
-//	return best_score;
-//}
-//
-//int GameState::evaluate_ply( const Ply& ply, int depth, eColor color ) const
-//{
-//	return make(ply).alpha_beta( numeric_limits<int>::min(), numeric_limits<int>::max(), depth, color );
-//}
-//
-//
