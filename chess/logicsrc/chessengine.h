@@ -78,19 +78,19 @@ public:
 	std::array<std::pair<std::string,std::string>,10> get_info();
 	std::array<char, 64> get_piece_positions( );
 
-	std::map<char, int> get_piece_values() const { return piece_values; };
-	bool set_piece_values( std::map<char, int> new_values ) { piece_values = new_values; return true; };
+	std::map<char, int> get_piece_values() const;
+	bool set_piece_values( std::map<char, int> new_values );
 
 private:
 	enum eLevels { EASY, TIMED, TOTALTIME, INFINITE, PLYSEARCH, MATESEARCH, MATCHING, LEVELCOUNT };
 
 	struct STInfo
 	{
-		std::string turn;	/* either "black" or "white" */
-		std::string white;	/* the last move white made. Format: minutes:seconds movenumber movestring */
-		std::string black;	/* the last move black made. Format: minutes:seconds movenumber movestring */
+		//std::string turn;	/* either "black" or "white" */
+		//std::string white;	/* the last move white made. Format: minutes:seconds movenumber movestring */
+		//std::string black;	/* the last move black made. Format: minutes:seconds movenumber movestring */
 		std::string time;
-		std::string level;
+		//std::string level;
 		std::string value;
 		std::string nodes;
 		std::string n_sec;
@@ -110,7 +110,7 @@ private:
     eLevels level = EASY;
     int level_total_time = 60;
     int level_timed = 120;
-	std::map<char, int> piece_values;
+    int ply_depth = 6;
 	std::map<eColor,std::string> last_ply;
 
 

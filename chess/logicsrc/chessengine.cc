@@ -35,21 +35,6 @@ using namespace std;
 ChessEngine::ChessEngine()
 {
     is_arranging = false;
- // 9 << 8 // 5 << 8  // 3 << 8  // 3 << 8  // 1 << 8
-	piece_values = {
-		{ 'Q', 2304 },
-		{ 'R', 1280 },
-		{ 'B', 768 },
-		{ 'N', 768 },
-		{ 'P', 256 },
-		{ 'K', 0 },
-		{ 'q', -2304 },
-		{ 'r', -1280 },
-		{ 'b', -768 },
-		{ 'n', -768 },
-		{ 'p', -256 },
-		{ 'k', 0 },
-	};
 
 	last_ply = std::map<eColor,std::string> { {eColor::white, ""}, {eColor::black, ""} };
 }
@@ -60,15 +45,15 @@ void ChessEngine::new_game( int game_type )
     game = ChessGame();
 
 
-    info.turn = "white";
-    info.black = "";
-    info.time = "";
-    info.level = "";
-    info.value = "";
-    info.nodes = "";
-    info.n_sec = "";
-    info.depth = "";
-    info.bestline = "";
+//    info.turn = "white";
+//    info.black = "";
+//    info.time = "";
+//    info.level = "";
+//    info.value = "";
+//    info.nodes = "";
+//    info.n_sec = "";
+//    info.depth = "";
+//    info.bestline = "";
 
     multi_player = false;
 
@@ -216,7 +201,6 @@ bool ChessEngine::set_level_easy()
 		return false;
 
 	level = EASY;
-	info.level = "Easy";
 
 	return true;
 }
@@ -228,7 +212,7 @@ bool ChessEngine::set_level_timed( int timeout )
 
 	level = TIMED;
 	level_timed = timeout;
-	info.level = to_string( timeout ) + " sec/move";
+//	info.level = to_string( level_timed ) + " sec/move";
 
 	return true;
 }
@@ -240,7 +224,7 @@ bool ChessEngine::set_level_total_time( int timeout )
 
 	level = TOTALTIME;
 	level_total_time = timeout;
-    info.level = to_string( timeout ) + " min/game";
+//    info.level = to_string( level_total_time ) + " min/game";
 
 	return true;
 }
@@ -251,20 +235,20 @@ bool ChessEngine::set_level_infinite()
 		return false;
 
 	level = INFINITE;
-    info.level = "Infinite";
+//    info.level = "Infinite";
 
 	return true;
 }
 
 bool ChessEngine::set_level_ply_search()
 {
-	static unsigned int MaxLevel = 6;
+//	static unsigned int MaxLevel = 6;
 
     if( multi_player )
 		return false;
 
 	level = PLYSEARCH;
-    info.level = "Ply-Depth = " + to_string( MaxLevel );
+//    info.level = "Ply-Depth = " + to_string( MaxLevel );
 
 	return true;
 }
@@ -275,7 +259,7 @@ bool ChessEngine::set_level_mate_search()
 		return false;
 
 	level = MATESEARCH;
-	info.level = "MateSearch";
+//	info.level = "MateSearch";
 
 	return true;
 }
@@ -286,7 +270,7 @@ bool ChessEngine::set_level_matching()
 		return false;
 
 	level = MATCHING;
-	info.level = "Match users time";
+//	info.level = "Match users time";
 
 	return true;
 }
@@ -295,8 +279,8 @@ bool ChessEngine::toggle_multiplayer()
 {
     multi_player = !multi_player;
 
-    if( multi_player )
-        info.level = "Two Player";
+//    if( multi_player )
+//        info.level = "Two Player";
 
     return multi_player;
 }
@@ -321,7 +305,23 @@ std::array<char, 64> ChessEngine::get_piece_positions( )
 
 std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
 {
-	string level_string = (multi_player) ? "Two Player" : (vector<string>{ "Easy", "Timed", "Total Time", "Infinite", "Ply Search", "Mate Search", "Matching" })[level];
+	string level_string;
+
+	if( multi_player )
+		level_string = "Two Player";
+	else
+		switch( level ) {
+		case eLevels::EASY      : level_string = "Easy"; break;
+		case eLevels::TIMED     : level_string = "Timed, " + to_string( level_timed ) + " sec/move"; break;
+		case eLevels::TOTALTIME : level_string = "Total Time, " + to_string( level_total_time ) + " min/game"; break;
+		case eLevels::INFINITE  : level_string = "Infinite"; break;
+		case eLevels::PLYSEARCH : level_string = "Ply-Depth = " + to_string( ply_depth ); break;
+		case eLevels::MATESEARCH: level_string = "Mate Search"; break;
+		case eLevels::MATCHING  : level_string = "Match users time"; break;
+		default: level_string = "";
+		}
+
+
 
 	std::array<std::pair<std::string,std::string>,10> std_info =
 	{
@@ -339,6 +339,31 @@ std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
 
 	return std_info;
 }
+
+std::map<char, int> ChessEngine::get_piece_values() const
+{
+	std::map<char, int> values = {
+		{ 'Q', Piece::get_value( Piece::queen) },
+		{ 'R', Piece::get_value( Piece::rook) },
+		{ 'B', Piece::get_value( Piece::bishop) },
+		{ 'N', Piece::get_value( Piece::knight) },
+		{ 'P', Piece::get_value( Piece::pawn) },
+	};
+
+	return values;
+}
+
+bool ChessEngine::set_piece_values( std::map<char, int> new_values )
+{
+	Piece::set_value( Piece::queen, new_values.at('Q') );
+	Piece::set_value( Piece::rook, new_values.at('R') );
+	Piece::set_value( Piece::bishop, new_values.at('B') );
+	Piece::set_value( Piece::knight, new_values.at('N') );
+	Piece::set_value( Piece::pawn, new_values.at('P') );
+
+	return true;
+}
+
 
 
 int ChessEngine::evaluate_ply( const Ply& ply, int depth, eColor color ) const

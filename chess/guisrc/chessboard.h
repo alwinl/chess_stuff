@@ -36,7 +36,7 @@ class ChessBoard : public Gtk::DrawingArea
 {
 private:
 	static const int SQUARE_SIZE = 36;
-	static const int INFO_WIDTH = 226; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
+	static const int INFO_WIDTH = 240; /* 226 pixels is 6 * 36 pixels + 10 pixels for spacing/border */
 	static const int MAX_HEIGHT = 1024;
 
 public:

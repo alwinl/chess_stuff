@@ -26,6 +26,20 @@ using namespace std;
 
 extern int* square_tables[];
 
+//std::array<unsigned int,7> Piece::material_value = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
+std::array<unsigned int,7> Piece::material_value = { 0, 256, 768, 768, 1280, 2304, 0 };		// Borland
+
+
+void Piece::set_value( eType type, unsigned int new_value )
+{
+	if( type != eType::none )
+		material_value[type] = new_value;
+}
+
+unsigned int Piece::get_value( eType type )
+	{ return material_value[type]; }
+
+
 Piece::Piece( eType type, eColor color  )
 {
 	this->piece = 0;

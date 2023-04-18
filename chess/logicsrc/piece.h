@@ -21,6 +21,7 @@
 #define PIECE_H
 
 #include <cstdint>
+#include <array>
 
 enum class eColor { white, black};
 
@@ -29,13 +30,16 @@ class Piece
 public:
 	enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-	static constexpr unsigned int material_value[] = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
+	static std::array<unsigned int,7> material_value;
 
-	Piece( eType type = none, eColor color = eColor::white  );
+	static void set_value( eType type, unsigned int new_value );
+	static unsigned int get_value( eType type );
+
+	Piece( eType type = eType::none, eColor color = eColor::white  );
 	Piece( char code );
 
 	bool is_color( eColor test_color ) const { return color == ((test_color == eColor::white) ? 0 : 1); }
-	bool is_sliding() const {	return (type == bishop) || (type == rook) || (type == queen); }
+	bool is_sliding() const {	return (type == eType::bishop) || (type == eType::rook) || (type == eType::queen); }
 	bool is_of_type( eType test_type ) const { return type == test_type; }
 	eType get_type() const { return eType( type ); }
 	eColor get_color() const { return color ? eColor::white : eColor::black; }
