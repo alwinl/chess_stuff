@@ -224,7 +224,7 @@ std::string ChessGame::save_game()
 	if( result_it == tag_pairs.end() )
 		throw( domain_error( "Cannot find game result") );
 
-	result += (*result_it).second;
+	result += (*result_it).second + "\n";
 
 	return result;
 }
