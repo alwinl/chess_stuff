@@ -50,10 +50,19 @@ Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_
 
 Ply::Ply( EnPassant input )
 {
-	Ply new_ply( input.current_square, input.target_square, Piece::pawn );
+	this->ply = 0;
 
-	new_ply.capture  = true;
-	new_ply.en_passant = true;
+	this->from  = input.current_square;
+	this->to  = input.target_square;
+	this->type = Piece::pawn;
+
+	this->promo_type = Piece::none;
+	this->capture  = true;
+	this->castling  = false;
+	this->en_passant = true;
+	this->king_capture = false;
+	//		uint16_t check : 1;
+	//		uint16_t checkmate : 1;
 }
 
 uint16_t Ply::get_ep_square( ) const

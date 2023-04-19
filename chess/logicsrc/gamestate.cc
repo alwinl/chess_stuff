@@ -290,7 +290,10 @@ GameState GameState::make( Ply a_ply ) const
 
 		new_board.position[to] = position[from];
 		new_board.position[from] = Piece( Piece::none );
-		new_board.position[en_passant_target] = Piece( Piece::none );
+		if( current_player == eColor::white )
+			new_board.position[to - 8] = Piece( Piece::none );
+		else
+			new_board.position[to + 8] = Piece( Piece::none );
 
 	} else if( ! a_ply.check_promo_match( Piece::none ) ) {
 
