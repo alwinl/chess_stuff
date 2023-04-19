@@ -61,8 +61,8 @@ Piece::Piece( char code )
 
 	piece = 0;
 
-	color = (code_to_type.at( code )).second;
-	type = (code_to_type.at( code )).first;
+	color = get<1>(code_to_type.at( code ));
+	type = get<0>(code_to_type.at( code ));
 }
 
 Piece Piece::make_promo_piece( Piece::eType new_type ) const
