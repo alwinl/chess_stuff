@@ -58,6 +58,7 @@ public:
 	uint16_t get_castling_rook_square_from( ) const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
 	uint16_t get_castling_rook_square_to( ) const { return to + (  ( to > from ) ? -1 : +1 ); };
 	uint16_t get_ep_square( ) const;
+	uint16_t get_ep_captured_square( ) const;
 	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
 
 	bool check_square_match( Ply rhs ) const { return (from == rhs.from) && (to == rhs.to); }

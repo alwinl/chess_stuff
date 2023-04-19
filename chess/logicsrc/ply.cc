@@ -73,6 +73,11 @@ uint16_t Ply::get_ep_square( ) const
 	return to + ( (from < to) ? -8 : 8 );
 }
 
+uint16_t Ply::get_ep_captured_square( ) const
+{
+	return to + ( (from < to) ? -8 : 8 );
+}
+
 bool Ply::check_match( uint16_t from_square, uint16_t to_square, char promo_piece )
 {
 	return (from_square == from) && (to_square == to) && ( (promo_piece == ' ') || (promo_type == Piece(promo_piece).get_type() ) );
