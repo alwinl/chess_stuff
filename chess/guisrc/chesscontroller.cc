@@ -249,7 +249,8 @@ void ChessController::on_action_save()
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error saving game. Try Save As.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+		on_action_save_as();
+		//Gtk::MessageDialog( *view, "Error saving game. Try Save As.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
 		return;
 	}
 
