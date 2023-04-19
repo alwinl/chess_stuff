@@ -199,7 +199,7 @@ std::string GameState::fullmoves() const
 
 GameState GameState::set_piece( uint16_t square, char code )
 {
-	position[ square ] = ( code == ' ' ) ? Piece::none : Piece( code );
+	position[ square ] = ( code == ' ' ) ? Piece(Piece::none) : Piece( code );
 	return *this;
 }
 
