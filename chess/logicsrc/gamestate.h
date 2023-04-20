@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Alwin Leerling <alwin@jambo>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
 #ifndef GAMESTATE_H
@@ -42,14 +40,14 @@ public:
 	GameState set_ep_square( uint16_t square );
 	GameState set_halvemoves( uint16_t number );
 	GameState set_fullmoves( uint16_t number );
-	bool is_valid();
+	bool is_valid() const;
 
 	std::vector<Ply> generate_legal_plys() const;
 
 	int evaluate() const;
 	GameState make( Ply a_ply ) const;
 
-	std::array<Piece,64> get_pieces() { return position; }
+	std::array<Piece,64> get_pieces() const { return position; }
 	eColor get_current_colour() const { return current_player; };
 
 private:

@@ -212,7 +212,6 @@ bool ChessEngine::set_level_timed( int timeout )
 
 	level = TIMED;
 	level_timed = timeout;
-//	info.level = to_string( level_timed ) + " sec/move";
 
 	return true;
 }
@@ -224,7 +223,6 @@ bool ChessEngine::set_level_total_time( int timeout )
 
 	level = TOTALTIME;
 	level_total_time = timeout;
-//    info.level = to_string( level_total_time ) + " min/game";
 
 	return true;
 }
@@ -235,20 +233,16 @@ bool ChessEngine::set_level_infinite()
 		return false;
 
 	level = INFINITE;
-//    info.level = "Infinite";
 
 	return true;
 }
 
 bool ChessEngine::set_level_ply_search()
 {
-//	static unsigned int MaxLevel = 6;
-
     if( multi_player )
 		return false;
 
 	level = PLYSEARCH;
-//    info.level = "Ply-Depth = " + to_string( MaxLevel );
 
 	return true;
 }
@@ -259,7 +253,6 @@ bool ChessEngine::set_level_mate_search()
 		return false;
 
 	level = MATESEARCH;
-//	info.level = "MateSearch";
 
 	return true;
 }
@@ -270,7 +263,6 @@ bool ChessEngine::set_level_matching()
 		return false;
 
 	level = MATCHING;
-//	info.level = "Match users time";
 
 	return true;
 }
@@ -278,9 +270,6 @@ bool ChessEngine::set_level_matching()
 bool ChessEngine::toggle_multiplayer()
 {
     multi_player = !multi_player;
-
-//    if( multi_player )
-//        info.level = "Two Player";
 
     return multi_player;
 }

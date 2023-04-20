@@ -245,7 +245,7 @@ GameState GameState::set_fullmoves( uint16_t number )
 	return *this;
 }
 
-bool GameState::is_valid()
+bool GameState::is_valid() const
 {
 	struct Counts {
 		int KingCount;

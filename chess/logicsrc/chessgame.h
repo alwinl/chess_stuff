@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alwin Leerling <alwin@jambo>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
-#ifndef APPMODEL_H
-#define APPMODEL_H
+#ifndef CHESSGAME_H
+#define CHESSGAME_H
 
 #include <vector>
 #include <string>
 #include <utility>
-#include <map>
-
-//#include "pods.h"
 
 #include "gamestate.h"
 #include "ply.h"
@@ -63,4 +58,4 @@ private:
 	void set_alternate_starting_position();
 };
 
-#endif // APPMODEL_H
+#endif // CHESSGAME_H

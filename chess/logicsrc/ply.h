@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
 #ifndef PLY_H
@@ -42,9 +40,8 @@ public:
 	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type = Piece::none, Piece::eType target_square_type = Piece::none, Piece::eType promo_type = Piece::none );
 	Ply( EnPassant input );
 
-	void set_check() { check = 1; }
+	void set_check() { check = 1; }		// not happy with this function
 
-	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
 	std::string print_LAN() const;
 	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
 
