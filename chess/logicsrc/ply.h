@@ -28,8 +28,12 @@
 
 struct EnPassant
 {
-	EnPassant( uint16_t current, uint16_t target ) : current_square( current ), target_square( target ) {}
+	uint16_t current_square;
+	uint16_t target_square;
+};
 
+struct CastleMove
+{
 	uint16_t current_square;
 	uint16_t target_square;
 };
@@ -39,6 +43,7 @@ class Ply
 public:
 	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type = Piece::none, Piece::eType target_square_type = Piece::none, Piece::eType promo_type = Piece::none );
 	Ply( EnPassant input );
+	Ply( CastleMove input );
 
 	void set_check() { check = 1; }		// not happy with this function
 

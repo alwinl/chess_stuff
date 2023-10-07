@@ -61,9 +61,27 @@ Ply::Ply( EnPassant input )
 	this->castling  = false;
 	this->en_passant = true;
 	this->king_capture = false;
-	//		uint16_t check : 1;
-	//		uint16_t checkmate : 1;
+	this->check = false;
+	this->checkmate = false;
 }
+
+Ply::Ply( CastleMove input )
+{
+	this->ply = 0;
+
+	this->from  = input.current_square;
+	this->to  = input.target_square;
+	this->type = Piece::king;
+
+	this->promo_type = Piece::none;
+	this->capture  = false;
+	this->castling  = true;
+	this->en_passant = false;
+	this->king_capture = false;
+	this->check = false;
+	this->checkmate = false;
+}
+
 
 uint16_t Ply::get_ep_square( ) const
 {

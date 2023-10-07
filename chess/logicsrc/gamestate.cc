@@ -445,7 +445,7 @@ std::vector<Ply> GameState::generate_plys() const
 				}
 
 				if( en_passant_target == target_square )
-					plys.push_back( Ply( EnPassant( square, target_square ) ) );
+					plys.push_back( Ply( EnPassant{ square, target_square } ) );
 			}
 
 		}
@@ -456,14 +456,14 @@ std::vector<Ply> GameState::generate_plys() const
 				&& position[square + 1].is_of_type(Piece::none)
 				&& position[square + 2].is_of_type(Piece::none)
 			)
-				plys.push_back( Ply( square, uint16_t(square + 2), Piece::king ) );
+				plys.push_back( Ply( CastleMove{ square, uint16_t(square + 2) } ) );
 
 			if( can_castle_queenside.at( current_player )
 				&& position[square - 1].is_of_type(Piece::none)
 				&& position[square - 2].is_of_type(Piece::none)
 				&& position[square - 3].is_of_type(Piece::none)
 			)
-				plys.push_back( Ply( square, uint16_t(square - 2), Piece::king ) );
+				plys.push_back( Ply( CastleMove{ square, uint16_t(square - 2) } ) );
 		}
 	}
 
