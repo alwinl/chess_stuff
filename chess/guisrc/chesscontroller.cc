@@ -706,6 +706,10 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 	// regular move, check if this this move can be made
 	if( engine->human_move( drag_start_square, drag_end_square ) )
 		do_animate( drag_start_square, drag_end_square, drag_piece_code );
+	else {
+		save_board = engine->get_piece_positions();
+		board->set_piece_positions( engine->get_piece_positions() );
+	}
 
 	return true;
 }
