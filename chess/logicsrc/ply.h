@@ -26,24 +26,16 @@
 
 #include "piece.h"
 
-struct EnPassant
-{
-	uint16_t current_square;
-	uint16_t target_square;
-};
-
-struct CastleMove
-{
-	uint16_t current_square;
-	uint16_t target_square;
-};
-
 class Ply
 {
 public:
-	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type = Piece::none, Piece::eType target_square_type = Piece::none, Piece::eType promo_type = Piece::none );
-	Ply( EnPassant input );
-	Ply( CastleMove input );
+	static Ply make_quiet_ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type );
+	static Ply make_capture_ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type );
+	static Ply make_ep_ply( uint16_t current_square, uint16_t target_square );
+	static Ply make_castle_ply( uint16_t current_square, uint16_t target_square );
+	static Ply make_promotion_ply( uint16_t current_square, uint16_t target_square, Piece::eType promo_type, Piece::eType target_square_type = Piece::none );
+
+	static Ply make_test_ply( uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type );
 
 	void set_check() { check = 1; }		// not happy with this function
 
@@ -86,6 +78,8 @@ private:
 			uint16_t flags : 7;
 		};
 	};
+
+	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type, bool is_ep );
 };
 
 #endif // PLY_H

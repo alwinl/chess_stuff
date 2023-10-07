@@ -97,7 +97,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 			target_square ^= 56;
 		}
 
-		Ply test_ply( CastleMove( {start_square, target_square} ) );
+		Ply test_ply( Ply::make_castle_ply( start_square, target_square ) );
 
 		auto ply_it( find_if( legal_plys.begin(), legal_plys.end(), [test_ply]( Ply the_ply) { return the_ply.check_square_match( test_ply ); } ) );
 
@@ -131,7 +131,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 
 	Piece::eType target_square_type = (current.get_pieces())[target_square].get_type();
 
-	Ply test_ply( (uint16_t)-1, target_square, current_type, target_square_type, promo_type );
+	Ply test_ply( Ply::make_test_ply( target_square, current_type, target_square_type, promo_type ) );
 
 	vector<Ply> filtered_plys;
 

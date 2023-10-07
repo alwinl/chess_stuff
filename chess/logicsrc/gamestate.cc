@@ -388,10 +388,10 @@ std::vector<Ply> GameState::generate_plys() const
 						break;
 
 					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
-						plys.push_back( Ply(square, target_square, piece.get_type()) );
+						plys.push_back( Ply::make_quiet_ply( square, target_square, piece.get_type() ) );
 					else {
 						if( ! position[target_square].is_color( current_player ) )
-							plys.push_back( Ply(square, target_square, piece.get_type(), position[target_square].get_type()) );
+							plys.push_back( Ply::make_capture_ply(square, target_square, piece.get_type(), position[target_square].get_type()) );
 						break;
 					}
 
@@ -412,11 +412,11 @@ std::vector<Ply> GameState::generate_plys() const
 
 				if( target_square / 8 == (piece.is_color( eColor::white ) ? 7: 0) ) {		// promotion ranks
 					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType(type + 1) )
-						plys.push_back( Ply( square, target_square, Piece::pawn, Piece::none, type ) );	// generate a promotion plys
+						plys.push_back( Ply::make_promotion_ply( square, target_square, type ) );	// generate a promotion plys
 					break;
 				}
 
-				plys.push_back( Ply( square, target_square, Piece::pawn ) );
+				plys.push_back( Ply::make_quiet_ply( square, target_square, Piece::pawn ) );
 
 				if( square / 8 != (piece.is_color( eColor::white ) ? 1 : 6) )		// start ranks
 					break;
@@ -439,13 +439,13 @@ std::vector<Ply> GameState::generate_plys() const
 
 					if( target_square / 8 == (piece.is_color( eColor::white ) ? 7: 0) ) {		// promotion ranks
 						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
-							plys.push_back( Ply( square, target_square, Piece::pawn, position[target_square].get_type(), type ) );	// generate promotion plys
+							plys.push_back( Ply::make_promotion_ply( square, target_square, type, position[target_square].get_type() ) );	// generate promotion plys
 					} else
-						plys.push_back( Ply( square, target_square, Piece::pawn, position[target_square].get_type() ) );
+						plys.push_back( Ply::make_capture_ply( square, target_square, Piece::pawn, position[target_square].get_type() ) );
 				}
 
 				if( en_passant_target == target_square )
-					plys.push_back( Ply( EnPassant{ square, target_square } ) );
+					plys.push_back( Ply::make_ep_ply( square, target_square ) );
 			}
 
 		}
@@ -456,14 +456,14 @@ std::vector<Ply> GameState::generate_plys() const
 				&& position[square + 1].is_of_type(Piece::none)
 				&& position[square + 2].is_of_type(Piece::none)
 			)
-				plys.push_back( Ply( CastleMove{ square, uint16_t(square + 2) } ) );
+				plys.push_back( Ply::make_castle_ply( square, uint16_t(square + 2) ) );
 
 			if( can_castle_queenside.at( current_player )
 				&& position[square - 1].is_of_type(Piece::none)
 				&& position[square - 2].is_of_type(Piece::none)
 				&& position[square - 3].is_of_type(Piece::none)
 			)
-				plys.push_back( Ply( CastleMove{ square, uint16_t(square - 2) } ) );
+				plys.push_back( Ply::make_castle_ply( square, uint16_t(square - 2) ) );
 		}
 	}
 

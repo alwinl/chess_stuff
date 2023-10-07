@@ -28,7 +28,26 @@
 using namespace std;
 
 
-Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type )
+Ply Ply::make_quiet_ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type )
+	{ return Ply( current_square, target_square, current_type, Piece::none, Piece::none, false ); }
+
+Ply Ply::make_capture_ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type  )
+	{ return Ply( current_square, target_square, current_type, target_square_type, Piece::none, false ); }
+
+Ply Ply::make_ep_ply( uint16_t current_square, uint16_t target_square )
+	{ return Ply( current_square, target_square, Piece::pawn, Piece::pawn, Piece::none, true ); }
+
+Ply Ply::make_castle_ply( uint16_t current_square, uint16_t target_square )
+	{ return Ply( current_square, target_square, Piece::king, Piece::none, Piece::none, false ); }
+
+Ply Ply::make_promotion_ply( uint16_t current_square, uint16_t target_square, Piece::eType promo_type, Piece::eType target_square_type )
+	{ return Ply( current_square, target_square, Piece::pawn, target_square_type, promo_type, false ); }
+
+Ply Ply::make_test_ply( uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type )
+	{ return Ply( (uint16_t)-1, target_square, current_type, target_square_type, promo_type, false ); }
+
+
+Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type, bool is_ep )
 {
 	this->ply = 0;
 
@@ -39,7 +58,7 @@ Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_
 	this->promo_type = promo_type;
 	this->capture  = ( target_square_type != Piece::none );
 	this->castling  = ((current_type == Piece::king) && (std::abs( current_square - target_square) == 2 ));
-	//		uint16_t en_passant : 1;
+	this->en_passant = is_ep;
 	this->king_capture = ( target_square_type == Piece::king );
 	//		uint16_t check : 1;
 	//		uint16_t checkmate : 1;
@@ -47,41 +66,6 @@ Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_
 	if( flags != 0 )
 		throw( domain_error( "Ply with nonzero reserved member") );
 }
-
-Ply::Ply( EnPassant input )
-{
-	this->ply = 0;
-
-	this->from  = input.current_square;
-	this->to  = input.target_square;
-	this->type = Piece::pawn;
-
-	this->promo_type = Piece::none;
-	this->capture  = true;
-	this->castling  = false;
-	this->en_passant = true;
-	this->king_capture = false;
-	this->check = false;
-	this->checkmate = false;
-}
-
-Ply::Ply( CastleMove input )
-{
-	this->ply = 0;
-
-	this->from  = input.current_square;
-	this->to  = input.target_square;
-	this->type = Piece::king;
-
-	this->promo_type = Piece::none;
-	this->capture  = false;
-	this->castling  = true;
-	this->en_passant = false;
-	this->king_capture = false;
-	this->check = false;
-	this->checkmate = false;
-}
-
 
 uint16_t Ply::get_ep_square( ) const
 {
