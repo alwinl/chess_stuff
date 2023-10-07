@@ -85,23 +85,29 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 	if( SAN == "1-0" || SAN == "0-1" || SAN == "1/2-1/2" )
 		return;
 
-	if( SAN == "O-O" ) {
-		if( color == eColor::white )
-			plys.push_back( Ply( 4, 6, Piece::king ) );
-		else
-			plys.push_back( Ply( 4^56, 6^56, Piece::king ) );
-		return;
-	}
-
-	if( SAN == "O-O-O" ) {
-		if( color == eColor::white )
-			plys.push_back( Ply( 4, 2, Piece::king ) );
-		else
-			plys.push_back( Ply( 4^56, 0x2^56, Piece::king ) );
-		return;
-	}
-
 	vector<Ply> legal_plys = current.generate_legal_plys();
+
+	if( (SAN == "O-O") || (SAN == "O-O-O") ) {
+
+		uint16_t start_square = 4;
+		uint16_t target_square = (SAN == "O-O") ? 6 : 2;
+
+		if( color == eColor::black ) {
+			start_square ^= 56;
+			target_square ^= 56;
+		}
+
+		Ply test_ply( CastleMove( {start_square, target_square} ) );
+
+		auto ply_it( find_if( legal_plys.begin(), legal_plys.end(), [test_ply]( Ply the_ply) { return the_ply.check_square_match( test_ply ); } ) );
+
+		if( ply_it == legal_plys.end() )
+			throw( domain_error( "Cannot find matching ply") );
+
+		plys.push_back( *ply_it );
+
+		return;
+	}
 
 	Piece::eType current_type = ( SAN[0] >= 'a' && SAN[0] <= 'h' ) ? Piece::pawn : Piece(SAN[0]).get_type();
 
