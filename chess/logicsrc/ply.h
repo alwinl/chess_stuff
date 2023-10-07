@@ -50,7 +50,7 @@ public:
 	bool is_ep_capture() const { return en_passant == 1; };
 	bool is_castling() const { return castling == 1; }
 	bool is_kingcapture() const { return king_capture == 1; }
-	bool halfclock_needs_reset() { return (type == Piece::pawn) || capture; }
+	bool halfclock_needs_reset() const { return (type == Piece::pawn) || capture; }
 
 	uint16_t get_castling_rook_square_from( ) const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
 	uint16_t get_castling_rook_square_to( ) const { return to + (  ( to > from ) ? -1 : +1 ); };
@@ -61,7 +61,7 @@ public:
 	bool check_square_match( Ply rhs ) const { return (from == rhs.from) && (to == rhs.to); }
 	bool check_promo_match( Ply rhs ) const { return (promo_type == rhs.promo_type); }
 	bool check_promo_match( Piece::eType rhs_promo_type ) const { return (promo_type == rhs_promo_type); }
-	bool check_match( uint16_t from_square, uint16_t to_square, char promo_piece );
+	bool check_match( uint16_t from_square, uint16_t to_square, char promo_piece ) const;
 	bool check_san_match( Ply rhs ) const;
 
 private:

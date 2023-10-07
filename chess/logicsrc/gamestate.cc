@@ -281,61 +281,61 @@ bool GameState::is_valid() const
 
 GameState GameState::make( Ply a_ply ) const
 {
-	GameState new_board( *this );
+	GameState new_state( *this );
 
 	uint16_t to = a_ply.square_to();
 	uint16_t from = a_ply.square_from();
 
 	if( a_ply.is_ep_capture() ) {
 
-		new_board.position[to] = position[from];
-		new_board.position[from] = Piece( Piece::none );
+		new_state.position[to] = position[from];
+		new_state.position[from] = Piece( Piece::none );
 
-		new_board.position[a_ply.get_ep_captured_square()] = Piece( Piece::none );
+		new_state.position[a_ply.get_ep_captured_square()] = Piece( Piece::none );
 
 	} else if( ! a_ply.check_promo_match( Piece::none ) ) {
 
-		new_board.position[to] = position[from].make_promo_piece( a_ply.get_promo_type() );
-		new_board.position[from] = Piece( Piece::none );
+		new_state.position[to] = position[from].make_promo_piece( a_ply.get_promo_type() );
+		new_state.position[from] = Piece( Piece::none );
 
 	} else if( a_ply.is_castling() ) {
 
 		// move the king
-		new_board.position[to] = position[from];
-		new_board.position[from] = Piece( Piece::none );
+		new_state.position[to] = position[from];
+		new_state.position[from] = Piece( Piece::none );
 
 		// reuse for rook
 		to = a_ply.get_castling_rook_square_to();
 		from = a_ply.get_castling_rook_square_from();
 
 		// move the rook
-		new_board.position[to] = position[from];
-		new_board.position[from] = Piece( Piece::none );
+		new_state.position[to] = position[from];
+		new_state.position[from] = Piece( Piece::none );
 
-		new_board.can_castle_kingside[current_player] = false;
-		new_board.can_castle_queenside[current_player] = false;
+		new_state.can_castle_kingside[current_player] = false;
+		new_state.can_castle_queenside[current_player] = false;
 
 	} else {
-		new_board.position[to] = position[from];
-		new_board.position[from] = Piece( Piece::none );
+		new_state.position[to] = position[from];
+		new_state.position[from] = Piece( Piece::none );
 
 		if( current_player == eColor::white ) {
-			if( (from == 0) || (from == 4) ) new_board.can_castle_queenside[eColor::white] = false;
-			if( (from == 7) || (from == 4) ) new_board.can_castle_kingside[eColor::white]  = false;
+			if( (from == 0) || (from == 4) ) new_state.can_castle_queenside[eColor::white] = false;
+			if( (from == 7) || (from == 4) ) new_state.can_castle_kingside[eColor::white]  = false;
 		} else {
-			if( (from == (0^56)) || (from == (4^56)) ) new_board.can_castle_queenside[eColor::black] = false;
-			if( (from == (7^56)) || (from == (4^56)) ) new_board.can_castle_kingside[eColor::black]  = false;
+			if( (from == (0^56)) || (from == (4^56)) ) new_state.can_castle_queenside[eColor::black] = false;
+			if( (from == (7^56)) || (from == (4^56)) ) new_state.can_castle_kingside[eColor::black]  = false;
 		}
 	}
 
-	new_board.current_player = (current_player == eColor::white) ? eColor::black : eColor::white;
-	new_board.en_passant_target = a_ply.get_ep_square();
+	new_state.current_player = (current_player == eColor::white) ? eColor::black : eColor::white;
+	new_state.en_passant_target = a_ply.get_ep_square();
 
-    new_board.halfmove_clock = a_ply.halfclock_needs_reset() ? 0 : halfmove_clock + 1;
+    new_state.halfmove_clock = a_ply.halfclock_needs_reset() ? 0 : halfmove_clock + 1;
     if( current_player == eColor::black )
-		new_board.fullmove_number = fullmove_number + 1;             // The number of the move, start at one increment after black move
+		new_state.fullmove_number = fullmove_number + 1;             // The number of the move, start at one increment after black move
 
-	return new_board;
+	return new_state;
 }
 
 std::vector<Ply> GameState::generate_plys() const
