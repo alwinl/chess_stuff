@@ -97,7 +97,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 		if( color == eColor::white )
 			plys.push_back( Ply( 4, 2, Piece::king ) );
 		else
-			plys.push_back( Ply( 4^56, 2^56, Piece::king ) );
+			plys.push_back( Ply( 4^56, 0x2^56, Piece::king ) );
 		return;
 	}
 
