@@ -88,7 +88,6 @@ void ChessController::bind_actions()
     add_action("redo",    sigc::mem_fun( *this, &ChessController::on_action_redo ) );
     add_action("arrange", sigc::mem_fun( *this, &ChessController::on_action_arrange ) );
 
-    add_action("twoplayer",   sigc::mem_fun( *this, &ChessController::on_action_twoplayer ) );
     add_action("demomode",    sigc::mem_fun( *this, &ChessController::on_action_demomode ) );
     add_action("piecevalues", sigc::mem_fun( *this, &ChessController::on_action_piecevalues ) );
 
@@ -145,8 +144,6 @@ void ChessController::get_widgets()
 	ui_model->get_widget( "chkLevelPlySearch", chkLevelPlySearch );
 	ui_model->get_widget( "chkLevelMateSearch", chkLevelMateSearch );
 	ui_model->get_widget( "chkLevelMatching", chkLevelMatching );
-
-    ui_model->get_widget( "mnuTwoplayer", mnuTwoplayer );
 
 	ui_model->get_widget( "chkOptionSound", chkSound );
 
@@ -502,14 +499,11 @@ void ChessController::on_action_level_matching()
 	status_bar->push( std::string("Level: Matching") );
 }
 
-void ChessController::on_action_twoplayer()
-{
-	mnuTwoplayer->set_label( engine->toggle_multiplayer() ? "_Single Player" : "_Two Player" );
-}
-
 void ChessController::on_action_demomode()
 {
 	status_bar->push( std::string("Demo") );
+
+	is_demo = true;
 
     mnuGame->hide();
     mnuStop->show();
@@ -660,8 +654,14 @@ void ChessController::on_action_arrange_make_fen()
 
 void ChessController::on_action_thinking_stop()
 {
-	engine->stop_thinking();
-	slot_move_calculator.emit();
+	if( ! is_demo ) {
+		engine->stop_thinking();
+		slot_move_calculator.emit();
+	} else {
+		mnuStop->hide();
+		mnuGame->show();
+		is_demo = false;
+	}
 }
 
 /**-----------------------------------------------------------------------------

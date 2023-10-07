@@ -72,7 +72,6 @@ private:
 	void on_action_undo();
 	void on_action_redo();
 	void on_action_arrange();
-	void on_action_twoplayer();
 	void on_action_demomode();
     void on_action_piecevalues();
 	void on_action_colours();
@@ -128,7 +127,6 @@ private:
 	Gtk::RadioMenuItem *chkLevelPlySearch;
 	Gtk::RadioMenuItem *chkLevelMateSearch;
 	Gtk::RadioMenuItem *chkLevelMatching;
-    Gtk::MenuItem * mnuTwoplayer;
     Gtk::MenuBar * mnuGame;
     Gtk::MenuBar * mnuArrange;
     Gtk::MenuBar * mnuStop;
@@ -145,6 +143,7 @@ private:
 	char drag_piece_code;
     std::array<std::string,4> colours;
     std::array<char, 64> save_board;
+    bool is_demo = false;
 
     ChessEngine* engine;
 };
