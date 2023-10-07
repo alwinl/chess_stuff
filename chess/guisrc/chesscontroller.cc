@@ -168,6 +168,8 @@ void ChessController::on_activate()
 
 	status_bar->push( std::string("") );
 
+	save_board = engine->get_piece_positions();
+
 	board->set_colours( colours );
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
@@ -196,8 +198,12 @@ void ChessController::on_action_new()
 
 	engine->new_game( dlgNewGame->get_choice() );
 
+	save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
+
+	if( ! engine->current_player_is_human() )
+		move_calculator_start();
 
 	status_bar->push( std::string("New game") );
 }
@@ -234,6 +240,7 @@ void ChessController::on_action_open()
         return;
     }
 
+    save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
@@ -302,6 +309,7 @@ void ChessController::on_action_quit()
 
 void ChessController::on_action_play()
 {
+    save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 }
@@ -316,6 +324,8 @@ void ChessController::on_action_undo()
 {
 	engine->undo();
 
+	// should animate the undo
+    save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
@@ -326,6 +336,8 @@ void ChessController::on_action_redo()
 {
 	engine->redo();
 
+	// should animate the redo
+    save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
@@ -628,6 +640,7 @@ void ChessController::on_action_arrange_done()
 		return;
 	}
 
+    save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 
 	mnuArrange->hide();
@@ -660,7 +673,6 @@ bool ChessController::on_drag_start( GdkEventButton* button_event )
 	drag_piece_code = button_event->state;
 
 	if( drag_start_square != (uint16_t)-1 ) {
-		std::array<char, 64> save_board = engine->get_piece_positions();
 		save_board[drag_start_square] = ' ';
 		board->set_piece_positions( save_board );
 	}
@@ -673,6 +685,7 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 	drag_end_square = button_event->x;
 
 	if( drag_start_square == drag_end_square ) {
+		save_board = engine->get_piece_positions();
 		board->set_piece_positions( engine->get_piece_positions() );
 		return true;
 	}
@@ -690,22 +703,10 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
 		return true;
 	}
 
-	std::array<char, 64> save_board = engine->get_piece_positions();
-
 	// regular move, check if this this move can be made
-	if( engine->human_move( drag_start_square, drag_end_square ) ) {
-
-		// take the piece of the start square:
-		save_board[ drag_start_square ] = ' ';
-		board->set_piece_positions( save_board );
-		board->set_info( engine->get_info() );
-
+	if( engine->human_move( drag_start_square, drag_end_square ) )
 		do_animate( drag_start_square, drag_end_square, drag_piece_code );
 
-		return true;
-	}
-
-	board->set_piece_positions( save_board );
 	return true;
 }
 
@@ -714,6 +715,10 @@ bool ChessController::on_drag_done( GdkEventButton* button_event )
  */
 void ChessController::do_animate( uint16_t start_square, uint16_t end_square, char piece )
 {
+	save_board[ start_square ] = ' ';
+	board->set_piece_positions( save_board );
+	board->set_info( engine->get_info() );
+
     board->animate_start( start_square, end_square, piece );
 
     timeout_counter = 10;
@@ -729,11 +734,13 @@ bool ChessController::on_animate_timeout()
 
 	board->animate_finish();
 
+	save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
 	// if it is the computers turn here, let the AI calculate a move
-	move_calculator_start();
+	if( ! engine->current_player_is_human() )
+		move_calculator_start();
 
 	return false;
 }
@@ -774,6 +781,8 @@ void ChessController::move_calculator_start()
 
 void ChessController::move_calculator_thread()
 {
+	save_board = engine->get_piece_positions();
+
 	engine->AI_move();
 
 	slot_move_calculator.emit();
@@ -786,13 +795,18 @@ void ChessController::on_move_calculator_notify()
 
 	thread_move_calculator = nullptr;
 
-	board->set_piece_positions( engine->get_piece_positions() );
-	board->set_info( engine->get_info() );
-
 	mnuStop->hide();
 	mnuGame->show();
 
 	board->computer_is_thinking( false );
+
+	uint16_t start_square;
+	uint16_t end_square;
+	char piece;
+
+	engine->get_last_ply_info( start_square, end_square, piece );
+
+	do_animate( start_square, end_square, piece );
 }
 
 

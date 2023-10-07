@@ -82,10 +82,7 @@ public:
     int get_choice() const { return choice; }
 
 private:
-	void on_human_vs_AI();
-	void on_AI_vs_human();
-	void on_AI_vs_AI();
-	void on_human_vs_human();
+	void make_choice( int the_choice ) { choice = the_choice; response( Gtk::ResponseType::RESPONSE_OK ); };
 
 	int choice;
 };

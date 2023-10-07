@@ -34,12 +34,16 @@ class ChessEngine
 public:
     ChessEngine();
 
+    bool current_player_is_human() { return is_human.at( current_state.get_current_colour() ); };
+
     bool human_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
     void AI_move();
 
 	bool toggle_multiplayer();
 	void do_demo();
 	bool get_next_ply( Ply& ply ) { return false; };
+	void get_last_ply_info( uint16_t& start_square, uint16_t& end_square, char& piece );
+
 
 	void arranging_start();
 	void arrange_add_piece( uint16_t square, char piece ) { if( is_arranging ) arrange_state.set_piece( square, piece ); }
@@ -110,6 +114,7 @@ private:
     int level_timed = 120;
     int ply_depth = 6;
 	std::map<eColor,std::string> last_ply;
+	std::map<eColor,bool> is_human = { {eColor::white, true}, {eColor::black, false} };
 
 
 	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;

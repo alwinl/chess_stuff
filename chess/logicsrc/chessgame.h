@@ -45,6 +45,8 @@ public:
 	void add_tag_pair( std::string tag, std::string value );
 	void add_ply( Ply ply );
 
+	Ply last_ply() { return plys.back(); }
+
 	void visit_tag_pairs( ChessGameVisitorBase* processor );
 	void visit_plys( ChessGameVisitorBase* processor );
 

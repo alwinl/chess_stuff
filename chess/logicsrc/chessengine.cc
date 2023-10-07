@@ -57,6 +57,14 @@ void ChessEngine::new_game( int game_type )
 
     multi_player = false;
 
+	switch( game_type ) {
+	case 1: is_human = { {eColor::white, true}, {eColor::black, false} }; break;
+	case 2: is_human = { {eColor::white, false}, {eColor::black, true} }; break;
+	case 3: is_human = { {eColor::white, false}, {eColor::black, false} }; break;
+	case 4: is_human = { {eColor::white, true}, {eColor::black, true} }; break;
+	}
+
+
     current_state = GameState();
 }
 
@@ -327,6 +335,16 @@ std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
 	};
 
 	return std_info;
+}
+
+void ChessEngine::get_last_ply_info( uint16_t& start_square, uint16_t& end_square, char& piece )
+{
+	// Get the ply from the previous state
+	eColor prev_state_color = (current_state.get_current_colour() == eColor::white) ? eColor::black : eColor::white;
+
+	start_square = game.last_ply().square_from();
+	end_square =  game.last_ply().square_to();
+	piece = Piece(game.last_ply().get_type(), prev_state_color).get_code();
 }
 
 std::map<char, int> ChessEngine::get_piece_values() const

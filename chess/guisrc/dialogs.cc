@@ -143,40 +143,14 @@ DialogNewGame::DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::B
 	Gtk::Button * button;
 
 	ui_model->get_widget( "btnHumanvsAI", button );
-	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_human_vs_AI) );
+	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 1 ) );
 
 	ui_model->get_widget( "btnAIvsHuman", button );
-	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_AI_vs_human) );
+	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 2 ) );
 
 	ui_model->get_widget( "btnAIvsAI", button );
-	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_AI_vs_AI) );
+	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 3 ) );
 
 	ui_model->get_widget( "btnHumanvsHuman", button );
-	button->signal_clicked().connect( sigc::mem_fun(*this, &DialogNewGame::on_human_vs_human) );
+	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 4 ) );
 }
-
-
-void DialogNewGame::on_human_vs_AI()
-{
-	choice = 1;
-	response( Gtk::ResponseType::RESPONSE_OK );
-}
-
-void DialogNewGame::on_AI_vs_human()
-{
-	choice = 2;
-	response( Gtk::ResponseType::RESPONSE_OK );
-}
-
-void DialogNewGame::on_AI_vs_AI()
-{
-	choice = 3;
-	response( Gtk::ResponseType::RESPONSE_OK );
-}
-
-void DialogNewGame::on_human_vs_human()
-{
-	choice = 4;
-	response( Gtk::ResponseType::RESPONSE_OK );
-}
-

@@ -144,6 +144,7 @@ private:
 	uint16_t drag_end_square;
 	char drag_piece_code;
     std::array<std::string,4> colours;
+    std::array<char, 64> save_board;
 
     ChessEngine* engine;
 };
