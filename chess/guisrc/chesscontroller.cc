@@ -42,16 +42,13 @@ ChessController::ChessController( ) : Gtk::Application( "net.dnatechnologies.che
 	Glib::set_application_name("GTKmm Chess");
 
 	engine = new ChessEngine;
-
 	thread_move_calculator = nullptr;
-
 	colours = {
 		"rgb(78,154,6)",
 		"rgb(0,0,0)",
 		"rgb(238,238,236)",
 		"rgb(85,87,83)",
 	};
-
 }
 
 ChessController::~ChessController( )
@@ -306,6 +303,7 @@ void ChessController::on_action_quit()
 
 void ChessController::on_action_play()
 {
+	/// @TODO Need to actually play
     save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
@@ -314,14 +312,13 @@ void ChessController::on_action_play()
 void ChessController::on_action_hint()
 {
 	do_highlight( engine->hint() );
-
 }
 
 void ChessController::on_action_undo()
 {
 	engine->undo();
 
-	// should animate the undo
+	/// @TODO should animate the undo
     save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
@@ -333,7 +330,7 @@ void ChessController::on_action_redo()
 {
 	engine->redo();
 
-	// should animate the redo
+	/// @TODO should animate the redo
     save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
@@ -501,6 +498,7 @@ void ChessController::on_action_level_matching()
 
 void ChessController::on_action_demomode()
 {
+	/// @TODO Implement demo. Load a game and start animating it
 	status_bar->push( std::string("Demo") );
 
 	is_demo = true;
@@ -816,6 +814,7 @@ void ChessController::on_move_calculator_notify()
 
 bool ChessController::do_demo_move()
 {
+	/// \TODO Implement demo move
 //    Ply ply;
 //
 //    if( ! engine->get_next_ply( ply ) ) {
@@ -855,4 +854,3 @@ bool ChessController::on_demo_move_timeout()
 
     return false;
 }
-
