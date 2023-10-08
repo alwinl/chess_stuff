@@ -211,7 +211,7 @@ std::string ChessGame::save_game()
 
 	result += "\n";
 
-	GameState temp_state( initial );
+	GameState current( initial );
 	string collected;
 
 	for( unsigned int i = 0; i < plys.size(); ++i ) {
@@ -229,7 +229,7 @@ std::string ChessGame::save_game()
 			collected += moveno_rep;
 		}
 
-		string ply_rep( plys[i].print_SAN( temp_state ) + " " );
+		string ply_rep( plys[i].print_SAN( current ) + " " );
 
 		if( collected.length() + ply_rep.length() > 80 ) {
 			collected.pop_back();		// remove last space
@@ -239,7 +239,7 @@ std::string ChessGame::save_game()
 
 		collected += ply_rep;
 
-		temp_state = temp_state.make( plys[i] );
+		current = current.make( plys[i] );
 	}
 
 	result += collected;
