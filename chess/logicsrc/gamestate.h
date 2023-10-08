@@ -50,6 +50,8 @@ public:
 	std::array<Piece,64> get_pieces() const { return position; }
 	eColor get_current_colour() const { return current_player; };
 
+	int evaluate_ply( const Ply& ply, int depth ) const;
+
 private:
 	std::array<Piece,64> position;
     eColor current_player;
@@ -75,6 +77,8 @@ private:
 	std::string fullmoves() const;
 
 	std::vector<Ply> generate_plys() const;
+
+	int alpha_beta( int alpha, int beta, int depth_left ) const;
 };
 
 #endif // GAMESTATE_H

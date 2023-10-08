@@ -90,21 +90,27 @@ bool ChessEngine::human_move( uint16_t start_square, uint16_t end_square, char p
 	return true;
 }
 
-void ChessEngine::AI_move()
+void ChessEngine::AI_move( uint16_t& AI_start_square, uint16_t& AI_end_square, char& AI_piece )
 {
     std::vector<Ply> plys = current_state.generate_legal_plys();
 
 	if( current_state.get_current_colour() == eColor::white )
-		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.make(lhs).evaluate() > current_state.make(rhs).evaluate(); } );
+		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.evaluate_ply( lhs, 3) > current_state.evaluate_ply( rhs, 3); } );
 	else
-		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.make(lhs).evaluate() < current_state.make(rhs).evaluate(); } );
+		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.evaluate_ply( lhs, 3) < current_state.evaluate_ply( rhs, 3); } );
 
-	last_ply[ current_state.get_current_colour() ] = (*(plys.begin())).print_LAN();
-	game.add_ply( *(plys.begin()) );
+	Ply chosen_ply( *(plys.begin()) );
 
-	current_state = current_state.make( *(plys.begin()) );
+	last_ply[ current_state.get_current_colour() ] = chosen_ply.print_LAN();
+	game.add_ply( chosen_ply );
+
+
+	AI_start_square = chosen_ply.square_from();
+	AI_end_square =  chosen_ply.square_to();
+	AI_piece = Piece( chosen_ply.get_type(), current_state.get_current_colour()).get_code();
+
+	current_state = current_state.make( chosen_ply );
 }
-
 
 /**-----------------------------------------------------------------------------
  *	State editing (create a custom state)
@@ -335,16 +341,6 @@ std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
 	};
 
 	return std_info;
-}
-
-void ChessEngine::get_last_ply_info( uint16_t& start_square, uint16_t& end_square, char& piece )
-{
-	// Get the ply from the previous state
-	eColor prev_state_color = (current_state.get_current_colour() == eColor::white) ? eColor::black : eColor::white;
-
-	start_square = game.last_ply().square_from();
-	end_square =  game.last_ply().square_to();
-	piece = Piece(game.last_ply().get_type(), prev_state_color).get_code();
 }
 
 std::map<char, int> ChessEngine::get_piece_values() const

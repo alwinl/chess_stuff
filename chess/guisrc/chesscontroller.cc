@@ -785,7 +785,7 @@ void ChessController::move_calculator_thread()
 {
 	save_board = engine->get_piece_positions();
 
-	engine->AI_move();
+	engine->AI_move( AI_start_square, AI_end_square, AI_piece );
 
 	slot_move_calculator.emit();
 }
@@ -802,13 +802,7 @@ void ChessController::on_move_calculator_notify()
 
 	board->computer_is_thinking( false );
 
-	uint16_t start_square;
-	uint16_t end_square;
-	char piece;
-
-	engine->get_last_ply_info( start_square, end_square, piece );
-
-	do_animate( start_square, end_square, piece );
+	do_animate( AI_start_square, AI_end_square, AI_piece );
 }
 
 

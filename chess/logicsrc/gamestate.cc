@@ -506,3 +506,50 @@ int GameState::evaluate() const
 
 	return score.at(eColor::white) - score.at(eColor::black);
 }
+
+/*
+ *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
+ *	Beta is the best value that the minimizer currently can guarantee at that level or below.
+ */
+int GameState::alpha_beta( int alpha, int beta, int depth_left ) const
+{
+	if( ! depth_left )
+		return evaluate();
+
+	std::vector<Ply> plys = generate_legal_plys( );	// grabs all legal moves
+
+	int best_score;
+
+	if( current_player == eColor::white ) {		// maximiser
+		best_score = std::numeric_limits<int>::min();
+		for( Ply& ply : plys ) {
+			best_score = std::max( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1 ) );
+			alpha = std::max( alpha, best_score );
+
+			if( beta <= alpha )
+				break;
+		}
+
+	} else {					// minimiser
+		best_score = std::numeric_limits<int>::max();
+		for( Ply& ply : plys ) {
+			best_score = std::min( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1 ) );
+			beta = std::min( beta, best_score );
+
+			if( beta <= alpha )
+				break;
+		}
+	}
+
+	return best_score;
+}
+
+int GameState::evaluate_ply( const Ply& ply, int depth ) const
+{
+	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth );
+}
+
+
+
+
+

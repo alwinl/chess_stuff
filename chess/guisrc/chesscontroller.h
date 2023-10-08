@@ -141,6 +141,10 @@ private:
 	uint16_t drag_start_square;
 	uint16_t drag_end_square;
 	char drag_piece_code;
+	uint16_t AI_start_square;
+	uint16_t AI_end_square;
+	char AI_piece;
+
     std::array<std::string,4> colours;
     std::array<char, 64> save_board;
     bool is_demo = false;
