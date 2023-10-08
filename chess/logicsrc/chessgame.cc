@@ -213,17 +213,39 @@ std::string ChessGame::save_game()
 
 	GameState temp_state( initial );
 
+	string collected;
+
 	for( unsigned int i = 0; i < plys.size(); ++i ) {
 
-		if( !(i%2) )				// even is white move
-			result += to_string( i/2 + 1 ) + ". ";
+		if( !(i%2) ) {				// even is white move
+
+			string moveno_rep( to_string( i/2 + 1 ) + ". " );
+
+			if( collected.length() + moveno_rep.length() > 80 ) {
+				collected.pop_back();		// remove last space
+				result += collected + "\n";
+				collected.clear();
+			}
+
+			collected += moveno_rep;
+		}
 
 		vector<Ply> valid_plys = temp_state.generate_legal_plys();
 
-		result += plys[i].print_SAN( valid_plys ) + " ";
+		string ply_rep( plys[i].print_SAN( valid_plys ) + " " );
+
+		if( collected.length() + ply_rep.length() > 80 ) {
+			collected.pop_back();		// remove last space
+			result += collected + "\n";
+			collected.clear();
+		}
+
+		collected += ply_rep;
 
 		temp_state = temp_state.make( plys[i] );
 	}
+
+	result += collected;
 
 	auto result_it = find_if( tag_pairs.begin(), tag_pairs.end(), [](pair<string,string>& tp) { return tp.first == "Result"; } );
 
