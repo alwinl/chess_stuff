@@ -21,6 +21,7 @@
 
 #include "ply.h"
 #include "piece.h"
+#include "gamestate.h"
 
 #include <stdexcept>
 #include <algorithm>
@@ -119,7 +120,7 @@ std::string Ply::print_LAN( ) const
 	return result;
 }
 
-std::string Ply::print_SAN( std::vector<Ply>& legal_plys ) const
+std::string Ply::print_SAN( const GameState& current_state ) const
 {
 	if( castling )
 		return (( to > from ) ? "O-O" : "O-O-O");
@@ -132,6 +133,8 @@ std::string Ply::print_SAN( std::vector<Ply>& legal_plys ) const
 
 	if( type != Piece::pawn ) {
 		result += string("E NBRQK")[type];
+
+		vector<Ply> legal_plys = current_state.generate_legal_plys();
 
 		// insert either file or rank (or both) if there is more than one piece that can make this move
 		if( count_if( legal_plys.begin(), legal_plys.end(), piece_with_same_target ) != 1 ) {

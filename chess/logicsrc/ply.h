@@ -26,6 +26,8 @@
 
 #include "piece.h"
 
+class GameState;
+
 class Ply
 {
 public:
@@ -40,7 +42,7 @@ public:
 	void set_check() { check = 1; }		// not happy with this function
 
 	std::string print_LAN() const;
-	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
+	std::string print_SAN( const GameState& current_state ) const;
 
 	uint16_t square_from() const { return from; };
 	uint16_t square_to() const { return to; };

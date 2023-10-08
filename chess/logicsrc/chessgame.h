@@ -43,7 +43,7 @@ public:
 	std::string save_game();
 
 	void add_tag_pair( std::string tag, std::string value );
-	void add_ply( Ply ply );
+	void add_ply( Ply ply ) { plys.push_back( ply ); }
 
 	Ply last_ply() { return plys.back(); }
 
