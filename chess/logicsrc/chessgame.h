@@ -39,8 +39,8 @@ class ChessGame
 public:
 	ChessGame( );
 
-	void load_game( std::string pgn_string );
-	std::string save_game();
+	void load( std::string pgn_string );
+	std::string save();
 
 	void add_tag_pair( std::string tag, std::string value );
 	void add_ply( Ply ply ) { plys.push_back( ply ); }

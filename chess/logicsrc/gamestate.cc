@@ -549,6 +549,15 @@ int GameState::evaluate_ply( const Ply& ply, int depth ) const
 	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth );
 }
 
+std::array<char,64> GameState::get_position_codes() const
+{
+	std::array<char, 64> positions_codes;
+
+	for( int i=0; i<64; ++i )
+		positions_codes[i] = position[i].get_code();
+
+	return positions_codes;
+}
 
 
 

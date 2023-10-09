@@ -225,7 +225,7 @@ void ChessController::on_action_open()
 
     dlg.hide();
 
-    if( ! engine->open_file( dlg.get_filename() ) ) {
+    if( ! engine->load_game( dlg.get_filename() ) ) {
 
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
@@ -245,7 +245,7 @@ void ChessController::on_action_save()
 {
 	status_bar->push( std::string("") );
 
-	if( ! engine->save_file( "" ) ) {
+	if( ! engine->save_game( "" ) ) {
 
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();
@@ -279,7 +279,7 @@ void ChessController::on_action_save_as()
 
     dlg.hide();
 
-    if( ! engine->save_file( dlg.get_filename() ) ) {
+    if( ! engine->save_game( dlg.get_filename() ) ) {
 
 		if( chkSound->get_active() )
 			Gdk::Display::get_default()->beep();

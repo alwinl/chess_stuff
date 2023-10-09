@@ -47,8 +47,9 @@ public:
 	int evaluate() const;
 	GameState make( Ply a_ply ) const;
 
-	std::array<Piece,64> get_pieces() const { return position; }
 	eColor get_current_colour() const { return current_player; };
+	Piece::eType get_type_on_square( uint16_t square ) const { return position[square].get_type(); }
+	std::array<char,64> get_position_codes() const;
 
 	int evaluate_ply( const Ply& ply, int depth ) const;
 

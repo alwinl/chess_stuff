@@ -44,7 +44,7 @@ ChessGame::ChessGame( )
     };
 }
 
-void ChessGame::load_game( std::string pgn_string )
+void ChessGame::load( std::string pgn_string )
 {
 	regex re_tvpair( "\\[(.*) \"(.*)\"\\]\\n" );
 	smatch tvpair_match;
@@ -129,9 +129,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 		}
 	}
 
-	Piece::eType target_square_type = (current.get_pieces())[target_square].get_type();
-
-	Ply test_ply( Ply::make_test_ply( target_square, current_type, target_square_type, promo_type ) );
+	Ply test_ply( Ply::make_test_ply( target_square, current_type, current.get_type_on_square(target_square), promo_type ) );
 
 	vector<Ply> filtered_plys;
 
@@ -200,7 +198,7 @@ void ChessGame::set_alternate_starting_position()
 	initial = GameState( (*FEN_it).second );
 }
 
-std::string ChessGame::save_game()
+std::string ChessGame::save()
 {
 	string result = accumulate( tag_pairs.begin(), tag_pairs.end(), string(""),
 		[]( string collector, pair<string,string>& tag_pair )

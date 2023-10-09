@@ -32,17 +32,9 @@
 class ChessEngine
 {
 public:
-    ChessEngine();
-
-    bool current_player_is_human() { return is_human.at( current_state.get_current_colour() ); };
-
-    bool human_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
-    void AI_move( uint16_t& AI_start_square, uint16_t& AI_end_square, char& AI_piece);
-
-	bool toggle_multiplayer();
-	void do_demo();
-	bool get_next_ply( Ply& ply ) { return false; };
-
+    void new_game( int game_type );
+    bool load_game( std::string filename );
+    bool save_game( std::string filename );
 
 	void arranging_start();
 	void arrange_add_piece( uint16_t square, char piece ) { if( is_arranging ) arrange_state.set_piece( square, piece ); }
@@ -56,13 +48,19 @@ public:
 	bool arranging_end( bool canceled );
 	bool in_edit_mode() { return is_arranging; }
 
+    bool current_player_is_human() { return is_human.at( current_state.get_current_colour() ); };
+
+    bool human_move( uint16_t start_square, uint16_t end_square, char promo_piece = ' ' );
+    bool AI_move( uint16_t& AI_start_square, uint16_t& AI_end_square, char& AI_piece);
+
+	void do_demo();
+	bool get_next_ply( Ply& ply ) { return false; };
+
+
     uint16_t hint();
 
-    void new_game( int game_type );
-    bool can_quit();
 
-    bool open_file( std::string filename );
-    bool save_file( std::string filename );
+    bool can_quit();
 
 	void undo();
 	void redo();
@@ -107,17 +105,19 @@ private:
 
     std::string game_filename = "";
     bool is_arranging = false;
-    bool multi_player = false;
     eLevels level = EASY;
     int level_total_time = 60;
     int level_timed = 120;
     int ply_depth = 6;
-	std::map<eColor,std::string> last_ply;
+	std::map<eColor,std::string> last_ply = { {eColor::white, ""}, {eColor::black, ""} };
 	std::map<eColor,bool> is_human = { {eColor::white, true}, {eColor::black, false} };
 
+	bool is_multi_player() const { return is_human.at(eColor::white) && is_human.at(eColor::black); }
 
 	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;
 	int alpha_beta( GameState state, int alpha, int beta, int depth_left, eColor color ) const;
+
+	void game_over();
 };
 
 #endif // CHESSENGINE_H

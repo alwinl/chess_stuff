@@ -31,32 +31,8 @@
 
 using namespace std;
 
-
-ChessEngine::ChessEngine()
-{
-    is_arranging = false;
-
-	last_ply = std::map<eColor,std::string> { {eColor::white, ""}, {eColor::black, ""} };
-}
-
-
 void ChessEngine::new_game( int game_type )
 {
-    game = ChessGame();
-
-
-//    info.turn = "white";
-//    info.black = "";
-//    info.time = "";
-//    info.level = "";
-//    info.value = "";
-//    info.nodes = "";
-//    info.n_sec = "";
-//    info.depth = "";
-//    info.bestline = "";
-
-    multi_player = false;
-
 	switch( game_type ) {
 	case 1: is_human = { {eColor::white, true}, {eColor::black, false} }; break;
 	case 2: is_human = { {eColor::white, false}, {eColor::black, true} }; break;
@@ -64,57 +40,46 @@ void ChessEngine::new_game( int game_type )
 	case 4: is_human = { {eColor::white, true}, {eColor::black, true} }; break;
 	}
 
-
+    game = ChessGame();
     current_state = GameState();
 }
 
-
-
-
-bool ChessEngine::human_move( uint16_t start_square, uint16_t end_square, char promo_piece )
+bool ChessEngine::load_game( std::string filename )
 {
-	vector<Ply> plys = current_state.generate_legal_plys();	// grabs all legal moves
-
-	if( plys.empty() ) // checkmate
+	if( filename.empty() )
 		return false;
 
-	auto ply_it = std::find_if( plys.begin(), plys.end(), [start_square, end_square, promo_piece]( Ply ply ) { return ply.check_match( start_square, end_square, promo_piece ); } );
-	if( ply_it == plys.end() )
+	std::ifstream is( filename.c_str() );
+
+	if( !is.good() )
 		return false;
 
-	last_ply[ current_state.get_current_colour() ] = (*ply_it).print_LAN();
-	game.add_ply( *ply_it );
+	game.load( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
 
-	current_state = current_state.make( *ply_it );
-
+	is.close();
 	return true;
 }
 
-void ChessEngine::AI_move( uint16_t& AI_start_square, uint16_t& AI_end_square, char& AI_piece )
+bool ChessEngine::save_game( std::string filename )
 {
-    std::vector<Ply> plys = current_state.generate_legal_plys();
+	if( filename.empty() && game_filename.empty() )
+		return false;
 
-	if( current_state.get_current_colour() == eColor::white )
-		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.evaluate_ply( lhs, 3) > current_state.evaluate_ply( rhs, 3); } );
-	else
-		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.evaluate_ply( lhs, 3) < current_state.evaluate_ply( rhs, 3); } );
+	string tmp_name( filename.empty() ? game_filename : filename );
 
-	Ply chosen_ply( *(plys.begin()) );
+	std::ofstream os( tmp_name.c_str() );
+	if( !os.good() )
+		return false;
 
-	last_ply[ current_state.get_current_colour() ] = chosen_ply.print_LAN();
-	game.add_ply( chosen_ply );
+	os << game.save();
 
+    os.close();
 
-	AI_start_square = chosen_ply.square_from();
-	AI_end_square =  chosen_ply.square_to();
-	AI_piece = Piece( chosen_ply.get_type(), current_state.get_current_colour()).get_code();
+	game_filename = tmp_name;
 
-	current_state = current_state.make( chosen_ply );
+    return true;
 }
 
-/**-----------------------------------------------------------------------------
- *	State editing (create a custom state)
- */
 void ChessEngine::arranging_start()
 {
     arrange_state = GameState( "8/8/8/8/8/8/8/8 w KQkq - 0 1" );
@@ -137,43 +102,55 @@ bool ChessEngine::arranging_end( bool canceled )
     return true;
 }
 
-/**-----------------------------------------------------------------------------
- *	Persistance
- */
-bool ChessEngine::open_file( std::string filename )
+
+
+bool ChessEngine::human_move( uint16_t start_square, uint16_t end_square, char promo_piece )
 {
-	if( filename.empty() )
+	vector<Ply> plys = current_state.generate_legal_plys();	// grabs all legal moves
+
+	if( plys.empty() ) {// checkmate
+		game_over();
+		return false;
+	}
+
+	auto ply_it = std::find_if( plys.begin(), plys.end(), [start_square, end_square, promo_piece]( Ply ply ) { return ply.check_match( start_square, end_square, promo_piece ); } );
+	if( ply_it == plys.end() )
 		return false;
 
-	std::ifstream is( filename.c_str() );
+	last_ply[ current_state.get_current_colour() ] = (*ply_it).print_LAN();
+	game.add_ply( *ply_it );
 
-	if( !is.good() )
-		return false;
+	current_state = current_state.make( *ply_it );
 
-	game.load_game( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
-
-	is.close();
 	return true;
 }
 
-bool ChessEngine::save_file( std::string filename )
+bool ChessEngine::AI_move( uint16_t& AI_start_square, uint16_t& AI_end_square, char& AI_piece )
 {
-	if( filename.empty() && game_filename.empty() )
+    std::vector<Ply> plys = current_state.generate_legal_plys();
+
+	if( plys.empty() ) {// checkmate
+		game_over();
 		return false;
+	}
 
-	string tmp_name( filename.empty() ? game_filename : filename );
+	if( current_state.get_current_colour() == eColor::white )
+		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.evaluate_ply( lhs, 3) > current_state.evaluate_ply( rhs, 3); } );
+	else
+		sort( plys.begin(), plys.end(), [this](const Ply& lhs, const Ply& rhs) { return current_state.evaluate_ply( lhs, 3) < current_state.evaluate_ply( rhs, 3); } );
 
-	std::ofstream os( tmp_name.c_str() );
-	if( !os.good() )
-		return false;
+	Ply chosen_ply( *(plys.begin()) );
 
-	os << game.save_game();
+	last_ply[ current_state.get_current_colour() ] = chosen_ply.print_LAN();
+	game.add_ply( chosen_ply );
 
-    os.close();
+	AI_start_square = chosen_ply.square_from();
+	AI_end_square =  chosen_ply.square_to();
+	AI_piece = Piece( chosen_ply.get_type(), current_state.get_current_colour()).get_code();
 
-	game_filename = tmp_name;
+	current_state = current_state.make( chosen_ply );
 
-    return true;
+	return true;
 }
 
 bool ChessEngine::can_quit( )
@@ -181,6 +158,10 @@ bool ChessEngine::can_quit( )
     return false;
 }
 
+void ChessEngine::game_over()
+{
+
+}
 
 void ChessEngine::undo()
 {
@@ -211,7 +192,7 @@ void ChessEngine::stop_thinking()
 
 bool ChessEngine::set_level_easy()
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = EASY;
@@ -221,7 +202,7 @@ bool ChessEngine::set_level_easy()
 
 bool ChessEngine::set_level_timed( int timeout )
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = TIMED;
@@ -232,7 +213,7 @@ bool ChessEngine::set_level_timed( int timeout )
 
 bool ChessEngine::set_level_total_time( int timeout )
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = TOTALTIME;
@@ -243,7 +224,7 @@ bool ChessEngine::set_level_total_time( int timeout )
 
 bool ChessEngine::set_level_infinite()
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = INFINITE;
@@ -253,7 +234,7 @@ bool ChessEngine::set_level_infinite()
 
 bool ChessEngine::set_level_ply_search()
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = PLYSEARCH;
@@ -263,7 +244,7 @@ bool ChessEngine::set_level_ply_search()
 
 bool ChessEngine::set_level_mate_search()
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = MATESEARCH;
@@ -273,19 +254,12 @@ bool ChessEngine::set_level_mate_search()
 
 bool ChessEngine::set_level_matching()
 {
-    if( multi_player )
+    if( is_multi_player() )
 		return false;
 
 	level = MATCHING;
 
 	return true;
-}
-
-bool ChessEngine::toggle_multiplayer()
-{
-    multi_player = !multi_player;
-
-    return multi_player;
 }
 
 void ChessEngine::do_demo()
@@ -297,20 +271,14 @@ void ChessEngine::do_demo()
 
 std::array<char, 64> ChessEngine::get_piece_positions( )
 {
-	std::array<char, 64> new_positions;
-	std::array<Piece,64> piece_positions = is_arranging ? arrange_state.get_pieces() : current_state.get_pieces();
-
-	for( int i=0; i<64; ++i )
-		new_positions[i] = piece_positions[i].get_code();
-
-	return new_positions;
+	return is_arranging ? arrange_state.get_position_codes() : current_state.get_position_codes();
 }
 
 std::array<std::pair<std::string,std::string>,10> ChessEngine::get_info()
 {
 	string level_string;
 
-	if( multi_player )
+	if( is_multi_player() )
 		level_string = "Two Player";
 	else
 		switch( level ) {

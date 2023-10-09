@@ -43,11 +43,11 @@ void TestGameObject::save_load()
 	if( !is.good() )
 		CPPUNIT_FAIL( "cannot open 'game.pgn'");
 
-	game.load_game( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
+	game.load( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
 
     is.close();
 
-    string actual = game.save_game();
+    string actual = game.save();
     string expected =
 		"[Event \"F/S Return Match\"]\n"
 		"[Site \"Belgrade, Serbia JUG\"]\n"
