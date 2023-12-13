@@ -60,7 +60,7 @@ PAWNBITTYPE         pawnbitt[2][MAXPLY + 2];
 /*
  *  count the number of set bits in b
  */
-static int count( unsigned char b )
+static int count_bits( unsigned char b )
 {
     char cnt = 0;
 
@@ -73,32 +73,53 @@ static int count( unsigned char b )
 }
 
 
-/*
- * Initialize pawnbitt
- *
- * pawnbitt[color][0].one contains a byte where each bit represent the presence of a pawn somewhere on that file
- * thus if pawnbitt[color][0].one returns as 0x0100110 we know that we have pawn(s) on the b, c, and g files
- * (remember PawnTable is reversed). There could be more than one pawn on the file.
- * The corresponding bit in dob will tell us if there is more than one pawn on the file.
- */
-static void InitPawnbitt( ENUMCOLOR color, unsigned char PawnTable[] )
+/*  Calculate PawnTable (indicates which squares contain pawns )
+	for all intents and purposes the pawntable is a 2 times 8x8 matrix of bits. Each bit represents the presence of a pawn
+	Each value in the table represents one rank. Within a rank each bit represents a file.
+	However for some reason the files are reversed.
+	So for instance 0x10011000 does not mean pawns on the a, d and e files but pawns on the d, e and h files.
+*/
+void BuildPawnTable( unsigned char PawnTable[], ENUMCOLOR color, BOARDTYPE board[] )
 {
-    pawnbitt[color][0].one = 0;
-    pawnbitt[color][0].dob = 0;
+	memset( PawnTable, 0, 8 );
 
-    for( int sq_rank = 1; sq_rank < 7; sq_rank++ ) {
-        pawnbitt[color][0].dob |= ( pawnbitt[color][0].one & PawnTable[sq_rank] );
-        pawnbitt[color][0].one |= PawnTable[sq_rank];
+    for( unsigned int square = 0x00; square < 0x78; ++square ) {
+        if( VALIDSQUARE( square ) && ( board[ square ].piece == pawn ) && (Board[ square ].color == color) ) {
+
+            int rank = ( color == black ) ? (square ^ 0x70) >> 4 : (square >> 4);
+			unsigned char file = square & 0x07;
+
+            PawnTable[rank] |= (1 << file);
+        }
     }
 }
 
-static void CalcPawnBit( ENUMCOLOR color, short depth )
+/*
+ * Initialize pawnbitt (at depth 0)
+ *
+ * pawnbitt[depth].one contains a byte where each bit represent the presence of a pawn somewhere on that file
+ * thus if pawnbitt[depth].one returns as 0x0100110 we know that we have pawn(s) on the b, c, and g files
+ * (remember PawnTable is reversed). There could be more than one pawn on the file.
+ * The corresponding bit in dob will tell us if there is more than one pawn on the file.
+ */
+static void InitPawnbitt( PAWNBITTYPE PawnBitt[], unsigned char PawnTable[] )
 {
-    pawnbitt[color][ depth ] = pawnbitt[color][ depth - 1 ];  /*  calculate pawnbitt  */
+    PawnBitt[0].one = 0;
+    PawnBitt[0].dob = 0;
+
+    for( int sq_rank = 1; sq_rank < 7; sq_rank++ ) {
+        PawnBitt[0].dob |= ( PawnBitt[0].one & PawnTable[sq_rank] );
+        PawnBitt[0].one |= PawnTable[sq_rank];
+    }
+}
+
+static void CalcPawnBit( PAWNBITTYPE PawnBitt[], short depth )
+{
+    PawnBitt[ depth ] = PawnBitt[ depth - 1 ];  /*  calculate pawnbitt  */
 }
 
 /**
- * \brief Calculate value of the pawn structure in pawnbitt[depth][color]
+ * \brief Calculate value of the pawn structure in pawnbitt[color][depth]
  *
  * The maximum value is 0. In this case there are no isolated pawns
  * and no double pawns.
@@ -106,16 +127,27 @@ static void CalcPawnBit( ENUMCOLOR color, short depth )
  * on the amount of isolated pawns we have and give it a double whammy
  * for pawns that are isolated and double.
  */
-static int pawnstrval( ENUMCOLOR color, short depth )
+static int pawnstrval( PAWNBITTYPE * entry )
 {
-	PAWNBITTYPE * entry = &pawnbitt[color][depth];
-    unsigned char iso;  /*  contains FILEs with isolated pawns  */
+    unsigned char isolated_pawns = entry->one & ~( (entry->one << 1) | (entry->one >> 1) );
 
-    iso = entry->one & ~( ( entry->one << 1 ) | ( entry->one >> 1 ) );
+    return ( -( count_bits( entry->dob ) * DOUBLEPAWN
+               + count_bits( isolated_pawns ) * ISOLATEDPAWN
+               + count_bits( isolated_pawns & entry->dob ) * ISOLATEDPAWN * 2 ) );
+}
 
-    return ( -( count( entry->dob ) * DOUBLEPAWN
-               + count( iso ) * ISOLATEDPAWN
-               + count( iso & entry->dob ) * ISOLATEDPAWN * 2 ) );
+static void remove_pawn( PAWNBITTYPE * entry, unsigned char file )
+{
+    entry->one &= ~( 1 << file );	// remove from file
+    entry->one |= entry->dob;		// if there is a double pawn, this will turn the bit back on
+
+    entry->dob &= ~( 1 << file );	// remove (potential) double pawn flag
+}
+
+static void add_pawn( PAWNBITTYPE * entry, unsigned char file )
+{
+    entry->dob  |= ( entry->one &  (1 << new_file) ); // if there already is a pawn on the file, this will signal a double pawn
+    entry->one  |= (1 << new_file);
 }
 
 /*
@@ -130,7 +162,7 @@ static int decpawnstrval( ENUMCOLOR color, unsigned char file, short depth )
 
     entry->dob &= ~( 1 << file );
 
-    return( pawnstrval( color, depth ) - pawnstrval( color, depth - 1 ) );
+    return( pawnstrval( &pawnbitt[color][depth] ) - pawnstrval( &pawnbitt[color][depth - 1] ) );
 }
 
 /*
@@ -147,7 +179,7 @@ static int movepawnstrval( ENUMCOLOR color, unsigned char new_file, unsigned cha
 
     entry->dob  &= ~(1 << old_file);
 
-    return( pawnstrval( color, depth ) - pawnstrval( color, depth - 1 ) );
+    return( pawnstrval( &pawnbitt[color][depth] ) - pawnstrval( &pawnbitt[color][depth - 1] ) );
 }
 
 
@@ -234,7 +266,7 @@ void CalcPVTable( void )
              rightchaintab, chaintab, leftcovertab, rightcovertab;		/*  Bit tables for static pawn structure evaluation  */
     //int           posval;													/*  The positional value of piece  */
     //int           attval;													/*  The attack value of the square  */
-    unsigned char file;														/*  The file of the piece  */
+    //unsigned char file;														/*  The file of the piece  */
     unsigned char rank;														/*  The rank of the piece  */
     //char          dist;											/*  Distance to center, to opponents king */
     //char          kingdist;											/*  Distance to center, to opponents king */
@@ -421,6 +453,9 @@ void CalcPVTable( void )
 		}
 	}
 
+	BuildPawnTable( PawnTable[white], white, Board );
+	BuildPawnTable( PawnTable[black], black, Board );
+#if 0
     /*  Calculate PawnTable (indicates which squares contain pawns )
 		for all intents and purposes the pawntable is a 2 times 8x8 matrix of bits. Each bit represents the presence of a pawn
 		Each value in the table represents one rank. Within a rank each bit represents a file.
@@ -443,12 +478,13 @@ void CalcPVTable( void )
             PawnTable[ color ][rank] |= (1 << file);
         }
     }
+#endif // 0
 
-    InitPawnbitt( white, PawnTable[white] );
-    InitPawnbitt( black, PawnTable[black] );
+    InitPawnbitt( pawnbitt[white], PawnTable[white] );
+    InitPawnbitt( pawnbitt[black], PawnTable[black] );
 
     /*  Calculate pawnstructurevalue  */
-    RootValue = pawnstrval( Player, 0 ) - pawnstrval( Opponent, 0 );
+    RootValue = pawnstrval( &pawnbitt[Player][0] ) - pawnstrval( &pawnbitt[Opponent][0] );
 
     /*  Calculate static value for pawn structure  */
     for( ENUMCOLOR color = white; color <= black; color = ENUMCOLOR(color+1) ) {
@@ -553,30 +589,34 @@ void CalcPVTable( void )
 
 int StatEvalu( MOVESTRUCT *amove )
 {
-    //const char          castvalue[2]           = { 4, 32 };  /*  Value of castling  */
     const int ShortCastleValue = 32;
     const int LongCastleValue = 4;
 
     int value = 0;
 
-    if( amove->spe ) {
-        if( amove->movpiece == king ) {
+    bool is_ep_capture = amove->spe && (amove->movpiece == pawn);
+    bool is_castling = amove->spe && (amove->movpiece == king);
+    bool is_promotion = amove->spe && !is_ep_capture && !is_castling;
+    bool is_capture = (amove->content != no_piece);
 
-            int castsquare;
-            int cornersquare;
+	if( is_castling ) {
 
-            GenCastSquare( amove->new1, &castsquare, &cornersquare );
+		int castsquare;
+		int cornersquare;
 
-            value = PiecePosVal( rook, Player, castsquare ) - PiecePosVal( rook, Player, cornersquare );
-            value += ( amove->new1 > amove->old ) ? ShortCastleValue : LongCastleValue;
+		GenCastSquare( amove->new1, &castsquare, &cornersquare );
 
-        } else if( amove->movpiece == pawn ) {
-            value = PiecePosVal( pawn, Opponent, amove->new1 - ( ( Player == white ) ? 0x10 : -0x10 ) ); /*  E.p. capture  */
-        } else
-            value = PiecePosVal( amove->movpiece, Player, amove->old ) - PiecePosVal( pawn, Player, amove->old ) + decpawnstrval( Player, amove->old & 7, Depth + 1 );		      /*  Pawnpromotion  */
-    }
+		value += PiecePosVal( rook, Player, castsquare ) - PiecePosVal( rook, Player, cornersquare );
+		value += ( amove->new1 > amove->old ) ? ShortCastleValue : LongCastleValue;
+	}
 
-    if( amove->content != no_piece ) {										/*  normal moves  */
+	if( is_ep_capture )
+		value += PiecePosVal( pawn, Opponent, amove->new1 - ( ( Player == white ) ? 0x10 : -0x10 ) );
+
+	if( is_promotion )
+		value += PiecePosVal( amove->movpiece, Player, amove->old ) - PiecePosVal( pawn, Player, amove->old ) + decpawnstrval( Player, amove->old & 7, Depth + 1 );
+
+    if( is_capture ) {
         value += PiecePosVal( amove->content, Opponent, amove->new1 );
 
         /*  Penalty for exchanging pieces when behind in material  */
@@ -584,17 +624,19 @@ int StatEvalu( MOVESTRUCT *amove )
             value -= EXCHANGEVALUE;
     }
 
-    CalcPawnBit( white, Depth + 1 );
-    CalcPawnBit( black, Depth + 1 );
+    CalcPawnBit( pawnbitt[white], Depth + 1 );
+    CalcPawnBit( pawnbitt[black], Depth + 1 );
 
-    if( ( amove->movpiece == pawn ) && ( ( amove->content != no_piece ) || amove->spe ) )
+
+    //if( ( amove->movpiece == pawn ) && ( ( amove->content != no_piece ) || amove->spe ) )
+    if( ( is_capture && (amove->movpiece == pawn) ) || is_ep_capture )
         value += movepawnstrval( Player, (amove->new1 & 7), (amove->old & 7), Depth + 1 );
 
-    if( ( amove->content == pawn ) || (amove->spe && ( amove->movpiece == pawn ) ) )
+    if( ( amove->content == pawn ) || is_ep_capture )
         value -= decpawnstrval( Opponent, amove->new1 & 7, Depth + 1 );
 
     /*  Calculate value of move  */
-    value += PiecePosVal( amove->movpiece, Player, amove->new1 )- PiecePosVal( amove->movpiece, Player, amove->old );
+    value += PiecePosVal( amove->movpiece, Player, amove->new1 ) - PiecePosVal( amove->movpiece, Player, amove->old );
 
     return( value );
 }

@@ -170,7 +170,7 @@ int main()
 
 	for( int i = 0; i< 240; i++ ) {
 		if( !(i%16) )
-			cout << endl << "0x" << setw(2) << abs(i - 0x78) << ": ";
+			cout << endl << (( i < 120 ) ? '-' : '+') << "0x" << setw(2) << abs(i - 0x78) << ": ";
 		else
 			cout << "0x" << setw(2) << (unsigned int)(second[i] & 0xFF) << " ";
 	}
@@ -180,7 +180,7 @@ int main()
 
 	for( int i = 0; i< 240; i++ ) {
 		if( !(i%16) )
-			cout << endl << "0x" << setw(2) << abs(i - 0x78) << ": ";
+			cout << endl << (( i < 120 ) ? '-' : '+') << "0x" << setw(2) << abs(i - 0x78) << ": ";
 		else
 			cout << "0x" << setw(2) << (unsigned int)((second[i] >> 8) & 0xFF) << " ";
 	}
