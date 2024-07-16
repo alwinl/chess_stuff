@@ -23,6 +23,8 @@
 #include "ply.h"
 
 #include <vector>
+#include <algorithm>
+#include <cctype>
 
 using namespace std;
 
@@ -65,13 +67,31 @@ std::string build_random_fen()
 	return placement;
 }
 
+std::string resolve_blanks( std::string in )
+{
+	std::string out;
+
+	std::for_each( in.begin(), in.end(),
+		[in, &out]( char ch ) {
+			if( std::isdigit(ch) ) {
+				int count = ch - '0';
+				out += std::string( count, ' ' );
+			} else
+				out.push_back( ch );
+		});
+
+	return out;
+}
+
 void TestBoard::read_write_FEN()
 {
 	for( int test_cases = 0; test_cases < 10; ++test_cases ) {
 		std::string placement = build_random_fen();
 		Board board( placement );
 
-		CPPUNIT_ASSERT_EQUAL( placement, board.piece_placement() );
+		std::string expected = resolve_blanks( placement );
+
+		CPPUNIT_ASSERT_EQUAL( expected, board.piece_placement() );
 	}
 }
 

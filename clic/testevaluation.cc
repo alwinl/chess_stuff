@@ -23,6 +23,7 @@
 #include <string>
 #include <tuple>
 #include <sstream>
+#include <algorithm>
 
 #include "piece.h"
 #include "board.h"
@@ -172,12 +173,12 @@ void TestEvaluation::check_all_first_moves()
 		}
 	);
 
-	for_each( plys.begin(), plys.end(),
-		[&board](Ply& ply)
-		{
-			cout << ply.print_LAN() << ": score " << board.evaluate_ply( ply, 0, white ) << endl;
-		}
-	);
+	// for_each( plys.begin(), plys.end(),
+	// 	[&board](Ply& ply)
+	// 	{
+	// 		cout << ply.print_LAN() << ": score " << board.evaluate_ply( ply, 0, white ) << endl;
+	// 	}
+	// );
 }
 
 void TestEvaluation::test_alpha_beta()
@@ -193,15 +194,15 @@ void TestEvaluation::test_alpha_beta()
 		}
 	);
 
-	cout << endl;
-	for( Ply& ply: plys ) {
-		cout << ply.print_LAN() << ": "
-			<< board.evaluate_ply( ply, 0, black ) << ", "
-			<< board.evaluate_ply( ply, 1, black ) << ", "
-			<< board.evaluate_ply( ply, 2, black ) << ", "
-			<< board.evaluate_ply( ply, 3, black ) << endl;
-	}
-	cout << endl;
+	// cout << endl;
+	// for( Ply& ply: plys ) {
+	// 	cout << ply.print_LAN() << ": "
+	// 		<< board.evaluate_ply( ply, 0, black ) << ", "
+	// 		<< board.evaluate_ply( ply, 1, black ) << ", "
+	// 		<< board.evaluate_ply( ply, 2, black ) << ", "
+	// 		<< board.evaluate_ply( ply, 3, black ) << endl;
+	// }
+	// cout << endl;
 }
 
 void TestEvaluation::queen_should_not_capture_rook()
@@ -217,13 +218,13 @@ void TestEvaluation::queen_should_not_capture_rook()
 		}
 	);
 
-	cout << endl;
-	for( Ply& ply: plys ) {
-		cout << ply.print_LAN() << ": "
-			<< board.evaluate_ply( ply, 1, black ) << ", "
-			<< board.evaluate_ply( ply, 2, black ) << ", "
-			<< board.evaluate_ply( ply, 3, black ) << endl;
-	}
-	cout << endl;
+	// cout << endl;
+	// for( Ply& ply: plys ) {
+	// 	cout << ply.print_LAN() << ": "
+	// 		<< board.evaluate_ply( ply, 1, black ) << ", "
+	// 		<< board.evaluate_ply( ply, 2, black ) << ", "
+	// 		<< board.evaluate_ply( ply, 3, black ) << endl;
+	// }
+	// cout << endl;
 
 }
