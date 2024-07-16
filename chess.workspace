@@ -4,8 +4,6 @@
 		<Project filename="chess/chess.cbp" />
 		<Project filename="Borland/Borland.cbp" />
 		<Project filename="other/other.cbp" />
-		<Project filename="calc_square/calc_square.cbp" />
-		<Project filename="clic/clic.cbp" />
 		<Project filename="OWLChess/OWLChess.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
