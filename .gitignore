@@ -7,4 +7,5 @@
 chess/doxygen/html/*
 chess/doxygen/doxygen.log
 resources.c
+**/build/*
 
