@@ -132,7 +132,6 @@
 			<lib_finder disable_auto="0">
 				<lib name="gtkmm-3.0" />
 				<lib name="cppunit" />
-				<lib name="gthread-2.0" />
 			</lib_finder>
 		</Extensions>
 	</Project>
