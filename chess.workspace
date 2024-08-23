@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<CodeBlocks_workspace_file>
-	<Workspace title="Chess">
-		<Project filename="chess/chess.cbp" />
-		<Project filename="Borland/Borland.cbp" />
-		<Project filename="other/other.cbp" />
-		<Project filename="OWLChess/OWLChess.cbp" />
-	</Workspace>
-</CodeBlocks_workspace_file>
