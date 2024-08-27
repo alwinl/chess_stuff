@@ -23,7 +23,6 @@
 #include <ostream>
 #include <cstdint>
 #include <string>
-#include <termios.h>
 
 class Display
 {
@@ -56,8 +55,6 @@ public:
 	void print_bar();
 
 private:
-	struct termios t;
-
 	void off();
 	void on();
 
