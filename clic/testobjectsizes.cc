@@ -27,15 +27,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestObjectSizes );
 
 void TestObjectSizes::Ply_size_is_32_bit()
 {
-	CPPUNIT_ASSERT_EQUAL( 4ul, sizeof( Ply ) );
+	CPPUNIT_ASSERT_EQUAL( 4ul, (unsigned long)sizeof( Ply ) );
 }
 
 void TestObjectSizes::Piece_size_is_16_bit()
 {
-	CPPUNIT_ASSERT_EQUAL( 2ul, sizeof( Piece ) );
+	CPPUNIT_ASSERT_EQUAL( 2ul, (unsigned long)sizeof( Piece ) );
 }
 
 void TestObjectSizes::Board_size_is_64_x_16_bit()
 {
-	CPPUNIT_ASSERT_EQUAL( 128ul, sizeof( Board ) );
+	CPPUNIT_ASSERT_EQUAL( 128ul, (unsigned long)sizeof( Board ) );
 }
