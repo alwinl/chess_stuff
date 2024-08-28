@@ -17,6 +17,12 @@
 # MA 02110-1301, USA.
 #
 
-add_subdirectory( logicsrc )
-add_subdirectory( src )
-add_subdirectory( test )
+add_executable( clic
+	chessgame.cc
+	chessgame.h
+	main.cc
+)
+
+target_include_directories( clic PUBLIC ../logicsrc )
+target_link_libraries( clic PUBLIC clic_logic )
+

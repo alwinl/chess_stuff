@@ -151,3 +151,18 @@ void TestBoard::test_pawn_promotion()
 		}
 	);
 }
+
+void TestBoard::test_promo_match()
+{
+	Board board("8/P7/8/8/8/8/8/8");
+	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+
+	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
+
+	vector<string> expected = { "a7-a8N", "a7-a8B", "a7-a8R", "a7-a8Q" };
+
+	for( auto move : moves )
+		if( move.check_promo_match( Piece::none ) )
+			CPPUNIT_FAIL( "Did not expect this");
+
+}
