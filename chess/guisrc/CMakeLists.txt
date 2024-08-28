@@ -19,14 +19,6 @@
 
 find_package(gtkmm-3.0)
 
-add_executable(
-	chess
-
-	chesscontroller.cc
-	chessboard.cc
-	dialogs.cc
-)
-
 find_program( GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED )
 
 set(GRESOURCE_C   resources.c )
@@ -48,8 +40,17 @@ add_custom_command(
 
 add_custom_target( chess-resource DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C} )
 set_source_files_properties( ${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C} PROPERTIES GENERATED TRUE )
-add_dependencies( chess chess-resource )
 
+add_executable(
+	chess
+
+	chesscontroller.cc
+	chessboard.cc
+	dialogs.cc
+	${CMAKE_CURRENT_BINARY_DIR}/${GRESOURCE_C}
+)
+
+add_dependencies( chess chess-resource )
 
 target_include_directories( chess PRIVATE ${GTKMM_INCLUDE_DIRS} guisrc ../logicsrc )
 target_link_libraries( chess ${GTKMM_LIBRARIES} chess_logic )

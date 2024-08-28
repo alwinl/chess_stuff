@@ -131,7 +131,7 @@ void ChessController::connect_signals()
 
 void ChessController::get_widgets()
 {
-    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/guisrc/appui.glade" );
+    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
 
 	ui_model->get_widget_derived("main_view", view );
     ui_model->get_widget( "widStatusBar", status_bar );
