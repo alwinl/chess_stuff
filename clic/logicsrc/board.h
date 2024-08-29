@@ -27,36 +27,35 @@
 #include "piece.h"
 
 class Ply;
-class Display;
 
 class Board
 {
 public:
 	Board( std::string PiecePlacement = "" );
 
-	void print_board( Display& display ) const;
 	void update_board( Ply a_ply );
-
-	std::string piece_placement() const;
-	//Piece::eType get_type_from_square( unsigned int square ) const { return position[square].get_type(); }
-
-	std::vector<Ply> generate_legal_plys( eColor side, uint16_t ep_square ) const;
-
-	int evaluate() const;
 	Board make( Ply a_ply ) const;
 
-	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;
+	std::vector<Ply> generate_legal_plys() const;
+
+	int evaluate() const;
+
+	int evaluate_ply( const Ply& ply, int depth_left ) const;
+
+	std::string piece_placement() const;
+	Piece get_piece( unsigned int index) {return position[index]; }
 
 private:
 	std::array<Piece, 64> position;
+	uint16_t ep_square;
+	eColor side_to_move;
 
 	bool illegal_move( Ply& a_ply ) const;
-	std::vector<Ply> generate_plys( eColor side, uint16_t ep_square ) const;
+	std::vector<Ply> generate_plys( ) const;
 
 	void process_placement( std::string PiecePlacement );
 
-	int alpha_beta( int alpha, int beta, int depth_left, eColor color ) const;
-
+	int alpha_beta( int alpha, int beta, int depth_left/*, eColor color*/ ) const;
 };
 
 #endif // BOARD_H

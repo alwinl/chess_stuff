@@ -53,14 +53,14 @@ bool ChessGame::game_loop()
 {
 	bool quit;
 
-	board.print_board( disp );
+	print_board( );
 
-	uint16_t ep_square = (uint16_t)-1;
+	// uint16_t ep_square = (uint16_t)-1;
 
-	if( !game_moves.empty() && game_moves.back().is_ep_candidate() )
-		ep_square = game_moves.back().get_ep_square( current_player == white );
+	// if( !game_moves.empty() && game_moves.back().is_ep_candidate() )
+	// 	ep_square = game_moves.back().get_ep_square( current_player == white );
 
-	std::vector<Ply> plys = board.generate_legal_plys( current_player, ep_square );	// grabs all legal moves
+	std::vector<Ply> plys = board.generate_legal_plys( /*current_player, ep_square*/ );	// grabs all legal moves
 	if( plys.empty() ) {
 		// checkmate
 		return true;
@@ -76,6 +76,29 @@ bool ChessGame::game_loop()
 	current_player = eColor( current_player ^ 1 );
 
     return quit;
+}
+
+void ChessGame::print_board( )
+{
+	disp.print_board_header();
+
+    for( int rank=8; rank; --rank ) {
+
+		disp.print_rank_header( rank );
+
+		for( int file=0; file<8; ++file ) {
+
+			int index = (rank - 1) * 8 + file;
+
+			Piece piece = board.get_piece(index);
+
+			disp.print_square( rank, file, piece.get_type(), piece.is_color( white ) );
+		}
+
+		disp.print_rank_footer( rank );
+    }
+
+    disp.print_board_footer();
 }
 
 
@@ -146,9 +169,9 @@ bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 		[this](const Ply& lhs, const Ply& rhs)
 		{
 			if( current_player == white )
-				return board.evaluate_ply( lhs, 0, white ) > board.evaluate_ply( rhs, 0, white );	// colour does not matter as depth = 0
+				return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
 			else
-				return board.evaluate_ply( lhs, 0, white ) < board.evaluate_ply( rhs, 0, white );	// colour does not matter as depth = 0
+				return board.evaluate_ply( lhs, 0 ) < board.evaluate_ply( rhs, 0 );
 		}
 	);
 

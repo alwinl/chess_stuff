@@ -98,7 +98,7 @@ void TestBoard::read_write_FEN()
 void TestBoard::test_pawn_first_move()
 {
 	Board board("8/8/8/8/8/8/4P3/8");
-	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> moves = board.generate_legal_plys( );
 
 	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
 
@@ -117,7 +117,7 @@ void TestBoard::test_pawn_first_move()
 void TestBoard::test_pawn_capture()
 {
 	Board board("8/8/8/8/8/3p1p2/4P3/8");
-	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> moves = board.generate_legal_plys( );
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
 
@@ -136,7 +136,7 @@ void TestBoard::test_pawn_capture()
 void TestBoard::test_pawn_promotion()
 {
 	Board board("8/P7/8/8/8/8/8/8");
-	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> moves = board.generate_legal_plys();
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
 
@@ -155,7 +155,7 @@ void TestBoard::test_pawn_promotion()
 void TestBoard::test_promo_match()
 {
 	Board board("8/P7/8/8/8/8/8/8");
-	vector<Ply> moves = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> moves = board.generate_legal_plys();
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
 

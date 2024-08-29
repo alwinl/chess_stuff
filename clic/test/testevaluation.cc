@@ -164,12 +164,12 @@ void TestEvaluation::check_all_first_moves()
 {
 	Board board;
 
-	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> plys = board.generate_legal_plys();
 
 	sort( plys.begin(), plys.end(),
 		[&board](const Ply& lhs, const Ply& rhs)
 		{
-			return board.evaluate_ply( lhs, 0, white ) > board.evaluate_ply( rhs, 0, white );
+			return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
 		}
 	);
 
@@ -185,12 +185,12 @@ void TestEvaluation::test_alpha_beta()
 {
 	Board board;
 
-	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> plys = board.generate_legal_plys();
 
 	sort( plys.begin(), plys.end(),
 		[&board](const Ply& lhs, const Ply& rhs)
 		{
-			return board.evaluate_ply( lhs, 3, black ) > board.evaluate_ply( rhs, 3, black );
+			return board.evaluate_ply( lhs, 3 ) > board.evaluate_ply( rhs, 3 );
 		}
 	);
 
@@ -209,12 +209,12 @@ void TestEvaluation::queen_should_not_capture_rook()
 {
 	Board board( "4k3/8/6p1/5r2/8/3Q4/8/4K3" );
 
-	vector<Ply> plys = board.generate_legal_plys( white, (uint16_t)-1 );
+	vector<Ply> plys = board.generate_legal_plys();
 
 	sort( plys.begin(), plys.end(),
 		[&board](const Ply& lhs, const Ply& rhs)
 		{
-			return board.evaluate_ply( lhs, 3, black ) > board.evaluate_ply( rhs, 3, black );
+			return board.evaluate_ply( lhs, 3 ) > board.evaluate_ply( rhs, 3 );
 		}
 	);
 
