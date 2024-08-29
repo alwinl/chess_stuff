@@ -19,8 +19,8 @@
 
 add_executable( clic
 	chessgame.cc
-	chessgame.h
 	main.cc
+	display.cc
 )
 
 target_include_directories( clic PUBLIC ../logicsrc )

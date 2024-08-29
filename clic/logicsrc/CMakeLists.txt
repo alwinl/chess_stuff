@@ -19,7 +19,6 @@
 
 add_library( clic_logic
 	board.cc
-	display.cc
 	piece.cc
 	piece_square_tables.cc
 	ply.cc
