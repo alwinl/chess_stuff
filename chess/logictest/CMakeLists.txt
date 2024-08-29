@@ -19,6 +19,8 @@
 
 find_package(cppunit)
 
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+
 add_executable(
 	test_chess
 	
