@@ -34,7 +34,7 @@ Display::Display()
 
 Display::~Display()
 {
-	set_cursor( cout, 10, 1 );	// restore the screen
+	set_cursor( cout, 11, 1 );	// restore the screen
 }
 
 void Display::print_board_header()
