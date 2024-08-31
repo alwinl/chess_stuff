@@ -60,6 +60,8 @@ private:
 	std::ostream& set_cursor( std::ostream& os, unsigned int row, unsigned int column );
 	std::ostream& restore( std::ostream& os );
 
+	void set_cannonical(bool on);
+
 	std::ostream& erase_display( std::ostream& os );	/* clears from cursor to end of screen */
 	std::ostream& erase_line( std::ostream& os );	/* clears from cursor to end of line */
 };

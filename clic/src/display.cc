@@ -28,6 +28,7 @@ using namespace std;
 
 Display::Display()
 {
+	set_cannonical( false );
 	set_cursor( cout, 1, 1 );	// initialise the screen
 	erase_display( cout );
 }
@@ -35,6 +36,7 @@ Display::Display()
 Display::~Display()
 {
 	set_cursor( cout, 11, 1 );	// restore the screen
+	set_cannonical( true );
 }
 
 void Display::print_board_header()
@@ -254,3 +256,32 @@ ostream& Display::set_cursor( ostream& os, unsigned int row, unsigned int column
 	{ return ansi_cgi( os, std::to_string( row ) + ';' + std::to_string( column ) + "H" ); }
 
 ostream& Display::restore( ostream& os ) { return char_color( os, 39, 49 ); }
+
+#ifdef __linux__
+#include <termios.h>
+#endif
+
+/**
+ * @brief Turn input timeout on or off
+ *
+ * Normal terminal input requires to be terminated with a newline.
+ * Setting the ICANNON flag turns input timeout on (amongst other things), thus
+ * we do not need to press enter to finalise our input.
+ *
+ * @param on Turn timeout on (or off)
+ */
+void Display::set_cannonical( bool on )
+{
+#ifdef __linux__
+	termios t;
+
+	tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
+
+	if( on )
+		t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
+	else
+		t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
+
+	tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
+#endif
+}
