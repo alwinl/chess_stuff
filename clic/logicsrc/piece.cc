@@ -60,28 +60,6 @@ Piece Piece::make_promo_piece( Piece::eType new_type ) const
 	return new_piece;
 }
 
-unsigned int Piece::ray_directions() const
-{
-	static unsigned int directions[] = { 0, 0, 8, 4, 4, 8, 8 };
-
-	return directions[type];
-}
-
-unsigned int Piece::get_ray_offset( unsigned int ray ) const
-{
-	static int offset[7][8] = {
-		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
-		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
-		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
-		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
-		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
-		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
-		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
-	};
-
-	return offset[type][ray];
-}
-
 char Piece::get_code() const
 {
 	return ( color == white ) ? (std::string(" PNBRQK"))[type] : (std::string(" pnbrqk"))[type];

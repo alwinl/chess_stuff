@@ -171,6 +171,17 @@ std::vector<Ply> Board::generate_plys( ) const
 		91, 92, 93, 94, 95, 96, 97, 98
 	};
 
+	static int mailbox_offset[7][8] = {
+		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
+		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
+		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
+		{ -11,  -9,  9, 11, 0,  0,  0,  0 }, /* bishop */
+		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
+		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
+		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
+	};
+
+
 	for( uint16_t square = 0; square < 64; ++square) { /* loop over all squares (no piece list) */
 
 		Piece piece = position[square];
@@ -180,45 +191,42 @@ std::vector<Ply> Board::generate_plys( ) const
 
 		if( ! piece.is_of_type( Piece::pawn ) ) {
 
-			for( unsigned int ray = 0; ray < piece.ray_directions(); ++ray ) {
+			int* offset = &mailbox_offset[piece.get_type()][0];
 
-				uint16_t target_square = square;
+			for( unsigned int ray = 0; (ray < 8) && (offset[ray] != 0); ++ray ) {
 
-				do {
-					target_square = mailbox[ mailbox64[target_square] + piece.get_ray_offset( ray ) ];	/* next square in this direction */
+				for( uint16_t target_square = mailbox[ mailbox64[square] + offset[ray] ]; target_square != (uint16_t)-1; target_square = mailbox[ mailbox64[target_square] + offset[ray] ] ) {
 
-					if( target_square == (uint16_t)-1 )	/* outside of board */
-						break;
-
-					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
+					if( position[target_square].is_of_type( Piece::none ) )	{ /* quiet move */
 						plys.push_back(
 							Ply::create( piece, square, target_square )
 								.build()
 						);
-					else {
-						if( ! position[target_square].is_color( side_to_move ) ) /* capture move */
+					} else {
+						if( ! position[target_square].is_color( side_to_move ) ) {/* capture move */
 							plys.push_back(
 								Ply::create( piece, square, target_square )
 									.setCaptureType( position[target_square].get_type() )
 									.build()
 							);
-						break;
+						}
+						break;		// cannot slide any further
 					}
 
-				} while( piece.is_sliding() );
+					if( !piece.is_sliding() )
+						break;
+				}
 			}
 		}
 
 		if( piece.is_of_type( Piece::pawn ) ) {
 
-			uint16_t target_square = square;
+			/* quiet moves */
+			int offset = (piece.is_color( white ) ? 10 : -10);
 
-			for( int counter = 0; counter < 2; ++counter ) {
+			uint16_t target_square = mailbox[ mailbox64[square] + offset ];	/* next square in this direction */
 
-				target_square = mailbox[ mailbox64[target_square] + (piece.is_color( white ) ? 10 : -10) ];	/* next square in this direction */
-
-				if( ! position[target_square].is_of_type( Piece::none ) )	/* cannot_move */
-					break;
+			if( position[target_square].is_of_type( Piece::none ) )	{
 
 				if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
 					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType(type + 1) )
@@ -226,23 +234,28 @@ std::vector<Ply> Board::generate_plys( ) const
 								Ply::create( piece, square, target_square )
 									.setPromoType( type )
 									.build()
-						);	// generate a promotion plys
-					break;
+						);
+
+				} else {
+
+					plys.push_back( Ply::create( piece, square, target_square ).build() );
+
+					if( square / 8 == (piece.is_color( white ) ? 1 : 6) ) {		// first pawn rank
+
+						target_square = mailbox[ mailbox64[square] + 2 * offset ];	// try double move
+
+						if( position[target_square].is_of_type( Piece::none ) )
+							plys.push_back( Ply::create( piece, square, target_square ).build() );
+					}
+
+
 				}
-
-				plys.push_back(
-					Ply::create( piece, square, target_square )
-						.build()
-				);
-
-				if( piece.has_moved() )
-					break;
 			}
 
-			// capture plys
+			/* capture moves */
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				unsigned int offset = ((counter == 0) ? 9 : 11);
+				int offset = ((counter == 0) ? 9 : 11);
 
 				if( piece.is_color( black ) )
 					offset *= -1;
