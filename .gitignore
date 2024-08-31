@@ -1,11 +1,5 @@
-*/bin/*
-*/obj/*
 *.*~
-*/*.depend
-*/*.layout
-*.layout
 chess/doxygen/html/*
 chess/doxygen/doxygen.log
-resources.c
 **/build/*
 

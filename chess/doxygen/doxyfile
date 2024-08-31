@@ -10,10 +10,10 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = chess
-PROJECT_NUMBER         = 
+PROJECT_NUMBER         =
 PROJECT_BRIEF          =
 PROJECT_LOGO           =
-OUTPUT_DIRECTORY       =
+OUTPUT_DIRECTORY       = @CMAKE_CURRENT_SOURCE_DIR@
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -95,50 +95,7 @@ WARN_LOGFILE            = "/home/alwin/Documents/Programming/ChessStuff/chess/do
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = \
-	"../dlginput.h" \
-	"../colourchooser.h" \
-	"../testfentranslator.cpp" \
-	"../fentranslator.h" \
-	"../dlgcolours.cpp" \
-	"../fentranslator.cpp" \
-	"../testtimeinputter.cpp" \
-	"../testfentranslator.h" \
-	"../timeinputter.h" \
-	"../chessview.h" \
-	"../umldefinition.java" \
-	"../chessview.cpp" \
-	"../chessapplication.cpp" \
-	"../teststhalvemove.h" \
-	"../chessapplication.h" \
-	"../testcolourchooser.h" \
-	"../testpiecevalues.cpp" \
-	"../chessengine.h" \
-	"../chessinfo.h" \
-	"../teststhalvemove.cpp" \
-	"../pods.cpp" \
-	"../testapplication.cpp" \
-	"../chessengine.cpp" \
-	"../dlginput.cpp" \
-	"../resources.c" \
-	"../chessboard.cpp" \
-	"../testpiecevalues.h" \
-	"../dlgpiecevalues.cpp" \
-	"../dlgpiecevalues.h" \
-	"../pods.h" \
-	"../chessinfo.cpp" \
-	"../dlgcolours.h" \
-	"../appmodel.h" \
-	"../main.cpp" \
-	"../piecevalues.cpp" \
-	"../chessedit.h" \
-	"../chessedit.cpp" \
-	"../testcolourchooser.cpp" \
-	"../piecevalues.h" \
-	"../testapplication.h" \
-	"../testtimeinputter.h" \
-	"../chessboard.h" \
-	"../appmodel.cpp" 
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../guisrc @CMAKE_CURRENT_SOURCE_DIR@/../logicsrc
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          =
 RECURSIVE              = NO
