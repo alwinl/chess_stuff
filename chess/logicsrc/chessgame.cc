@@ -79,6 +79,8 @@ void ChessGame::load( std::string pgn_string )
 	}
 }
 
+#define REVERSE_RANK_MASK 0b00111000
+
 void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 {
 	// result
@@ -93,8 +95,8 @@ void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
 		uint16_t target_square = (SAN == "O-O") ? 6 : 2;
 
 		if( color == eColor::black ) {
-			start_square ^= 56;
-			target_square ^= 56;
+			start_square ^= REVERSE_RANK_MASK;
+			target_square ^= REVERSE_RANK_MASK;
 		}
 
 		Ply test_ply( Ply::make_castle_ply( start_square, target_square ) );

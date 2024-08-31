@@ -499,6 +499,8 @@ void ChessBoard::highlight_finish()
 	queue_draw();
 }
 
+#define REVERSE_RANK_MASK 0b00111000
+
 /**-----------------------------------------------------------------------------
  * The following set of functions are utility functions
  */
@@ -510,7 +512,7 @@ uint16_t ChessBoard::point_to_square( Gdk::Point point )
 	uint16_t square = point.get_x() / SQUARE_SIZE + 8 * (7 - (point.get_y() / SQUARE_SIZE));
 
 	if( is_reversed )
-		square ^= 56;
+		square ^= REVERSE_RANK_MASK;
 
 	return square;
 }
@@ -518,7 +520,7 @@ uint16_t ChessBoard::point_to_square( Gdk::Point point )
 Gdk::Point ChessBoard::square_to_point( uint16_t square )
 {
 	if( is_reversed )
-		square ^= 56;
+		square ^= REVERSE_RANK_MASK;
 
 	Gdk::Point point( (square % 8) * SQUARE_SIZE, (7 - (square / 8)) * SQUARE_SIZE );
 

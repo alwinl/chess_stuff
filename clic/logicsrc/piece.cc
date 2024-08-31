@@ -24,6 +24,15 @@
 
 using namespace std;
 
+Piece::Piece( eType _type, eColor _color  )
+{
+	piece = 0;
+
+	hasmoved = false;
+	color = _color;
+	type = _type;
+}
+
 Piece::Piece( char code )
 {
 	static map<char,Piece::eType> code_to_type {
@@ -34,6 +43,8 @@ Piece::Piece( char code )
 		{ 'q', Piece::queen }, { 'Q', Piece::queen },
 		{ 'k', Piece::king }, { 'K', Piece::king }
 	};
+
+	piece = 0;
 
 	hasmoved = false;
 	color = ((string("KQRBNP").find( code ) != string::npos) ? white : black );
@@ -76,10 +87,12 @@ char Piece::get_code() const
 	return ( color == white ) ? (std::string(" PNBRQK"))[type] : (std::string(" pnbrqk"))[type];
 }
 
+#define REVERSE_RANK_MASK 0b00111000
+
 unsigned int Piece::get_score( uint16_t square ) const
 {
 	if( color == white )
-		square ^= 56;
+		square ^= REVERSE_RANK_MASK;
 
 	return material_value[type] + square_tables[type][square];
 }
