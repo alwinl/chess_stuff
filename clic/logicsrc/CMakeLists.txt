@@ -20,6 +20,7 @@
 add_library(
 	clic_logic
 
+	game.cc
 	board.cc
 	piece.cc
 	piece_square_tables.cc
