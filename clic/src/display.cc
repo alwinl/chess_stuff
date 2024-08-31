@@ -19,8 +19,8 @@
 
 #include "display.h"
 
-#include <iostream>
 #include <array>
+#include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -29,13 +29,13 @@ using namespace std;
 Display::Display()
 {
 	set_cannonical( false );
-	set_cursor( cout, 1, 1 );	// initialise the screen
+	set_cursor( cout, 1, 1 ); // initialise the screen
 	erase_display( cout );
 }
 
 Display::~Display()
 {
-	set_cursor( cout, 11, 1 );	// restore the screen
+	set_cursor( cout, 11, 1 ); // restore the screen
 	set_cannonical( true );
 }
 
@@ -44,15 +44,15 @@ void Display::print_board_header()
 	set_cursor( cout, 1, 1 );
 	erase_display( cout );
 
-    cout << " abcdefgh";
+	cout << " abcdefgh";
 }
 
 void Display::print_board_footer()
 {
 	set_cursor( cout, 10, 1 );
-    cout << " abcdefgh";
+	cout << " abcdefgh";
 
-    flush( cout );
+	flush( cout );
 }
 
 void Display::print_rank_header( unsigned int rank )
@@ -70,18 +70,20 @@ void Display::print_rank_footer( unsigned int rank )
 
 void Display::print_square( unsigned int rank, unsigned int file, uint16_t type, bool is_white )
 {
-	static array<string,14> rep = {
+	static array<string, 14> rep = {
+		// clang-format off
 		" ", "♙", "♘", "♗", "♖", "♕", "♔",
 		" ", "♟", "♞", "♝", "♜", "♛", "♚",
+		// clang-format on
 	};
 
-	bool odd = (file + rank) % 2;
+	bool odd = ( file + rank ) % 2;
 
 	set_cursor( cout, 10 - rank, file + 2 );
 
 	odd ? char_color( cout, 97, 40 ) : char_color( cout, 30, 107 );
 
-	cout << rep[ ( odd == is_white ) ? type + 7 : type ];
+	cout << rep[( odd == is_white ) ? type + 7 : type];
 }
 
 void Display::print_input_header( bool is_white )
@@ -89,10 +91,9 @@ void Display::print_input_header( bool is_white )
 	set_cursor( cout, 2, 12 );
 	erase_line( cout );
 
-    cout << (is_white ? "White" :"Black") << '?';
-    flush( cout );
+	cout << ( is_white ? "White" : "Black" ) << '?';
+	flush( cout );
 }
-
 
 void Display::print_move( std::string the_move )
 {
@@ -109,10 +110,10 @@ void Display::print_promotion_move( uint16_t from, uint16_t to, bool is_capture,
 	set_cursor( cout, 3, 12 );
 	erase_line( cout );
 
-	cout << (char)('a' + (from % 8)) << (char)('1' + (from / 8) );
-	cout << (is_capture ? " x " : " - " );
-	cout << (char)('a' + (to % 8)) << (char)('1' + (to / 8) );
-	cout << string("E NBRQK")[promo_type];
+	cout << (char)( 'a' + ( from % 8 ) ) << (char)( '1' + ( from / 8 ) );
+	cout << ( is_capture ? " x " : " - " );
+	cout << (char)( 'a' + ( to % 8 ) ) << (char)( '1' + ( to / 8 ) );
+	cout << string( "E NBRQK" )[promo_type];
 
 	flush( cout );
 }
@@ -122,7 +123,7 @@ void Display::print_castling_move( uint16_t from, uint16_t to )
 	set_cursor( cout, 3, 12 );
 	erase_line( cout );
 
-	cout << (( to > from ) ? "O - O" : "O - O - O");
+	cout << ( ( to > from ) ? "O - O" : "O - O - O" );
 
 	flush( cout );
 }
@@ -132,10 +133,10 @@ void Display::print_regular_move( uint16_t type, uint16_t from, uint16_t to, boo
 	set_cursor( cout, 3, 12 );
 	erase_line( cout );
 
-	cout << string("E NBRQK")[type];
-	cout << (char)('a' + (from % 8)) << (char)('1' + (from / 8) );
-	cout << (is_capture ? " x " : " - " );
-	cout << (char)('a' + (to % 8)) << (char)('1' + (to / 8) );
+	cout << string( "E NBRQK" )[type];
+	cout << (char)( 'a' + ( from % 8 ) ) << (char)( '1' + ( from / 8 ) );
+	cout << ( is_capture ? " x " : " - " );
+	cout << (char)( 'a' + ( to % 8 ) ) << (char)( '1' + ( to / 8 ) );
 
 	flush( cout );
 }
@@ -149,7 +150,7 @@ void Display::print_invalid_move()
 	flush( cout );
 }
 
-void Display::promo_menu( bool clear)
+void Display::promo_menu( bool clear )
 {
 	std::string output[] = { "1. N", "2. B", "3. R", "4. Q", "? " };
 
@@ -199,30 +200,29 @@ void Display::print_total_possible_moves( unsigned int no_of_moves )
 	flush( cout );
 }
 
-
 uint16_t Display::get_square()
 {
-    char file_char;
-    char rank_char;
+	char file_char;
+	char rank_char;
 
 	cin >> file_char;
-	if( (file_char == 'Q') || (file_char == 'q') )
-		return uint16_t(-1);
+	if( ( file_char == 'Q' ) || ( file_char == 'q' ) )
+		return uint16_t( -1 );
 
-	if( (file_char >= 'A') && (file_char <= 'H') )
-		file_char += ('a' - 'A');
+	if( ( file_char >= 'A' ) && ( file_char <= 'H' ) )
+		file_char += ( 'a' - 'A' );
 
-	if( (file_char < 'a') || (file_char > 'h') )
-		return uint16_t(64);
+	if( ( file_char < 'a' ) || ( file_char > 'h' ) )
+		return uint16_t( 64 );
 
 	cin >> rank_char;
-	if( (rank_char == 'Q') || (rank_char == 'q') )
-		return uint16_t(-1);
+	if( ( rank_char == 'Q' ) || ( rank_char == 'q' ) )
+		return uint16_t( -1 );
 
-	if( (rank_char < '1') || (rank_char > '8') )
-		return uint16_t(64);
+	if( ( rank_char < '1' ) || ( rank_char > '8' ) )
+		return uint16_t( 64 );
 
-	return uint16_t((rank_char - '1') * 8 + file_char - 'a');
+	return uint16_t( ( rank_char - '1' ) * 8 + file_char - 'a' );
 }
 
 unsigned int Display::select_promo_type()
@@ -231,7 +231,7 @@ unsigned int Display::select_promo_type()
 
 	cin >> answer;
 
-	return ( (answer >= '1') && (answer <= '4') ) ?  answer -'1' : (unsigned int)-1;
+	return ( ( answer >= '1' ) && ( answer <= '4' ) ) ? answer - '1' : (unsigned int)-1;
 }
 
 unsigned int Display::select_gametype()
@@ -240,22 +240,39 @@ unsigned int Display::select_gametype()
 
 	cin >> answer;
 
-	return ( (answer >= '1') && (answer <= '5') ) ?  answer -'0' : (unsigned int)-1;
+	return ( ( answer >= '1' ) && ( answer <= '5' ) ) ? answer - '0' : (unsigned int)-1;
 }
 
-ostream& Display::ansi_cgi( ostream& os, std::string cgi_sequence )
-	{ os << "\x1B[" << cgi_sequence; return os; }
+ostream &Display::ansi_cgi( ostream &os, std::string cgi_sequence )
+{
+	os << "\x1B[" << cgi_sequence;
+	return os;
+}
 
-ostream& Display::erase_display( ostream& os ) { return ansi_cgi( os, "0J" ); }	/* clears from cursor to end of screen */
-ostream& Display::erase_line( ostream& os ) {  return ansi_cgi( os, "0K" ); }	/* clears from cursor to end of line */
+ostream &Display::erase_display( ostream &os )
+{
+	return ansi_cgi( os, "0J" ); // clears from cursor to end of screen
+}
 
-ostream& Display::char_color( ostream& os, unsigned int foreground, unsigned int background )
-	{ return ansi_cgi( os, std::to_string( foreground ) + ';' + std::to_string( background ) + "m" ); }
+ostream &Display::erase_line( ostream &os )
+{
+	return ansi_cgi( os, "0K" ); // clears from cursor to end of line
+}
 
-ostream& Display::set_cursor( ostream& os, unsigned int row, unsigned int column )
-	{ return ansi_cgi( os, std::to_string( row ) + ';' + std::to_string( column ) + "H" ); }
+ostream &Display::char_color( ostream &os, unsigned int foreground, unsigned int background )
+{
+	return ansi_cgi( os, std::to_string( foreground ) + ';' + std::to_string( background ) + "m" );
+}
 
-ostream& Display::restore( ostream& os ) { return char_color( os, 39, 49 ); }
+ostream &Display::set_cursor( ostream &os, unsigned int row, unsigned int column )
+{
+	return ansi_cgi( os, std::to_string( row ) + ';' + std::to_string( column ) + "H" );
+}
+
+ostream &Display::restore( ostream &os )
+{
+	return char_color( os, 39, 49 );
+}
 
 #ifdef __linux__
 #include <termios.h>
@@ -275,13 +292,13 @@ void Display::set_cannonical( bool on )
 #ifdef __linux__
 	termios t;
 
-	tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
+	tcgetattr( STDIN_FILENO, &t ); // get the current terminal I/O structure
 
 	if( on )
-		t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
+		t.c_lflag |= ICANON; // Manipulate the flag bits to do what you want it to do
 	else
-		t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
+		t.c_lflag &= ~ICANON; // Manipulate the flag bits to do what you want it to do
 
-	tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
+	tcsetattr( STDIN_FILENO, TCSANOW, &t ); // Apply the new settings
 #endif
 }

@@ -19,14 +19,14 @@
 
 #include "testevaluation.h"
 
-#include <vector>
+#include <algorithm>
+#include <sstream>
 #include <string>
 #include <tuple>
-#include <sstream>
-#include <algorithm>
+#include <vector>
 
-#include "piece.h"
 #include "board.h"
+#include "piece.h"
 #include "ply.h"
 
 using namespace std;
@@ -54,10 +54,10 @@ void TestEvaluation::test_square_parsing()
 
 void TestEvaluation::piece_scores_depend_on_color()
 {
-	for( unsigned int i=0; i<6; ++i ) {
+	for( unsigned int i = 0; i < 6; ++i ) {
 
-		Piece white_piece( string("PNBRQK")[i] );
-		Piece black_piece( string("pnbrqk")[i] );
+		Piece white_piece( string( "PNBRQK" )[i] );
+		Piece black_piece( string( "pnbrqk" )[i] );
 
 		for( unsigned char rank = '1'; rank <= '8'; ++rank ) {
 			for( unsigned char file = 'a'; file <= 'h'; ++file ) {
@@ -67,20 +67,23 @@ void TestEvaluation::piece_scores_depend_on_color()
 
 				unsigned int square = parse_square( SAN );
 
-				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ), black_piece.get_score( square ^ REVERSE_RANK_MASK ) );
+				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ),
+									  black_piece.get_score( square ^ REVERSE_RANK_MASK ) );
 			};
 		};
 	}
 }
 
-template<typename T>
-std::ostream& operator<<( std::ostream& os, const std::vector<T> t )
+template <typename T> std::ostream &operator<<( std::ostream &os, const std::vector<T> t )
 {
-    os << "[";
-    for( size_t i = 0; i < t.size(); ++i )
-        os << t[i] << (i == t.size() - 1 ? "" : ",");
+	os << "[";
 
-    return os << "]";
+	for( size_t i = 0; i < t.size(); ++i ) {
+		os << t[i];
+		os << ( i == t.size() - 1 ? "" : "," )
+	};
+
+	return os << "]";
 }
 
 void TestEvaluation::square_table_values()
@@ -88,6 +91,7 @@ void TestEvaluation::square_table_values()
 	enum { piece_code, square, value };
 
 	vector<tuple<char, string, unsigned int>> test_set = {
+		// clang-format off
 		{ 'P', "e2", 80 },
 		{ 'p', "e2", 150 },
 		{ 'K', "e1", 20000 },
@@ -97,14 +101,15 @@ void TestEvaluation::square_table_values()
 		{ 'Q', "h4", 895 },
 		{ 'q', "a4", 895 },
 		{ 'Q', "a4", 900 },
+		// clang-format on
 	};
 
 	vector<int> expected;
 	vector<int> actual;
 
 	for( auto entry : test_set ) {
-		expected.push_back( get<value>(entry) );
-		actual.push_back( Piece( get<piece_code>(entry) ).get_score( parse_square( get<square>(entry) ) ) );
+		expected.push_back( get<value>( entry ) );
+		actual.push_back( Piece( get<piece_code>( entry ) ).get_score( parse_square( get<square>( entry ) ) ) );
 	}
 
 	stringstream expected_string;
@@ -120,12 +125,14 @@ void TestEvaluation::square_table_values()
 void TestEvaluation::test_queen_asymmetry()
 {
 	vector<string> ranks = {
+		// clang-format off
 		"[890,900,905,900,900,900,900,890]",
 		"[890,905,905,905,905,905,900,890]",
 		"[900,900,905,905,905,905,900,895]"
+		// clang-format on
 	};
 
-	for( unsigned int index=0; index < 3; ++index ) {
+	for( unsigned int index = 0; index < 3; ++index ) {
 
 		vector<int> white_result;
 		vector<int> black_result;
@@ -135,12 +142,12 @@ void TestEvaluation::test_queen_asymmetry()
 			SAN.push_back( file );
 			SAN.push_back( '2' + index );
 
-			white_result.push_back( Piece('Q').get_score( parse_square( SAN ) ) );
+			white_result.push_back( Piece( 'Q' ).get_score( parse_square( SAN ) ) );
 
 			SAN.pop_back();
 			SAN.push_back( '7' - index );
 
-			black_result.push_back( Piece('q').get_score( parse_square( SAN ) ) );
+			black_result.push_back( Piece( 'q' ).get_score( parse_square( SAN ) ) );
 		}
 
 		stringstream ss;
@@ -159,7 +166,7 @@ void TestEvaluation::standard_board_eval_is_zero()
 {
 	Board board;
 
-	CPPUNIT_ASSERT_EQUAL( board.evaluate(), 0);
+	CPPUNIT_ASSERT_EQUAL( board.evaluate(), 0 );
 }
 
 void TestEvaluation::check_all_first_moves()
@@ -168,12 +175,9 @@ void TestEvaluation::check_all_first_moves()
 
 	vector<Ply> plys = board.generate_legal_plys();
 
-	sort( plys.begin(), plys.end(),
-		[&board](const Ply& lhs, const Ply& rhs)
-		{
-			return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
-		}
-	);
+	sort( plys.begin(), plys.end(), [&board]( const Ply &lhs, const Ply &rhs ) {
+		return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
+	} );
 
 	// for_each( plys.begin(), plys.end(),
 	// 	[&board](Ply& ply)
@@ -189,12 +193,9 @@ void TestEvaluation::test_alpha_beta()
 
 	vector<Ply> plys = board.generate_legal_plys();
 
-	sort( plys.begin(), plys.end(),
-		[&board](const Ply& lhs, const Ply& rhs)
-		{
-			return board.evaluate_ply( lhs, 3 ) > board.evaluate_ply( rhs, 3 );
-		}
-	);
+	sort( plys.begin(), plys.end(), [&board]( const Ply &lhs, const Ply &rhs ) {
+		return board.evaluate_ply( lhs, 3 ) > board.evaluate_ply( rhs, 3 );
+	} );
 
 	// cout << endl;
 	// for( Ply& ply: plys ) {
@@ -213,12 +214,9 @@ void TestEvaluation::queen_should_not_capture_rook()
 
 	vector<Ply> plys = board.generate_legal_plys();
 
-	sort( plys.begin(), plys.end(),
-		[&board](const Ply& lhs, const Ply& rhs)
-		{
-			return board.evaluate_ply( lhs, 3 ) > board.evaluate_ply( rhs, 3 );
-		}
-	);
+	sort( plys.begin(), plys.end(), [&board]( const Ply &lhs, const Ply &rhs ) {
+		return board.evaluate_ply( lhs, 3 ) > board.evaluate_ply( rhs, 3 );
+	} );
 
 	// cout << endl;
 	// for( Ply& ply: plys ) {
@@ -228,5 +226,4 @@ void TestEvaluation::queen_should_not_capture_rook()
 	// 		<< board.evaluate_ply( ply, 3, black ) << endl;
 	// }
 	// cout << endl;
-
 }

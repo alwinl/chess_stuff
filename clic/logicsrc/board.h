@@ -20,9 +20,9 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <array>
 #include <string>
 #include <vector>
-#include <array>
 
 #include "piece.h"
 
@@ -40,18 +40,18 @@ public:
 
 	int evaluate() const;
 
-	int evaluate_ply( const Ply& ply, int depth_left ) const;
+	int evaluate_ply( const Ply &ply, int depth_left ) const;
 
 	std::string piece_placement() const;
-	Piece get_piece( unsigned int index) {return position[index]; }
+	Piece get_piece( unsigned int index ) { return position[index]; }
 
 private:
 	std::array<Piece, 64> position;
 	uint16_t ep_square;
 	eColor side_to_move;
 
-	bool illegal_move( Ply& a_ply ) const;
-	std::vector<Ply> generate_plys( ) const;
+	bool illegal_move( Ply &a_ply ) const;
+	std::vector<Ply> generate_plys() const;
 
 	void process_placement( std::string PiecePlacement );
 

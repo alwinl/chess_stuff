@@ -27,86 +27,85 @@ int main( int argc, char *argv[] )
 {
 	ChessGame game;
 
-	bool quit = game.setup();
+	if( game.setup() )
+		return 0;
 
-    while( !quit )
-		quit = game.game_loop();
+	for( ;; )
+		if( game.game_loop() )
+			break;
 
-    return 0;
+	return 0;
 }
 
 bool ChessGame::setup()
 {
 	unsigned int gametype = -1;
 
-	while( gametype == (unsigned int )-1 ) {
+	while( gametype == (unsigned int)-1 ) {
 		disp.new_game_menu();
 		gametype = disp.select_gametype();
 	}
 
-	bool quit = ( gametype == 5 );
-	is_human[0] = ((gametype == 1) || (gametype == 4));
-	is_human[1] = ((gametype == 2) || (gametype == 4));
+	is_human[0] = ( ( gametype == 1 ) || ( gametype == 4 ) );
+	is_human[1] = ( ( gametype == 2 ) || ( gametype == 4 ) );
 
-	return quit;
+	return ( gametype == 5 );
 }
 
 bool ChessGame::game_loop()
 {
 	bool quit;
 
-	print_board( );
+	print_board();
 
-	std::vector<Ply> plys = board.generate_legal_plys( );
-	if( plys.empty() )		// checkmate
+	std::vector<Ply> plys = board.generate_legal_plys();
+	if( plys.empty() ) // checkmate
 		return true;
 
 	disp.print_total_possible_moves( plys.size() );
 
-	if( is_human[ current_player ] )
+	if( is_human[current_player] )
 		quit = human_move( current_player, plys );
 	else
 		quit = ai_move( current_player, plys );
 
 	current_player = eColor( current_player ^ 1 );
 
-    return quit;
+	return quit;
 }
 
-void ChessGame::print_board( )
+void ChessGame::print_board()
 {
 	disp.print_board_header();
 
-    for( int rank=8; rank; --rank ) {
+	for( int rank = 8; rank; --rank ) {
 
 		disp.print_rank_header( rank );
 
-		for( int file=0; file<8; ++file ) {
+		for( int file = 0; file < 8; ++file ) {
 
-			int index = (rank - 1) * 8 + file;
+			int index = ( rank - 1 ) * 8 + file;
 
-			Piece piece = board.get_piece(index);
+			Piece piece = board.get_piece( index );
 
 			disp.print_square( rank, file, piece.get_type(), piece.is_color( white ) );
 		}
 
 		disp.print_rank_footer( rank );
-    }
+	}
 
-    disp.print_board_footer();
+	disp.print_board_footer();
 }
-
-
 
 bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 {
 	unsigned int square_from;
 	unsigned int square_to;
 
-	for(;;) {
+	for( ;; ) {
 		disp.print_input_header( player == white );
 
-		if( (square_from = disp.get_square()) == uint16_t(-1) )
+		if( ( square_from = disp.get_square() ) == uint16_t( -1 ) )
 			return true;
 
 		if( square_from == 64 )
@@ -114,20 +113,22 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 
 		disp.print_bar();
 
-		if( (square_to = disp.get_square()) == uint16_t(-1) )
+		if( ( square_to = disp.get_square() ) == uint16_t( -1 ) )
 			return true;
 
 		if( square_to == 64 )
 			continue;
 
-		auto ply_it = std::find_if( plys.begin(), plys.end(), [square_from, square_to]( Ply ply ) { return ply.check_square_match( square_from, square_to ); } );
+		auto ply_it = std::find_if( plys.begin(), plys.end(), [square_from, square_to]( Ply ply ) {
+			return ply.check_square_match( square_from, square_to );
+		} );
 		if( ply_it == plys.end() ) {
 			disp.print_invalid_move();
 			continue;
 		}
 
 		// If it is not a promotion, we have all relevant information. Process the move
-		if( (*ply_it).check_promo_match( Piece::none ) ) {
+		if( ( *ply_it ).check_promo_match( Piece::none ) ) {
 			apply_move( *ply_it );
 			return false;
 		}
@@ -135,18 +136,21 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 		// we need to find all possible promotions and ask the player to select one
 		unsigned int index;
 
-		for(;;) {
+		for( ;; ) {
 			disp.promo_menu( false );
 
-			if( (index = disp.select_promo_type()) != (unsigned int) -1 ) {
+			if( ( index = disp.select_promo_type() ) != (unsigned int)-1 ) {
 				disp.promo_menu( true );
 				break;
 			}
 		}
 
-		Piece::eType promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
+		Piece::eType promo_type =
+			( ( Piece::eType[] ){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen } )[index];
 
-		ply_it = std::find_if( plys.begin(), plys.end(), [promo_type]( Ply the_ply ) { return the_ply.check_promo_match( promo_type ); } );	// should always find one
+		ply_it = std::find_if( plys.begin(), plys.end(), [promo_type]( Ply the_ply ) {
+			return the_ply.check_promo_match( promo_type );
+		} ); // should always find one
 
 		apply_move( *ply_it );
 
@@ -156,17 +160,14 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 
 bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 {
-	sort( plys.begin(), plys.end(),
-		[this](const Ply& lhs, const Ply& rhs)
-		{
-			if( current_player == white )
-				return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
-			else
-				return board.evaluate_ply( lhs, 0 ) < board.evaluate_ply( rhs, 0 );
-		}
-	);
+	sort( plys.begin(), plys.end(), [this]( const Ply &lhs, const Ply &rhs ) {
+		if( current_player == white )
+			return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
+		else
+			return board.evaluate_ply( lhs, 0 ) < board.evaluate_ply( rhs, 0 );
+	} );
 
-    apply_move( plys[0] );
+	apply_move( plys[0] );
 
 	return false;
 }
@@ -175,12 +176,9 @@ void ChessGame::apply_move( Ply ply )
 {
 	disp.print_move( ply.print_LAN() );
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
 	game_moves.push_back( ply );
 
 	board.update_board( ply );
 }
-
-
-

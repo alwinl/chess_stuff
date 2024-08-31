@@ -22,22 +22,22 @@
 
 #include <cstdint>
 
-enum eColor { white, black};
+enum eColor { white, black };
 
-extern int* square_tables[];
+extern int *square_tables[];
 
 class Piece
 {
 public:
 	enum eType { none, pawn, knight, bishop, rook, queen, king };
 
-	static constexpr unsigned int material_value[] = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
+	static constexpr unsigned int material_value[] = { 0, 100, 320, 330, 500, 900, 20000 }; //  Tomasz Michniewski
 
-	Piece( eType _type = none, eColor _color = white  );
+	Piece( eType _type = none, eColor _color = white );
 	Piece( char code );
 
 	bool is_color( eColor test_color ) const { return color == test_color; }
-	bool is_sliding() const {	return (type == bishop) || (type == rook) || (type == queen); }
+	bool is_sliding() const { return ( type == bishop ) || ( type == rook ) || ( type == queen ); }
 	bool is_of_type( eType test_type ) const { return type == test_type; }
 	bool has_moved() const { return hasmoved; }
 	eType get_type() const { return eType( type ); }
@@ -55,10 +55,10 @@ protected:
 	union {
 		uint16_t piece;
 		struct {
-			uint16_t hasmoved:1;
-			uint16_t color:1;
-			uint16_t type:3;
-			uint16_t reserved:11;
+			uint16_t hasmoved : 1;
+			uint16_t color : 1;
+			uint16_t type : 3;
+			uint16_t reserved : 11;
 		};
 	};
 };

@@ -19,9 +19,9 @@
 
 #include "testobjectsizes.h"
 
-#include "ply.h"
-#include "piece.h"
 #include "board.h"
+#include "piece.h"
+#include "ply.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( TestObjectSizes );
 

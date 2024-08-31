@@ -28,20 +28,20 @@ class TestBoard : public CppUnit::TestFixture
 public:
 	CPPUNIT_TEST_SUITE( TestBoard );
 
-    CPPUNIT_TEST( read_write_FEN );
-    CPPUNIT_TEST( test_pawn_first_move );
-    CPPUNIT_TEST( test_pawn_capture );
-    CPPUNIT_TEST( test_pawn_promotion );
-    CPPUNIT_TEST( test_promo_match );
+	CPPUNIT_TEST( read_write_FEN );
+	CPPUNIT_TEST( test_pawn_first_move );
+	CPPUNIT_TEST( test_pawn_capture );
+	CPPUNIT_TEST( test_pawn_promotion );
+	CPPUNIT_TEST( test_promo_match );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
-    void read_write_FEN();
+	void read_write_FEN();
 	void test_pawn_first_move();
 	void test_pawn_capture();
 	void test_pawn_promotion();
-    void test_promo_match();
+	void test_promo_match();
 };
 
 #endif // TESTBOARD_H

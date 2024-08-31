@@ -24,4 +24,3 @@ add_executable( clic
 
 target_include_directories( clic PUBLIC ../logicsrc )
 target_link_libraries( clic PUBLIC clic_logic )
-

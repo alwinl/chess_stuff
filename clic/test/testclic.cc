@@ -17,7 +17,6 @@
  * MA 02110-1301, USA.
  */
 
-
 #include <span>
 
 #include <cppunit/TestFixture.h>

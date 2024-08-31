@@ -23,15 +23,14 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-
 class TestObjectSizes : public CppUnit::TestFixture
 {
 public:
 	CPPUNIT_TEST_SUITE( TestObjectSizes );
 
-    CPPUNIT_TEST( Ply_size_is_32_bit );
-    CPPUNIT_TEST( Piece_size_is_16_bit );
-    CPPUNIT_TEST( Board_size_is_64_x_16_bit );
+	CPPUNIT_TEST( Ply_size_is_32_bit );
+	CPPUNIT_TEST( Piece_size_is_16_bit );
+	CPPUNIT_TEST( Board_size_is_64_x_16_bit );
 
 	CPPUNIT_TEST_SUITE_END();
 

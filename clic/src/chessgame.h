@@ -22,10 +22,10 @@
 
 #include <vector>
 
-#include "ply.h"
 #include "board.h"
 #include "display.h"
 #include "piece.h"
+#include "ply.h"
 
 class ChessGame
 {
@@ -40,12 +40,11 @@ private:
 	Board board;
 	std::vector<Ply> game_moves;
 
-    void print_board();
+	void print_board();
 
-    bool human_move( eColor player, std::vector<Ply> moves );
+	bool human_move( eColor player, std::vector<Ply> moves );
 	bool ai_move( eColor player, std::vector<Ply> moves );
 	void apply_move( Ply the_move );
-
 };
 
 #endif // CHESSGAME_H

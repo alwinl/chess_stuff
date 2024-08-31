@@ -22,9 +22,9 @@
 #include "board.h"
 #include "ply.h"
 
-#include <vector>
 #include <algorithm>
 #include <cctype>
+#include <vector>
 
 using namespace std;
 
@@ -32,12 +32,12 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestBoard );
 
 std::string build_random_fen()
 {
-//	<Piece Placement> ::= <rank8>'/'<rank7>'/'<rank6>'/'<rank5>'/'<rank4>'/'<rank3>'/'<rank2>'/'<rank1>
-//	<ranki>       ::= [<digit17>]<piece> {[<digit17>]<piece>} [<digit17>] | '8'
-//	<piece>       ::= <white Piece> | <black Piece>
-//	<digit17>     ::= '1' | '2' | '3' | '4' | '5' | '6' | '7'
-//	<white Piece> ::= 'P' | 'N' | 'B' | 'R' | 'Q' | 'K'
-//	<black Piece> ::= 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
+	//	<Piece Placement> ::= <rank8>'/'<rank7>'/'<rank6>'/'<rank5>'/'<rank4>'/'<rank3>'/'<rank2>'/'<rank1>
+	//	<ranki>       ::= [<digit17>]<piece> {[<digit17>]<piece>} [<digit17>] | '8'
+	//	<piece>       ::= <white Piece> | <black Piece>
+	//	<digit17>     ::= '1' | '2' | '3' | '4' | '5' | '6' | '7'
+	//	<white Piece> ::= 'P' | 'N' | 'B' | 'R' | 'Q' | 'K'
+	//	<black Piece> ::= 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
 
 	std::string placement;
 
@@ -46,7 +46,7 @@ std::string build_random_fen()
 		unsigned int files_remaining = 8;
 
 		while( files_remaining ) {
-			unsigned int blanks = rand() % (files_remaining + 1);
+			unsigned int blanks = rand() % ( files_remaining + 1 );
 
 			if( blanks != 0 ) {
 				placement += std::to_string( blanks );
@@ -54,7 +54,7 @@ std::string build_random_fen()
 			}
 
 			if( files_remaining ) {
-				placement += (std::string("pnbrqkPNBRQK"))[rand() % 12];	// select a piece at random
+				placement += ( std::string( "pnbrqkPNBRQK" ) )[rand() % 12]; // select a piece at random
 				--files_remaining;
 			}
 		}
@@ -71,14 +71,13 @@ std::string resolve_blanks( std::string in )
 {
 	std::string out;
 
-	std::for_each( in.begin(), in.end(),
-		[in, &out]( char ch ) {
-			if( std::isdigit(ch) ) {
-				int count = ch - '0';
-				out += std::string( count, ' ' );
-			} else
-				out.push_back( ch );
-		});
+	std::for_each( in.begin(), in.end(), [in, &out]( char ch ) {
+		if( std::isdigit( ch ) ) {
+			int count = ch - '0';
+			out += std::string( count, ' ' );
+		} else
+			out.push_back( ch );
+	} );
 
 	return out;
 }
@@ -97,64 +96,61 @@ void TestBoard::read_write_FEN()
 
 void TestBoard::test_pawn_first_move()
 {
-	Board board("8/8/8/8/8/8/4P3/8");
-	vector<Ply> moves = board.generate_legal_plys( );
+	Board board( "8/8/8/8/8/8/4P3/8" );
+	vector<Ply> moves = board.generate_legal_plys();
 
 	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
 
 	vector<string> expected = { "e2-e4", "e2-e3" };
 
-	for_each( expected.begin(), expected.end(),
-		[moves](string& ex_move ) {
-			auto iter = find_if( moves.begin(), moves.end(), [ex_move](const Ply& gen_move) { return gen_move.print_LAN() == ex_move; });
+	for_each( expected.begin(), expected.end(), [moves]( string &ex_move ) {
+		auto iter = find_if( moves.begin(), moves.end(),
+							 [ex_move]( const Ply &gen_move ) { return gen_move.print_LAN() == ex_move; } );
 
-			if( iter == moves.end() )
-				CPPUNIT_ASSERT_EQUAL( ex_move, string("(none)") );
-		}
-	);
+		if( iter == moves.end() )
+			CPPUNIT_ASSERT_EQUAL( ex_move, string( "(none)" ) );
+	} );
 }
 
 void TestBoard::test_pawn_capture()
 {
-	Board board("8/8/8/8/8/3p1p2/4P3/8");
-	vector<Ply> moves = board.generate_legal_plys( );
+	Board board( "8/8/8/8/8/3p1p2/4P3/8" );
+	vector<Ply> moves = board.generate_legal_plys();
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
 
 	vector<string> expected = { "e2-e4", "e2-e3", "e2xd3", "e2xf3" };
 
-	for_each( expected.begin(), expected.end(),
-		[moves](string& ex_move ) {
-			auto iter = find_if( moves.begin(), moves.end(), [ex_move](const Ply& gen_move) { return gen_move.print_LAN() == ex_move; });
+	for_each( expected.begin(), expected.end(), [moves]( string &ex_move ) {
+		auto iter = find_if( moves.begin(), moves.end(),
+							 [ex_move]( const Ply &gen_move ) { return gen_move.print_LAN() == ex_move; } );
 
-			if( iter == moves.end() )
-				CPPUNIT_ASSERT_EQUAL( ex_move, string("(none)") );
-		}
-	);
+		if( iter == moves.end() )
+			CPPUNIT_ASSERT_EQUAL( ex_move, string( "(none)" ) );
+	} );
 }
 
 void TestBoard::test_pawn_promotion()
 {
-	Board board("8/P7/8/8/8/8/8/8");
+	Board board( "8/P7/8/8/8/8/8/8" );
 	vector<Ply> moves = board.generate_legal_plys();
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
 
 	vector<string> expected = { "a7-a8N", "a7-a8B", "a7-a8R", "a7-a8Q" };
 
-	for_each( expected.begin(), expected.end(),
-		[moves](string& ex_move ) {
-			auto iter = find_if( moves.begin(), moves.end(), [ex_move](const Ply& gen_move) { return gen_move.print_LAN() == ex_move; });
+	for_each( expected.begin(), expected.end(), [moves]( string &ex_move ) {
+		auto iter = find_if( moves.begin(), moves.end(),
+							 [ex_move]( const Ply &gen_move ) { return gen_move.print_LAN() == ex_move; } );
 
-			if( iter == moves.end() )
-				CPPUNIT_ASSERT_EQUAL( ex_move, string("(none)") );
-		}
-	);
+		if( iter == moves.end() )
+			CPPUNIT_ASSERT_EQUAL( ex_move, string( "(none)" ) );
+	} );
 }
 
 void TestBoard::test_promo_match()
 {
-	Board board("8/P7/8/8/8/8/8/8");
+	Board board( "8/P7/8/8/8/8/8/8" );
 	vector<Ply> moves = board.generate_legal_plys();
 
 	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
@@ -163,6 +159,5 @@ void TestBoard::test_promo_match()
 
 	for( auto move : moves )
 		if( move.check_promo_match( Piece::none ) )
-			CPPUNIT_FAIL( "Did not expect this");
-
+			CPPUNIT_FAIL( "Did not expect this" );
 }

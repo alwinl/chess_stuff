@@ -42,48 +42,48 @@ void Board::process_placement( std::string PiecePlacement )
 
 	position.fill( Piece( Piece::none ) );
 
-    for( char& code : PiecePlacement ) {
+	for( char &code : PiecePlacement ) {
 
-        if( (code > '0') && (code < '9') ) {       // Character can either be a number (squares to skip)
-           file += (code - '0' );
-        } else if( code == '/' ) {                      // ... or an end of rank indicator
-            --rank;
-            file = 0;
-        } else {								  // or an piece designator
-        	position[rank * 8 + file] = Piece( code );
-            ++file;
-        }
-    }
+		if( ( code > '0' ) && ( code < '9' ) ) { // Character can either be a number (squares to skip)
+			file += ( code - '0' );
+		} else if( code == '/' ) { // ... or an end of rank indicator
+			--rank;
+			file = 0;
+		} else { // or an piece designator
+			position[rank * 8 + file] = Piece( code );
+			++file;
+		}
+	}
 }
 
 std::string Board::piece_placement() const
 {
 	std::string placement;
 
-    for( int rank=7; rank >= 0; --rank ) {
+	for( int rank = 7; rank >= 0; --rank ) {
 
-        int blanks = 0;
+		int blanks = 0;
 
-        for( int file=0; file < 8; ++file ) {
+		for( int file = 0; file < 8; ++file ) {
 
 			if( position[rank * 8 + file] != Piece( Piece::none ) ) {
-                if( blanks ) {
+				if( blanks ) {
 					placement += std::to_string( blanks );
-                    blanks = 0;
-                }
-                placement += position[rank * 8 + file].get_code();
+					blanks = 0;
+				}
+				placement += position[rank * 8 + file].get_code();
 			} else
-                ++blanks;
-        }
+				++blanks;
+		}
 
-        if( blanks )
+		if( blanks )
 			placement += std::to_string( blanks );
 
-        if( rank )
-            placement += "/";
-    }
+		if( rank )
+			placement += "/";
+	}
 
-    return placement;
+	return placement;
 }
 
 Board Board::make( Ply a_ply ) const
@@ -105,9 +105,9 @@ void Board::update_board( Ply a_ply )
 		position[to] = position[from];
 		position[from] = Piece( Piece::none );
 
-		position[ ep_square ] = Piece( Piece::none );
+		position[ep_square] = Piece( Piece::none );
 
-	} else if( ! a_ply.check_promo_match( Piece::none ) ) {
+	} else if( !a_ply.check_promo_match( Piece::none ) ) {
 
 		position[to] = position[from].make_promo_piece( a_ply.get_promo_type() );
 		position[from] = Piece( Piece::none );
@@ -141,11 +141,12 @@ void Board::update_board( Ply a_ply )
 	side_to_move = eColor( side_to_move ^ 1 );
 }
 
-std::vector<Ply> Board::generate_plys( ) const
+std::vector<Ply> Board::generate_plys() const
 {
 	std::vector<Ply> plys;
 
 	static int mailbox[120] = {
+		// clang-format off
 		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		 -1,  0,  1,  2,  3,  4,  5,  6,  7, -1,
@@ -158,9 +159,11 @@ std::vector<Ply> Board::generate_plys( ) const
 		 -1, 56, 57, 58, 59, 60, 61, 62, 63, -1,
 		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+		// clang-format on
 	};
 
 	static int mailbox64[64] = {
+		// clang-format off
 		21, 22, 23, 24, 25, 26, 27, 28,
 		31, 32, 33, 34, 35, 36, 37, 38,
 		41, 42, 43, 44, 45, 46, 47, 48,
@@ -169,9 +172,11 @@ std::vector<Ply> Board::generate_plys( ) const
 		71, 72, 73, 74, 75, 76, 77, 78,
 		81, 82, 83, 84, 85, 86, 87, 88,
 		91, 92, 93, 94, 95, 96, 97, 98
+		// clang-format on
 	};
 
 	static int mailbox_offset[7][8] = {
+		// clang-format off
 		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* none */
 		{   0,   0,  0,  0, 0,  0,  0,  0 }, /* pawn */
 		{ -21, -19,-12, -8, 8, 12, 19, 21 }, /* knight */
@@ -179,38 +184,34 @@ std::vector<Ply> Board::generate_plys( ) const
 		{ -10,  -1,  1, 10, 0,  0,  0,  0 }, /* rook */
 		{ -11, -10, -9, -1, 1,  9, 10, 11 }, /* queen */
 		{ -11, -10, -9, -1, 1,  9, 10, 11 }  /* king */
+		// clang-format on
 	};
 
-
-	for( uint16_t square = 0; square < 64; ++square) { /* loop over all squares (no piece list) */
+	for( uint16_t square = 0; square < 64; ++square ) { /* loop over all squares (no piece list) */
 
 		Piece piece = position[square];
 
-		if( ! piece.is_color( side_to_move ) || piece.is_of_type( Piece::none ) )
+		if( !piece.is_color( side_to_move ) || piece.is_of_type( Piece::none ) )
 			continue;
 
-		if( ! piece.is_of_type( Piece::pawn ) ) {
+		if( !piece.is_of_type( Piece::pawn ) ) {
 
-			int* offset = &mailbox_offset[piece.get_type()][0];
+			int *offset = &mailbox_offset[piece.get_type()][0];
 
-			for( unsigned int ray = 0; (ray < 8) && (offset[ray] != 0); ++ray ) {
+			for( unsigned int ray = 0; ( ray < 8 ) && ( offset[ray] != 0 ); ++ray ) {
 
-				for( uint16_t target_square = mailbox[ mailbox64[square] + offset[ray] ]; target_square != (uint16_t)-1; target_square = mailbox[ mailbox64[target_square] + offset[ray] ] ) {
+				for( uint16_t target_square = mailbox[mailbox64[square] + offset[ray]]; target_square != (uint16_t)-1;
+					 target_square = mailbox[mailbox64[target_square] + offset[ray]] ) {
 
-					if( position[target_square].is_of_type( Piece::none ) )	{ /* quiet move */
-						plys.push_back(
-							Ply::create( piece, square, target_square )
-								.build()
-						);
+					if( position[target_square].is_of_type( Piece::none ) ) { /* quiet move */
+						plys.push_back( Ply::create( piece, square, target_square ).build() );
 					} else {
-						if( ! position[target_square].is_color( side_to_move ) ) {/* capture move */
-							plys.push_back(
-								Ply::create( piece, square, target_square )
-									.setCaptureType( position[target_square].get_type() )
-									.build()
-							);
+						if( !position[target_square].is_color( side_to_move ) ) { /* capture move */
+							plys.push_back( Ply::create( piece, square, target_square )
+												.setCaptureType( position[target_square].get_type() )
+												.build() );
 						}
-						break;		// cannot slide any further
+						break; // cannot slide any further
 					}
 
 					if( !piece.is_sliding() )
@@ -222,125 +223,108 @@ std::vector<Ply> Board::generate_plys( ) const
 		if( piece.is_of_type( Piece::pawn ) ) {
 
 			/* quiet moves */
-			int offset = (piece.is_color( white ) ? 10 : -10);
+			int offset = ( piece.is_color( white ) ? 10 : -10 );
 
-			uint16_t target_square = mailbox[ mailbox64[square] + offset ];	/* next square in this direction */
+			uint16_t target_square = mailbox[mailbox64[square] + offset]; /* next square in this direction */
 
-			if( position[target_square].is_of_type( Piece::none ) )	{
+			if( position[target_square].is_of_type( Piece::none ) ) {
 
-				if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
-					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType(type + 1) )
-						plys.push_back(
-								Ply::create( piece, square, target_square )
-									.setPromoType( type )
-									.build()
-						);
+				if( target_square / 8 == ( piece.is_color( white ) ? 7 : 0 ) ) { // promotion ranks
+					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType( type + 1 ) )
+						plys.push_back( Ply::create( piece, square, target_square ).setPromoType( type ).build() );
 
 				} else {
 
 					plys.push_back( Ply::create( piece, square, target_square ).build() );
 
-					if( square / 8 == (piece.is_color( white ) ? 1 : 6) ) {		// first pawn rank
+					if( square / 8 == ( piece.is_color( white ) ? 1 : 6 ) ) { // first pawn rank
 
-						target_square = mailbox[ mailbox64[square] + 2 * offset ];	// try double move
+						target_square = mailbox[mailbox64[square] + 2 * offset]; // try double move
 
 						if( position[target_square].is_of_type( Piece::none ) )
 							plys.push_back( Ply::create( piece, square, target_square ).build() );
 					}
-
-
 				}
 			}
 
 			/* capture moves */
 			for( int counter = 0; counter < 2; ++counter ) {
 
-				int offset = ((counter == 0) ? 9 : 11);
+				int offset = ( ( counter == 0 ) ? 9 : 11 );
 
 				if( piece.is_color( black ) )
 					offset *= -1;
 
-				target_square = mailbox[ mailbox64[square] + offset ];
+				target_square = mailbox[mailbox64[square] + offset];
 
-				if( target_square == (uint16_t)-1 )				/* off the board... */
+				if( target_square == (uint16_t)-1 ) /* off the board... */
 					continue;
 
-				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side_to_move ) ) {	/* something is there, and its their piece */
+				if( !position[target_square].is_of_type( Piece::none ) &&
+					!position[target_square].is_color( side_to_move ) ) { /* something is there, and its their piece */
 
-					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
-						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
-							plys.push_back(
-								Ply::create( piece, square, target_square )
-									.setCaptureType( position[target_square].get_type() )
-									.setPromoType( type )
-									.build()
-							);
+					if( target_square / 8 == ( piece.is_color( white ) ? 7 : 0 ) ) { // promotion ranks
+						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType( type + 1 ) )
+							plys.push_back( Ply::create( piece, square, target_square )
+												.setCaptureType( position[target_square].get_type() )
+												.setPromoType( type )
+												.build() );
 					} else
-						plys.push_back(
-								Ply::create( piece, square, target_square )
-									.setCaptureType( position[target_square].get_type() )
-									.build()
-						);
+						plys.push_back( Ply::create( piece, square, target_square )
+											.setCaptureType( position[target_square].get_type() )
+											.build() );
 				}
 
 				if( ep_square == target_square )
-					plys.push_back(
-								Ply::create( piece, square, target_square )
-									.setEPMove()
-									.build()
-					);
+					plys.push_back( Ply::create( piece, square, target_square ).setEPMove().build() );
 			}
 		}
 
 		if( piece.is_of_type( Piece::king ) && !piece.has_moved() ) {
 
 			// Check king side castle
-			if(   !position[square + 3].has_moved()
-				&& position[square + 1].is_of_type(Piece::none)
-				&& position[square + 2].is_of_type(Piece::none)
-			)
-				plys.push_back( Ply::create( piece, square, uint16_t(square + 2) ).build() );
+			if( !position[square + 3].has_moved() && position[square + 1].is_of_type( Piece::none ) &&
+				position[square + 2].is_of_type( Piece::none ) )
+				plys.push_back( Ply::create( piece, square, uint16_t( square + 2 ) ).build() );
 
 			// Check queen side castle
-			if(   !position[square - 4].has_moved()
-				&& position[square - 1].is_of_type(Piece::none)
-				&& position[square - 2].is_of_type(Piece::none)
-				&& position[square - 3].is_of_type(Piece::none)
-			)
-				plys.push_back( Ply::create( piece, square, uint16_t(square - 2) ).build() );
+			if( !position[square - 4].has_moved() && position[square - 1].is_of_type( Piece::none ) &&
+				position[square - 2].is_of_type( Piece::none ) && position[square - 3].is_of_type( Piece::none ) )
+				plys.push_back( Ply::create( piece, square, uint16_t( square - 2 ) ).build() );
 		}
 	}
 
 	return plys;
 }
 
-bool Board::illegal_move( Ply& a_ply ) const
+bool Board::illegal_move( Ply &a_ply ) const
 {
-	Board test_board(*this);
+	Board test_board( *this );
 
 	test_board.update_board( a_ply );
 
 	std::vector<Ply> opponent_moves = test_board.generate_plys();
 
-	return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Ply& opp_move) { return opp_move.is_kingcapture(); }) != opponent_moves.end() );
+	return ( find_if( opponent_moves.begin(), opponent_moves.end(),
+					  []( Ply &opp_move ) { return opp_move.is_kingcapture(); } ) != opponent_moves.end() );
 }
 
 std::vector<Ply> Board::generate_legal_plys() const
 {
-	std::vector<Ply> moves = generate_plys();	// grabs all pseudo legal moves
+	std::vector<Ply> moves = generate_plys(); // grabs all pseudo legal moves
 
-	moves.erase( remove_if(moves.begin(), moves.end(), [this](Ply& a_ply) { return this->illegal_move(a_ply); }), moves.end() );	// filter out illegal moves
+	moves.erase( remove_if( moves.begin(), moves.end(), [this]( Ply &a_ply ) { return this->illegal_move( a_ply ); } ),
+				 moves.end() ); // filter out illegal moves
 
 	return moves;
 }
-
 
 int Board::evaluate() const
 {
 	unsigned int score[2] = { 0, 0 };
 
 	for( uint16_t square = 0; square < 64; ++square )
-		if( ! position[square].is_of_type( Piece::none ) ) {
+		if( !position[square].is_of_type( Piece::none ) ) {
 			unsigned int index = position[square].is_color( white ) ? white : black;
 			score[index] += position[square].get_score( square );
 		}
@@ -354,27 +338,27 @@ int Board::evaluate() const
  */
 int Board::alpha_beta( int alpha, int beta, int depth_left ) const
 {
-	if( ! depth_left )
+	if( !depth_left )
 		return evaluate();
 
-	std::vector<Ply> plys = generate_legal_plys();	// grabs all legal moves
+	std::vector<Ply> plys = generate_legal_plys(); // grabs all legal moves
 
 	int best_score;
 
-	if( side_to_move == white ) {		// maximiser
+	if( side_to_move == white ) { // maximiser
 		best_score = std::numeric_limits<int>::min();
-		for( Ply& ply : plys ) {
-			best_score = std::max( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1 ) );
+		for( Ply &ply : plys ) {
+			best_score = std::max( best_score, make( ply ).alpha_beta( alpha, beta, depth_left - 1 ) );
 			alpha = std::max( alpha, best_score );
 
 			if( beta <= alpha )
 				break;
 		}
 
-	} else {					// minimiser
+	} else { // minimiser
 		best_score = std::numeric_limits<int>::max();
-		for( Ply& ply : plys ) {
-			best_score = std::min( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1 ) );
+		for( Ply &ply : plys ) {
+			best_score = std::min( best_score, make( ply ).alpha_beta( alpha, beta, depth_left - 1 ) );
 			beta = std::min( beta, best_score );
 
 			if( beta <= alpha )
@@ -385,7 +369,7 @@ int Board::alpha_beta( int alpha, int beta, int depth_left ) const
 	return best_score;
 }
 
-int Board::evaluate_ply( const Ply& ply, int depth ) const
+int Board::evaluate_ply( const Ply &ply, int depth ) const
 {
-	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth );
+	return make( ply ).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth );
 }

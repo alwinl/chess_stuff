@@ -30,12 +30,12 @@ public:
 
 	CPPUNIT_TEST( piece_scores_depend_on_color );
 	CPPUNIT_TEST( test_square_parsing );
-    CPPUNIT_TEST( square_table_values );
-    CPPUNIT_TEST( test_queen_asymmetry );
-    CPPUNIT_TEST( standard_board_eval_is_zero );
-    CPPUNIT_TEST( check_all_first_moves );
-    CPPUNIT_TEST( test_alpha_beta );
-    CPPUNIT_TEST( queen_should_not_capture_rook );
+	CPPUNIT_TEST( square_table_values );
+	CPPUNIT_TEST( test_queen_asymmetry );
+	CPPUNIT_TEST( standard_board_eval_is_zero );
+	CPPUNIT_TEST( check_all_first_moves );
+	CPPUNIT_TEST( test_alpha_beta );
+	CPPUNIT_TEST( queen_should_not_capture_rook );
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -49,9 +49,7 @@ private:
 	void test_alpha_beta();
 	void queen_should_not_capture_rook();
 
-	uint16_t parse_square( std::string SAN ) { return (SAN[1] - '1') * 8 + (SAN[0] - 'a'); };
-
-
+	uint16_t parse_square( std::string SAN ) { return ( SAN[1] - '1' ) * 8 + ( SAN[0] - 'a' ); };
 };
 
 #endif // TESTEVALUATION_H

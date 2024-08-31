@@ -17,7 +17,10 @@
  * MA 02110-1301, USA.
  */
 
-static int empty_square_table[] = {
+// clang-format off
+
+static int empty_square_table[] =
+{
 	 0,  0,  0,  0,  0,  0,  0,  0,
 	 0,  0,  0,  0,  0,  0,  0,  0,
 	 0,  0,  0,  0,  0,  0,  0,  0,
@@ -28,7 +31,8 @@ static int empty_square_table[] = {
 	 0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-static int pawn_square_table[] = {
+static int pawn_square_table[] =
+{
 	 0,  0,  0,  0,  0,  0,  0,  0,
 	50, 50, 50, 50, 50, 50, 50, 50,
 	10, 10, 20, 30, 30, 20, 10, 10,
@@ -39,7 +43,8 @@ static int pawn_square_table[] = {
 	 0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-static int knight_square_table[] = {
+static int knight_square_table[] =
+{
 	-50,-40,-30,-30,-30,-30,-40,-50,
 	-40,-20,  0,  0,  0,  0,-20,-40,
 	-30,  0, 10, 15, 15, 10,  0,-30,
@@ -50,7 +55,8 @@ static int knight_square_table[] = {
 	-50,-40,-30,-30,-30,-30,-40,-50,
 };
 
-static int bishop_square_table[] = {
+static int bishop_square_table[] =
+{
 	-20,-10,-10,-10,-10,-10,-10,-20,
 	-10,  0,  0,  0,  0,  0,  0,-10,
 	-10,  0,  5, 10, 10,  5,  0,-10,
@@ -61,7 +67,8 @@ static int bishop_square_table[] = {
 	-20,-10,-10,-10,-10,-10,-10,-20,
 };
 
-static int rook_square_table[] = {
+static int rook_square_table[] =
+{
 	 0,  0,  0,  0,  0,  0,  0,  0,
 	 5, 10, 10, 10, 10, 10, 10,  5,
 	-5,  0,  0,  0,  0,  0,  0, -5,
@@ -72,7 +79,8 @@ static int rook_square_table[] = {
 	 0,  0,  0,  5,  5,  0,  0,  0,
 };
 
-static int queen_square_table[] = {
+static int queen_square_table[] =
+{
 	-20,-10,-10, -5, -5,-10,-10,-20,
 	-10,  0,  0,  0,  0,  0,  0,-10,
 	-10,  0,  5,  5,  5,  5,  0,-10,
@@ -83,7 +91,8 @@ static int queen_square_table[] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
 };
 
-static int king_square_table[] = {
+static int king_square_table[] =
+{
 	-30,-40,-40,-50,-50,-40,-40,-30,
 	-30,-40,-40,-50,-50,-40,-40,-30,
 	-30,-40,-40,-50,-50,-40,-40,-30,
@@ -94,7 +103,8 @@ static int king_square_table[] = {
 	 20, 30, 10,  0,  0, 10, 30, 20
 };
 
-int* square_tables[] = {
+int* square_tables[] =
+{
 	empty_square_table,
 	pawn_square_table,
 	knight_square_table,
@@ -104,5 +114,4 @@ int* square_tables[] = {
 	king_square_table,
 };
 
-
-
+// clang-format on

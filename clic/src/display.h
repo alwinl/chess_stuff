@@ -20,8 +20,8 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#include <ostream>
 #include <cstdint>
+#include <ostream>
 #include <string>
 
 class Display
@@ -50,20 +50,20 @@ public:
 	void print_total_possible_moves( unsigned int no_of_moves );
 
 	void print_input_header( bool is_white );
-	void promo_menu( bool clear);
+	void promo_menu( bool clear );
 	void new_game_menu();
 	void print_bar();
 
 private:
-	std::ostream& ansi_cgi( std::ostream& os, std::string cgi_sequence );
-	std::ostream& char_color( std::ostream& os, unsigned int foreground, unsigned int background );
-	std::ostream& set_cursor( std::ostream& os, unsigned int row, unsigned int column );
-	std::ostream& restore( std::ostream& os );
+	std::ostream &ansi_cgi( std::ostream &os, std::string cgi_sequence );
+	std::ostream &char_color( std::ostream &os, unsigned int foreground, unsigned int background );
+	std::ostream &set_cursor( std::ostream &os, unsigned int row, unsigned int column );
+	std::ostream &restore( std::ostream &os );
 
-	void set_cannonical(bool on);
+	void set_cannonical( bool on );
 
-	std::ostream& erase_display( std::ostream& os );	/* clears from cursor to end of screen */
-	std::ostream& erase_line( std::ostream& os );	/* clears from cursor to end of line */
+	std::ostream &erase_display( std::ostream &os ); /* clears from cursor to end of screen */
+	std::ostream &erase_line( std::ostream &os );	 /* clears from cursor to end of line */
 };
 
 #endif // DISPLAY_H

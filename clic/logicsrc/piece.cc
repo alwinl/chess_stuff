@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Piece::Piece( eType _type, eColor _color  )
+Piece::Piece( eType _type, eColor _color )
 {
 	piece = 0;
 
@@ -35,19 +35,21 @@ Piece::Piece( eType _type, eColor _color  )
 
 Piece::Piece( char code )
 {
-	static map<char,Piece::eType> code_to_type {
-		{ 'p', Piece::pawn }, { 'P', Piece::pawn },
+	static map<char, Piece::eType> code_to_type{
+		// clang-format off
+		{ 'p', Piece::pawn   }, { 'P', Piece::pawn   },
 		{ 'n', Piece::knight }, { 'N', Piece::knight },
 		{ 'b', Piece::bishop }, { 'B', Piece::bishop },
-		{ 'r', Piece::rook }, { 'R', Piece::rook },
-		{ 'q', Piece::queen }, { 'Q', Piece::queen },
-		{ 'k', Piece::king }, { 'K', Piece::king }
+		{ 'r', Piece::rook   }, { 'R', Piece::rook   },
+		{ 'q', Piece::queen  }, { 'Q', Piece::queen  },
+		{ 'k', Piece::king   }, { 'K', Piece::king   }
+		// clang-format on
 	};
 
 	piece = 0;
 
 	hasmoved = false;
-	color = ((string("KQRBNP").find( code ) != string::npos) ? white : black );
+	color = ( ( string( "KQRBNP" ).find( code ) != string::npos ) ? white : black );
 	type = code_to_type.at( code );
 }
 
@@ -62,7 +64,7 @@ Piece Piece::make_promo_piece( Piece::eType new_type ) const
 
 char Piece::get_code() const
 {
-	return ( color == white ) ? (std::string(" PNBRQK"))[type] : (std::string(" pnbrqk"))[type];
+	return ( color == white ) ? ( std::string( " PNBRQK" ) )[type] : ( std::string( " pnbrqk" ) )[type];
 }
 
 #define REVERSE_RANK_MASK 0b00111000
@@ -74,5 +76,3 @@ unsigned int Piece::get_score( uint16_t square ) const
 
 	return material_value[type] + square_tables[type][square];
 }
-
-
