@@ -26,6 +26,8 @@
 #include <array>
 #include <utility>
 
+namespace chess_gui {
+
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
  *
@@ -111,5 +113,7 @@ private:
 	Gdk::Point annimate_delta;
 	Gdk::Point highlight_pos;
 };
+
+}
 
 #endif // CHESSBOARD_H

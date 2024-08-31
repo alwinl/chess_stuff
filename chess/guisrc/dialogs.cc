@@ -19,6 +19,9 @@
 
 #include "dialogs.h"
 
+namespace chess_gui {
+
+
 DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
     : Gtk::Dialog( cobject )
 {
@@ -153,4 +156,6 @@ DialogNewGame::DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::B
 
 	ui_model->get_widget( "btnHumanvsHuman", button );
 	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 4 ) );
+}
+
 }

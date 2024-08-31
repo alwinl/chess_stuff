@@ -26,6 +26,9 @@
 #include <string>
 #include <map>
 
+namespace chess_gui {
+
+
 class DialogColours : public Gtk::Dialog
 {
 public:
@@ -86,5 +89,7 @@ private:
 
 	int choice;
 };
+
+}
 
 #endif // DIALOGS_H

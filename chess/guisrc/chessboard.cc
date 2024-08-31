@@ -19,6 +19,9 @@
 
 #include "chessboard.h"
 
+namespace chess_gui {
+
+
 Gdk::Point operator-( const Gdk::Point& lhs, const Gdk::Point& rhs )
 	{ return Gdk::Point( lhs.get_x() - rhs.get_x(), lhs.get_y() - rhs.get_y() ); }
 
@@ -542,4 +545,6 @@ char ChessBoard::editpoint_to_piececode( Gdk::Point point )
 	static std::string piece_chars = "KQRBNPkqrbnp";
 
 	return piece_chars[ (point.get_x() / SQUARE_SIZE) + 6 * (point.get_y() / SQUARE_SIZE) ];
+}
+
 }

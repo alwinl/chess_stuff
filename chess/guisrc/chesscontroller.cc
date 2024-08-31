@@ -29,8 +29,11 @@
  */
 int main( int argc, char *argv[] )
 {
-    return ChessController().run( argc, argv );
+    return chess_gui::ChessController().run( argc, argv );
 }
+
+namespace chess_gui {
+
 
 /**-----------------------------------------------------------------------------
  * Application window
@@ -855,4 +858,6 @@ bool ChessController::on_demo_move_timeout()
     Glib::signal_timeout().connect( sigc::mem_fun(*this, &ChessController::do_demo_move), 1000 );	// Wait a second, then initiate the next move
 
     return false;
+}
+
 }

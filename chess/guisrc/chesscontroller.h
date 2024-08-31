@@ -29,6 +29,8 @@
 
 class ChessEngine;
 
+namespace chess_gui {
+
 class ChessWindow;
 class ChessBoard;
 class DialogColours;
@@ -151,5 +153,7 @@ private:
 
     ChessEngine* engine;
 };
+
+}
 
 #endif // CHESSCONTROLLER_H
