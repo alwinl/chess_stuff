@@ -55,9 +55,6 @@ public:
 	void print_bar();
 
 private:
-	void off();
-	void on();
-
 	std::ostream& ansi_cgi( std::ostream& os, std::string cgi_sequence );
 	std::ostream& char_color( std::ostream& os, unsigned int foreground, unsigned int background );
 	std::ostream& set_cursor( std::ostream& os, unsigned int row, unsigned int column );
@@ -65,7 +62,6 @@ private:
 
 	std::ostream& erase_display( std::ostream& os );	/* clears from cursor to end of screen */
 	std::ostream& erase_line( std::ostream& os );	/* clears from cursor to end of line */
-	void restore_screen();
 };
 
 #endif // DISPLAY_H

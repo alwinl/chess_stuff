@@ -28,8 +28,6 @@ using namespace std;
 
 Display::Display()
 {
-	off();
-
 	set_cursor( cout, 1, 1 );	// initialise the screen
 	erase_display( cout );
 }
@@ -37,8 +35,6 @@ Display::Display()
 Display::~Display()
 {
 	set_cursor( cout, 10, 1 );	// restore the screen
-
-	on();
 }
 
 void Display::print_board_header()
@@ -245,29 +241,6 @@ unsigned int Display::select_gametype()
 	return ( (answer >= '1') && (answer <= '5') ) ?  answer -'0' : (unsigned int)-1;
 }
 
-
-
-// #include <termios.h>
-
-
-void Display::off()
-{
-	// struct termios t;
-
-	// tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
-	// t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
-	// tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
-}
-
-void Display::on()
-{
-	// struct termios t;
-
-	// tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
-	// t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
-	// tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
-}
-
 ostream& Display::ansi_cgi( ostream& os, std::string cgi_sequence )
 	{ os << "\x1B[" << cgi_sequence; return os; }
 
@@ -281,5 +254,3 @@ ostream& Display::set_cursor( ostream& os, unsigned int row, unsigned int column
 	{ return ansi_cgi( os, std::to_string( row ) + ';' + std::to_string( column ) + "H" ); }
 
 ostream& Display::restore( ostream& os ) { return char_color( os, 39, 49 ); }
-
-

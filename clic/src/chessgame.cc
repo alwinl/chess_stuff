@@ -57,16 +57,9 @@ bool ChessGame::game_loop()
 
 	print_board( );
 
-	// uint16_t ep_square = (uint16_t)-1;
-
-	// if( !game_moves.empty() && game_moves.back().is_ep_candidate() )
-	// 	ep_square = game_moves.back().get_ep_square( current_player == white );
-
-	std::vector<Ply> plys = board.generate_legal_plys( /*current_player, ep_square*/ );	// grabs all legal moves
-	if( plys.empty() ) {
-		// checkmate
+	std::vector<Ply> plys = board.generate_legal_plys( );
+	if( plys.empty() )		// checkmate
 		return true;
-	}
 
 	disp.print_total_possible_moves( plys.size() );
 
