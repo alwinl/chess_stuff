@@ -37,12 +37,13 @@ public:
 	bool is_ep_capture() const { return en_passant == 1; };
 	bool is_castling() const { return castling == 1; }
 	bool is_kingcapture() const { return king_capture == 1; }
+	bool halfclock_needs_reset() const { return (type == Piece::pawn) || capture; }
 
 	uint16_t get_castling_rook_square_from() const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
 	uint16_t get_castling_rook_square_to() const { return to + ( ( to > from ) ? -1 : +1 ); };
 	uint16_t get_ep_square() const
 	{
-		return ( ep_candidate == 1 ) ? to + ( ( color == white ) ? -8 : 8 ) : (uint16_t)-1;
+		return ( ep_candidate == 1 ) ? to + ( (from < to) ? -8 : 8 ) : (uint16_t)-1;
 	}
 	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
 

@@ -52,5 +52,5 @@ add_test( TestEvaluation::test_alpha_beta clic_test TestEvaluation::test_alpha_b
 add_test( TestEvaluation::queen_should_not_capture_rook clic_test TestEvaluation::queen_should_not_capture_rook )
 
 add_test( TestObjectSizes::Ply_size_is_32_bit clic_test TestObjectSizes::Ply_size_is_32_bit )
-add_test( TestObjectSizes::Piece_size_is_16_bit clic_test TestObjectSizes::Piece_size_is_16_bit )
-add_test( TestObjectSizes::Board_size_is_64_x_16_bit clic_test TestObjectSizes::Board_size_is_64_x_16_bit )
+add_test( TestObjectSizes::Piece_size_is_8_bit clic_test TestObjectSizes::Piece_size_is_8_bit )
+add_test( TestObjectSizes::Board_size_is_64_plus_8_bytes clic_test TestObjectSizes::Board_size_is_64_plus_8_bytes )

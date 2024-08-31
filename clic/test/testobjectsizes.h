@@ -29,15 +29,15 @@ public:
 	CPPUNIT_TEST_SUITE( TestObjectSizes );
 
 	CPPUNIT_TEST( Ply_size_is_32_bit );
-	CPPUNIT_TEST( Piece_size_is_16_bit );
-	CPPUNIT_TEST( Board_size_is_64_x_16_bit );
+	CPPUNIT_TEST( Piece_size_is_8_bit );
+	CPPUNIT_TEST( Board_size_is_64_plus_8_bytes );
 
 	CPPUNIT_TEST_SUITE_END();
 
 private:
 	void Ply_size_is_32_bit();
-	void Piece_size_is_16_bit();
-	void Board_size_is_64_x_16_bit();
+	void Piece_size_is_8_bit();
+	void Board_size_is_64_plus_8_bytes();
 };
 
 #endif // TESTOBJECTSIZES_H

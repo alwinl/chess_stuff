@@ -80,7 +80,7 @@ template <typename T> std::ostream &operator<<( std::ostream &os, const std::vec
 
 	for( size_t i = 0; i < t.size(); ++i ) {
 		os << t[i];
-		os << ( i == t.size() - 1 ? "" : "," )
+		os << ( i == t.size() - 1 ? "" : "," );
 	};
 
 	return os << "]";

@@ -64,7 +64,7 @@ Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_
 	//		uint16_t check : 1;
 	//		uint16_t checkmate : 1;
 
-	if( flags != 0 )
+	if( reserved != 0 )
 		throw( domain_error( "Ply with nonzero reserved member") );
 }
 

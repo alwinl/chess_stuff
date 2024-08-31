@@ -53,12 +53,12 @@ public:
 
 protected:
 	union {
-		uint16_t piece;
+		uint8_t piece;
 		struct {
-			uint16_t hasmoved : 1;
-			uint16_t color : 1;
-			uint16_t type : 3;
-			uint16_t reserved : 11;
+			uint8_t hasmoved : 1;
+			uint8_t color : 1;
+			uint8_t type : 3;
+			uint8_t reserved : 3;
 		};
 	};
 };

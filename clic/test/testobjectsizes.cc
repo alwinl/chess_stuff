@@ -30,12 +30,12 @@ void TestObjectSizes::Ply_size_is_32_bit()
 	CPPUNIT_ASSERT_EQUAL( 4ul, (unsigned long)sizeof( Ply ) );
 }
 
-void TestObjectSizes::Piece_size_is_16_bit()
+void TestObjectSizes::Piece_size_is_8_bit()
 {
-	CPPUNIT_ASSERT_EQUAL( 2ul, (unsigned long)sizeof( Piece ) );
+	CPPUNIT_ASSERT_EQUAL( 1ul, (unsigned long)sizeof( Piece ) );
 }
 
-void TestObjectSizes::Board_size_is_64_x_16_bit()
+void TestObjectSizes::Board_size_is_64_plus_8_bytes()
 {
-	CPPUNIT_ASSERT_EQUAL( 136ul, (unsigned long)sizeof( Board ) );
+	CPPUNIT_ASSERT_EQUAL( 72ul, (unsigned long)sizeof( Board ) );
 }
