@@ -17,7 +17,9 @@
 # MA 02110-1301, USA.
 #
 
-add_library( clic_logic
+add_library(
+	clic_logic
+
 	board.cc
 	piece.cc
 	piece_square_tables.cc

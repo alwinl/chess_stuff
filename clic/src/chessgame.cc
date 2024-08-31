@@ -120,9 +120,7 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 		if( square_to == 64 )
 			continue;
 
-		Ply new_ply = Ply( square_from, square_to );
-
-		auto ply_it = std::find_if( plys.begin(), plys.end(), [new_ply]( Ply ply ) { return ply.check_square_match( new_ply ); } );
+		auto ply_it = std::find_if( plys.begin(), plys.end(), [square_from, square_to]( Ply ply ) { return ply.check_square_match( square_from, square_to ); } );
 		if( ply_it == plys.end() ) {
 			disp.print_invalid_move();
 			continue;
@@ -148,9 +146,7 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 
 		Piece::eType promo_type = ((Piece::eType[]){ Piece::knight, Piece::bishop, Piece::rook, Piece::queen})[index];
 
-		new_ply = Ply( square_from, square_to, Piece::none, Piece::none, promo_type );
-
-		ply_it = std::find_if( plys.begin(), plys.end(), [new_ply]( Ply the_ply ) { return the_ply.check_promo_match( new_ply ); } );	// should always find one
+		ply_it = std::find_if( plys.begin(), plys.end(), [promo_type]( Ply the_ply ) { return the_ply.check_promo_match( promo_type ); } );	// should always find one
 
 		apply_move( *ply_it );
 

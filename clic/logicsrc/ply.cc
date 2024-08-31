@@ -23,34 +23,29 @@
 using namespace std;
 
 
-Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type )
+Ply::Builder Ply::create( Piece& piece, uint16_t current_square, uint16_t target_square )
+{
+	return Builder( piece, current_square, target_square);
+}
+
+Ply::Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType capture_type, Piece::eType promo_type, eColor color, bool ep_move )
 {
 	this->ply = 0;
 
+	this->color = color;
 	this->from  = current_square;
 	this->to  = target_square;
 	this->type = current_type;
 
 	this->promo_type = promo_type;
-	this->capture  = ( target_square_type != Piece::none );
+	this->capture  = ( capture_type != Piece::none ) || ep_move;
 	this->castling  = ((current_type == Piece::king) && (std::abs( current_square - target_square) == 2 ));
 	this->ep_candidate =  ((current_type == Piece::pawn) && (std::abs( current_square - target_square) == 16 ));
-	//		uint16_t en_passant : 1;
-	this->king_capture = ( target_square_type == Piece::king );
+	this->en_passant = ep_move;
+	this->king_capture = ( capture_type == Piece::king );
 	//		uint16_t check : 1;
 	//		uint16_t checkmate : 1;
 }
-
-Ply Ply::ep_move( uint16_t current_square, uint16_t target_square )
-{
-	Ply new_ply( current_square, target_square, Piece::pawn );
-
-	new_ply.capture  = true;
-	new_ply.en_passant = true;
-
-	return new_ply;
-}
-
 
 std::string Ply::print_LAN( ) const
 {

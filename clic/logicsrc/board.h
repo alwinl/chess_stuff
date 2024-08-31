@@ -55,7 +55,7 @@ private:
 
 	void process_placement( std::string PiecePlacement );
 
-	int alpha_beta( int alpha, int beta, int depth_left/*, eColor color*/ ) const;
+	int alpha_beta( int alpha, int beta, int depth_left ) const;
 };
 
 #endif // BOARD_H
