@@ -17,6 +17,13 @@
 # MA 02110-1301, USA.
 #
 
-add_subdirectory( logicsrc )
-add_subdirectory( guisrc )
-add_subdirectory( logictest )
+add_library(
+	chess_logic
+
+	chessengine.cc
+	chessgame.cc
+	gamestate.cc
+	piece.cc
+	piece_square_tables.cc
+	ply.cc
+)

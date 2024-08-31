@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/net/dnatechnologies/chess">
-    <file preprocess="xml-stripblanks">guisrc/appui.glade</file>
-    <file>guisrc/pieces.png</file>
-    <file>guisrc/chess.png</file>
-    <file>guisrc/chess.ico</file>
+    <file preprocess="xml-stripblanks">appui.glade</file>
+    <file>pieces.png</file>
+    <file>chess.png</file>
+    <file>chess.ico</file>
   </gresource>
 </gresources>
 

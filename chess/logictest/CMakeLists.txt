@@ -17,6 +17,19 @@
 # MA 02110-1301, USA.
 #
 
-add_subdirectory( logicsrc )
-add_subdirectory( guisrc )
-add_subdirectory( logictest )
+find_package(cppunit)
+
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+
+add_executable(
+	test_chess
+	
+	test_runner.cc
+	testgameobject.cc
+)
+
+target_include_directories( test_chess PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
+target_link_libraries( test_chess ${CPPUNIT_LIBRARIES} chess_logic )
+
+add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
+add_test( TestGameObject::save_load test_chess TestGameObject::save_load )

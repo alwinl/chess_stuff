@@ -17,25 +17,31 @@
  * MA 02110-1301, USA.
  */
 
-#include "testobjectsizes.h"
+#ifndef TESTBOARD_H
+#define TESTBOARD_H
 
-#include "ply.h"
-#include "piece.h"
-#include "board.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-CPPUNIT_TEST_SUITE_REGISTRATION( TestObjectSizes );
-
-void TestObjectSizes::Ply_size_is_32_bit()
+class TestBoard : public CppUnit::TestFixture
 {
-	CPPUNIT_ASSERT_EQUAL( 4ul, sizeof( Ply ) );
-}
+public:
+	CPPUNIT_TEST_SUITE( TestBoard );
 
-void TestObjectSizes::Piece_size_is_16_bit()
-{
-	CPPUNIT_ASSERT_EQUAL( 2ul, sizeof( Piece ) );
-}
+    CPPUNIT_TEST( read_write_FEN );
+    CPPUNIT_TEST( test_pawn_first_move );
+    CPPUNIT_TEST( test_pawn_capture );
+    CPPUNIT_TEST( test_pawn_promotion );
+    CPPUNIT_TEST( test_promo_match );
 
-void TestObjectSizes::Board_size_is_64_x_16_bit()
-{
-	CPPUNIT_ASSERT_EQUAL( 128ul, sizeof( Board ) );
-}
+	CPPUNIT_TEST_SUITE_END();
+
+private:
+    void read_write_FEN();
+	void test_pawn_first_move();
+	void test_pawn_capture();
+	void test_pawn_promotion();
+    void test_promo_match();
+};
+
+#endif // TESTBOARD_H

@@ -23,10 +23,12 @@
 #include <limits>
 
 #include "ply.h"
-#include "display.h"
 
 Board::Board( std::string PiecePlacement )
 {
+	side_to_move = white;
+	ep_square = (uint8_t)-1;
+
 	if( PiecePlacement.empty() )
 		PiecePlacement = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
@@ -84,25 +86,13 @@ std::string Board::piece_placement() const
     return placement;
 }
 
-void Board::print_board( Display& display ) const
+Board Board::make( Ply a_ply ) const
 {
-	display.print_board_header();
+	Board new_board( *this );
 
-    for( int rank=8; rank; --rank ) {
+	new_board.update_board( a_ply );
 
-		display.print_rank_header( rank );
-
-		for( int file=0; file<8; ++file ) {
-
-			int index = (rank - 1) * 8 + file;
-
-			display.print_square( rank, file, position[index].get_type(), position[index].is_color( white ) );
-		}
-
-		display.print_rank_footer( rank );
-    }
-
-    display.print_board_footer();
+	return new_board;
 }
 
 void Board::update_board( Ply a_ply )
@@ -148,13 +138,16 @@ void Board::update_board( Ply a_ply )
 
 		position[to].moved();
 	}
+
+	ep_square = a_ply.is_ep_candidate() ? a_ply.get_ep_square( side_to_move == white ) : (uint8_t)-1;
+	side_to_move = eColor( side_to_move ^ 1 );
 }
 
 
 
 
 
-std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
+std::vector<Ply> Board::generate_plys( /*eColor side, uint16_t ep_square*/ ) const
 {
 	std::vector<Ply> plys;
 
@@ -188,7 +181,7 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 
 		Piece piece = position[square];
 
-		if( ! piece.is_color( side ) || piece.is_of_type( Piece::none ) )
+		if( ! piece.is_color( side_to_move ) || piece.is_of_type( Piece::none ) )
 			continue;
 
 		if( ! piece.is_of_type( Piece::pawn ) ) {
@@ -206,7 +199,7 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 					if( position[target_square].is_of_type( Piece::none ) )	/* quiet move */
 						plys.push_back( Ply(square, target_square, piece.get_type()) );
 					else {
-						if( ! position[target_square].is_color( side ) )
+						if( ! position[target_square].is_color( side_to_move ) ) /* capture move */
 							plys.push_back( Ply(square, target_square, piece.get_type(), position[target_square].get_type()) );
 						break;
 					}
@@ -251,7 +244,7 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 				if( target_square == (uint16_t)-1 )				/* off the board... */
 					continue;
 
-				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side ) ) {	/* something is there, and its their piece */
+				if( !position[target_square].is_of_type( Piece::none ) && ! position[target_square].is_color( side_to_move ) ) {	/* something is there, and its their piece */
 
 					if( target_square / 8 == (piece.is_color( white ) ? 7: 0) ) {		// promotion ranks
 						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType(type + 1) )
@@ -293,20 +286,20 @@ std::vector<Ply> Board::generate_plys( eColor side, uint16_t ep_square ) const
 bool Board::illegal_move( Ply& a_ply ) const
 {
 	// Deduce the color of the player making this move
-	eColor player = (position[a_ply.square_from()].is_color( white ) ? white : black );
+	//eColor player = (position[a_ply.square_from()].is_color( white ) ? white : black );
 	Board test_board(*this);
 
 	test_board.update_board( a_ply );
 
-	std::vector<Ply> opponent_moves = test_board.generate_plys( eColor(player ^ 1), (uint16_t)-1 );
+	std::vector<Ply> opponent_moves = test_board.generate_plys( /*eColor(player ^ 1), (uint16_t)-1*/ );
 
 	return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Ply& opp_move) { return opp_move.is_kingcapture(); }) != opponent_moves.end() );
 
 }
 
-std::vector<Ply> Board::generate_legal_plys( eColor side, uint16_t ep_square ) const
+std::vector<Ply> Board::generate_legal_plys( /*eColor side, uint16_t ep_square*/ ) const
 {
-	std::vector<Ply> moves = generate_plys( side, ep_square );	// grabs all pseudo legal moves
+	std::vector<Ply> moves = generate_plys( /*side, ep_square*/ );	// grabs all pseudo legal moves
 
 	moves.erase( remove_if(moves.begin(), moves.end(), [this](Ply& a_ply) { return this->illegal_move(a_ply); }), moves.end() );	// filter out illegal moves
 
@@ -327,32 +320,23 @@ int Board::evaluate() const
 	return score[white] - score[black];
 }
 
-Board Board::make( Ply a_ply ) const
-{
-	Board new_board( *this );
-
-	new_board.update_board( a_ply );
-
-	return new_board;
-}
-
 /*
  *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
  *	Beta is the best value that the minimizer currently can guarantee at that level or below.
  */
-int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color ) const
+int Board::alpha_beta( int alpha, int beta, int depth_left/*, eColor color*/ ) const
 {
 	if( ! depth_left )
 		return evaluate();
 
-	std::vector<Ply> plys = generate_legal_plys( color, (uint16_t)-1 );	// grabs all legal moves
+	std::vector<Ply> plys = generate_legal_plys( /*color, (uint16_t)-1*/ );	// grabs all legal moves
 
 	int best_score;
 
-	if( color == white ) {		// maximiser
+	if( side_to_move == white ) {		// maximiser
 		best_score = std::numeric_limits<int>::min();
 		for( Ply& ply : plys ) {
-			best_score = std::max( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1, black ) );
+			best_score = std::max( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1/*, black*/ ) );
 			alpha = std::max( alpha, best_score );
 
 			if( beta <= alpha )
@@ -362,7 +346,7 @@ int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color ) const
 	} else {					// minimiser
 		best_score = std::numeric_limits<int>::max();
 		for( Ply& ply : plys ) {
-			best_score = std::min( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1, white ) );
+			best_score = std::min( best_score, make(ply).alpha_beta( alpha, beta, depth_left - 1/*, white*/ ) );
 			beta = std::min( beta, best_score );
 
 			if( beta <= alpha )
@@ -373,9 +357,9 @@ int Board::alpha_beta( int alpha, int beta, int depth_left, eColor color ) const
 	return best_score;
 }
 
-int Board::evaluate_ply( const Ply& ply, int depth, eColor color ) const
+int Board::evaluate_ply( const Ply& ply, int depth/*, eColor color*/ ) const
 {
-	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth, color );
+	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth/*, color*/ );
 }
 
 

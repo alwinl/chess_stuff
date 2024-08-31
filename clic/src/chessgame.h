@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,29 +17,37 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef TESTBOARD_H
-#define TESTBOARD_H
+#ifndef CHESSGAME_H
+#define CHESSGAME_H
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <vector>
 
-class TestBoard : public CppUnit::TestFixture
+#include "ply.h"
+#include "board.h"
+#include "display.h"
+#include "piece.h"
+
+class ChessGame
 {
 public:
-	CPPUNIT_TEST_SUITE( TestBoard );
-
-    CPPUNIT_TEST( read_write_FEN );
-    CPPUNIT_TEST( test_pawn_first_move );
-    CPPUNIT_TEST( test_pawn_capture );
-    CPPUNIT_TEST( test_pawn_promotion );
-
-	CPPUNIT_TEST_SUITE_END();
+	int run( int argc, char *argv[] );
 
 private:
-    void read_write_FEN();
-	void test_pawn_first_move();
-	void test_pawn_capture();
-	void test_pawn_promotion();
+	Display disp;
+	eColor current_player = white;
+	bool is_human[2];
+	Board board;
+	std::vector<Ply> game_moves;
+
+	bool setup();
+	bool game_loop();
+
+    void print_board();
+
+    bool human_move( eColor player, std::vector<Ply> moves );
+	bool ai_move( eColor player, std::vector<Ply> moves );
+	void apply_move( Ply the_move );
+
 };
 
-#endif // TESTBOARD_H
+#endif // CHESSGAME_H

@@ -137,26 +137,10 @@ int* CalcAttackTab2( void )
 int main()
 {
 	CalcAttackTab();
+	int * second = CalcAttackTab2();
 
 	cout << setfill('0') << uppercase << hex;
 
-	for( int i = 0; i< 240; i++ ) {
-		if( !(i%16) )
-			cout << endl << "0x" << setw(2) << abs(i - 0x78) << ": ";
-		else
-			cout << "0x" << setw(2) << (unsigned int)attack[i].pieceset << " ";
-	}
-
-	cout << endl;
-
-	for( int i = 0; i< 240; i++ ) {
-		if( !(i%16) )
-			cout << endl << "0x" << setw(2) << abs(i - 0x78) << ": ";
-		else
-			cout << "0x" << setw(2) << (unsigned int)attack[i].direction << " ";
-	}
-
-	cout << endl;
 	cout << "legend" << endl;
 
 	cout << "king: " << "0x" << setw(2) << (unsigned int )(1 << king) << endl;
@@ -166,7 +150,15 @@ int main()
 	cout << "knight: " << "0x" << setw(2) << (unsigned int )(1 << knight) << endl;
 	cout << "pawn: " << "0x" << setw(2) << (unsigned int )(1 << pawn) << endl;
 
-	int * second = CalcAttackTab2();
+    cout << endl << "Piece tables:\nOriginal:" << endl;
+	for( int i = 0; i< 240; i++ ) {
+		if( !(i%16) )
+			cout << endl << "0x" << setw(2) << abs(i - 0x78) << ": ";
+		else
+			cout << "0x" << setw(2) << (unsigned int)(attack[i].pieceset & 0xFF) << " ";
+	}
+
+	cout << endl << "New:" << endl;
 
 	for( int i = 0; i< 240; i++ ) {
 		if( !(i%16) )
@@ -175,8 +167,15 @@ int main()
 			cout << "0x" << setw(2) << (unsigned int)(second[i] & 0xFF) << " ";
 	}
 
-	cout << endl;
-	cout << endl;
+    cout << endl << "Direction tables:\nOriginal:" << endl;
+	for( int i = 0; i< 240; i++ ) {
+		if( !(i%16) )
+			cout << endl << "0x" << setw(2) << abs(i - 0x78) << ": ";
+		else
+			cout << "0x" << setw(2) << (unsigned int)(attack[i].direction & 0xFF) << " ";
+	}
+
+	cout << endl << "New:" << endl;
 
 	for( int i = 0; i< 240; i++ ) {
 		if( !(i%16) )

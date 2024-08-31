@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
+ * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,25 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef CHESSGAME_H
-#define CHESSGAME_H
-
-#include <vector>
+#include "testobjectsizes.h"
 
 #include "ply.h"
-#include "board.h"
-#include "display.h"
 #include "piece.h"
+#include "board.h"
 
-class ChessGame
+CPPUNIT_TEST_SUITE_REGISTRATION( TestObjectSizes );
+
+void TestObjectSizes::Ply_size_is_32_bit()
 {
-public:
-	int run( int argc, char *argv[] );
+	CPPUNIT_ASSERT_EQUAL( 4ul, (unsigned long)sizeof( Ply ) );
+}
 
-private:
-	Display disp;
-	eColor current_player = white;
-	bool is_human[2];
-	Board board;
-	std::vector<Ply> game_moves;
+void TestObjectSizes::Piece_size_is_16_bit()
+{
+	CPPUNIT_ASSERT_EQUAL( 2ul, (unsigned long)sizeof( Piece ) );
+}
 
-	bool setup();
-	bool game_loop();
-
-	bool human_move( eColor player, std::vector<Ply> moves );
-	bool ai_move( eColor player, std::vector<Ply> moves );
-	void apply_move( Ply the_move );
-
-};
-
-#endif // CHESSGAME_H
+void TestObjectSizes::Board_size_is_64_x_16_bit()
+{
+	CPPUNIT_ASSERT_EQUAL( 136ul, (unsigned long)sizeof( Board ) );
+}

@@ -247,20 +247,25 @@ unsigned int Display::select_gametype()
 
 
 
+// #include <termios.h>
 
 
 void Display::off()
 {
-	tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
-	t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
-	tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
+	// struct termios t;
+
+	// tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
+	// t.c_lflag &= ~ICANON; //Manipulate the flag bits to do what you want it to do
+	// tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
 }
 
 void Display::on()
 {
-	tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
-	t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
-	tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
+	// struct termios t;
+
+	// tcgetattr( STDIN_FILENO, &t ); //get the current terminal I/O structure
+	// t.c_lflag |= ICANON; //Manipulate the flag bits to do what you want it to do
+	// tcsetattr( STDIN_FILENO, TCSANOW, &t ); //Apply the new settings
 }
 
 ostream& Display::ansi_cgi( ostream& os, std::string cgi_sequence )

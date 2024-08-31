@@ -17,6 +17,9 @@
 # MA 02110-1301, USA.
 #
 
-add_subdirectory( logicsrc )
-add_subdirectory( guisrc )
-add_subdirectory( logictest )
+add_library( clic_logic
+	board.cc
+	piece.cc
+	piece_square_tables.cc
+	ply.cc
+)
