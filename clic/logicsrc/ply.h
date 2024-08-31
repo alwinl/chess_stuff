@@ -43,9 +43,7 @@ public:
 	uint16_t get_ep_square()   const { return (ep_candidate == 1) ? to + ( (color == white) ? -8 : 8 ) : (uint16_t)-1; }
 	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
 
-	bool check_square_match( Ply rhs ) const { return (from == rhs.from) && (to == rhs.to); }
 	bool check_square_match( uint16_t rhs_from, uint16_t rhs_to ) const { return (from == rhs_from) && (to == rhs_to); }
-	bool check_promo_match( Ply rhs ) const { return (promo_type == rhs.promo_type); }
 	bool check_promo_match( Piece::eType rhs_promo_type ) const { return (promo_type == rhs_promo_type); }
 
 public:
