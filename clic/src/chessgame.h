@@ -30,7 +30,8 @@
 class ChessGame
 {
 public:
-	int run( int argc, char *argv[] );
+	bool setup();
+	bool game_loop();
 
 private:
 	Display disp;
@@ -38,9 +39,6 @@ private:
 	bool is_human[2];
 	Board board;
 	std::vector<Ply> game_moves;
-
-	bool setup();
-	bool game_loop();
 
     void print_board();
 

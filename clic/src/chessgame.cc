@@ -23,12 +23,14 @@
 #include <chrono>
 #include <thread>
 
-int ChessGame::run( int argc, char *argv[] )
+int main( int argc, char *argv[] )
 {
-	bool quit = setup();
+	ChessGame game;
+
+	bool quit = game.setup();
 
     while( !quit )
-		quit = game_loop();
+		quit = game.game_loop();
 
     return 0;
 }

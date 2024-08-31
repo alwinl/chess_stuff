@@ -19,7 +19,6 @@
 
 add_executable( clic
 	chessgame.cc
-	main.cc
 	display.cc
 )
 
