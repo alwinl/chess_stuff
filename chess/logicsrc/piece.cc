@@ -101,10 +101,12 @@ char Piece::get_code() const
 	return color ? (std::string(" pnbrqk"))[type] : (std::string(" PNBRQK"))[type];
 }
 
+#define REVERSE_RANK_MASK 0b00111000
+
 unsigned int Piece::get_score( uint16_t square ) const
 {
 	if( color )
-		square ^= 56;
+		square ^= REVERSE_RANK_MASK;
 
 	return material_value[type] + square_tables[type][square];
 }

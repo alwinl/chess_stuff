@@ -33,7 +33,7 @@ public:
 
 	static constexpr unsigned int material_value[] = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
 
-	Piece( eType _type = none, eColor _color = white  ) { hasmoved = false; color = _color; type = _type; }
+	Piece( eType _type = none, eColor _color = white  );
 	Piece( char code );
 
 	bool is_color( eColor test_color ) const { return color == test_color; }

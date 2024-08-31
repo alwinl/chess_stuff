@@ -277,6 +277,7 @@ bool GameState::is_valid() const
 
 
 
+#define REVERSE_RANK_MASK 0b00111000
 
 
 GameState GameState::make( Ply a_ply ) const
@@ -323,8 +324,8 @@ GameState GameState::make( Ply a_ply ) const
 			if( (from == 0) || (from == 4) ) new_state.can_castle_queenside[eColor::white] = false;
 			if( (from == 7) || (from == 4) ) new_state.can_castle_kingside[eColor::white]  = false;
 		} else {
-			if( (from == (0^56)) || (from == (4^56)) ) new_state.can_castle_queenside[eColor::black] = false;
-			if( (from == (7^56)) || (from == (4^56)) ) new_state.can_castle_kingside[eColor::black]  = false;
+			if( (from == (0^REVERSE_RANK_MASK)) || (from == (4^REVERSE_RANK_MASK)) ) new_state.can_castle_queenside[eColor::black] = false;
+			if( (from == (7^REVERSE_RANK_MASK)) || (from == (4^REVERSE_RANK_MASK)) ) new_state.can_castle_kingside[eColor::black]  = false;
 		}
 	}
 

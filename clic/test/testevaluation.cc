@@ -50,6 +50,8 @@ void TestEvaluation::test_square_parsing()
 	}
 }
 
+#define REVERSE_RANK_MASK 0b00111000
+
 void TestEvaluation::piece_scores_depend_on_color()
 {
 	for( unsigned int i=0; i<6; ++i ) {
@@ -65,7 +67,7 @@ void TestEvaluation::piece_scores_depend_on_color()
 
 				unsigned int square = parse_square( SAN );
 
-				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ), black_piece.get_score( square ^ 56 ) );
+				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ), black_piece.get_score( square ^ REVERSE_RANK_MASK ) );
 			};
 		};
 	}
