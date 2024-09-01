@@ -30,7 +30,7 @@ using namespace std;
 
 ChessGame::ChessGame( )
 {
-    initial = GameState();
+    initial = Board();
     plys.clear();
 
     tag_pairs = vector<pair<string,string>>{
@@ -51,7 +51,7 @@ void ChessGame::load( std::string pgn_string )
 
 	tag_pairs.clear();
 	plys.clear();
-    initial = GameState();
+    initial = Board();
 
 	while( regex_search( pgn_string, tvpair_match, re_tvpair ) ) {
 		add_tag_pair( tvpair_match[1], tvpair_match[2] );
@@ -61,7 +61,7 @@ void ChessGame::load( std::string pgn_string )
 	regex re_movetext( "(\\d*)\\.\\s(\\S*)\\s(\\S*)?" );
 	smatch movetext_match;
 
-	GameState current;
+	Board current;
 
 	while( regex_search( pgn_string, movetext_match, re_movetext ) ) {
 
@@ -81,7 +81,7 @@ void ChessGame::load( std::string pgn_string )
 
 #define REVERSE_RANK_MASK 0b00111000
 
-void ChessGame::add_ply( eColor color, std::string SAN, GameState& current )
+void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
 {
 	// result
 	if( SAN == "1-0" || SAN == "0-1" || SAN == "1/2-1/2" )
@@ -197,7 +197,7 @@ void ChessGame::set_alternate_starting_position()
 	if( (*SetUp_it).second != "1" )
 		return;
 
-	initial = GameState( (*FEN_it).second );
+	initial = Board( (*FEN_it).second );
 }
 
 std::string ChessGame::save()
@@ -211,7 +211,7 @@ std::string ChessGame::save()
 
 	result += "\n";
 
-	GameState current( initial );
+	Board current( initial );
 	string collected;
 
 	for( unsigned int i = 0; i < plys.size(); ++i ) {

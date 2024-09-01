@@ -120,7 +120,7 @@ std::string Ply::print_LAN( ) const
 	return result;
 }
 
-std::string Ply::print_SAN( const GameState& current_state ) const
+std::string Ply::print_SAN( const Board& current_state ) const
 {
 	if( castling )
 		return (( to > from ) ? "O-O" : "O-O-O");

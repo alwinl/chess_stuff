@@ -27,7 +27,7 @@
 
 using namespace std;
 
-GameState::GameState( std::string FEN )
+Board::Board( std::string FEN )
 {
 	if( FEN.empty() )
 		FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -48,13 +48,13 @@ GameState::GameState( std::string FEN )
 	process_fullmoves( fields[5] );
 }
 
-std::string GameState::FEN() const
+std::string Board::FEN() const
 {
 	return piece_placement() + " " + active_color() + " "  + castle_rights() + " "
 					+ ep_square() + " " + halvemoves() + " " + fullmoves();
 }
 
-void GameState::process_placement( std::string PiecePlacement )
+void Board::process_placement( std::string PiecePlacement )
 {
 	unsigned int rank = 7;
 	unsigned int file = 0;
@@ -75,7 +75,7 @@ void GameState::process_placement( std::string PiecePlacement )
     }
 }
 
-std::string GameState::piece_placement() const
+std::string Board::piece_placement() const
 {
 	string placement;
 
@@ -105,17 +105,17 @@ std::string GameState::piece_placement() const
     return placement;
 }
 
-void GameState::process_active_color( std::string active_color )
+void Board::process_active_color( std::string active_color )
 {
     current_player = (active_color == "w" ) ? eColor::white : eColor::black;
 }
 
-std::string GameState::active_color() const
+std::string Board::active_color() const
 {
 	return (current_player == eColor::white) ? "w" : "b";
 }
 
-void GameState::process_castling( std::string castle_rights )
+void Board::process_castling( std::string castle_rights )
 {
 	can_castle_kingside = map<eColor,bool> { { eColor::white, false}, {eColor::black, false} };
 	can_castle_queenside = map<eColor,bool> { { eColor::white, false}, {eColor::black, false} };
@@ -134,7 +134,7 @@ void GameState::process_castling( std::string castle_rights )
 
 }
 
-std::string GameState::castle_rights() const
+std::string Board::castle_rights() const
 {
 	string result;
 
@@ -146,7 +146,7 @@ std::string GameState::castle_rights() const
 	return result.empty() ? "-" : result;
 }
 
-void GameState::process_ep( std::string ep_input )
+void Board::process_ep( std::string ep_input )
 {
 	if( ep_input == "-" ) {
 		en_passant_target =  (uint16_t)-1;
@@ -157,7 +157,7 @@ void GameState::process_ep( std::string ep_input )
 	en_passant_target += (ep_input[1] - '1') * 8;
 }
 
-std::string GameState::ep_square() const
+std::string Board::ep_square() const
 {
 	if( en_passant_target == (uint16_t)-1)
 		return "-";
@@ -170,22 +170,22 @@ std::string GameState::ep_square() const
 	return SAN;
 }
 
-void GameState::process_halfmoves( std::string halvemoves )
+void Board::process_halfmoves( std::string halvemoves )
 {
     halfmove_clock = std::stoi( halvemoves );
 }
 
-std::string GameState::halvemoves() const
+std::string Board::halvemoves() const
 {
 	return to_string( halfmove_clock );
 }
 
-void GameState::process_fullmoves( std::string fullmoves )
+void Board::process_fullmoves( std::string fullmoves )
 {
     fullmove_number = std::stoi( fullmoves );
 }
 
-std::string GameState::fullmoves() const
+std::string Board::fullmoves() const
 {
 	return to_string( fullmove_number );
 }
@@ -197,19 +197,19 @@ std::string GameState::fullmoves() const
 
 
 
-GameState GameState::set_piece( uint16_t square, char code )
+Board Board::set_piece( uint16_t square, char code )
 {
 	position[ square ] = ( code == ' ' ) ? Piece(Piece::none) : Piece( code );
 	return *this;
 }
 
-GameState GameState::set_active_color( eColor color )
+Board Board::set_active_color( eColor color )
 {
 	current_player = color;
 	return *this;
 }
 
-GameState GameState::set_castle_rights( std::string castle_rights )
+Board Board::set_castle_rights( std::string castle_rights )
 {
 	can_castle_kingside[eColor::white] =
 	can_castle_queenside[eColor::white] =
@@ -227,25 +227,25 @@ GameState GameState::set_castle_rights( std::string castle_rights )
 	return *this;
 }
 
-GameState GameState::set_ep_square( uint16_t square )
+Board Board::set_ep_square( uint16_t square )
 {
 	en_passant_target = square;
 	return *this;
 }
 
-GameState GameState::set_halvemoves( uint16_t number )
+Board Board::set_halvemoves( uint16_t number )
 {
 	halfmove_clock = number;
 	return *this;
 }
 
-GameState GameState::set_fullmoves( uint16_t number )
+Board Board::set_fullmoves( uint16_t number )
 {
 	fullmove_number = number;
 	return *this;
 }
 
-bool GameState::is_valid() const
+bool Board::is_valid() const
 {
 	struct Counts {
 		int KingCount;
@@ -280,9 +280,9 @@ bool GameState::is_valid() const
 #define REVERSE_RANK_MASK 0b00111000
 
 
-GameState GameState::make( Ply a_ply ) const
+Board Board::make( Ply a_ply ) const
 {
-	GameState new_state( *this );
+	Board new_state( *this );
 
 	uint16_t to = a_ply.square_to();
 	uint16_t from = a_ply.square_from();
@@ -339,7 +339,7 @@ GameState GameState::make( Ply a_ply ) const
 	return new_state;
 }
 
-std::vector<Ply> GameState::generate_plys() const
+std::vector<Ply> Board::generate_plys() const
 {
 	vector<Ply> plys;
 
@@ -471,7 +471,7 @@ std::vector<Ply> GameState::generate_plys() const
 	return plys;
 }
 
-std::vector<Ply> GameState::generate_legal_plys() const
+std::vector<Ply> Board::generate_legal_plys() const
 {
 	vector<Ply> moves = generate_plys();	// grabs all pseudo legal moves
 
@@ -486,7 +486,7 @@ std::vector<Ply> GameState::generate_legal_plys() const
 	// Mark check (checkmate) plys
 	auto mark_check = [this](Ply& a_ply)
 	{
-		GameState test = make( a_ply );
+		Board test = make( a_ply );
 		test.current_player = current_player;
 		vector<Ply> plys = test.generate_plys();
 		if( find_if( plys.begin(), plys.end(), [](Ply& ply) { return ply.is_kingcapture(); }) != plys.end() )
@@ -497,7 +497,7 @@ std::vector<Ply> GameState::generate_legal_plys() const
 	return moves;
 }
 
-int GameState::evaluate() const
+int Board::evaluate() const
 {
 	map<eColor,int> score = { {eColor::white, 0}, {eColor::black, 0} };
 
@@ -512,7 +512,7 @@ int GameState::evaluate() const
  *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
  *	Beta is the best value that the minimizer currently can guarantee at that level or below.
  */
-int GameState::alpha_beta( int alpha, int beta, int depth_left ) const
+int Board::alpha_beta( int alpha, int beta, int depth_left ) const
 {
 	if( ! depth_left )
 		return evaluate();
@@ -545,12 +545,12 @@ int GameState::alpha_beta( int alpha, int beta, int depth_left ) const
 	return best_score;
 }
 
-int GameState::evaluate_ply( const Ply& ply, int depth ) const
+int Board::evaluate_ply( const Ply& ply, int depth ) const
 {
 	return make(ply).alpha_beta( std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), depth );
 }
 
-std::array<char,64> GameState::get_position_codes() const
+std::array<char,64> Board::get_position_codes() const
 {
 	std::array<char, 64> positions_codes;
 

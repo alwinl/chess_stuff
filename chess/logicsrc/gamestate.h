@@ -28,24 +28,24 @@
 #include "piece.h"
 #include "ply.h"
 
-class GameState
+class Board
 {
 public:
-	GameState( std::string FEN = "" );
+	Board( std::string FEN = "" );
 	std::string FEN() const;
 
-	GameState set_piece( uint16_t square, char code );
-	GameState set_active_color( eColor color );
-	GameState set_castle_rights( std::string castle_rights );
-	GameState set_ep_square( uint16_t square );
-	GameState set_halvemoves( uint16_t number );
-	GameState set_fullmoves( uint16_t number );
+	Board set_piece( uint16_t square, char code );
+	Board set_active_color( eColor color );
+	Board set_castle_rights( std::string castle_rights );
+	Board set_ep_square( uint16_t square );
+	Board set_halvemoves( uint16_t number );
+	Board set_fullmoves( uint16_t number );
 	bool is_valid() const;
 
 	std::vector<Ply> generate_legal_plys() const;
 
 	int evaluate() const;
-	GameState make( Ply a_ply ) const;
+	Board make( Ply a_ply ) const;
 
 	eColor get_current_colour() const { return current_player; };
 	Piece::eType get_type_on_square( uint16_t square ) const { return position[square].get_type(); }

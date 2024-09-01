@@ -51,12 +51,12 @@ public:
 	void visit_plys( ChessGameVisitorBase* processor );
 
 private:
-    GameState initial;
+    Board initial;
     std::vector<Ply> plys;
 
     std::vector<std::pair<std::string, std::string> > tag_pairs;
 
-	void add_ply( eColor color, std::string SAN, GameState& current );
+	void add_ply( eColor color, std::string SAN, Board& current );
 	void set_alternate_starting_position();
 };
 

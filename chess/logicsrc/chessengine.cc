@@ -41,7 +41,7 @@ void ChessEngine::new_game( int game_type )
 	}
 
     game = ChessGame();
-    current_state = GameState();
+    current_state = Board();
 }
 
 bool ChessEngine::load_game( std::string filename )
@@ -82,7 +82,7 @@ bool ChessEngine::save_game( std::string filename )
 
 void ChessEngine::arranging_start()
 {
-    arrange_state = GameState( "8/8/8/8/8/8/8/8 w KQkq - 0 1" );
+    arrange_state = Board( "8/8/8/8/8/8/8/8 w KQkq - 0 1" );
     is_arranging = true;
 }
 
@@ -346,7 +346,7 @@ int ChessEngine::evaluate_ply( const Ply& ply, int depth, eColor color ) const
  *	Alpha is the best value that the maximizer currently can guarantee at that level or above.
  *	Beta is the best value that the minimizer currently can guarantee at that level or below.
  */
-int ChessEngine::alpha_beta( GameState state, int alpha, int beta, int depth_left, eColor color ) const
+int ChessEngine::alpha_beta( Board state, int alpha, int beta, int depth_left, eColor color ) const
 {
 	if( ! depth_left )
 		return state.evaluate();
@@ -358,7 +358,7 @@ int ChessEngine::alpha_beta( GameState state, int alpha, int beta, int depth_lef
 	if( color == eColor::white ) {		// maximiser
 		best_score = numeric_limits<int>::min();
 		for( Ply& ply : plys ) {
-			GameState new_state = state.make(ply);
+			Board new_state = state.make(ply);
 			best_score = max( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, eColor::black ) );
 			alpha = max( alpha, best_score );
 
@@ -369,7 +369,7 @@ int ChessEngine::alpha_beta( GameState state, int alpha, int beta, int depth_lef
 	} else {					// minimiser
 		best_score = numeric_limits<int>::max();
 		for( Ply& ply : plys ) {
-			GameState new_state = state.make(ply);
+			Board new_state = state.make(ply);
 			best_score = min( best_score, alpha_beta( new_state, alpha, beta, depth_left - 1, eColor::white ) );
 			beta = min( beta, best_score );
 

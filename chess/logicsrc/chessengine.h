@@ -99,8 +99,8 @@ private:
 
 	ChessGame game;
 
-	GameState current_state;
-	GameState arrange_state;
+	Board current_state;
+	Board arrange_state;
     STInfo info;
 
     std::string game_filename = "";
@@ -115,7 +115,7 @@ private:
 	bool is_multi_player() const { return is_human.at(eColor::white) && is_human.at(eColor::black); }
 
 	int evaluate_ply( const Ply& ply, int depth_left, eColor color ) const;
-	int alpha_beta( GameState state, int alpha, int beta, int depth_left, eColor color ) const;
+	int alpha_beta( Board state, int alpha, int beta, int depth_left, eColor color ) const;
 
 	void game_over();
 };
