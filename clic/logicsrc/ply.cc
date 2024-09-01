@@ -113,9 +113,12 @@ std::string Ply::print_SAN( vector<Ply>& legal_plys ) const
 	} else if( capture ) {
 		result += (char)('a' + (from % 8));
 	}
+
+	if( capture )
+		result += 'x';
 	// end of san unique
 
-	result += ( capture ? 'x' : '-' );
+
 	result += (char)('a' + (to % 8));
 	result += (char)('1' + (to / 8) );
 

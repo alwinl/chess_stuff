@@ -19,12 +19,15 @@
 
 find_package( cppunit REQUIRED )
 
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+
 include_directories( ${CPPUNIT_INCLUDE_DIRS} )
 link_directories( ${CPPUNIT_LIBRARY_DIRS} )
 link_libraries( ${CPPUNIT_LIBRARIES} )
 
 add_executable( clic_test
 	testclic.cc
+	testgameobject.cc
 	testboard.cc
 	testboard.h
 	testevaluation.cc
@@ -54,3 +57,6 @@ add_test( TestEvaluation::queen_should_not_capture_rook clic_test TestEvaluation
 add_test( TestObjectSizes::Ply_size_is_32_bit clic_test TestObjectSizes::Ply_size_is_32_bit )
 add_test( TestObjectSizes::Piece_size_is_8_bit clic_test TestObjectSizes::Piece_size_is_8_bit )
 add_test( TestObjectSizes::Board_size_is_64_plus_8_bytes clic_test TestObjectSizes::Board_size_is_64_plus_8_bytes )
+
+add_test( TestGameObject::create_object clic_test TestGameObject::create_object )
+add_test( TestGameObject::save_load clic_test TestGameObject::save_load )

@@ -33,6 +33,8 @@ public:
 	std::string print_LAN() const;
 	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
 
+	void set_check() { check = 1; }		// not happy with this function
+
 	uint16_t square_from() const { return from; };
 	uint16_t square_to() const { return to; };
 	bool is_ep_candidate() const { return ep_candidate == 1; };

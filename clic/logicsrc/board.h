@@ -50,7 +50,6 @@ private:
 	uint16_t ep_square;
 	eColor side_to_move;
 
-	bool illegal_move( Ply &a_ply ) const;
 	std::vector<Ply> generate_plys() const;
 
 	void process_placement( std::string PiecePlacement );
