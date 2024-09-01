@@ -17,6 +17,8 @@
  * MA 02110-1301, USA.
  */
 
+#include <algorithm>
+
 #include "ply.h"
 #include "piece.h"
 
@@ -57,8 +59,11 @@ std::string Ply::print_LAN() const
 	if( type != Piece::pawn )
 		result += string( "E NBRQK" )[type];
 
+	// this bit is unique for lan
 	result += (char)( 'a' + ( from % 8 ) );
 	result += (char)( '1' + ( from / 8 ) );
+	// end of lan unique
+
 	result += ( capture ? 'x' : '-' );
 	result += (char)( 'a' + ( to % 8 ) );
 	result += (char)( '1' + ( to / 8 ) );
@@ -70,6 +75,57 @@ std::string Ply::print_LAN() const
 		result += '+'; // "†";
 
 	if( checkmate )
+		result += '#'; // "‡";
+
+	return result;
+}
+
+std::string Ply::print_SAN( vector<Ply>& legal_plys ) const
+{
+	if( castling )
+		return (( to > from ) ? "O-O" : "O-O-O");
+
+	string result;
+
+	if( type != Piece::pawn )
+		result += string("E NBRQK")[type];
+
+	// this bit is unique to san
+	if( type != Piece::pawn ) {
+
+		auto piece_with_same_target = [&](Ply& ply){ return (type == ply.type) && (to == ply.to) && (promo_type == ply.promo_type); };
+
+		// insert either file or rank (or both) if there is more than one piece that can make this move
+		if( std::count_if( legal_plys.begin(), legal_plys.end(), piece_with_same_target ) != 1 ) {
+
+			auto same_file_of_departure = [&](Ply& ply) { return (type == ply.type) && (to == ply.to) && (promo_type == ply.promo_type) && ( (from % 8)  == (ply.from % 8)  ); };
+			auto same_rank_of_departure = [&](Ply& ply) { return (type == ply.type) && (to == ply.to) && (promo_type == ply.promo_type) && ( (from / 8)  == (ply.from / 8)  ); };
+
+			if( std::count_if( legal_plys.begin(), legal_plys.end(), same_file_of_departure ) == 1 )			// file inclusion resolves conflict
+				result += (char)('a' + (from % 8));
+			else if( std::count_if( legal_plys.begin(), legal_plys.end(), same_rank_of_departure ) == 1 )	// rank inclusion resolves conflict
+				result += (char)('1' + (from / 8) );
+			else {																						// need both file and rank to resolve conflict
+				result += (char)('a' + (from % 8));
+				result += (char)('1' + (from / 8) );
+			}
+		}
+	} else if( capture ) {
+		result += (char)('a' + (from % 8));
+	}
+	// end of san unique
+
+	result += ( capture ? 'x' : '-' );
+	result += (char)('a' + (to % 8));
+	result += (char)('1' + (to / 8) );
+
+	if( promo_type != Piece::none )
+		result += "=" + string("E NBRQK")[promo_type];
+
+	if( check )
+		result += '+'; // "†";
+
+	if( checkmate)
 		result += '#'; // "‡";
 
 	return result;

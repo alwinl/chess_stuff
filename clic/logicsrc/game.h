@@ -20,9 +20,32 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <vector>
+#include <string>
+#include <utility>
+
+#include "board.h"
+#include "ply.h"
+
 class Game
 {
+public:
+	Game();
 
+	void load( std::string pgn_string );
+	std::string save();
+
+	void add_tag_pair( std::string tag, std::string value );
+
+
+private:
+    Board initial;
+    std::vector<Ply> moves;
+
+    std::vector<std::pair<std::string, std::string> > tag_pairs;
+
+	void set_alternate_starting_position();
+	void add_ply( eColor color, std::string SAN, Board& current );
 };
 
 #endif

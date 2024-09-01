@@ -20,6 +20,7 @@
 #ifndef PLY_H
 #define PLY_H
 
+#include <vector>
 #include <cstdint>
 #include <string>
 
@@ -30,6 +31,7 @@ class Ply
 public:
 	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
 	std::string print_LAN() const;
+	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
 
 	uint16_t square_from() const { return from; };
 	uint16_t square_to() const { return to; };
@@ -42,16 +44,18 @@ public:
 	uint16_t get_castling_rook_square_from() const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
 	uint16_t get_castling_rook_square_to() const { return to + ( ( to > from ) ? -1 : +1 ); };
 	uint16_t get_ep_square() const
-	{
-		return ( ep_candidate == 1 ) ? to + ( (from < to) ? -8 : 8 ) : (uint16_t)-1;
-	}
+		{ return ( ep_candidate == 1 ) ? to + ( (from < to) ? -8 : 8 ) : (uint16_t)-1; }
+
 	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
 
+
 	bool check_square_match( uint16_t rhs_from, uint16_t rhs_to ) const
-	{
-		return ( from == rhs_from ) && ( to == rhs_to );
-	}
+		{ return ( from == rhs_from ) && ( to == rhs_to ); }
+
 	bool check_promo_match( Piece::eType rhs_promo_type ) const { return ( promo_type == rhs_promo_type ); }
+
+	bool check_san_match( uint16_t rhs_target_square, Piece::eType rhs_current_type, Piece::eType rhs_promo_type) const
+		{ return (to == rhs_target_square) && (type == rhs_current_type) && (promo_type == rhs_promo_type); };
 
 public:
 	class Builder;
