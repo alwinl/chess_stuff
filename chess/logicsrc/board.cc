@@ -19,7 +19,7 @@
  *
  */
 
-#include "gamestate.h"
+#include "board.h"
 
 #include <algorithm>
 #include <limits>

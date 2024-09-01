@@ -24,7 +24,7 @@
 #include <string>
 #include <utility>
 
-#include "gamestate.h"
+#include "board.h"
 #include "ply.h"
 
 class ChessGameVisitorBase

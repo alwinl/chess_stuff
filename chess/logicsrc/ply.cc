@@ -21,7 +21,7 @@
 
 #include "ply.h"
 #include "piece.h"
-#include "gamestate.h"
+#include "board.h"
 
 #include <stdexcept>
 #include <algorithm>

@@ -25,7 +25,7 @@
 #include <array>
 
 #include "chessgame.h"
-#include "gamestate.h"
+#include "board.h"
 
 /** \brief
  */

@@ -22,7 +22,7 @@ add_library(
 
 	chessengine.cc
 	chessgame.cc
-	gamestate.cc
+	board.cc
 	piece.cc
 	piece_square_tables.cc
 	ply.cc

@@ -17,8 +17,8 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef GAMESTATE_H
-#define GAMESTATE_H
+#ifndef BOARD_H
+#define BOARD_H
 
 #include <string>
 #include <array>
@@ -82,4 +82,4 @@ private:
 	int alpha_beta( int alpha, int beta, int depth_left ) const;
 };
 
-#endif // GAMESTATE_H
+#endif // BOARD_H
