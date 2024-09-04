@@ -23,6 +23,20 @@ int PawnDir[2] = {0x10, -0x10};
 int GeneratedMoveCount, BufPnt;
 static MOVESTRUCT GeneratedMoves[81];
 
+void add_generated_move( MOVESTRUCT move )
+{
+
+}
+
+void clear_generated_moves()
+{
+
+}
+
+// MOVESTRUCT get_generated_move()
+// {
+// 	return MOVESTRUCT();
+// }
 
 /****************************************************************************/
 
@@ -285,7 +299,7 @@ static void NonCapMovGen( ENUMCOLOR acolour )
 {
     MOVESTRUCT new_move;
 
-    for( index = get_total_piece_count(acolour); index >= 0; index-- ) {
+    for( int index = get_total_piece_count(acolour); index >= 0; index-- ) {
 
 		PIECETAB player_piece = PieceTab[acolour][index];
 

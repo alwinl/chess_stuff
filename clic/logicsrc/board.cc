@@ -248,9 +248,9 @@ std::vector<Ply> Board::generate_plys() const
 			}
 
 			/* capture moves */
-			for( int counter = 0; counter < 2; ++counter ) {
+			for( int offset : {9, 11}/*counter = 0; counter < 2; ++counter*/ ) {
 
-				int offset = ( ( counter == 0 ) ? 9 : 11 );
+				// int offset = ( ( counter == 0 ) ? 9 : 11 );
 
 				if( piece.is_color( black ) )
 					offset *= -1;
@@ -299,22 +299,28 @@ std::vector<Ply> Board::generate_plys() const
 
 std::vector<Ply> Board::generate_legal_plys() const
 {
+	auto king_capture = [](Ply& move) { return move.is_kingcapture(); };
+
 	std::vector<Ply> moves = generate_plys(); // grabs all pseudo legal moves
 
-	auto illegal_move = [this](Ply& a_ply)
+	auto illegal_move = [this, king_capture](Ply& a_ply)
 	{
-		std::vector<Ply> opponent_moves = make( a_ply ).generate_plys();
-		return ( find_if( opponent_moves.begin(), opponent_moves.end(), [](Ply& opp_move) { return opp_move.is_kingcapture(); }) != opponent_moves.end() );
+		Board test = make( a_ply );
+		std::vector<Ply> opponent_moves = test.generate_plys();
+		auto it = find_if( opponent_moves.begin(), opponent_moves.end(), king_capture );
+
+		return (  it != opponent_moves.end() );
 	};
 	moves.erase( remove_if(moves.begin(), moves.end(), illegal_move ), moves.end() );
 
 	// Mark check (checkmate) plys
-	auto mark_check = [this](Ply& a_ply)
+	auto mark_check = [this, king_capture](Ply& a_ply)
 	{
 		Board test = make( a_ply );
 		test.side_to_move = eColor( test.side_to_move ^ 1 );
 		std::vector<Ply> plys = test.generate_plys();
-		if( find_if( plys.begin(), plys.end(), [](Ply& ply) { return ply.is_kingcapture(); }) != plys.end() )
+		auto it = find_if( plys.begin(), plys.end(), king_capture );
+		if( it != plys.end() )
 			a_ply.set_check();
 	};
 	for_each( moves.begin(), moves.end(), mark_check );
