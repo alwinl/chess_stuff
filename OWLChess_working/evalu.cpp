@@ -146,8 +146,8 @@ static void remove_pawn( PAWNBITTYPE * entry, unsigned char file )
 
 static void add_pawn( PAWNBITTYPE * entry, unsigned char file )
 {
-    entry->dob  |= ( entry->one &  (1 << new_file) ); // if there already is a pawn on the file, this will signal a double pawn
-    entry->one  |= (1 << new_file);
+    entry->dob  |= ( entry->one &  (1 << file) ); // if there already is a pawn on the file, this will signal a double pawn
+    entry->one  |= (1 << file);
 }
 
 /*
