@@ -1,0 +1,9 @@
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../OWLChess_Original/OPENING.LIB DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(RENAME ${CMAKE_CURRENT_BINARY_DIR}/OPENING.LIB ${CMAKE_CURRENT_BINARY_DIR}/opening.lib)
+
+add_executable(
+	openinglib_test
+
+	main.cc
+)
