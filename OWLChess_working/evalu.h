@@ -22,9 +22,11 @@
 #ifndef EVALU_H_INCLUDED
 #define EVALU_H_INCLUDED
 
-int StatEvalu( MOVESTRUCT *amove );
-void CalcPVTable( void );
-void ClearPVTable( void );
+#include "wcdefs.h"
 
+void ClearPVTable( void );
+void CalcPVTable( void );
+int CalcRootvalue();
+int StatEvalu( MOVESTRUCT *amove );
 
 #endif // EVALU_H_INCLUDED

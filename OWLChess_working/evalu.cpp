@@ -1,15 +1,12 @@
 // OWLCVT 08/22/97 02:11:38
 // ObjectWindows - (C) Copyright 1992 by Borland International
 
-#include <math.h>
-#include "wcdefs.h"
-//#include "externs.h"
-
-#include <cstring>
-
+#include "evalu.h"
+#include <string.h>
+#include <cmath>
 #include "search.h"
 #include "board.h"
-#include "small.h"
+// #include "small.h"
 
 #undef max
 #undef min
@@ -32,29 +29,30 @@ struct PAWNBITTYPE {
 };
 
 /*
- *  external variables
- */
-
-int                 RootValue;
-int                 PositionValueTable[2][7][0x78];
-
-/*
  *  Global variables for this module
  */
+const char          pawnrank[8]            = { 0, 0, 0, 2, 4, 8, 30, 0 };
+const char          pawnfilefactor[8]      = { 0, 0, 2, 5, 6, 2, 0, 0 };
+const unsigned char filebittab[8]          = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
 static int          PieceValue[7]          = { 0, 0x1000, 0x900, 0x4c0, 0x300, 0x300, 0x100 };
 //static int          PieceValue[7]          = { 0, (16 << 4), (9 << 4), (5 << 4), (3 << 4), (3 << 4), (1 << 4) };
-const char          pawnrank[8]            = { 0, 0, 0, 2, 4, 8, 30, 0 };
-const char          passpawnrank[8]        = { 0, 0, 10, 20, 40, 60, 70, 0 };
-const char          pawnfilefactor[8]      = { 0, 0, 2, 5, 6, 2, 0, 0 };
 
-const unsigned char filebittab[8]          = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
-
-PAWNBITTYPE         pawnbitt[2][MAXPLY + 2];
+static int PositionValueTable[2][7][0x78];
+static PAWNBITTYPE pawnbitt[2][MAXPLY + 2];
 
 
 
 
+void SetPieceValues( int NewValues[7] )
+{
+    memcpy( PieceValue, NewValues, 7 * sizeof( int ) );
+}
+
+void GetPieceValues( int OutValues[7] )
+{
+    memcpy( OutValues, PieceValue, 7 * sizeof( int ) );
+}
 
 
 /*
@@ -79,17 +77,20 @@ static int count_bits( unsigned char b )
 	However for some reason the files are reversed.
 	So for instance 0x10011000 does not mean pawns on the a, d and e files but pawns on the d, e and h files.
 */
-void BuildPawnTable( unsigned char PawnTable[], ENUMCOLOR color, BOARDTYPE board[] )
+void BuildPawnTable( unsigned char table[], ENUMCOLOR color, BOARDTYPE board[] )
 {
-	memset( PawnTable, 0, 8 );
+	memset( table, 0, 8 );
 
     for( unsigned int square = 0x00; square < 0x78; ++square ) {
         if( VALIDSQUARE( square ) && ( board[ square ].piece == pawn ) && (Board[ square ].color == color) ) {
 
-            int rank = ( color == black ) ? (square ^ 0x70) >> 4 : (square >> 4);
-			unsigned char file = square & 0x07;
+            unsigned char rank = (square >> 4);
+			unsigned char file = (square & 0x07);
 
-            PawnTable[rank] |= (1 << file);
+            if( color == black )
+                rank ^= 0x07;
+
+            table[rank] |= (1 << file);
         }
     }
 }
@@ -97,43 +98,24 @@ void BuildPawnTable( unsigned char PawnTable[], ENUMCOLOR color, BOARDTYPE board
 /*
  * Initialize pawnbitt (at depth 0)
  *
- * pawnbitt[depth].one contains a byte where each bit represent the presence of a pawn somewhere on that file
- * thus if pawnbitt[depth].one returns as 0x0100110 we know that we have pawn(s) on the b, c, and g files
+ * pawnbitt.one contains a byte where each bit represent the presence of a pawn somewhere on that file
+ * thus if pawnbitt.one returns as 0x0100110 we know that we have pawn(s) on the b, c, and g files
  * (remember PawnTable is reversed). There could be more than one pawn on the file.
  * The corresponding bit in dob will tell us if there is more than one pawn on the file.
  */
-static void InitPawnbitt( PAWNBITTYPE PawnBitt[], unsigned char PawnTable[] )
+static PAWNBITTYPE InitPawnbitt( unsigned char table[] )
 {
-    PawnBitt[0].one = 0;
-    PawnBitt[0].dob = 0;
+    PAWNBITTYPE pawn_bitt;
 
-    for( int sq_rank = 1; sq_rank < 7; sq_rank++ ) {
-        PawnBitt[0].dob |= ( PawnBitt[0].one & PawnTable[sq_rank] );
-        PawnBitt[0].one |= PawnTable[sq_rank];
+    pawn_bitt.one = 0;
+    pawn_bitt.dob = 0;
+
+    for( int rank = 1; rank < 7; rank++ ) {
+        pawn_bitt.dob |= ( pawn_bitt.one & table[rank] );
+        pawn_bitt.one |= table[rank];
     }
-}
 
-static void CalcPawnBit( PAWNBITTYPE PawnBitt[], short depth )
-{
-    PawnBitt[ depth ] = PawnBitt[ depth - 1 ];  /*  calculate pawnbitt  */
-}
-
-/**
- * \brief Calculate value of the pawn structure in pawnbitt[color][depth]
- *
- * The maximum value is 0. In this case there are no isolated pawns
- * and no double pawns.
- * We penalise based on the amount of double pawns, we penalise based
- * on the amount of isolated pawns we have and give it a double whammy
- * for pawns that are isolated and double.
- */
-static int pawnstrval( PAWNBITTYPE * entry )
-{
-    unsigned char isolated_pawns = entry->one & ~( (entry->one << 1) | (entry->one >> 1) );
-
-    return ( -( count_bits( entry->dob ) * DOUBLEPAWN
-               + count_bits( isolated_pawns ) * ISOLATEDPAWN
-               + count_bits( isolated_pawns & entry->dob ) * ISOLATEDPAWN * 2 ) );
+    return pawn_bitt;
 }
 
 static void remove_pawn( PAWNBITTYPE * entry, unsigned char file )
@@ -146,40 +128,28 @@ static void remove_pawn( PAWNBITTYPE * entry, unsigned char file )
 
 static void add_pawn( PAWNBITTYPE * entry, unsigned char file )
 {
-    entry->dob  |= ( entry->one &  (1 << file) ); // if there already is a pawn on the file, this will signal a double pawn
+    entry->dob  |= ( entry->one &  (1 << file) ); // if there already is a pawn on the file, this will now signal a double pawn
     entry->one  |= (1 << file);
 }
 
-/*
- *  Update pawnbitt and calculates value difference with current position when a pawn is removed from file
+/**
+ * \brief Calculate value of the pawn structure
+ *
+ * The maximum value is 0. In this case there are no isolated pawns
+ * and no double pawns.
+ * We penalise based on the amount of double pawns, we penalise based
+ * on the amount of isolated pawns we have and give it a double whammy
+ * for pawns that are isolated and double.
  */
-static int decpawnstrval( ENUMCOLOR color, unsigned char file, short depth )
+static int pawnstrval( PAWNBITTYPE * entry )
 {
-	PAWNBITTYPE * entry = &pawnbitt[color][depth];
+    unsigned char isolated_pawns = entry->one & ~( (entry->one << 1) | (entry->one >> 1) );
 
-    entry->one &= ~( 1 << file );
-    entry->one |= entry->dob;
-
-    entry->dob &= ~( 1 << file );
-
-    return( pawnstrval( &pawnbitt[color][depth] ) - pawnstrval( &pawnbitt[color][depth - 1] ) );
-}
-
-/*
- *  Update pawnbitt and calculates value when a pawn moves from old to new1 file
- */
-static int movepawnstrval( ENUMCOLOR color, unsigned char new_file, unsigned char old_file, short depth )
-{
-	PAWNBITTYPE * entry = &pawnbitt[color][depth];
-
-    entry->dob  |= ( entry->one &  (1 << new_file) );
-
-    entry->one   = ( entry->one & ~(1 << old_file) );
-    entry->one  |= ( entry->dob |  (1 << new_file) );
-
-    entry->dob  &= ~(1 << old_file);
-
-    return( pawnstrval( &pawnbitt[color][depth] ) - pawnstrval( &pawnbitt[color][depth - 1] ) );
+    return (
+        - count_bits( entry->dob ) * DOUBLEPAWN
+        - count_bits( isolated_pawns ) * ISOLATEDPAWN
+        - count_bits( isolated_pawns & entry->dob ) * ISOLATEDPAWN * 2
+    );
 }
 
 
@@ -221,8 +191,13 @@ static char calc_attack_value( ENUMCOLOR color, int square, int mat_level )
 	const char squarerankvalue[8] = { 0, 0, 0, 0, 3, 6, 12, 12 };
     const char distance_from_center[8] = { 3, 2, 1, 0, 0, 1, 2, 3 };
 
-	int rank = (color == white) ? (square >> 4) : 7 - (square >> 4);	/* calculate the rank from the colours perspective */
+	int rank = square >> 4;
 	int file = square & 0x0F;
+    ENUMCOLOR opponent = (color == white) ? black : white;
+
+    if( color == black )
+        rank ^= 0x07;
+
 
 	/* mat_level ranges from 0 to 78
 	 * squarerankvalue[rank] * ( mat_level + 8 ) ranges 0..1032
@@ -232,7 +207,7 @@ static char calc_attack_value( ENUMCOLOR color, int square, int mat_level )
 	char rank_importance = ( ( squarerankvalue[rank] * ( mat_level + 8 ) ) >> 5 ); /* range 0..32 */
 
 	char centre_importance = max( 0, 8 - 3 * ( distance_from_center[rank] + distance_from_center[file] ) );
-	char king_importance = ( (mat_level > 0) && squares_are_neighbours( square, get_king_square( color == white ? black : white ) ) ) ? ( ( 12 * ( mat_level + 8 ) ) >> 5 ) : 0;
+	char king_importance = ( (mat_level > 0) && squares_are_neighbours( square, get_king_square( opponent ) ) ) ? ( ( 12 * ( mat_level + 8 ) ) >> 5 ) : 0;
 
 	return rank_importance + centre_importance + king_importance;
 }
@@ -246,17 +221,14 @@ static char calc_attack_value( ENUMCOLOR color, int square, int mat_level )
  */
 void ClearPVTable( void )
 {
-    for( ENUMPIECE piece = king; piece <= pawn; piece = ENUMPIECE(piece + 1) )
-        for( int square = 0; square <= 0x77; square++ ) {
-            PositionValueTable[ white ][ piece ][ square ] = 0;
-            PositionValueTable[ black ][ piece ][ square ] = 0;
-        }
+    memset( PositionValueTable, 0, sizeof(int) * 2 * 7 * 0x78 );
 }
 
 /**
  * \brief Calculate the value of a piece on a certain square
  *
- * This function gets called just before we start evaluating moves
+ * This function gets called just before we start evaluating moves.
+ * It builds the positional value tables (piece square tables) and the current boards pawn structure evaluation
  */
 void CalcPVTable( void )
 {
@@ -267,7 +239,7 @@ void CalcPVTable( void )
     //int           posval;													/*  The positional value of piece  */
     //int           attval;													/*  The attack value of the square  */
     //unsigned char file;														/*  The file of the piece  */
-    unsigned char rank;														/*  The rank of the piece  */
+    //unsigned char rank;														/*  The rank of the piece  */
     //char          dist;											/*  Distance to center, to opponents king */
     //char          kingdist;											/*  Distance to center, to opponents king */
     //ENUMCASTDIR   cast;														/*  Possible castlings  */
@@ -319,19 +291,9 @@ void CalcPVTable( void )
 
 
     /*  Initialise PVControl  */
-    int           pvcontrol[2][5][0x78];										/*  Value of squares controlled from the square  */
-    for( int square = 0x00; square < 0x78; ++square ) {
-        if( VALIDSQUARE( square ) ) {
-			pvcontrol[ white ][ rook ][ square ] = 0;
-			pvcontrol[ black ][ rook ][ square ] = 0;
-			pvcontrol[ white ][ bishop ][ square ] = 0;
-			pvcontrol[ black ][ bishop ][ square ] = 0;
-			pvcontrol[ white ][ knight ][ square ] = 0;
-			pvcontrol[ black ][ knight ][ square ] = 0;
-			pvcontrol[ white ][ queen ][ square ] = 0;
-			pvcontrol[ black ][ queen ][ square ] = 0;
-        }
-    }
+    int pvcontrol[2][7][0x78];										/*  Value of squares controlled from the square  */
+
+    memset( pvcontrol, 0, sizeof(int) * 2 * 7 * 0x78 );
 
     /*  Calculate PVControl  */
 	/*  Count value of all attacks from the square in the direction.
@@ -354,137 +316,111 @@ void CalcPVTable( void )
 
 		for( color = white; color <= black; color = ENUMCOLOR(color + 1) ) {
 
-			/* Calculate bishop and rook values */
-			for( int dir = 0; dir < 8; ++dir ) {
+            if( ! mating ) {                // if we are mating we don't need to calculate these values, they will be zero
 
-				cnt = 0;
-				direct = 1;
+                /* Calculate bishop and rook values */
+                for( int dir = 0; dir < 8; ++dir ) {
 
-				/* Run through the line. If we run off the board or stomp on a pawn we stop */
-				for( int sq = square; VALIDSQUARE( sq ) && ( Board[ sq ].piece != pawn ); sq += dir_table[ dir ] ) {
+                    cnt = 0;
+                    direct = 1;
+                    ENUMPIECE piece_type = ((dir < 4) ? rook : bishop);
 
-					// add the attack value of this square to the running total
-					cnt += ( direct ? attackvalue[ color ][ sq ] : ( attackvalue[ color ][ sq ] >> 1 ) );
+                    /* Run through the line. If we run off the board or stomp on a pawn we stop */
+                    for( int sq = square; VALIDSQUARE( sq ) && ( Board[ sq ].piece != pawn ); sq += dir_table[ dir ] ) {
 
-					/* check if there is a (different) piece blocking the way */
-					if( ( Board[ sq ].piece != no_piece ) && ( Board[ sq ].piece != queen ) && Board[ sq ].piece != ((dir < 4) ? rook : bishop) )
-						direct = 0;
-				}
+                        // add the attack value of this square to the running total
+                        cnt += ( direct ? attackvalue[ color ][ sq ] : ( attackvalue[ color ][ sq ] >> 1 ) );
 
-				pvcontrol[ color ][ ((dir < 4) ? rook : bishop) ][ square ] += ( cnt >> 2 );
-			}
+                        /* check if there is a (different) piece blocking the way */
+                        if( ( Board[ sq ].piece != no_piece ) && ( Board[ sq ].piece != queen ) && Board[ sq ].piece != piece_type )
+                            direct = 0;
+                    }
 
-			/* Calculate the knight value */
-			cnt = 0;
-			for( int dir = 0; dir < 8; dir++ ) {
-				sq = square + knight_dir[dir];
-				if( VALIDSQUARE( sq ) )
-					cnt += attackvalue[color][sq];
-			}
+                    PositionValueTable[ color ][piece_type][ square ] += ( cnt >> 2 );
+                }
 
-			pvcontrol[ color ][ knight ][ square ] = ( cnt >> 1 );
+                /* Calculate the knight value. If we are mating the value is 0 */
+                cnt = 0;
+                for( int dir = 0; dir < 8; dir++ ) {
+                    sq = square + knight_dir[dir];
+                    if( VALIDSQUARE( sq ) )
+                        cnt += attackvalue[color][sq];
+                }
 
-			/* Penalise knight squares that are further from the centre */
-			pvcontrol[ color ][ knight ][ square ] -= 3 * ( distan[ square >> 4] + distan[square & 7] );
+                PositionValueTable[ color ][ knight ][ square ] = ( cnt >> 1 );
+                PositionValueTable[ color ][ knight ][ square ] -= 3 * ( distan[ square >> 4] + distan[square & 7] );    /* Penalise knight squares that are further from the centre */
 
-			/* Calculate queen value from bishop and rook */
-			pvcontrol[ color ][ queen ][ square ] = ( pvcontrol[ color ][ rook ][ square ] + pvcontrol[ color ][ bishop ][ square ] ) >> 2;
+                /* Calculate queen value from bishop and rook */
+                PositionValueTable[ color ][ queen ][ square ] = ( PositionValueTable[ color ][ rook ][ square ] + PositionValueTable[ color ][ bishop ][ square ] ) >> 2;
 
-			/* calculate the king value */
-			if( mating ) {
+			    /* Calculate the king value */
+				if( ! materiallevel )		// materiallevel == 0 => endgame, !=0 => opening or midgame, moving the king has no value
+					PositionValueTable[ color ][ king ][ square ] = -2 * (distan[ square >> 4 ] + distan[ square & 0x0F ]);  /* Penalise squares that are closer to the edge */
+
+            } else {            // mating
+
+                /* Bishop, rook, knight and queen values are all zero */
+
+                /* Calculate the king value */
+
 				/* by default we want to move the king. Hence we set it to a high-ish default value */
-				pvcontrol[ color ][ king ][ square ] = 128;
+				PositionValueTable[ color ][ king ][ square ] = 128;
 
-					if( color == losingcolor ) {
-						/* If we are losing we want to stay away from the edges. Penalise squares that are further away from the centre */
-						pvcontrol[ color ][ king ][ square ] -= 16 * distan[ square >> 4  ];
-						pvcontrol[ color ][ king ][ square ] -= 12 * distan[ square & 0x0F ];
+                if( color == losingcolor ) {
+                    /* If we are losing we want to stay away from the edges. Penalise squares that are further away from the centre */
+                    PositionValueTable[ color ][ king ][ square ] -= 16 * distan[ square >> 4  ];        // rank
+                    PositionValueTable[ color ][ king ][ square ] -= 12 * distan[ square & 0x0F ];       // file
 
-						/* Extra penalisation for the outer edges of the board */
-						if( distan[ square >> 4  ] == 3 )
-							pvcontrol[ color ][ king ][ square ] -= 16;
+                    /* Extra penalisation for the outer edges of the board */
+                    if( distan[ square >> 4  ] == 3 )
+                        PositionValueTable[ color ][ king ][ square ] -= 16;
 
-					} else {
-						/* Penalise squares that are further away from opponents king */
-						pvcontrol[ color ][ king ][ square ] -= 4 * square_distance( square, get_king_square( (color == white) ? black : white ) );
+                } else {
+                    /* Penalise squares that are further away from opponents king */
+                    PositionValueTable[ color ][ king ][ square ] -= 4 * square_distance( square, get_king_square( (color == white) ? black : white ) );
 
-						/* Penalise squares closer to the edge */
-						if( ( distan[ square >> 4 ] >= 2 ) || ( distan[ square & 0x0F ] == 3 ) )
-							pvcontrol[ color ][ king ][ square ] -= 16;
-					}
-
-			} else {
-				if( ! materiallevel )		// materiallevel == 0 means endgame
-					/* Penalise squares that are closer to the edge */
-					pvcontrol[ color ][ king ][ square ] = -2 * (distan[ square >> 4 ] + distan[ square & 0x0F ]);
-				else
-					/* Opening and middle game, moving the king has no value */
-					pvcontrol[ color ][ king ][ square ] = 0;
+                    /* Penalise squares closer to the edge */
+                    if( ( distan[ square >> 4 ] >= 2 ) || ( distan[ square & 0x0F ] == 3 ) )
+                        PositionValueTable[ color ][ king ][ square ] -= 16;
+                }
 			}
 
-			/* calculate the pawn value */
+			/* Calculate the pawn value, gets calculated irrespectively of mating condition */
 			const char pawnrankfactor[8] = { 0, 0, 0, 2, 4, 8, 30, 0 };
 			const char pawnfilefactor[8] = { 0, 0, 2, 5, 6, 2, 0, 0 };
 
-			rank = ( ( color == black ) ? ( 7 - ( square >> 4 ) ) : ( square >> 4 ) );
+            unsigned char rank = (square >> 4);
+            if( color == black )
+                rank ^= 0x07;
 
-			if( ( rank == 0 ) || ( rank == 7 ) )		// pawns can never be on rank 0 and get promoted on rank 7
-				pvcontrol[ color ][ pawn ][ square ] = 0;
-			else {
-				pvcontrol[ color ][ pawn ][ square ] = -12;
-				pvcontrol[ color ][ pawn ][ square ] += pawnrankfactor[ rank ]; 							/* as pawns progress they become more valuable */
-				pvcontrol[ color ][ pawn ][ square ] += pawnfilefactor[ square & 0x07 ] * ( rank + 2 );		/* e and d pawns are much more valuable */
+			if( ( rank != 0 ) && ( rank != 7 ) ) {		// pawns can never be on rank 0 and get promoted on rank 7
+				PositionValueTable[ color ][ pawn ][ square ] = -12;
+				PositionValueTable[ color ][ pawn ][ square ] += pawnrankfactor[ rank ]; 							/* as pawns progress they become more valuable */
+				PositionValueTable[ color ][ pawn ][ square ] += pawnfilefactor[ square & 0x07 ] * ( rank + 2 );		/* e and d pawns are much more valuable */
 			}
 		}
     }
 
-	/*  Calculate the position value table, value by value  */
-	for( square = 0x00; square < 0x78; ++square ) {
+    /*  Calculate penalty for blocking centre pawns with a bishop  */
+    for( square = 0x13; square < 0x15; ++square ) {
+        if( ( Board[square].piece == pawn ) && ( Board[square].color == white ) ) // if the pawn is still at the starting position
+            PositionValueTable[ white ][ bishop ][ square + 0x10 ] -= BISHOPBLOCKVALUE;             // we don't want the bishop blocking its progress
+    }
 
-		if( ! VALIDSQUARE( square ) )
-			continue;
+    for( square = 0x63; square < 0x65; ++square ) {
+        if( ( Board[square].piece == pawn ) && ( Board[square].color == black ) )
+            PositionValueTable[ black ][ bishop ][ square - 0x10 ] -= BISHOPBLOCKVALUE;
+    }
 
-		for( color = white; color <= black; color = ENUMCOLOR(color+1) ) {
+    /*  Calculate pawnstructurevalue  */
 
-			for( piece = king; piece <= pawn; piece = ENUMPIECE(piece+1) ) {
-				PositionValueTable[ color ][ piece ][ square ] =
-							( !mating || ( piece == pawn ) || (piece == king)  ) ? pvcontrol[ color ][ piece ][ square ] : 0;
-			}
-		}
-	}
+    static const char passpawnrank[8] = { 0, 0, 10, 20, 40, 60, 70, 0 };
 
 	BuildPawnTable( PawnTable[white], white, Board );
 	BuildPawnTable( PawnTable[black], black, Board );
-#if 0
-    /*  Calculate PawnTable (indicates which squares contain pawns )
-		for all intents and purposes the pawntable is a 2 times 8x8 matrix of bits. Each bit represents the presence of a pawn
-		Each value in the table represents one rank. Within a rank each bit represents a file.
-		However for some reason the files are reversed.
-		So for instance 0x10011000 does not mean pawns on the a, d and e files but pawns on the d, e and h files.
-    */
-    for( rank = 0; rank < 8; rank++ ) {
-        PawnTable[ white ][ rank ] = 0;
-        PawnTable[ black ][ rank ] = 0;
-    }
 
-
-    for( square = 0x00; square < 0x78; ++square ) {
-        if( VALIDSQUARE( square ) && ( Board[ square ].piece == pawn ) ) {
-
-			color = Board[ square ].color;
-            rank = ( color == black ) ? (square ^ 0x70) >> 4 : (square >> 4);
-			file = square & 0x07;
-
-            PawnTable[ color ][rank] |= (1 << file);
-        }
-    }
-#endif // 0
-
-    InitPawnbitt( pawnbitt[white], PawnTable[white] );
-    InitPawnbitt( pawnbitt[black], PawnTable[black] );
-
-    /*  Calculate pawnstructurevalue  */
-    RootValue = pawnstrval( &pawnbitt[Player][0] ) - pawnstrval( &pawnbitt[Opponent][0] );
+    pawnbitt[white][0] = InitPawnbitt( PawnTable[white] );
+    pawnbitt[black][0] = InitPawnbitt( PawnTable[black] );
 
     /*  Calculate static value for pawn structure  */
     for( ENUMCOLOR color = white; color <= black; color = ENUMCOLOR(color+1) ) {
@@ -496,7 +432,7 @@ void CalcPVTable( void )
         behindoppass = 0;
         oppasstab    = 0xff;
 
-        for( rank = 1; rank < 7; rank++ ) {
+        for( unsigned char rank = 1; rank < 7; rank++ ) {
 
             oppasstab    &= ( ~( pawnfiletab | leftsidetab | rightsidetab ) );	/*  Squares where opponents pawns are passed pawns  */
             behindoppass |= ( oppasstab & PawnTable[ oppcolor ][ 7 - rank ] );	/*  Squares behind the opponents passed pawns  */
@@ -504,27 +440,25 @@ void CalcPVTable( void )
             leftchaintab  = leftsidetab;										/*  squares which are covered by a pawn  */
             rightchaintab = rightsidetab;
 
-            pawnfiletab   = PawnTable[ color ][ rank ];							/*  squares w/ pawns  */
+            pawnfiletab   = ( PawnTable[ color ][ rank ] );							/*  squares w/ pawns  */
 
-            leftsidetab   = ( pawnfiletab << 1 ) & 0xff;							/*  squares w/ a pawn beside them  */
-            rightsidetab  = ( pawnfiletab >> 1 ) & 0xff;
-
-            sidetab       = leftsidetab | rightsidetab;
-            chaintab      = leftchaintab | rightchaintab;
+            leftsidetab   = ( PawnTable[ color ][ rank ] << 1 ) & 0xff;							/*  squares w/ a pawn beside them  */
+            rightsidetab  = ( PawnTable[ color ][ rank ] >> 1 ) & 0xff;
 
             leftcovertab  = ( PawnTable[ color ][ rank + 1 ] << 1 ) & 0xff;
             rightcovertab = ( PawnTable[ color ][ rank + 1 ] >> 1 ) & 0xff;
 
-            sq            = ( ( color == black ) ? ( rank << 4 ) ^ 0x70 : ( rank << 4 ) );
+            sq            = ( ( color == black ) ? ( rank << 4 ) ^ 0x70 : ( rank << 4 ) );      // first file
 
-            while( bit ) {
+            for( bit = 0x01; bit != 0x00; bit = (bit << 1) & 0xFF, ++sq ) {     // increases both the bit mask and the file
 
                 strval = 0;
 
-                if( bit & sidetab )
+                if( bit & (leftsidetab | rightsidetab) )
                     strval = SIDEPAWN;
-                else if( bit & chaintab )
-                    strval = CHAINPAWN;
+                else
+                    if( bit & (leftchaintab | rightchaintab) )
+                        strval = CHAINPAWN;
 
                 if( bit & leftcovertab )
                     strval += COVERPAWN;
@@ -553,22 +487,22 @@ void CalcPVTable( void )
                         }
                     }
                 }
-                sq++;
-                bit = ( bit << 1 ) & 0xff;
+
             }
         }
     }
 
-    /*  Calculate penalty for blocking centre pawns with a bishop  */
-    for( sq = 3; sq < 5; sq ++ ) {
-        if( ( Board[ sq + 0x10 ].piece == pawn ) && ( Board[ sq + 0x10 ].color == white ) )
-            PositionValueTable[ white ][ bishop ][ sq + 0x20 ] -= BISHOPBLOCKVALUE;
+}
 
-        if( ( Board[ sq + 0x60 ].piece == pawn ) && ( Board[ sq + 0x60 ].color == black ) )
-            PositionValueTable[ black ][ bishop ][ sq + 0x50 ] -= BISHOPBLOCKVALUE;
-    }
+/*
+ * @brief Returns the current boards positional value (root value)
+ */
+int CalcRootvalue()
+{
+    int RootValue = 0;
 
-    for( square = 0x77; square >= 0; square-- ) {                                       /*  Calculate RootValue  */
+    /*  Calculate RootValue  */
+    for( unsigned int square = 0x77; square >= 0; square-- ) {
         if( VALIDSQUARE( square ) && ( Board[ square ].piece != no_piece ) ) {
             if( Board[ square ].color == Player )
                 RootValue += PiecePosVal( Board[ square ].piece, Player, square );
@@ -576,28 +510,27 @@ void CalcPVTable( void )
                 RootValue -= PiecePosVal( Board[ square ].piece, Opponent, square );
         }
     }
+
+    RootValue += pawnstrval( &pawnbitt[Player][0] ) - pawnstrval( &pawnbitt[Opponent][0] );
+
+    return RootValue;
 }
-
-/****************************************************************************/
-
-
-/****************************************************************************/
 
 /*
  *  Calculate STATIC evaluation of the move
  */
-
 int StatEvalu( MOVESTRUCT *amove )
 {
     const int ShortCastleValue = 32;
     const int LongCastleValue = 4;
 
-    int value = 0;
-
     bool is_ep_capture = amove->spe && (amove->movpiece == pawn);
     bool is_castling = amove->spe && (amove->movpiece == king);
     bool is_promotion = amove->spe && !is_ep_capture && !is_castling;
     bool is_capture = (amove->content != no_piece);
+
+    /* base value of move */
+    int value = PiecePosVal( amove->movpiece, Player, amove->new1 ) - PiecePosVal( amove->movpiece, Player, amove->old );
 
 	if( is_castling ) {
 
@@ -614,7 +547,7 @@ int StatEvalu( MOVESTRUCT *amove )
 		value += PiecePosVal( pawn, Opponent, amove->new1 - ( ( Player == white ) ? 0x10 : -0x10 ) );
 
 	if( is_promotion )
-		value += PiecePosVal( amove->movpiece, Player, amove->old ) - PiecePosVal( pawn, Player, amove->old ) + decpawnstrval( Player, amove->old & 7, Depth + 1 );
+		value += PiecePosVal( amove->movpiece, Player, amove->old ) - PiecePosVal( pawn, Player, amove->old );
 
     if( is_capture ) {
         value += PiecePosVal( amove->content, Opponent, amove->new1 );
@@ -624,29 +557,31 @@ int StatEvalu( MOVESTRUCT *amove )
             value -= EXCHANGEVALUE;
     }
 
-    CalcPawnBit( pawnbitt[white], Depth + 1 );
-    CalcPawnBit( pawnbitt[black], Depth + 1 );
+    // Pawn things
 
+    /*  Initialise pawnbitt using the board without this move */
+    pawnbitt[white][ Depth + 1 ] = pawnbitt[white][ Depth ];
+    pawnbitt[black][ Depth + 1 ] = pawnbitt[black][ Depth ];
 
-    //if( ( amove->movpiece == pawn ) && ( ( amove->content != no_piece ) || amove->spe ) )
-    if( ( is_capture && (amove->movpiece == pawn) ) || is_ep_capture )
-        value += movepawnstrval( Player, (amove->new1 & 7), (amove->old & 7), Depth + 1 );
+    if( ( is_capture && (amove->movpiece == pawn) ) || is_ep_capture ) { // if we move our pawn to another file (ie we use a pawn to capture)
 
-    if( ( amove->content == pawn ) || is_ep_capture )
-        value -= decpawnstrval( Opponent, amove->new1 & 7, Depth + 1 );
+        remove_pawn( &pawnbitt[Player][Depth + 1], amove->old & 7 );
+        add_pawn( &pawnbitt[Player][Depth + 1], amove->new1 & 7 );
 
-    /*  Calculate value of move  */
-    value += PiecePosVal( amove->movpiece, Player, amove->new1 ) - PiecePosVal( amove->movpiece, Player, amove->old );
+        value += ( pawnstrval( &pawnbitt[Player][Depth + 1] ) - pawnstrval( &pawnbitt[Player][Depth] ) );
+    }
+
+    if( ( amove->content == pawn ) || is_ep_capture ) {     // if an opponents pawn is captured
+        remove_pawn( &pawnbitt[Opponent][Depth + 1], amove->new1 & 7 );
+
+        value -=( pawnstrval( &pawnbitt[Opponent][Depth + 1] ) - pawnstrval( &pawnbitt[Opponent][Depth] ) );
+    }
+
+    if( is_promotion ) {                                    // Our pawn is now gone
+        remove_pawn( &pawnbitt[Player][Depth + 1], amove->old & 7 );
+
+        value +=( pawnstrval( &pawnbitt[Player][Depth + 1] ) - pawnstrval( &pawnbitt[Player][Depth] ) );
+    }
 
     return( value );
-}
-
-void SetPieceValues( int NewValues[7] )
-{
-    memcpy( PieceValue, NewValues, 7 * sizeof( int ) );
-}
-
-void GetPieceValues( int OutValues[7] )
-{
-    memcpy( OutValues, PieceValue, 7 * sizeof( int ) );
 }

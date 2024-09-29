@@ -1068,6 +1068,7 @@ void FindMove( int maxlevel )
     SkipSearch = false;
     clearkillmove();
     CalcPVTable();
+    int RootValue = CalcRootvalue();
 
     StopTime( &ChessClock );
 
