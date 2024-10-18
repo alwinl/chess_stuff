@@ -1,5 +1,3 @@
-*.*~
-chess/doxygen/html/*
-chess/doxygen/doxygen.log
+**/html/*
 **/build/*
 

@@ -18,19 +18,18 @@
 #
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules( CPPUNIT REQUIRED cppunit)
+pkg_check_modules( CPPUNIT REQUIRED cppunit )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
 
 add_executable(
-	test_chess
+	test_chessparser
 
 	test_runner.cc
-	testgameobject.cc
+	testchessparserengine.cc
 )
 
-target_include_directories( test_chess PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( test_chess ${CPPUNIT_LIBRARIES} chess_logic )
+target_link_libraries( test_chessparser ${CPPUNIT_LIBRARIES} chessparser_logic )
 
-add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
-add_test( TestGameObject::save_load test_chess TestGameObject::save_load )
+# add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
+# add_test( TestGameObject::save_load test_chess TestGameObject::save_load )

@@ -17,7 +17,8 @@
 # MA 02110-1301, USA.
 #
 
-find_package( cppunit REQUIRED )
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(CPPUNIT REQUIRED cppunit)
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
 

@@ -20,17 +20,15 @@
 find_package(PkgConfig REQUIRED)
 pkg_check_modules( CPPUNIT REQUIRED cppunit)
 
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
-
 add_executable(
-	test_chess
+	test_square_convertor
 
 	test_runner.cc
-	testgameobject.cc
+	test_square_convertorengine.cc
 )
 
-target_include_directories( test_chess PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( test_chess ${CPPUNIT_LIBRARIES} chess_logic )
+target_include_directories( test_square_convertor PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
+target_link_libraries( test_square_convertor ${CPPUNIT_LIBRARIES} square_convertor_logic )
 
-add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
-add_test( TestGameObject::save_load test_chess TestGameObject::save_load )
+# add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
+# add_test( TestGameObject::save_load test_chess TestGameObject::save_load )

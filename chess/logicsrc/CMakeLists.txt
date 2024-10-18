@@ -27,3 +27,5 @@ add_library(
 	piece_square_tables.cc
 	ply.cc
 )
+
+target_include_directories( chess_logic PUBLIC ./ )

@@ -17,20 +17,28 @@
 # MA 02110-1301, USA.
 #
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules( CPPUNIT REQUIRED cppunit)
+add_subdirectory(resources)
 
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+find_package(PkgConfig REQUIRED)
+pkg_check_modules( GTKMM REQUIRED gtkmm-3.0)
+
+# define a setup with all the crud that needs to be added to the gcc call
+add_library( square_convertor_setup INTERFACE )
+target_include_directories( square_convertor_setup INTERFACE ${GTKMM_INCLUDE_DIRS} )
+target_compile_options( square_convertor_setup INTERFACE ${GTKMM_CFLAGS_OTHER} )
+target_link_directories( square_convertor_setup INTERFACE ${GTKMM_LIBRARY_DIRS} )
+target_link_libraries( square_convertor_setup  INTERFACE ${GTKMM_LIBRARIES} )
+
+set_source_files_properties( ${GRESOURCE_C} PROPERTIES GENERATED TRUE )
 
 add_executable(
-	test_chess
+	square_convertor
 
-	test_runner.cc
-	testgameobject.cc
+	square_convertorcontroller.cc
+
+    ${GRESOURCE_C}
 )
 
-target_include_directories( test_chess PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( test_chess ${CPPUNIT_LIBRARIES} chess_logic )
+add_dependencies( square_convertor square_convertor-resource )
 
-add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
-add_test( TestGameObject::save_load test_chess TestGameObject::save_load )
+target_link_libraries( square_convertor PRIVATE square_convertor_setup square_convertor_logic )

@@ -22,8 +22,6 @@ project(Chess_Stuff VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/modules)
-
 include(CTest)
 enable_testing()
 
@@ -31,7 +29,9 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
-add_subdirectory(chess)
-add_subdirectory(clic)
 add_subdirectory(calc_square)
+add_subdirectory(chess)
+add_subdirectory(chess_parser)
+add_subdirectory(clic)
 add_subdirectory(openinglib_test)
+add_subdirectory(square_convertor)

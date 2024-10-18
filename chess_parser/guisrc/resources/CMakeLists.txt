@@ -17,20 +17,30 @@
 # MA 02110-1301, USA.
 #
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules( CPPUNIT REQUIRED cppunit)
+find_program( GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED )
 
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+set( GRESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/app.gresource.c )
+set( GRESOURCE_XML app.gresource.xml )
 
-add_executable(
-	test_chess
-
-	test_runner.cc
-	testgameobject.cc
+set( GRESOURCE_DEPEND
+	application.png
+	chessparserui.glade
 )
 
-target_include_directories( test_chess PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( test_chess ${CPPUNIT_LIBRARIES} chess_logic )
+add_custom_command(
+	OUTPUT ${GRESOURCE_C}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	COMMAND ${GLIB_COMPILE_RESOURCES}
+	ARGS
+		--target=${GRESOURCE_C}
+		--generate-source
+		${GRESOURCE_XML}
+	VERBATIM
+	MAIN_DEPENDENCY ${GRESOURCE_XML}
+	DEPENDS ${GRESOURCE_DEPEND}
+)
 
-add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
-add_test( TestGameObject::save_load test_chess TestGameObject::save_load )
+set_source_files_properties( ${GRESOURCE_C} PROPERTIES GENERATED TRUE )
+add_custom_target( app-resource DEPENDS ${GRESOURCE_C} )
+
+set( GRESOURCE_C "${GRESOURCE_C}" PARENT_SCOPE )

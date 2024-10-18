@@ -17,6 +17,4 @@
 # MA 02110-1301, USA.
 #
 
-add_executable( calc_square
-	main.cc
-)
+add_executable( calc_square	main.cc )
