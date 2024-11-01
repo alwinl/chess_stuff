@@ -21,14 +21,14 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules( CPPUNIT REQUIRED cppunit)
 
 add_executable(
-	test_square_convertor
+	square_convertor_test
 
 	test_runner.cc
 	test_square_convertorengine.cc
 )
 
-target_include_directories( test_square_convertor PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( test_square_convertor ${CPPUNIT_LIBRARIES} square_convertor_logic )
+target_include_directories( square_convertor_test PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
+target_link_libraries( square_convertor_test ${CPPUNIT_LIBRARIES} square_convertor_logic )
 
 # add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
 # add_test( TestGameObject::save_load test_chess TestGameObject::save_load )

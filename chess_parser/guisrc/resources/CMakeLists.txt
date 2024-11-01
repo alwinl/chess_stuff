@@ -17,10 +17,13 @@
 # MA 02110-1301, USA.
 #
 
+set( RESOURCE_BASE chessparser )
+
 find_program( GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED )
 
-set( GRESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/app.gresource.c )
-set( GRESOURCE_XML app.gresource.xml )
+set( GRESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_BASE}.gresource.c )
+set( GRESOURCE_XML ${RESOURCE_BASE}.gresource.xml )
+set( GRESOURCE_TARGET ${RESOURCE_BASE}-resource )
 
 set( GRESOURCE_DEPEND
 	application.png
@@ -41,6 +44,6 @@ add_custom_command(
 )
 
 set_source_files_properties( ${GRESOURCE_C} PROPERTIES GENERATED TRUE )
-add_custom_target( app-resource DEPENDS ${GRESOURCE_C} )
+add_custom_target( ${GRESOURCE_TARGET} DEPENDS ${GRESOURCE_C} )
 
 set( GRESOURCE_C "${GRESOURCE_C}" PARENT_SCOPE )

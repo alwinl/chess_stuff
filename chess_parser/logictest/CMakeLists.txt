@@ -23,13 +23,13 @@ pkg_check_modules( CPPUNIT REQUIRED cppunit )
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
 
 add_executable(
-	test_chessparser
+	chessparser_test
 
 	test_runner.cc
 	testchessparserengine.cc
 )
 
-target_link_libraries( test_chessparser ${CPPUNIT_LIBRARIES} chessparser_logic )
+target_link_libraries( chessparser_test ${CPPUNIT_LIBRARIES} chessparser_logic )
 
 # add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
 # add_test( TestGameObject::save_load test_chess TestGameObject::save_load )
