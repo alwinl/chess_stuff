@@ -17,16 +17,15 @@
  * MA 02110-1301, USA.
  */
 
-#include "chessparserengine.h"
-
 #include <string>
 
 #include "chessparsercontroller.h"
-
-using namespace std;
+#include "chessparserengine.h"
 
 int main( int argc, char* argv[])
 {
+	Glib::set_init_to_users_preferred_locale(false);
+
     ChessParserController().run( argc, argv );
 }
 
@@ -37,44 +36,43 @@ ChessParserController::ChessParserController() : Gtk::Application( "net.dnatechn
     engine = std::make_unique<ChessParserEngine>();
 }
 
-void ChessParserController::on_startup()
-{
-	Gtk::Application::on_startup();
-
-    add_action("open",                sigc::mem_fun( *this, &ChessParserController::on_action_open         ) );
-    add_action("quit",                sigc::mem_fun( *this, &ChessParserController::on_action_quit         ) );
-	add_action("about",               sigc::mem_fun( *this, &ChessParserController::on_action_about        ) );
-
-    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chessparser/chessparserui.glade" );
-
-	ui_model->get_widget_derived("appView", view );
-	ui_model->get_widget("appStatusbar", status_bar );
-
-	text_buffer = Glib::RefPtr<Gtk::TextBuffer>::cast_dynamic( ui_model->get_object( "content" ) );
-
-	Glib::signal_idle().connect( sigc::mem_fun(*this, &ChessParserController::on_idle) );
-}
-
-/*-----------------------------------------------------------------------------
- * The application has been started. Time to create and show a window
- * NB we could build multiple views here and activate (show) views
- * as needed
- */
 void ChessParserController::on_activate()
 {
-	view->set_default_size(640,480);
-	view->show_all_children();
+    add_action( "open", sigc::mem_fun( *this, &ChessParserController::on_action_open ) );
+	add_action( "about", sigc::mem_fun( *this, &ChessParserController::on_action_about ) );
 
-	add_window( *view );
-	view->show();
+	auto window = Gtk::make_managed<Gtk::ApplicationWindow>();
+	window->set_title( "Portable Game Notation parser" );
 
-	view->set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chessparser/chessparser.png") );
+	auto menu_button = Gtk::make_managed<Gtk::MenuButton>();
+	menu_button->set_icon_name("open-menu-symbolic");
+
+    auto menu_model = Gio::Menu::create();
+    menu_model->append( "Open", "app.open");
+    menu_model->append( "About", "app.about");
+
+	menu_button->set_menu_model(menu_model);
+
+	auto header_bar = Gtk::make_managed<Gtk::HeaderBar>();
+	header_bar->pack_start(*menu_button);
+
+	window->set_titlebar( *header_bar );
+
+	auto child = Gtk::make_managed<Gtk::TextView>();
+    child->set_size_request( 640, 480 );
+    text_buffer = child->get_buffer();
+	window->set_child( *child );
+
+    window->signal_close_request().connect( sigc::mem_fun( *this, &ChessParserController::on_action_quit ), true );
+
+	add_window( *window );
+    window->show();
 }
 
 class ParserVisitor : public ParserVisitorBase
 {
 public:
-	ParserVisitor( string& result ) : content(result) {}
+	ParserVisitor( std::string& result ) : content(result) {}
 
 	virtual void process_tag_pair( std::string tag, std::string value ) {
 		content += "Tag: " + tag + ", value: " + value + "\n";
@@ -84,80 +82,87 @@ public:
 	}
 
 private:
-	string& content;
+	std::string& content;
 };
 
-//-----------------------------------------------------------------------------
-// Action implementation
-//-----------------------------------------------------------------------------
 void ChessParserController::on_action_open()
 {
-    Gtk::FileChooserDialog dlg( *view, "Open Chess File", Gtk::FILE_CHOOSER_ACTION_OPEN );
+    auto dlg = Gtk::FileDialog::create();
 
-    dlg.add_button( "Cancel", Gtk::RESPONSE_CANCEL );
-    dlg.add_button( "Open", Gtk::RESPONSE_ACCEPT );
+    dlg->set_title( "Open Chess File" );
+    dlg->set_modal( true );
 
-    Glib::RefPtr<Gtk::FileFilter> filter_pgn = Gtk::FileFilter::create();
+    auto filter_list = Gio::ListStore<Gtk::FileFilter>::create();
+    auto pgn_filter = Gtk::FileFilter::create();
 
-    filter_pgn->set_name("PGN Files");
-    filter_pgn->add_pattern("*.pgn");
-    filter_pgn->add_pattern("*.PGN");
+    pgn_filter->set_name("PGN Files");
+    pgn_filter->add_pattern("*.pgn");
+    pgn_filter->add_pattern("*.PGN");
 
-    dlg.add_filter( filter_pgn );
-    dlg.set_filter( filter_pgn );
+    filter_list->append( pgn_filter );
+    dlg->set_filters( filter_list );
 
-    if( dlg.run() != Gtk::RESPONSE_ACCEPT ) {
-		dlg.hide();
-        return;
-    }
+    auto open_fun = [this,dlg]( std::shared_ptr<Gio::AsyncResult>& async_result )
+    {
+        auto file  = dlg->open_finish( async_result );
 
-    dlg.hide();
+        if( !engine->open_file( file->get_path() ) ) {
+            auto dlg = Gtk::AlertDialog::create( "Error opening chess file." );
 
-    if( ! engine->open_file( dlg.get_filename() ) ) {
+            dlg->show(*get_active_window());
+            return;
+        }
 
-        Gtk::MessageDialog( *view, "Error opening chess file.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-        return;
-    }
+        std::string content;
 
-    string content;
+        ParserVisitor visitor( content );
+        engine->visit_tag_pairs( &visitor );
+        engine->visit_movetext( &visitor );
 
-    ParserVisitor visitor( content );
-	engine->visit_tag_pairs( &visitor );
-	engine->visit_movetext( &visitor );
+        text_buffer->set_text( content );
+    };
 
-    text_buffer->set_text( content );
-
-    status_bar->push( std::string("Opened ") + dlg.get_filename() );
+    dlg->open( *get_active_window(), open_fun );
 }
 
-void ChessParserController::on_action_quit()
+bool ChessParserController::on_action_quit()
 {
-	Gtk::MessageDialog dlg( *view, "You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
-	if( dlg.run() == Gtk::RESPONSE_OK)
-		quit();
+    auto dlg = Gtk::AlertDialog::create("Do you really want to quit?" );
+
+    dlg->set_buttons( {"Yes", "No"} );
+    dlg->set_modal(true);
+
+    auto choice_fun = [this,dlg]( std::shared_ptr<Gio::AsyncResult>& async_result )
+    {
+        if( dlg->choose_finish( async_result ) == 0 )
+            quit();
+    };
+
+    dlg->choose( *get_active_window(), choice_fun );
+
+    return true;
 }
 
-bool ChessParserController::on_idle()
-{
-	return true;
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Show some application information
- *
- * Show our Help About... box
- */
 void ChessParserController::on_action_about()
 {
-    Gtk::AboutDialog dlg;
+	if( about_dlg == nullptr ) {
 
-    dlg.set_transient_for( *view ) ;
-    dlg.set_name("ChessParser") ;
-    dlg.set_logo( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chessparser/chessparser.png") ) ;
-    dlg.set_version( "0.01" ) ;
-    dlg.set_comments("A GtkMM application") ;
-    dlg.set_copyright( "Copyright © 2022 Alwin Leerling" ) ;
-    dlg.set_website( "http://github" ) ;
+		about_dlg = std::make_unique<Gtk::AboutDialog>();
 
-    dlg.run();
+		about_dlg->set_transient_for(*get_active_window());
+		about_dlg->set_hide_on_close();
+		about_dlg->set_logo(Gdk::Texture::create_from_resource("/net/dnatechnologies/chessparser/application.png"));
+		about_dlg->set_program_name("Chess Parser");
+		about_dlg->set_version("1.0.0");
+		about_dlg->set_copyright("Alwin Leerling");
+		about_dlg->set_comments("Parse PNG files.");
+		about_dlg->set_license("LGPL");
+		about_dlg->set_website("http://www.gtkmm.org");
+		about_dlg->set_website_label("gtkmm website");
+		about_dlg->set_authors({ "Alwin Leerling" });
+		about_dlg->set_modal( true );
+	}
+
+	about_dlg->set_visible( true );
+	about_dlg->present();
 }

@@ -17,10 +17,8 @@
 # MA 02110-1301, USA.
 #
 
-add_subdirectory(resources)
-
 find_package(PkgConfig REQUIRED)
-pkg_check_modules( GTKMM REQUIRED gtkmm-3.0)
+pkg_check_modules( GTKMM REQUIRED gtkmm-4.0)
 
 SET( LIB_SETUP chessparser_setup )
 
@@ -31,16 +29,10 @@ target_compile_options( ${LIB_SETUP} INTERFACE ${GTKMM_CFLAGS_OTHER} )
 target_link_directories( ${LIB_SETUP} INTERFACE ${GTKMM_LIBRARY_DIRS} )
 target_link_libraries( ${LIB_SETUP}  INTERFACE ${GTKMM_LIBRARIES} )
 
-set_source_files_properties( ${GRESOURCE_C} PROPERTIES GENERATED TRUE )
-
 add_executable(
 	chessparser
 
 	chessparsercontroller.cc
-
-	${GRESOURCE_C}
 )
-
-add_dependencies( chessparser chessparser-resource )
 
 target_link_libraries( chessparser ${LIB_SETUP} chessparser_logic )
