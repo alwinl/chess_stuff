@@ -20,7 +20,7 @@
 add_subdirectory(resources)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules( GTKMM REQUIRED gtkmm-3.0)
+pkg_check_modules( GTKMM REQUIRED gtkmm-4.0)
 
 SET( LIB_SETUP square_convertor_setup )
 

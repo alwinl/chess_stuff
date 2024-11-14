@@ -18,7 +18,6 @@
  */
 
 #include "square_convertorengine.h"
-
 #include "square_convertorcontroller.h"
 
 int main( int argc, char * argv[] )
@@ -30,101 +29,70 @@ square_convertorController::square_convertorController() : Gtk::Application( "ne
 {
 	Glib::set_application_name("square_convertor");
 
-    engine = new square_convertorEngine;
+    engine = std::make_unique<square_convertorEngine>();
 }
 
-void square_convertorController::on_startup()
-{
-	Gtk::Application::on_startup();
-
-    add_action("quit",                sigc::mem_fun( *this, &square_convertorController::on_action_quit         ) );
-	add_action("about",               sigc::mem_fun( *this, &square_convertorController::on_action_about        ) );
-
-    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/square_convertor/square_convertorui.glade" );
-
-	ui_model->get_widget_derived("appView", view );
-	ui_model->get_widget("lblSAN"  ,lblSAN  );
-	ui_model->get_widget("lblUint" ,lblUint );
-	ui_model->get_widget("fldSAN"  ,fldSAN  );
-	ui_model->get_widget("fldUint" ,fldUint );
-
-	fldSAN->signal_changed().connect( sigc::mem_fun(*this, &square_convertorController::SANtoUInt) );
-	fldUint->signal_changed().connect( sigc::mem_fun(*this, &square_convertorController::UInttoSAN) );
-	//Glib::signal_idle().connect( sigc::mem_fun(*this, &square_convertorController::on_idle) );
-}
-
-/*-----------------------------------------------------------------------------
- * The application has been started. Time to create and show a window
- * NB we could build multiple views here and activate (show) views
- * as needed
- */
 void square_convertorController::on_activate()
 {
-	view->set_default_size(640,480);
-	view->show_all_children();
+	add_action( "about", sigc::mem_fun( *this, &square_convertorController::on_action_about ) );
 
-	add_window( *view );
-	view->show();
+	auto refBuilder = Gtk::Builder::create();
 
-	view->set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/square_convertor/square_convertor.png") );
+	refBuilder->add_from_resource( "/net/dnatechnologies/square_convertor/square_convertor.ui");
+
+	Gtk::ApplicationWindow * win = refBuilder->get_widget<Gtk::ApplicationWindow>("appView");
+	lblSAN  = refBuilder->get_widget<Gtk::Label>( "lblSAN"  );
+	lblUint = refBuilder->get_widget<Gtk::Label>( "lblUint" );
+	fldSAN  = refBuilder->get_widget<Gtk::Entry>( "fldSAN"  );
+	fldUint = refBuilder->get_widget<Gtk::Entry>( "fldUint" );
+
+	fldSAN->signal_changed().connect( [this](){ lblUint->set_text( engine->SANtoUInt( fldSAN->get_text() ) ); } );
+	fldUint->signal_changed().connect( [this](){ lblSAN->set_text( engine->UInttoSAN( fldUint->get_text() ) ); } );
+
+    win->signal_close_request().connect( sigc::mem_fun( *this, &square_convertorController::on_action_quit ), true );
+
+	add_window( *win );
+    win->show();
 }
 
-//-----------------------------------------------------------------------------
-// Action implementation
-//-----------------------------------------------------------------------------
-void square_convertorController::on_action_quit()
+bool square_convertorController::on_action_quit()
 {
-	Gtk::MessageDialog dlg( *view, "You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
-	if( dlg.run() == Gtk::RESPONSE_OK)
-		quit();
+    auto dlg = Gtk::AlertDialog::create("Do you really want to quit?" );
+
+    dlg->set_buttons( {"Yes", "No"} );
+    dlg->set_modal(true);
+
+    auto choice_fun = [this,dlg]( std::shared_ptr<Gio::AsyncResult>& async_result )
+    {
+        if( dlg->choose_finish( async_result ) == 0 )
+            quit();
+    };
+
+    dlg->choose( *get_active_window(), choice_fun );
+
+    return true;
 }
 
-bool square_convertorController::on_idle()
-{
-	return true;
-}
-
-/**-----------------------------------------------------------------------------
- * \brief Show some application information
- *
- * Show our Help About... box
- */
 void square_convertorController::on_action_about()
 {
-    Gtk::AboutDialog dlg;
+	if( about_dlg == nullptr ) {
 
-    dlg.set_transient_for( *view ) ;
-    dlg.set_name("square_convertor") ;
-    dlg.set_logo( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/square_convertor/square_convertor.png") ) ;
-    dlg.set_version( "0.01" ) ;
-    dlg.set_comments("A GtkMM application") ;
-    dlg.set_copyright( "Copyright © 2022 Alwin Leerling" ) ;
-    dlg.set_website( "http://github" ) ;
+		about_dlg = std::make_unique<Gtk::AboutDialog>();
 
-    dlg.run();
-}
-
-void square_convertorController::SANtoUInt()
-{
-	std::string SAN = fldSAN->get_text();
-
-	if( SAN.size() == 2 ) {
-
-		unsigned int square = SAN[0] - 'a' + (SAN[1] - '1') * 8;
-
-		lblUint->set_text( std::to_string( square ) );
+		about_dlg->set_transient_for(*get_active_window());
+		about_dlg->set_hide_on_close();
+		about_dlg->set_logo(Gdk::Texture::create_from_resource("/net/dnatechnologies/square_convertor/square_convertor.png"));
+		about_dlg->set_program_name("Square Convertor");
+		about_dlg->set_version("1.0.0");
+		about_dlg->set_copyright("Alwin Leerling");
+		about_dlg->set_comments("Converts chess squares from algabraic notation into mailbox id and back");
+		about_dlg->set_license("LGPL");
+		about_dlg->set_website("http://www.gtkmm.org");
+		about_dlg->set_website_label("gtkmm website");
+		about_dlg->set_authors({ "Alwin Leerling" });
+		about_dlg->set_modal( true );
 	}
+
+	about_dlg->set_visible( true );
+	about_dlg->present();
 }
-
-void square_convertorController::UInttoSAN()
-{
-	unsigned int square = std::atoi( fldUint->get_text().c_str() );
-
-	std::string SAN;
-
-	SAN.push_back( (square % 8) + 'a' );
-	SAN.push_back( (square / 8) + '1' );
-
-	lblSAN->set_text( SAN );
-}
-

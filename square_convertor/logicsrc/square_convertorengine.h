@@ -17,16 +17,13 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef SQUARE_CONVERTORENGINE_H
-#define SQUARE_CONVERTORENGINE_H
+#pragma once
 
-/** \brief
- */
+#include <string>
+
 class square_convertorEngine
 {
 public:
-	square_convertorEngine( );
-	~square_convertorEngine();
+	std::string SANtoUInt( std::string SAN);
+	std::string UInttoSAN( std::string input );
 };
-
-#endif // SQUARE_CONVERTORENGINE_H

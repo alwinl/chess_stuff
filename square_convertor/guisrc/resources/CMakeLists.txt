@@ -27,7 +27,7 @@ set( GRESOURCE_TARGET ${RESOURCE_BASE}-resource )
 
 set( GRESOURCE_DEPEND
 	square_convertor.png
-	square_convertorui.glade
+	square_convertor.ui
 )
 
 add_custom_command(

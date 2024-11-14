@@ -19,12 +19,41 @@
 
 #include "square_convertorengine.h"
 
-square_convertorEngine::square_convertorEngine( )
+std::string square_convertorEngine::SANtoUInt( std::string SAN)
 {
-    //ctor
+	if( SAN.size() != 2 )
+		return std::string();
+
+	if( SAN[1] < '1' || SAN[1] > '8' )
+		return std::string();
+
+	if( SAN[0] >= 'a' && SAN[0] <= 'h') {
+		unsigned int square = SAN[0] - 'a' + (SAN[1] - '1') * 8;
+		return std::to_string( square );
+	}
+
+	if( SAN[0] >= 'A' && SAN[0] <= 'H') {
+		unsigned int square = SAN[0] - 'A' + (SAN[1] - '1') * 8;
+		return std::to_string( square );
+	}
+
+	return std::string();
 }
 
-square_convertorEngine::~square_convertorEngine()
+std::string square_convertorEngine::UInttoSAN( std::string input )
 {
-	//dtor
+	if( input.empty() )
+		return std::string();
+
+	unsigned int square = std::atoi( input.c_str() );
+
+	if( square > 63 )
+		return std::string();
+
+	std::string SAN;
+
+	SAN.push_back( (square % 8) + 'a' );
+	SAN.push_back( (square / 8) + '1' );
+
+	return SAN;
 }

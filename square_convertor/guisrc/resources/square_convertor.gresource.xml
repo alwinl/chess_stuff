@@ -2,7 +2,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/net/dnatechnologies/square_convertor">
-    <file preprocess="xml-stripblanks">square_convertorui.glade</file>
+    <file preprocess="xml-stripblanks">square_convertor.ui</file>
     <file>square_convertor.png</file>
   </gresource>
 </gresources>
