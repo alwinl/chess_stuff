@@ -19,26 +19,7 @@
 
 #pragma once
 
-#include <gtkmm.h>
+#include <string>
 
-class square_convertorEngine;
-
-class square_convertorController : public Gtk::Application
-{
-public:
-	square_convertorController();
-
-private:
-	void on_activate() override;
-
-	bool on_action_quit();
-	void on_action_about();
-
-	Gtk::Label *lblSAN;
-	Gtk::Label *lblUint;
-	Gtk::Entry *fldSAN;
-	Gtk::Entry *fldUint;
-
-	std::unique_ptr<square_convertorEngine> engine;
-	std::unique_ptr<Gtk::AboutDialog> about_dlg;
-};
+std::string SANtoUInt( std::string SAN);
+std::string UInttoSAN( std::string input );

@@ -17,26 +17,44 @@
  * MA 02110-1301, USA.
  */
 
-#include "square_convertorengine.h"
-#include "square_convertorcontroller.h"
+#include <gtkmm.h>
+
+#include "square_convertor_utils.h"
+
+class SquareConvertor : public Gtk::Application
+{
+public:
+	SquareConvertor();
+
+private:
+	void on_activate() override;
+
+	bool on_action_quit();
+	void on_action_about();
+
+	Gtk::Label *lblSAN;
+	Gtk::Label *lblUint;
+	Gtk::Entry *fldSAN;
+	Gtk::Entry *fldUint;
+
+	std::unique_ptr<Gtk::AboutDialog> about_dlg;
+};
 
 int main( int argc, char * argv[] )
 {
 	Glib::set_init_to_users_preferred_locale(false);
 
-	square_convertorController().run( argc, argv );
+	SquareConvertor().run( argc, argv );
 }
 
-square_convertorController::square_convertorController() : Gtk::Application( "net.dnatechnologies.square_convertor" )
+SquareConvertor::SquareConvertor() : Gtk::Application( "net.dnatechnologies.square_convertor" )
 {
 	Glib::set_application_name("square_convertor");
-
-    engine = std::make_unique<square_convertorEngine>();
 }
 
-void square_convertorController::on_activate()
+void SquareConvertor::on_activate()
 {
-	add_action( "about", sigc::mem_fun( *this, &square_convertorController::on_action_about ) );
+	add_action( "about", sigc::mem_fun( *this, &SquareConvertor::on_action_about ) );
 
 	auto refBuilder = Gtk::Builder::create();
 
@@ -48,16 +66,16 @@ void square_convertorController::on_activate()
 	fldSAN  = refBuilder->get_widget<Gtk::Entry>( "fldSAN"  );
 	fldUint = refBuilder->get_widget<Gtk::Entry>( "fldUint" );
 
-	fldSAN->signal_changed().connect( [this](){ lblUint->set_text( engine->SANtoUInt( fldSAN->get_text() ) ); } );
-	fldUint->signal_changed().connect( [this](){ lblSAN->set_text( engine->UInttoSAN( fldUint->get_text() ) ); } );
+	fldSAN->signal_changed().connect( [this](){ lblUint->set_text( SANtoUInt( fldSAN->get_text() ) ); } );
+	fldUint->signal_changed().connect( [this](){ lblSAN->set_text( UInttoSAN( fldUint->get_text() ) ); } );
 
-    win->signal_close_request().connect( sigc::mem_fun( *this, &square_convertorController::on_action_quit ), true );
+    win->signal_close_request().connect( sigc::mem_fun( *this, &SquareConvertor::on_action_quit ), true );
 
 	add_window( *win );
     win->show();
 }
 
-bool square_convertorController::on_action_quit()
+bool SquareConvertor::on_action_quit()
 {
     auto dlg = Gtk::AlertDialog::create("Do you really want to quit?" );
 
@@ -75,7 +93,7 @@ bool square_convertorController::on_action_quit()
     return true;
 }
 
-void square_convertorController::on_action_about()
+void SquareConvertor::on_action_about()
 {
 	if( about_dlg == nullptr ) {
 

@@ -20,7 +20,7 @@
 add_library(
 	square_convertor_logic
 
-	square_convertorengine.cc
+	square_convertor_utils.cc
 )
 
 target_include_directories( square_convertor_logic PUBLIC ./ )

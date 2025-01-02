@@ -36,7 +36,7 @@ set_source_files_properties( ${GRESOURCE_C} PROPERTIES GENERATED TRUE )
 add_executable(
 	square_convertor
 
-	square_convertorcontroller.cc
+	square_convertor.cc
 
     ${GRESOURCE_C}
 )

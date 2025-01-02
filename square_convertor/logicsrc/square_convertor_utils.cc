@@ -17,13 +17,43 @@
  * MA 02110-1301, USA.
  */
 
-#pragma once
+#include "square_convertor_utils.h"
 
-#include <string>
-
-class square_convertorEngine
+std::string SANtoUInt( std::string SAN)
 {
-public:
-	std::string SANtoUInt( std::string SAN);
-	std::string UInttoSAN( std::string input );
-};
+	if( SAN.size() != 2 )
+		return std::string();
+
+	if( SAN[1] < '1' || SAN[1] > '8' )
+		return std::string();
+
+	if( SAN[0] >= 'a' && SAN[0] <= 'h') {
+		unsigned int square = SAN[0] - 'a' + (SAN[1] - '1') * 8;
+		return std::to_string( square );
+	}
+
+	if( SAN[0] >= 'A' && SAN[0] <= 'H') {
+		unsigned int square = SAN[0] - 'A' + (SAN[1] - '1') * 8;
+		return std::to_string( square );
+	}
+
+	return std::string();
+}
+
+std::string UInttoSAN( std::string input )
+{
+	if( input.empty() )
+		return std::string();
+
+	unsigned int square = std::atoi( input.c_str() );
+
+	if( square > 63 )
+		return std::string();
+
+	std::string SAN;
+
+	SAN.push_back( (square % 8) + 'a' );
+	SAN.push_back( (square / 8) + '1' );
+
+	return SAN;
+}
