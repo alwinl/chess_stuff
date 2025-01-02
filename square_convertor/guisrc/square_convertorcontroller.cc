@@ -22,6 +22,8 @@
 
 int main( int argc, char * argv[] )
 {
+	Glib::set_init_to_users_preferred_locale(false);
+
 	square_convertorController().run( argc, argv );
 }
 
