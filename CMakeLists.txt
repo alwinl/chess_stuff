@@ -29,7 +29,6 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
-add_subdirectory(calc_square)
 add_subdirectory(chess)
 add_subdirectory(chess_parser)
 add_subdirectory(clic)

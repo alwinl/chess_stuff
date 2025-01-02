@@ -27,6 +27,7 @@ add_executable(
 
 	test_runner.cc
 	testgameobject.cc
+	test_attacktable_creation.cc
 )
 
 target_include_directories( chess_test PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
@@ -34,3 +35,5 @@ target_link_libraries( chess_test ${CPPUNIT_LIBRARIES} chess_logic )
 
 add_test( TestGameObject::create_object chess_test TestGameObject::create_object )
 add_test( TestGameObject::save_load chess_test TestGameObject::save_load )
+
+add_test( TestAttackTableGen::do_test chess_test TestAttackTableGen::do_test )
