@@ -21,7 +21,7 @@
 
 #include "testchessparserengine.h"
 
-#include "chessparserengine.h"
+#include "pgn_parser_engine.h"
 
 #include <iostream>
 #include <utility>
@@ -44,8 +44,9 @@ public:
 
 void TestChessParserEngine::a_test()
 {
-	ChessParserEngine engine;
+	PGNParserEngine engine;
 	ParserVisitor visitor;
+
 
 	engine.open_file( "./game1.pgn" );
 

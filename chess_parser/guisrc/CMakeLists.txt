@@ -20,7 +20,7 @@
 find_package(PkgConfig REQUIRED)
 pkg_check_modules( GTKMM REQUIRED gtkmm-4.0)
 
-SET( LIB_SETUP chessparser_setup )
+SET( LIB_SETUP pgn_parser_setup )
 
 # define a setup with all the crud that needs to be added to the gcc call
 add_library( ${LIB_SETUP} INTERFACE )
@@ -30,9 +30,9 @@ target_link_directories( ${LIB_SETUP} INTERFACE ${GTKMM_LIBRARY_DIRS} )
 target_link_libraries( ${LIB_SETUP}  INTERFACE ${GTKMM_LIBRARIES} )
 
 add_executable(
-	chessparser
+	pgn_parser
 
-	chessparsercontroller.cc
+	pgn_parser.cc
 )
 
-target_link_libraries( chessparser ${LIB_SETUP} chessparser_logic )
+target_link_libraries( pgn_parser ${LIB_SETUP} pgn_parser_logic )

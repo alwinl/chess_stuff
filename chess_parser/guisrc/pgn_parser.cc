@@ -19,27 +19,45 @@
 
 #include <string>
 
-#include "chessparsercontroller.h"
-#include "chessparserengine.h"
+#include "pgn_parser_engine.h"
+
+#include <gtkmm.h>
+
+class PGNParser : public Gtk::Application
+{
+public:
+	PGNParser();
+
+private:
+	void on_activate() override;
+
+	void on_action_open();
+	bool on_action_quit();
+	void on_action_about();
+
+	Glib::RefPtr<Gtk::TextBuffer> text_buffer;
+	std::unique_ptr<PGNParserEngine> engine;
+	std::unique_ptr<Gtk::AboutDialog> about_dlg;
+};
 
 int main( int argc, char* argv[])
 {
 	Glib::set_init_to_users_preferred_locale(false);
 
-    ChessParserController().run( argc, argv );
+    PGNParser().run( argc, argv );
 }
 
-ChessParserController::ChessParserController() : Gtk::Application( "net.dnatechnologies.chessparser" )
+PGNParser::PGNParser() : Gtk::Application( "net.dnatechnologies.chessparser" )
 {
 	Glib::set_application_name("chessparser");
 
-    engine = std::make_unique<ChessParserEngine>();
+    engine = std::make_unique<PGNParserEngine>();
 }
 
-void ChessParserController::on_activate()
+void PGNParser::on_activate()
 {
-    add_action( "open", sigc::mem_fun( *this, &ChessParserController::on_action_open ) );
-	add_action( "about", sigc::mem_fun( *this, &ChessParserController::on_action_about ) );
+    add_action( "open", sigc::mem_fun( *this, &PGNParser::on_action_open ) );
+	add_action( "about", sigc::mem_fun( *this, &PGNParser::on_action_about ) );
 
 	auto window = Gtk::make_managed<Gtk::ApplicationWindow>();
 	window->set_title( "Portable Game Notation parser" );
@@ -63,7 +81,7 @@ void ChessParserController::on_activate()
     text_buffer = child->get_buffer();
 	window->set_child( *child );
 
-    window->signal_close_request().connect( sigc::mem_fun( *this, &ChessParserController::on_action_quit ), true );
+    window->signal_close_request().connect( sigc::mem_fun( *this, &PGNParser::on_action_quit ), true );
 
 	add_window( *window );
     window->show();
@@ -85,7 +103,7 @@ private:
 	std::string& content;
 };
 
-void ChessParserController::on_action_open()
+void PGNParser::on_action_open()
 {
     auto dlg = Gtk::FileDialog::create();
 
@@ -125,7 +143,7 @@ void ChessParserController::on_action_open()
     dlg->open( *get_active_window(), open_fun );
 }
 
-bool ChessParserController::on_action_quit()
+bool PGNParser::on_action_quit()
 {
     auto dlg = Gtk::AlertDialog::create("Do you really want to quit?" );
 
@@ -143,7 +161,7 @@ bool ChessParserController::on_action_quit()
     return true;
 }
 
-void ChessParserController::on_action_about()
+void PGNParser::on_action_about()
 {
 	if( about_dlg == nullptr ) {
 

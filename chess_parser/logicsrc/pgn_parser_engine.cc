@@ -17,7 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#include "chessparserengine.h"
+#include "pgn_parser_engine.h"
 
 #include <fstream>
 
@@ -25,7 +25,7 @@
 
 using namespace std;
 
-bool ChessParserEngine::open_file( std::string filename )
+bool PGNParserEngine::open_file( std::string filename )
 {
 	tag_pairs.clear();
 	movetexts.clear();
@@ -44,7 +44,7 @@ bool ChessParserEngine::open_file( std::string filename )
 	return true;
 }
 
-void ChessParserEngine::load( std::string pgn_string )
+void PGNParserEngine::load( std::string pgn_string )
 {
 	regex re_tvpair( "\\[(.*) \"(.*)\"\\]\\n" );
 	smatch tvpair_match;
@@ -63,13 +63,13 @@ void ChessParserEngine::load( std::string pgn_string )
 	}
 }
 
-void ChessParserEngine::visit_tag_pairs( ParserVisitorBase* processor )
+void PGNParserEngine::visit_tag_pairs( ParserVisitorBase* processor )
 {
 	for( auto tag_pair : tag_pairs )
 		processor->process_tag_pair( tag_pair.first, tag_pair.second );
 }
 
-void ChessParserEngine::visit_movetext( ParserVisitorBase* processor )
+void PGNParserEngine::visit_movetext( ParserVisitorBase* processor )
 {
 	for( auto movetext : movetexts )
 		processor->process_movetext( movetext.first, movetext.second );

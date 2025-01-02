@@ -18,9 +18,9 @@
 #
 
 add_library(
-    chessparser_logic
+    pgn_parser_logic
 
-    chessparserengine.cc
+    pgn_parser_engine.cc
 )
 
-target_include_directories( chessparser_logic INTERFACE ./ )
+target_include_directories( pgn_parser_logic INTERFACE ./ )

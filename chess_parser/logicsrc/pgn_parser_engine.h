@@ -19,23 +19,31 @@
 
 #pragma once
 
-#include <gtkmm.h>
+#include <string>
+#include <vector>
+#include <utility>
 
-class ChessParserEngine;
-
-class ChessParserController : public Gtk::Application
+class ParserVisitorBase
 {
 public:
-	ChessParserController();
+	virtual void process_tag_pair( std::string tag, std::string value ) = 0;
+	virtual void process_movetext( std::string white_move, std::string black_move ) = 0;
+};
+
+class PGNParserEngine
+{
+public:
+	bool open_file( std::string filename );
+
+	void visit_tag_pairs( ParserVisitorBase* processor );
+	void visit_movetext( ParserVisitorBase* processor );
 
 private:
-	void on_activate() override;
+	std::vector< std::pair<std::string,std::string> > tag_pairs;
+	std::vector< std::pair<std::string, std::string> > movetexts;
 
-	void on_action_open();
-	bool on_action_quit();
-	void on_action_about();
+//	std::string parse_tag_pairs( std::string input );
+//	void parse_movetext( std::string input );
 
-	Glib::RefPtr<Gtk::TextBuffer> text_buffer;
-	std::unique_ptr<ChessParserEngine> engine;
-	std::unique_ptr<Gtk::AboutDialog> about_dlg;
+	void load( std::string input );
 };
