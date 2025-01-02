@@ -17,24 +17,22 @@
 # MA 02110-1301, USA.
 #
 
-find_package(Doxygen REQUIRED)
+find_package(Doxygen)
 
-if( NOT DOXYGEN_FOUND )
-	message( FATAL_ERROR "Doxygen is needed to build documentation" )
+if( DOXYGEN_FOUND )
+
+	set( doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doxyfile )
+	set( doxyfile_out ${CMAKE_CURRENT_BINARY_DIR}/doxyfile )
+
+	configure_file( ${doxyfile_in} ${doxyfile_out} @ONLY )
+
+	add_custom_target(
+		chess_documentation
+
+		COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile_out}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		COMMENT "Generating API documentation"
+		VERBATIM
+	)
+
 endif()
-
-set( doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doxyfile )
-set( doxyfile_out ${CMAKE_CURRENT_BINARY_DIR}/doxyfile )
-
-configure_file( ${doxyfile_in} ${doxyfile_out} @ONLY )
-
-add_custom_target(
-	chess_documentation
-
-	COMMAND  ${DOXYGEN_EXECUTABLE} ${doxyfile_out}
-		# $< $<DOXYGEN_FOUND> : ${DOXYGEN_EXECUTABLE} ${doxyfile_in}>
-		# $< $<NOT:$<DOXYGEN_FOUND>> : message( FATAL_ERROR "Doxygen is needed to build documentation" )>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	COMMENT "Generating API documentation"
-	VERBATIM
-)

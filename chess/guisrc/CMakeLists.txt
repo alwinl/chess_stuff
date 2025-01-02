@@ -20,14 +20,14 @@
 add_subdirectory(resources)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules( GTKMM REQUIRED gtkmm-3.0)
+pkg_check_modules( GTKMM REQUIRED gtkmm-4.0)
 
 SET( LIB_SETUP chess_setup )
 
 # define a setup with all the crud that needs to be added to the gcc call
 add_library( ${LIB_SETUP} INTERFACE )
 target_include_directories( ${LIB_SETUP} INTERFACE ${GTKMM_INCLUDE_DIRS} )
-target_compile_options( ${LIB_SETUP} INTERFACE ${GTKMM_CFLAGS_OTHER} )
+# target_compile_options( ${LIB_SETUP} INTERFACE ${GTKMM_CFLAGS_OTHER} )
 target_link_directories( ${LIB_SETUP} INTERFACE ${GTKMM_LIBRARY_DIRS} )
 target_link_libraries( ${LIB_SETUP}  INTERFACE ${GTKMM_LIBRARIES} )
 

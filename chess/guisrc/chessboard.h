@@ -28,6 +28,8 @@
 
 namespace chess_gui {
 
+using Point = std::pair<float,float>;
+
 /**-----------------------------------------------------------------------------
  * \brief Chess board area
  *
@@ -62,25 +64,25 @@ public:
 	void computer_is_thinking( bool on ) { is_computer_move = on; }
 
 private:
-	virtual bool on_configure_event( GdkEventConfigure* event );
-	virtual bool on_draw( const Cairo::RefPtr<Cairo::Context>& cr );
-	virtual bool on_button_press_event( GdkEventButton* button_event );
-    virtual bool on_button_release_event( GdkEventButton* release_event );
-    virtual bool on_motion_notify_event( GdkEventMotion* motion_event );
+	// virtual bool on_configure_event( GdkEventConfigure* event );
+	void on_draw( const Cairo::RefPtr<Cairo::Context>& cr, int width, int height );
+	// virtual bool on_button_press_event( GdkEventButton* button_event );
+    // virtual bool on_button_release_event( GdkEventButton* release_event );
+    // virtual bool on_motion_notify_event( GdkEventMotion* motion_event );
 
 	void paint_board();
 	void paint_pieces();
 	void paint_edit_pieces();
 	void paint_info();
 
-	void start_dragging( Gdk::Point start_point, char piece_code );
-	void update_dragging( Gdk::Point new_point );
+	void start_dragging( Point start_point, char piece_code );
+	void update_dragging( Point new_point );
 	void stop_dragging();
 
-	Gdk::Point square_to_point( uint16_t square );
-	uint16_t point_to_square( Gdk::Point point );
-	Gdk::Point piececode_to_editpoint( char piece_code );
-	char editpoint_to_piececode( Gdk::Point point );
+	Point square_to_point( uint16_t square );
+	uint16_t point_to_square( Point point );
+	Point piececode_to_editpoint( char piece_code );
+	char editpoint_to_piececode( Point point );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
@@ -108,10 +110,10 @@ private:
 	std::array<char,64> pieces;
 	std::array<std::pair<std::string,std::string>,10> info;
 
-	Gdk::Point floating_piece_position;
+	Point floating_piece_position;
 	char floating_piece_code;
-	Gdk::Point annimate_delta;
-	Gdk::Point highlight_pos;
+	Point annimate_delta;
+	Point highlight_pos;
 };
 
 }

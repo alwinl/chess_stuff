@@ -35,14 +35,14 @@ int main( int argc, char *argv[] )
 namespace chess_gui {
 
 
-/**-----------------------------------------------------------------------------
- * Application window
- */
-class ChessWindow : public Gtk::ApplicationWindow
-{
-public:
-	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model ) : Gtk::ApplicationWindow(cobject) {};
-};
+// /**-----------------------------------------------------------------------------
+//  * Application window
+//  */
+// class ChessWindow : public Gtk::ApplicationWindow
+// {
+// public:
+// 	ChessWindow( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model ) : Gtk::ApplicationWindow(cobject) {};
+// };
 
 
 /**-----------------------------------------------------------------------------
@@ -73,15 +73,6 @@ ChessController::~ChessController( )
 /**-----------------------------------------------------------------------------
  * Setup
  */
-void ChessController::on_startup()
-{
-    Gtk::Application::on_startup();
-
-	bind_actions();
-	get_widgets();
-	connect_signals();
-}
-
 void ChessController::bind_actions()
 {
     add_action("new",     sigc::mem_fun( *this, &ChessController::on_action_new ) );
@@ -115,61 +106,65 @@ void ChessController::bind_actions()
 
 void ChessController::connect_signals()
 {
- 	chkLevelEasy->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_easy ) );
-	chkLevelTimed->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_timed ) );
-	chkLevelTotalTime->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_total_time) );
-	chkLevelInfinite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_infinite) );
-	chkLevelPlySearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_ply_search) );
-	chkLevelMateSearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_mate_search) );
-	chkLevelMatching->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_matching) );
+	// chkLevelEasy->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_easy ) );
+	// chkLevelTimed->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_timed ) );
+	// chkLevelTotalTime->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_total_time) );
+	// chkLevelInfinite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_infinite) );
+	// chkLevelPlySearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_ply_search) );
+	// chkLevelMateSearch->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_mate_search) );
+	// chkLevelMatching->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_level_matching) );
 
-	chkTurnWhite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_white) );
-	chkTurnBlack->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black) );
+	// chkTurnWhite->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_white) );
+	// chkTurnBlack->signal_activate().connect( sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black) );
 
-	board->signal_button_press_event().connect( sigc::mem_fun(*this, &ChessController::on_drag_start) );
-	board->signal_button_release_event().connect( sigc::mem_fun(*this, &ChessController::on_drag_done) );
+	// board->signal_button_press_event().connect( sigc::mem_fun(*this, &ChessController::on_drag_start) );
+	// board->signal_button_release_event().connect( sigc::mem_fun(*this, &ChessController::on_drag_done) );
 
 	slot_move_calculator.connect( sigc::mem_fun(*this, &ChessController::on_move_calculator_notify) );
 }
 
 void ChessController::get_widgets()
 {
-    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/appui.glade" );
+    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/app.ui" );
 
-	ui_model->get_widget_derived("main_view", view );
-    ui_model->get_widget( "widStatusBar", status_bar );
-	ui_model->get_widget_derived("canvas", board );
+	view = ui_model->get_widget<Gtk::ApplicationWindow>("main_view" );
+    status_bar = ui_model->get_widget<Gtk::Statusbar>( "widStatusBar" );
+	board = Gtk::Builder::get_widget_derived<ChessBoard>( ui_model, "canvas" );
 
-    ui_model->get_widget_derived( "dlgPieceValue", dlgPieceValues, *view );
-    ui_model->get_widget_derived( "dlgColours", dlgColours, *view );
-	ui_model->get_widget_derived("dlgInput", dlgTimeInput, *view );
-	ui_model->get_widget_derived("dlgNewGame", dlgNewGame, *view );
+    dlgPieceValues = Gtk::Builder::get_widget_derived<DialogPieceValues>( ui_model, "dlgPieceValue");
+    dlgColours     = Gtk::Builder::get_widget_derived<DialogColours>( ui_model, "dlgColours"   );
+	dlgTimeInput   = Gtk::Builder::get_widget_derived<DialogInput>( ui_model, "dlgInput"     );
+	dlgNewGame     = Gtk::Builder::get_widget_derived<DialogNewGame>( ui_model, "dlgNewGame"   );
 
-	ui_model->get_widget( "chkLevelEasy", chkLevelEasy );
-	ui_model->get_widget( "chkLevelTimed", chkLevelTimed );
-	ui_model->get_widget( "chkLevelTotalTime", chkLevelTotalTime );
-	ui_model->get_widget( "chkLevelInfinite", chkLevelInfinite );
-	ui_model->get_widget( "chkLevelPlySearch", chkLevelPlySearch );
-	ui_model->get_widget( "chkLevelMateSearch", chkLevelMateSearch );
-	ui_model->get_widget( "chkLevelMatching", chkLevelMatching );
+	// ui_model->get_widget( "chkLevelEasy", chkLevelEasy );
+	// ui_model->get_widget( "chkLevelTimed", chkLevelTimed );
+	// ui_model->get_widget( "chkLevelTotalTime", chkLevelTotalTime );
+	// ui_model->get_widget( "chkLevelInfinite", chkLevelInfinite );
+	// ui_model->get_widget( "chkLevelPlySearch", chkLevelPlySearch );
+	// ui_model->get_widget( "chkLevelMateSearch", chkLevelMateSearch );
+	// ui_model->get_widget( "chkLevelMatching", chkLevelMatching );
 
-	ui_model->get_widget( "chkOptionSound", chkSound );
+	// ui_model->get_widget( "chkOptionSound", chkSound );
 
-    ui_model->get_widget( "mnuGame", mnuGame );
-    ui_model->get_widget( "mnuArrange", mnuArrange );
-    ui_model->get_widget( "mnuStop", mnuStop );
+    // ui_model->get_widget( "mnuGame", mnuGame );
+    // ui_model->get_widget( "mnuArrange", mnuArrange );
+    // ui_model->get_widget( "mnuStop", mnuStop );
 
-    ui_model->get_widget( "chkTurnWhite", chkTurnWhite );
-    ui_model->get_widget( "chkTurnBlack", chkTurnBlack );
+    // ui_model->get_widget( "chkTurnWhite", chkTurnWhite );
+    // ui_model->get_widget( "chkTurnBlack", chkTurnBlack );
 }
 
 void ChessController::on_activate()
 {
-	view->set_default_size( 640,480 );
-	view->set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
+	bind_actions();
+	get_widgets();
+	connect_signals();
 
-    add_window( *view );
-    view->show();
+	view->set_default_size( 640,480 );
+	// view->set_icon( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") );
+
+	add_window( *view );
+	view->show();
 
 	status_bar->push( std::string("") );
 
@@ -179,11 +174,11 @@ void ChessController::on_activate()
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
-	chkLevelEasy->set_active();
-	chkTurnWhite->set_active();
+	// chkLevelEasy->set_active();
+	// chkTurnWhite->set_active();
 
-	mnuArrange->hide();
-	mnuStop->hide();
+	// mnuArrange->hide();
+	// mnuStop->hide();
 }
 
 
@@ -194,62 +189,62 @@ void ChessController::on_action_new()
 {
 	status_bar->push( std::string("") );
 
-	if( dlgNewGame->run() == Gtk::RESPONSE_CANCEL ) {
-		dlgNewGame->hide();
-        return;
-	}
+	// if( dlgNewGame->run() == Gtk::RESPONSE_CANCEL ) {
+	// 	dlgNewGame->hide();
+    //     return;
+	// }
 
-	dlgNewGame->hide();
+	// dlgNewGame->hide();
 
-	engine->new_game( dlgNewGame->get_choice() );
+	// engine->new_game( dlgNewGame->get_choice() );
 
-	save_board = engine->get_piece_positions();
-	board->set_piece_positions( engine->get_piece_positions() );
-	board->set_info( engine->get_info() );
+	// save_board = engine->get_piece_positions();
+	// board->set_piece_positions( engine->get_piece_positions() );
+	// board->set_info( engine->get_info() );
 
-	if( ! engine->current_player_is_human() )
-		move_calculator_start();
+	// if( ! engine->current_player_is_human() )
+	// 	move_calculator_start();
 
 	status_bar->push( std::string("New game") );
 }
 
 void ChessController::on_action_open()
 {
-    Gtk::FileChooserDialog dlg( *view, "Open Chess File", Gtk::FILE_CHOOSER_ACTION_OPEN );
+    // Gtk::FileChooserDialog dlg( *view, "Open Chess File", Gtk::FILE_CHOOSER_ACTION_OPEN );
 
-    dlg.add_button( "Cancel", Gtk::RESPONSE_CANCEL );
-    dlg.add_button( "Open", Gtk::RESPONSE_ACCEPT );
+    // dlg.add_button( "Cancel", Gtk::RESPONSE_CANCEL );
+    // dlg.add_button( "Open", Gtk::RESPONSE_ACCEPT );
 
-    Glib::RefPtr<Gtk::FileFilter> filter_pgn = Gtk::FileFilter::create();
+    // Glib::RefPtr<Gtk::FileFilter> filter_pgn = Gtk::FileFilter::create();
 
-    filter_pgn->set_name("PGN Files");
-    filter_pgn->add_pattern("*.pgn");
-    filter_pgn->add_pattern("*.PGN");
+    // filter_pgn->set_name("PGN Files");
+    // filter_pgn->add_pattern("*.pgn");
+    // filter_pgn->add_pattern("*.PGN");
 
-    dlg.add_filter( filter_pgn );
-    dlg.set_filter( filter_pgn );
+    // dlg.add_filter( filter_pgn );
+    // dlg.set_filter( filter_pgn );
 
-    if( dlg.run() != Gtk::RESPONSE_ACCEPT ) {
-		dlg.hide();
-        return;
-    }
+    // if( dlg.run() != Gtk::RESPONSE_ACCEPT ) {
+	// 	dlg.hide();
+    //     return;
+    // }
 
-    dlg.hide();
+    // dlg.hide();
 
-    if( ! engine->load_game( dlg.get_filename() ) ) {
+    // if( ! engine->load_game( dlg.get_filename() ) ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-        Gtk::MessageDialog( *view, "Error opening chess file.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-        return;
-    }
+    //     Gtk::MessageDialog( *view, "Error opening chess file.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+    //     return;
+    // }
 
     save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
-    status_bar->push( std::string("Opened ") + dlg.get_filename() );
+    // status_bar->push( std::string("Opened ") + dlg.get_filename() );
 }
 
 void ChessController::on_action_save()
@@ -258,8 +253,8 @@ void ChessController::on_action_save()
 
 	if( ! engine->save_game( "" ) ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+		// if( chkSound->get_active() )
+		// 	Gdk::Display::get_default()->beep();
 
 		on_action_save_as();
 		return;
@@ -270,36 +265,36 @@ void ChessController::on_action_save()
 
 void ChessController::on_action_save_as()
 {
-    Gtk::FileChooserDialog dlg( *view, "Save Chess File", Gtk::FILE_CHOOSER_ACTION_SAVE );
+//     Gtk::FileChooserDialog dlg( *view, "Save Chess File", Gtk::FILE_CHOOSER_ACTION_SAVE );
 
-    dlg.add_button( "Cancel", Gtk::RESPONSE_CANCEL );
-    dlg.add_button( "Save", Gtk::RESPONSE_OK );
+//     dlg.add_button( "Cancel", Gtk::RESPONSE_CANCEL );
+//     dlg.add_button( "Save", Gtk::RESPONSE_OK );
 
-    Glib::RefPtr<Gtk::FileFilter> filter_pgn = Gtk::FileFilter::create();
-    filter_pgn->set_name( "PGN Files" );
-    filter_pgn->add_pattern("*.pgn");
-    filter_pgn->add_pattern("*.PGN");
+//     Glib::RefPtr<Gtk::FileFilter> filter_pgn = Gtk::FileFilter::create();
+//     filter_pgn->set_name( "PGN Files" );
+//     filter_pgn->add_pattern("*.pgn");
+//     filter_pgn->add_pattern("*.PGN");
 
-    dlg.add_filter( filter_pgn );
-    dlg.set_filter( filter_pgn );
+//     dlg.add_filter( filter_pgn );
+//     dlg.set_filter( filter_pgn );
 
-    if( dlg.run() != Gtk::RESPONSE_OK ) {
-		dlg.hide();
-        return;
-    }
+//     if( dlg.run() != Gtk::RESPONSE_OK ) {
+// 		dlg.hide();
+//         return;
+//     }
 
-    dlg.hide();
+//     dlg.hide();
 
-    if( ! engine->save_game( dlg.get_filename() ) ) {
+//     if( ! engine->save_game( dlg.get_filename() ) ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+// 		if( chkSound->get_active() )
+// 			Gdk::Display::get_default()->beep();
 
-        Gtk::MessageDialog( *view, "Error saving game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-        return;
-   }
+//         Gtk::MessageDialog( *view, "Error saving game.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+//         return;
+//    }
 
-    status_bar->push( std::string( "Saved " ) + dlg.get_filename() );
+//     status_bar->push( std::string( "Saved " ) + dlg.get_filename() );
 }
 
 void ChessController::on_action_quit()
@@ -307,9 +302,9 @@ void ChessController::on_action_quit()
 	if( engine->can_quit() )
 		quit();
 
-	Gtk::MessageDialog dlg( *view, "Unsaved game. You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
-	if( dlg.run() == Gtk::RESPONSE_OK)
-		quit();
+	// Gtk::MessageDialog dlg( *view, "Unsaved game. You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
+	// if( dlg.run() == Gtk::RESPONSE_OK)
+	// 	quit();
 }
 
 void ChessController::on_action_play()
@@ -355,25 +350,25 @@ void ChessController::on_action_arrange()
 
 	board->set_piece_positions( engine->get_piece_positions() );
 
-	mnuGame->hide();
-	mnuArrange->show();
+	// mnuGame->hide();
+	// mnuArrange->show();
 
 	board->set_edit( true );
 }
 
 void ChessController::on_action_level_easy()
 {
-	if( ! chkLevelEasy->get_active() )
-		return;
+	// if( ! chkLevelEasy->get_active() )
+	// 	return;
 
-	if( ! engine->set_level_easy() ) {
+	// if( ! engine->set_level_easy() ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting easy level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting easy level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Easy") );
@@ -381,26 +376,26 @@ void ChessController::on_action_level_easy()
 
 void ChessController::on_action_level_timed()
 {
-	if( ! chkLevelTimed->get_active() )
-		return;
+	// if( ! chkLevelTimed->get_active() )
+	// 	return;
 
-	dlgTimeInput->dlg_setup( "Timed Level", "Seconds per move:", 120 );
+	// dlgTimeInput->dlg_setup( "Timed Level", "Seconds per move:", 120 );
 
-	if( dlgTimeInput->run() != Gtk::RESPONSE_OK ) {
-		dlgTimeInput->hide();
-		return;
-	}
+	// if( dlgTimeInput->run() != Gtk::RESPONSE_OK ) {
+	// 	dlgTimeInput->hide();
+	// 	return;
+	// }
 
-	dlgTimeInput->hide();
+	// dlgTimeInput->hide();
 
-	if( ! engine->set_level_timed( dlgTimeInput->get_input() ) ) {
+	// if( ! engine->set_level_timed( dlgTimeInput->get_input() ) ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting timed level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting timed level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Timed") );
@@ -408,26 +403,26 @@ void ChessController::on_action_level_timed()
 
 void ChessController::on_action_level_total_time()
 {
-	if( ! chkLevelTotalTime->get_active() )
-		return;
+	// if( ! chkLevelTotalTime->get_active() )
+	// 	return;
 
-	dlgTimeInput->dlg_setup( "Total Time Level", "Minutes per game:", 60 );
+	// dlgTimeInput->dlg_setup( "Total Time Level", "Minutes per game:", 60 );
 
-	if( dlgTimeInput->run() != Gtk::RESPONSE_OK ) {
-		dlgTimeInput->hide();
-		return;
-	}
+	// if( dlgTimeInput->run() != Gtk::RESPONSE_OK ) {
+	// 	dlgTimeInput->hide();
+	// 	return;
+	// }
 
-	dlgTimeInput->hide();
+	// dlgTimeInput->hide();
 
-	if( ! engine->set_level_total_time( dlgTimeInput->get_input() ) ) {
+	// if( ! engine->set_level_total_time( dlgTimeInput->get_input() ) ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting total time level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting total time level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Total Time") );
@@ -435,17 +430,17 @@ void ChessController::on_action_level_total_time()
 
 void ChessController::on_action_level_infinite()
 {
-	if( ! chkLevelInfinite->get_active() )
-		return;
+	// if( ! chkLevelInfinite->get_active() )
+	// 	return;
 
-	if( ! engine->set_level_infinite() ) {
+	// if( ! engine->set_level_infinite() ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting infinite level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting infinite level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Inifnite") );
@@ -453,17 +448,17 @@ void ChessController::on_action_level_infinite()
 
 void ChessController::on_action_level_ply_search()
 {
-	if( ! chkLevelPlySearch->get_active() )
-		return;
+	// if( ! chkLevelPlySearch->get_active() )
+	// 	return;
 
-	if( ! engine->set_level_ply_search() ) {
+	// if( ! engine->set_level_ply_search() ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting ply search level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting ply search level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Ply Search") );
@@ -471,17 +466,17 @@ void ChessController::on_action_level_ply_search()
 
 void ChessController::on_action_level_mate_search()
 {
-	if( ! chkLevelMateSearch->get_active() )
-		return;
+	// if( ! chkLevelMateSearch->get_active() )
+	// 	return;
 
-	if( ! engine->set_level_mate_search() ) {
+	// if( ! engine->set_level_mate_search() ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting mate search level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting mate search level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Mate Search") );
@@ -489,19 +484,19 @@ void ChessController::on_action_level_mate_search()
 
 void ChessController::on_action_level_matching()
 {
-	if( ! chkLevelMatching->get_active() )
-		return;
+	// if( ! chkLevelMatching->get_active() )
+	// 	return;
 
-	status_bar->push( std::string("") );
+	// status_bar->push( std::string("") );
 
-	if( ! engine->set_level_matching() ) {
+	// if( ! engine->set_level_matching() ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+	// 	if( chkSound->get_active() )
+	// 		Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting matching level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
-		return;
-	}
+	// 	Gtk::MessageDialog( *view, "Error setting matching level.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+	// 	return;
+	// }
 
 	board->set_info( engine->get_info() );
 	status_bar->push( std::string("Level: Matching") );
@@ -514,8 +509,8 @@ void ChessController::on_action_demomode()
 
 	is_demo = true;
 
-    mnuGame->hide();
-    mnuStop->show();
+    // mnuGame->hide();
+    // mnuStop->show();
 
     do_demo_move();
 }
@@ -526,19 +521,19 @@ void ChessController::on_action_piecevalues()
 
 	dlgPieceValues->set_values( engine->get_piece_values() );
 
-    if( dlgPieceValues->run() != Gtk::RESPONSE_OK ) {
-		dlgPieceValues->hide();
-		return;
-    }
+    // if( dlgPieceValues->run() != Gtk::RESPONSE_OK ) {
+	// 	dlgPieceValues->hide();
+	// 	return;
+    // }
 
     dlgPieceValues->hide();
 
 	if( ! engine->set_piece_values( dlgPieceValues->get_values() ) ) {
 
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+		// if( chkSound->get_active() )
+		// 	Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "Error setting piece values.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
+		// Gtk::MessageDialog( *view, "Error setting piece values.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true).run();
 		return;
 	}
 
@@ -551,10 +546,10 @@ void ChessController::on_action_colours()
 
 	dlgColours->set_colours( colours );
 
-    if( dlgColours->run() != Gtk::RESPONSE_OK ) {
-		dlgColours->hide();
-		return;
-    }
+    // if( dlgColours->run() != Gtk::RESPONSE_OK ) {
+	// 	dlgColours->hide();
+	// 	return;
+    // }
 
     dlgColours->hide();
 
@@ -585,17 +580,17 @@ void ChessController::on_action_showbestline()
 
 void ChessController::on_action_help_about()
 {
-    Gtk::AboutDialog dlg;
+    // Gtk::AboutDialog dlg;
 
-    dlg.set_transient_for( *view ) ;
-    dlg.set_name("chess") ;
-    dlg.set_logo( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") ) ;
-    dlg.set_version( "0.01" ) ;
-    dlg.set_comments("A GtkMM translation of Borland Chess") ;
-    dlg.set_copyright( "Copyright © 2017 Alwin Leerling" ) ;
-    dlg.set_website( "http://github" ) ;
+    // dlg.set_transient_for( *view ) ;
+    // dlg.set_name("chess") ;
+    // dlg.set_logo( Gdk::Pixbuf::create_from_resource("/net/dnatechnologies/chess/chess.png") ) ;
+    // dlg.set_version( "0.01" ) ;
+    // dlg.set_comments("A GtkMM translation of Borland Chess") ;
+    // dlg.set_copyright( "Copyright © 2017 Alwin Leerling" ) ;
+    // dlg.set_website( "http://github" ) ;
 
-    dlg.run();
+    // dlg.run();
 }
 
 void ChessController::on_action_arrange_clear()
@@ -607,16 +602,16 @@ void ChessController::on_action_arrange_clear()
 
 void ChessController::on_action_arrange_turn_white()
 {
-	if( !chkTurnWhite->get_active() )
-		return;
+	// if( !chkTurnWhite->get_active() )
+	// 	return;
 
 	engine->arrange_set_turn( eColor::white );
 }
 
 void ChessController::on_action_arrange_turn_black()
 {
-	if( !chkTurnBlack->get_active() )
-		return;
+	// if( !chkTurnBlack->get_active() )
+	// 	return;
 
 	engine->arrange_set_turn( eColor::black );
 }
@@ -627,8 +622,8 @@ void ChessController::on_action_arrange_cancel()
 
 	board->set_piece_positions( engine->get_piece_positions() );
 
-	mnuArrange->hide();
-	mnuGame->show();
+	// mnuArrange->hide();
+	// mnuGame->show();
 
 	board->set_edit( false );
 }
@@ -636,18 +631,18 @@ void ChessController::on_action_arrange_cancel()
 void ChessController::on_action_arrange_done()
 {
 	if( ! engine->arranging_end( false ) ) {
-		if( chkSound->get_active() )
-			Gdk::Display::get_default()->beep();
+		// if( chkSound->get_active() )
+		// 	Gdk::Display::get_default()->beep();
 
-		Gtk::MessageDialog( *view, "This is not a valid board. Please fix.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true ).run();
+		// Gtk::MessageDialog( *view, "This is not a valid board. Please fix.", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_CANCEL, true ).run();
 		return;
 	}
 
     save_board = engine->get_piece_positions();
 	board->set_piece_positions( engine->get_piece_positions() );
 
-	mnuArrange->hide();
-	mnuGame->show();
+	// mnuArrange->hide();
+	// mnuGame->show();
 
 	board->set_edit( false );
 }
@@ -657,7 +652,7 @@ void ChessController::on_action_arrange_make_fen()
 	std::string FEN = engine->arrange_to_fen();
 
 	dlgTimeInput->dlg_setup( "Arrange", "FEN Setup:", FEN );
-	dlgTimeInput->run();
+	// dlgTimeInput->run();
 	dlgTimeInput->hide();
 }
 
@@ -667,8 +662,8 @@ void ChessController::on_action_thinking_stop()
 		engine->stop_thinking();
 		slot_move_calculator.emit();
 	} else {
-		mnuStop->hide();
-		mnuGame->show();
+		// mnuStop->hide();
+		// mnuGame->show();
 		is_demo = false;
 	}
 }
@@ -676,52 +671,52 @@ void ChessController::on_action_thinking_stop()
 /**-----------------------------------------------------------------------------
  * Mouse input
  */
-bool ChessController::on_drag_start( GdkEventButton* button_event )
-{
-	drag_start_square = button_event->x;
-	drag_piece_code = button_event->state;
+// bool ChessController::on_drag_start( GdkEventButton* button_event )
+// {
+// 	drag_start_square = button_event->x;
+// 	drag_piece_code = button_event->state;
 
-	if( drag_start_square != (uint16_t)-1 ) {
-		save_board[drag_start_square] = ' ';
-		board->set_piece_positions( save_board );
-	}
+// 	if( drag_start_square != (uint16_t)-1 ) {
+// 		save_board[drag_start_square] = ' ';
+// 		board->set_piece_positions( save_board );
+// 	}
 
-	return true;
-}
+// 	return true;
+// }
 
-bool ChessController::on_drag_done( GdkEventButton* button_event )
-{
-	drag_end_square = button_event->x;
+// bool ChessController::on_drag_done( GdkEventButton* button_event )
+// {
+// 	drag_end_square = button_event->x;
 
-	if( drag_start_square == drag_end_square ) {
-		save_board = engine->get_piece_positions();
-		board->set_piece_positions( engine->get_piece_positions() );
-		return true;
-	}
+// 	if( drag_start_square == drag_end_square ) {
+// 		save_board = engine->get_piece_positions();
+// 		board->set_piece_positions( engine->get_piece_positions() );
+// 		return true;
+// 	}
 
-	// Arranging?
-	if( engine->in_edit_mode() ) {
+// 	// Arranging?
+// 	if( engine->in_edit_mode() ) {
 
-		if( drag_start_square != (uint16_t)-1 )
-			engine->arrange_remove_piece( drag_start_square );
+// 		if( drag_start_square != (uint16_t)-1 )
+// 			engine->arrange_remove_piece( drag_start_square );
 
-		if( drag_end_square != (uint16_t)-1 )
-			engine->arrange_add_piece( drag_end_square, drag_piece_code );
+// 		if( drag_end_square != (uint16_t)-1 )
+// 			engine->arrange_add_piece( drag_end_square, drag_piece_code );
 
-		board->set_piece_positions( engine->get_piece_positions() );
-		return true;
-	}
+// 		board->set_piece_positions( engine->get_piece_positions() );
+// 		return true;
+// 	}
 
-	// regular move, check if this this move can be made
-	if( engine->human_move( drag_start_square, drag_end_square ) )
-		do_animate( drag_start_square, drag_end_square, drag_piece_code );
-	else {
-		save_board = engine->get_piece_positions();
-		board->set_piece_positions( engine->get_piece_positions() );
-	}
+// 	// regular move, check if this this move can be made
+// 	if( engine->human_move( drag_start_square, drag_end_square ) )
+// 		do_animate( drag_start_square, drag_end_square, drag_piece_code );
+// 	else {
+// 		save_board = engine->get_piece_positions();
+// 		board->set_piece_positions( engine->get_piece_positions() );
+// 	}
 
-	return true;
-}
+// 	return true;
+// }
 
 /**-----------------------------------------------------------------------------
  * Animation of moves, highlights
@@ -784,8 +779,8 @@ bool ChessController::on_highlight_timeout()
  */
 void ChessController::move_calculator_start()
 {
-	mnuGame->hide();
-	mnuStop->show();
+	// mnuGame->hide();
+	// mnuStop->show();
 
 	board->computer_is_thinking( true );
 
@@ -808,8 +803,8 @@ void ChessController::on_move_calculator_notify()
 
 	thread_move_calculator = nullptr;
 
-	mnuStop->hide();
-	mnuGame->show();
+	// mnuStop->hide();
+	// mnuGame->show();
 
 	board->computer_is_thinking( false );
 

@@ -1,0 +1,461 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.94.1 -->
+<interface>
+  <!-- interface-name app.ui -->
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkApplicationWindow" id="main_view">
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkDrawingArea" id="canvas">
+            <property name="hexpand">1</property>
+            <property name="vexpand">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStatusbar" id="widStatusBar"/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="dlgColours">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <property name="visible">0</property>
+        <child>
+          <object class="GtkFrame">
+            <property name="child">
+              <object class="GtkGrid">
+                <property name="column-spacing">5</property>
+                <property name="margin-bottom">5</property>
+                <property name="row-spacing">5</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Background</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">White</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Black</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">3</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColorButton" id="btnBackgroundColour">
+                    <property name="focusable">1</property>
+                    <property name="receives-default">1</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColorButton" id="btnWhiteColour">
+                    <property name="focusable">1</property>
+                    <property name="receives-default">1</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColorButton" id="btnBlackColour">
+                    <property name="focusable">1</property>
+                    <property name="receives-default">1</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">3</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Text</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColorButton" id="btnForegroundColour">
+                    <property name="focusable">1</property>
+                    <property name="receives-default">1</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </property>
+            <child type="label">
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Colours</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">0</property>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="focusable">1</property>
+                <property name="icon-name">emblem-ok</property>
+                <property name="label" translatable="yes">OK</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="focusable">1</property>
+                <property name="icon-name">gtk-cancel</property>
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="title">Colour Preferences</property>
+    <property name="transient-for">main_view</property>
+  </object>
+  <object class="GtkWindow" id="dlgPieceValue">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <property name="visible">0</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="column-spacing">19</property>
+            <property name="margin-start">20</property>
+            <property name="vexpand">1</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Queen</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Rook</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Bishop</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Knight</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">3</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Pawn</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">4</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="spnQueen">
+                <property name="adjustment">valQueen</property>
+                <property name="focusable">1</property>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="spnRook">
+                <property name="adjustment">valRook</property>
+                <property name="focusable">1</property>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="spnBishop">
+                <property name="adjustment">valBishop</property>
+                <property name="focusable">1</property>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="spnKnight">
+                <property name="adjustment">valKnight</property>
+                <property name="focusable">1</property>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">3</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="spnPawn">
+                <property name="adjustment">valPawn</property>
+                <property name="focusable">1</property>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">4</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="valign">center</property>
+            <property name="visible">0</property>
+            <child>
+              <object class="GtkButton" id="btnRevert">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">Revert</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button5">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">OK</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button6">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="title" translatable="yes">Piece Values</property>
+    <property name="transient-for">main_view</property>
+  </object>
+  <object class="GtkWindow" id="dlgInput">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <property name="visible">0</property>
+        <child>
+          <object class="GtkBox">
+            <property name="margin-bottom">5</property>
+            <property name="margin-end">5</property>
+            <property name="margin-start">5</property>
+            <property name="margin-top">5</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel" id="lblInputPrompt">
+                <property name="label" translatable="yes">label</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="txtInputEntry">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="valign">center</property>
+            <property name="visible">0</property>
+            <child>
+              <object class="GtkButton" id="button3">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">OK</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button4">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="title">Input</property>
+    <property name="transient-for">main_view</property>
+  </object>
+  <object class="GtkWindow" id="dlgNewGame">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <property name="visible">0</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkButton" id="btnHumanvsAI">
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes">Human vs Computer</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnAIvsHuman">
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes">Computer vs Human</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnAIvsAI">
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes">Computer vs Computer</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnHumanvsHuman">
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes">Human vs Human</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="valign">center</property>
+            <property name="visible">0</property>
+            <child>
+              <object class="GtkButton" id="button7">
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="receives-default">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="title">Game Type</property>
+    <property name="transient-for">main_view</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="icon-name">gtk-ok</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="icon-name">gtk-cancel</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="icon-name">gtk-ok</property>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="icon-name">gtk-cancel</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="icon-name">gtk-revert-to-saved-ltr</property>
+  </object>
+  <object class="GtkImage" id="image6">
+    <property name="icon-name">gtk-ok</property>
+  </object>
+  <object class="GtkImage" id="image7">
+    <property name="icon-name">gtk-cancel</property>
+  </object>
+  <object class="GtkImage" id="image8">
+    <property name="icon-name">gtk-cancel</property>
+  </object>
+  <object class="GtkAdjustment" id="valBishop">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">255</property>
+  </object>
+  <object class="GtkAdjustment" id="valKnight">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">255</property>
+  </object>
+  <object class="GtkAdjustment" id="valPawn">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">255</property>
+  </object>
+  <object class="GtkAdjustment" id="valQueen">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">255</property>
+  </object>
+  <object class="GtkAdjustment" id="valRook">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">255</property>
+  </object>
+</interface>

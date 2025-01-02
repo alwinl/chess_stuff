@@ -29,10 +29,10 @@
 namespace chess_gui {
 
 
-class DialogColours : public Gtk::Dialog
+class DialogColours : public Gtk::Window
 {
 public:
-    DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
+    DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
     void set_colours( std::array<std::string,4> colours );
     std::array<std::string,4> get_colours( );
@@ -44,10 +44,10 @@ private:
     Gtk::ColorButton * btnBlackColour;
 };
 
-class DialogPieceValues : public Gtk::Dialog
+class DialogPieceValues : public Gtk::Window
 {
 public:
-    DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
+    DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
 	void set_values( std::map<char, int> values );
 	std::map<char, int> get_values();
@@ -63,10 +63,10 @@ private:
 	std::array<PieceData,5> piece_data;
 };
 
-class DialogInput : public Gtk::Dialog
+class DialogInput : public Gtk::Window
 {
 public:
-    DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
+    DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
     void dlg_setup( std::string title, std::string prompt, int value );
     void dlg_setup( std::string title, std::string prompt, std::string value );
@@ -77,15 +77,15 @@ private:
     Gtk::Entry * txtEntry;
 };
 
-class DialogNewGame : public Gtk::Dialog
+class DialogNewGame : public Gtk::Window
 {
 public:
-    DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent );
+    DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
     int get_choice() const { return choice; }
 
 private:
-	void make_choice( int the_choice ) { choice = the_choice; response( Gtk::ResponseType::RESPONSE_OK ); };
+	void make_choice( int the_choice ) { choice = the_choice; /*response( Gtk::ResponseType::RESPONSE_OK );*/ };
 
 	int choice;
 };

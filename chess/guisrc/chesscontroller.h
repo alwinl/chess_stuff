@@ -57,8 +57,7 @@ public:
 private:
 
 	// Setup
-	virtual void on_startup();
-	virtual void on_activate();
+	void on_activate() override;
 	void bind_actions();
 	void connect_signals();
 	void get_widgets();
@@ -98,8 +97,8 @@ private:
 	void on_action_arrange_turn_black();
 
 	// Mouse input
-	bool on_drag_start( GdkEventButton* button_event );
-	bool on_drag_done( GdkEventButton* button_event );
+	// bool on_drag_start( GdkEventButton* button_event );
+	// bool on_drag_done( GdkEventButton* button_event );
 
 	// AI move calculator
 	void move_calculator_start();
@@ -115,26 +114,26 @@ private:
     bool on_demo_move_timeout();
 
 	// Widgets
-	ChessWindow * view;
+	Gtk::ApplicationWindow * view;
     ChessBoard * board;
     DialogPieceValues * dlgPieceValues;
     DialogColours * dlgColours;
     DialogInput * dlgTimeInput;
     DialogNewGame * dlgNewGame;
     Gtk::Statusbar * status_bar;
-	Gtk::RadioMenuItem *chkLevelEasy;
-	Gtk::RadioMenuItem *chkLevelTimed;
-	Gtk::RadioMenuItem *chkLevelTotalTime;
-	Gtk::RadioMenuItem *chkLevelInfinite;
-	Gtk::RadioMenuItem *chkLevelPlySearch;
-	Gtk::RadioMenuItem *chkLevelMateSearch;
-	Gtk::RadioMenuItem *chkLevelMatching;
-    Gtk::MenuBar * mnuGame;
-    Gtk::MenuBar * mnuArrange;
-    Gtk::MenuBar * mnuStop;
-	Gtk::RadioMenuItem * chkTurnWhite;
-	Gtk::RadioMenuItem * chkTurnBlack;
-	Gtk::CheckMenuItem * chkSound;
+	// Gtk::RadioMenuItem *chkLevelEasy;
+	// Gtk::RadioMenuItem *chkLevelTimed;
+	// Gtk::RadioMenuItem *chkLevelTotalTime;
+	// Gtk::RadioMenuItem *chkLevelInfinite;
+	// Gtk::RadioMenuItem *chkLevelPlySearch;
+	// Gtk::RadioMenuItem *chkLevelMateSearch;
+	// Gtk::RadioMenuItem *chkLevelMatching;
+    // Gtk::MenuBar * mnuGame;
+    // Gtk::MenuBar * mnuArrange;
+    // Gtk::MenuBar * mnuStop;
+	// Gtk::RadioMenuItem * chkTurnWhite;
+	// Gtk::RadioMenuItem * chkTurnBlack;
+	// Gtk::CheckMenuItem * chkSound;
 
     // Data
 	std::thread * thread_move_calculator;

@@ -20,10 +20,10 @@
 set( RESOURCE_BASE chess )
 
 set( GRESOURCE_DEPEND
-	chess.png
-	appui.glade
+	app.ui
 	chess.ico
 	pieces.png
+	chess.png
 )
 
 find_program( GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED )

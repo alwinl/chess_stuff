@@ -22,15 +22,13 @@
 namespace chess_gui {
 
 
-DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
-    : Gtk::Dialog( cobject )
+DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
+    : Gtk::Window( cobject )
 {
-    set_transient_for( parent );
-
-	ui_model->get_widget( "btnBackgroundColour", btnBackground );
-	ui_model->get_widget( "btnForegroundColour", btnForeground );
-	ui_model->get_widget( "btnWhiteColour", btnWhiteColour );
-	ui_model->get_widget( "btnBlackColour", btnBlackColour );
+	btnBackground  = ui_model->get_widget<Gtk::ColorButton>( "btnBackgroundColour");
+	btnForeground  = ui_model->get_widget<Gtk::ColorButton>( "btnForegroundColour");
+	btnWhiteColour = ui_model->get_widget<Gtk::ColorButton>( "btnWhiteColour"     );
+	btnBlackColour = ui_model->get_widget<Gtk::ColorButton>( "btnBlackColour"     );
 }
 
 void DialogColours::set_colours( std::array<std::string,4>  colours )
@@ -53,19 +51,16 @@ std::array<std::string,4>  DialogColours::get_colours( )
     return colors;
 }
 
-DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
-    : Gtk::Dialog( cobject )
+DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
+    : Gtk::Window( cobject )
 {
-    set_transient_for( parent );
+	piece_data[0].spnButton  = ui_model->get_widget<Gtk::SpinButton>( "spnQueen" );
+	piece_data[1].spnButton  = ui_model->get_widget<Gtk::SpinButton>( "spnRook"  );
+	piece_data[2].spnButton  = ui_model->get_widget<Gtk::SpinButton>( "spnBishop");
+	piece_data[3].spnButton  = ui_model->get_widget<Gtk::SpinButton>( "spnKnight");
+	piece_data[4].spnButton  = ui_model->get_widget<Gtk::SpinButton>( "spnPawn"  );
 
-	ui_model->get_widget( "spnQueen",  piece_data[0].spnButton );
-	ui_model->get_widget( "spnRook",   piece_data[1].spnButton );
-	ui_model->get_widget( "spnBishop", piece_data[2].spnButton );
-	ui_model->get_widget( "spnKnight", piece_data[3].spnButton );
-	ui_model->get_widget( "spnPawn",   piece_data[4].spnButton );
-
-    Gtk::Button * btnRevert;
-    ui_model->get_widget( "btnRevert", btnRevert );
+    auto btnRevert = ui_model->get_widget<Gtk::Button>( "btnRevert" );
     btnRevert->signal_clicked().connect( sigc::mem_fun( *this, &DialogPieceValues::on_revert_clicked ));
 }
 
@@ -110,13 +105,11 @@ void DialogPieceValues::on_revert_clicked()
 		piece_data[idx].spnButton->set_value( piece_data[idx].orig_value );
 }
 
-DialogInput::DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
-    : Gtk::Dialog( cobject )
+DialogInput::DialogInput( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
+    : Gtk::Window( cobject )
 {
-    set_transient_for( parent );
-
-	ui_model->get_widget( "lblInputPrompt", lblPrompt );
-	ui_model->get_widget( "txtInputEntry", txtEntry );
+	lblPrompt = ui_model->get_widget<Gtk::Label>( "lblInputPrompt" );
+	txtEntry  = ui_model->get_widget<Gtk::Entry>( "txtInputEntry" );
 }
 
 void DialogInput::dlg_setup( std::string title, std::string prompt, int value )
@@ -138,23 +131,22 @@ int DialogInput::get_input()
     return std::stoi( txtEntry->get_text() );
 }
 
-DialogNewGame::DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model, Gtk::Window& parent )
-	: Gtk::Dialog( cobject )
+DialogNewGame::DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
+	: Gtk::Window( cobject )
 {
-	set_transient_for( parent );
 
 	Gtk::Button * button;
 
-	ui_model->get_widget( "btnHumanvsAI", button );
+	button = ui_model->get_widget<Gtk::Button>( "btnHumanvsAI" );
 	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 1 ) );
 
-	ui_model->get_widget( "btnAIvsHuman", button );
+	button = ui_model->get_widget<Gtk::Button>( "btnAIvsHuman" );
 	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 2 ) );
 
-	ui_model->get_widget( "btnAIvsAI", button );
+	button = ui_model->get_widget<Gtk::Button>( "btnAIvsAI" );
 	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 3 ) );
 
-	ui_model->get_widget( "btnHumanvsHuman", button );
+	button = ui_model->get_widget<Gtk::Button>( "btnHumanvsHuman" );
 	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 4 ) );
 }
 
