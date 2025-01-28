@@ -46,3 +46,11 @@ add_executable(
 add_dependencies( chess chess-resource )
 
 target_link_libraries( chess PRIVATE ${LIB_SETUP} chess_logic )
+
+add_executable(
+	dialog_tester
+
+	dialog_tester.cc
+	dialogs.cc
+)
+target_link_libraries( dialog_tester PRIVATE ${LIB_SETUP} )

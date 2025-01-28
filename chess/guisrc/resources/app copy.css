@@ -1,0 +1,27 @@
+button {
+    padding: 5px 10px; /* Add padding for size */
+    font-size: 12px; /* Set the font size */
+    color: white; /* Text color */
+    background: linear-gradient(45deg, #332d36, #7c696f); /* Gradient from top-left to bottom-right */
+    border: none; /* Remove the default border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for a 3D effect */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition for hover effects */
+}
+/* Hover effect */
+button:hover {
+  /* transform: translateY(-1px); Slight upward movement */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+}
+
+/* Active (when clicked) effect */
+button:active {
+  transform: translateY(1px); /* Move down slightly when clicked */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Lighter shadow when active */
+}
+
+frame {
+    padding: 5px; /* Adds spacing inside the frame */
+    margin: 5px;  /* Adds spacing outside the frame */
+    border: 4px solid #110101; /* Optional: Adds a border for visibility */
+}

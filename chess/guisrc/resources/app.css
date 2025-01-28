@@ -1,0 +1,5 @@
+frame {
+    padding: 5px; /* Adds spacing inside the frame */
+    margin: 5px;  /* Adds spacing outside the frame */
+    border: 2px solid #1101016e; /* Optional: Adds a border for visibility */
+}

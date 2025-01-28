@@ -26,6 +26,7 @@
 #include <vector>
 #include <thread>
 #include <array>
+#include <iostream>
 
 class ChessEngine;
 
@@ -35,26 +36,17 @@ class ChessWindow;
 class ChessBoard;
 class DialogColours;
 class DialogPieceValues;
+class DialogLevel;
 class DialogInput;
 class DialogNewGame;
 
-/**-----------------------------------------------------------------------------
- * \brief Main application object
- *
- * The ChessController class is the GUI application class, as opposed to the main
- * application class. It's the top level object for the GUI and runs all communication
- * between the user and the real application. User input (menu selections, mouse
- * clicks etc) are translated to messages/object that make sense to the chess
- * engine. Instructions from the engine get interpreted here and appropriate GUI
- * actions are created and executed.
- */
 class ChessController : public Gtk::Application
 {
 public:
 	ChessController( );
-	virtual ~ChessController();
 
 private:
+	enum class DlgID { NEW, PIECEVALUES, INPUT, COLOURS, LEVEL, NONE };
 
 	// Setup
 	void on_activate() override;
@@ -74,6 +66,7 @@ private:
 	void on_action_redo();
 	void on_action_arrange();
 	void on_action_demomode();
+	void on_action_level();
     void on_action_piecevalues();
 	void on_action_colours();
     void on_action_reverse();
@@ -82,28 +75,30 @@ private:
 	void on_action_arrange_clear();
 	void on_action_arrange_cancel();
 	void on_action_arrange_done();
+	void on_action_arrange_turn_white();
+	void on_action_arrange_turn_black();
 	void on_action_arrange_make_fen();
 	void on_action_thinking_stop();
 
-	void on_action_level_easy();
-	void on_action_level_timed();
-	void on_action_level_total_time();
-	void on_action_level_infinite();
-	void on_action_level_ply_search();
-	void on_action_level_mate_search();
-	void on_action_level_matching();
+	// void on_action_level_easy();
+	// void on_action_level_timed();
+	// void on_action_level_total_time();
+	// void on_action_level_infinite();
+	// void on_action_level_ply_search();
+	// void on_action_level_mate_search();
+	// void on_action_level_matching();
 
-	void on_action_arrange_turn_white();
-	void on_action_arrange_turn_black();
+	void on_dialog_response( DlgID response );
 
 	// Mouse input
-	// bool on_drag_start( GdkEventButton* button_event );
-	// bool on_drag_done( GdkEventButton* button_event );
+	void on_drag_start( int n_press, double mouse_x, double mouse_y );
+	void on_drag_done( int n_press, double mouse_x, double mouse_y );
+	void on_drag_motion( double mouse_x, double mouse_y );
 
 	// AI move calculator
 	void move_calculator_start();
 	void move_calculator_thread();
-	void on_move_calculator_notify();
+	void move_calculator_notify();
 
 	// Animation of moves, highlights and demo
     void do_animate( uint16_t start_square, uint16_t end_square, char piece );
@@ -116,41 +111,45 @@ private:
 	// Widgets
 	Gtk::ApplicationWindow * view;
     ChessBoard * board;
+    DialogLevel * dlgLevel;
     DialogPieceValues * dlgPieceValues;
     DialogColours * dlgColours;
     DialogInput * dlgTimeInput;
     DialogNewGame * dlgNewGame;
     Gtk::Statusbar * status_bar;
-	// Gtk::RadioMenuItem *chkLevelEasy;
-	// Gtk::RadioMenuItem *chkLevelTimed;
-	// Gtk::RadioMenuItem *chkLevelTotalTime;
-	// Gtk::RadioMenuItem *chkLevelInfinite;
-	// Gtk::RadioMenuItem *chkLevelPlySearch;
-	// Gtk::RadioMenuItem *chkLevelMateSearch;
-	// Gtk::RadioMenuItem *chkLevelMatching;
-    // Gtk::MenuBar * mnuGame;
-    // Gtk::MenuBar * mnuArrange;
-    // Gtk::MenuBar * mnuStop;
-	// Gtk::RadioMenuItem * chkTurnWhite;
-	// Gtk::RadioMenuItem * chkTurnBlack;
-	// Gtk::CheckMenuItem * chkSound;
+	Gtk::AboutDialog * dlgAbout;
+    Gtk::PopoverMenuBar * mnuGame;
+    Gtk::PopoverMenuBar * mnuArrange;
+    Gtk::PopoverMenuBar * mnuStop;
 
     // Data
-	std::thread * thread_move_calculator;
+	using ThreadMoveCalcType = std::unique_ptr<std::thread, std::function<void(std::thread*)>>;
+
+	ThreadMoveCalcType thread_move_calculator = {nullptr, nullptr };
 	Glib::Dispatcher slot_move_calculator;
+
 	int timeout_counter;
+
 	uint16_t drag_start_square;
-	uint16_t drag_end_square;
 	char drag_piece_code;
+
 	uint16_t AI_start_square;
 	uint16_t AI_end_square;
 	char AI_piece;
 
-    std::array<std::string,4> colours;
-    std::array<char, 64> save_board;
-    bool is_demo = false;
+    std::array<std::string,4> colours = {
+		"rgb(78,154,6)",
+		"rgb(0,0,0)",
+		"rgb(238,238,236)",
+		"rgb(85,87,83)",
+	};
 
-    ChessEngine* engine;
+    bool is_demo = false;
+	bool is_dragging = false;
+	bool is_animating = false;
+	bool is_computer_move = false;
+
+    std::shared_ptr<ChessEngine> engine;
 };
 
 }

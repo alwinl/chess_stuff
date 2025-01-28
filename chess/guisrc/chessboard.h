@@ -17,8 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef CHESSBOARD_H
-#define CHESSBOARD_H
+#pragma once
 
 #include <gtkmm.h>
 
@@ -30,19 +29,8 @@ namespace chess_gui {
 
 using Point = std::pair<float,float>;
 
-/**-----------------------------------------------------------------------------
- * \brief Chess board area
- *
- * This class encapsulates the drawing of a complete chessboard, info area and edit bitmap
- * with background on a DrawingArea widget.
- */
 class ChessBoard : public Gtk::DrawingArea
 {
-private:
-	static const int SQUARE_SIZE = 36;
-	static const int INFO_WIDTH = 240;
-	static const int MAX_HEIGHT = 1024;
-
 public:
 	ChessBoard( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
@@ -53,36 +41,33 @@ public:
     void toggle_reverse();
     void toggle_bestline();
 
-	void highlight_start( uint16_t square );
-	void highlight_continue();
-	void highlight_finish();
+	void drag_start( double mouse_x, double mouse_y, char piece_code );
+	void drag_continue( double mouse_x, double mouse_y );
+	void drag_finish();
 
 	void animate_start( uint16_t start_square, uint16_t end_square, char piece );
 	void animate_continue();
 	void animate_finish();
 
-	void computer_is_thinking( bool on ) { is_computer_move = on; }
+	void highlight_start( uint16_t square );
+	void highlight_continue();
+	void highlight_finish();
+
+	bool point_in_chessboard( Point point );
+	Point chesssquare_to_boardpoint( uint16_t square );
+	uint16_t boardpoint_to_chesssquare( Point point );
+
+	bool point_in_editwindow( Point point );
+	char editpoint_to_piececode( Point point );
+	Point piececode_to_editpoint( char piece_code );
 
 private:
-	// virtual bool on_configure_event( GdkEventConfigure* event );
 	void on_draw( const Cairo::RefPtr<Cairo::Context>& cr, int width, int height );
-	// virtual bool on_button_press_event( GdkEventButton* button_event );
-    // virtual bool on_button_release_event( GdkEventButton* release_event );
-    // virtual bool on_motion_notify_event( GdkEventMotion* motion_event );
 
 	void paint_board();
 	void paint_pieces();
 	void paint_edit_pieces();
 	void paint_info();
-
-	void start_dragging( Point start_point, char piece_code );
-	void update_dragging( Point new_point );
-	void stop_dragging();
-
-	Point square_to_point( uint16_t square );
-	uint16_t point_to_square( Point point );
-	Point piececode_to_editpoint( char piece_code );
-	char editpoint_to_piececode( Point point );
 
 	Cairo::RefPtr<Cairo::ImageSurface> background_image;
 	Cairo::RefPtr<Cairo::ImageSurface> pieces_image;
@@ -101,9 +86,6 @@ private:
 	bool show_bestline = true;
 	bool draw_highlight = false;
 	bool draw_floating_piece = false;
-	bool is_dragging = false;
-	bool is_animating = false;
-	bool is_computer_move = false;
 	bool is_reversed = false;
 	bool is_edit = false;
 
@@ -117,5 +99,3 @@ private:
 };
 
 }
-
-#endif // CHESSBOARD_H

@@ -28,20 +28,27 @@
 
 namespace chess_gui {
 
+using ColorArray = std::array<std::string,4>;
+
+enum class eResult { OK, CANCEL, UNKNOWN };
 
 class DialogColours : public Gtk::Window
 {
 public:
     DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
 
-    void set_colours( std::array<std::string,4> colours );
-    std::array<std::string,4> get_colours( );
+    void set_colours( ColorArray colours );
+    ColorArray get_colours( );
 
 private:
     Gtk::ColorButton * btnBackground;
     Gtk::ColorButton * btnForeground;
     Gtk::ColorButton * btnWhiteColour;
     Gtk::ColorButton * btnBlackColour;
+
+    ColorArray initial_colours;
+
+    eResult result = eResult::UNKNOWN;
 };
 
 class DialogPieceValues : public Gtk::Window
@@ -53,14 +60,16 @@ public:
 	std::map<char, int> get_values();
 
 private:
-    void on_revert_clicked();
+    // void on_revert_clicked();
 
-	struct PieceData {
-		Gtk::SpinButton * spnButton;
-		int orig_value;
-	};
+	// struct PieceData {
+	std::array<Gtk::SpinButton *,5> spnButton;
+	std::array<int,5> orig_value;
+	// };
 
-	std::array<PieceData,5> piece_data;
+	// std::array<PieceData,5> piece_data;
+
+    eResult result = eResult::UNKNOWN;
 };
 
 class DialogInput : public Gtk::Window
@@ -75,6 +84,8 @@ public:
 private:
     Gtk::Label * lblPrompt;
     Gtk::Entry * txtEntry;
+
+    eResult result = eResult::UNKNOWN;
 };
 
 class DialogNewGame : public Gtk::Window
@@ -85,9 +96,28 @@ public:
     int get_choice() const { return choice; }
 
 private:
-	void make_choice( int the_choice ) { choice = the_choice; /*response( Gtk::ResponseType::RESPONSE_OK );*/ };
+	void make_choice( int the_choice ) { choice = the_choice; hide(); };
 
 	int choice;
+
+    eResult result = eResult::UNKNOWN;
+};
+
+class DialogLevel : public Gtk::Window
+{
+public:
+    enum class eLevels {EASY, TIMED, TOTALTIME, INFINITE, PLYSEARCH, MATESEARCH, MATCHING, NONE };
+
+    DialogLevel( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model );
+
+    eLevels get_level() const { return choice; }
+
+private:
+	void make_choice( eLevels the_choice ) { choice = the_choice; hide(); };
+
+	eLevels choice;
+
+    eResult result = eResult::UNKNOWN;
 };
 
 }
