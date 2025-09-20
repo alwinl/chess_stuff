@@ -1,0 +1,92 @@
+using Gtk 4.0;
+
+Grid MainView {
+  column-spacing: 5;
+  margin-bottom: 10;
+  margin-end: 10;
+  margin-start: 10;
+  margin-top: 10;
+  row-spacing: 5;
+  vexpand: true;
+
+  Label {
+    label: _("=");
+
+    layout {
+      column: "2";
+      row: "0";
+    }
+  }
+
+  Label {
+    label: "SAN";
+
+    layout {
+      column: "0";
+      column-span: "1";
+      row: "0";
+      row-span: "1";
+    }
+  }
+
+  Label {
+    label: "Index";
+
+    layout {
+      column: "0";
+      column-span: "1";
+      row: "1";
+      row-span: "1";
+    }
+  }
+
+  Label lblUint {
+    label: " ";
+
+    layout {
+      column: "3";
+      column-span: "1";
+      row: "0";
+      row-span: "1";
+    }
+  }
+
+  Label {
+    label: _("=");
+
+    layout {
+      column: "2";
+      row: "1";
+    }
+  }
+
+  Entry fldSAN {
+    focusable: true;
+
+    layout {
+      column: "1";
+      row: "0";
+    }
+  }
+
+  Entry fldUint {
+    focusable: true;
+
+    layout {
+      column: "1";
+      row: "1";
+    }
+  }
+
+  Label lblSAN {
+    label: " ";
+    width-chars: 3;
+
+    layout {
+      column: "3";
+      column-span: "1";
+      row: "1";
+      row-span: "1";
+    }
+  }
+}
