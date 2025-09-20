@@ -26,3 +26,5 @@ add_library(
 	piece_square_tables.cc
 	ply.cc
 )
+
+target_include_directories( clic_logic PUBLIC ./ )
