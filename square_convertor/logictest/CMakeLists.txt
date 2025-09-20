@@ -17,18 +17,13 @@
 # MA 02110-1301, USA.
 #
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules( CPPUNIT REQUIRED cppunit)
+include( GoogleTest )
 
 add_executable(
 	square_convertor_test
 
-	test_runner.cc
-	test_square_convertorengine.cc
+	gtest_square_convertor.cc
 )
 
-target_include_directories( square_convertor_test PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( square_convertor_test ${CPPUNIT_LIBRARIES} square_convertor_logic )
-
-# add_test( TestGameObject::create_object test_chess TestGameObject::create_object )
-# add_test( TestGameObject::save_load test_chess TestGameObject::save_load )
+target_link_libraries( square_convertor_test gtest gtest_main square_convertor_logic )
+gtest_discover_tests( square_convertor_test )
