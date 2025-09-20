@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * gtest_evaluation.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#include "testevaluation.h"
+#include <gtest/gtest.h>
 
 #include <algorithm>
 #include <sstream>
@@ -31,9 +31,13 @@
 
 using namespace std;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( TestEvaluation );
+uint16_t parse_square( std::string SAN )
+{
+    return ( SAN[1] - '1' ) * 8 + ( SAN[0] - 'a' );
+};
 
-void TestEvaluation::test_square_parsing()
+
+TEST( TestEvaluation, test_square_parsing )
 {
 	unsigned int expected_square = 0;
 
@@ -44,7 +48,7 @@ void TestEvaluation::test_square_parsing()
 			SAN.push_back( rank );
 
 			unsigned int square = parse_square( SAN );
-			CPPUNIT_ASSERT_EQUAL_MESSAGE( "Calculated square does not match parsed square", expected_square, square );
+			ASSERT_EQ( expected_square, square ) << "Calculated square does not match parsed square";
 			++expected_square;
 		}
 	}
@@ -52,7 +56,7 @@ void TestEvaluation::test_square_parsing()
 
 #define REVERSE_RANK_MASK 0b00111000
 
-void TestEvaluation::piece_scores_depend_on_color()
+TEST( TestEvaluation, piece_scores_depend_on_color )
 {
 	for( unsigned int i = 0; i < 6; ++i ) {
 
@@ -67,7 +71,7 @@ void TestEvaluation::piece_scores_depend_on_color()
 
 				unsigned int square = parse_square( SAN );
 
-				CPPUNIT_ASSERT_EQUAL( white_piece.get_score( square ),
+				ASSERT_EQ( white_piece.get_score( square ),
 									  black_piece.get_score( square ^ REVERSE_RANK_MASK ) );
 			};
 		};
@@ -86,7 +90,7 @@ template <typename T> std::ostream &operator<<( std::ostream &os, const std::vec
 	return os << "]";
 }
 
-void TestEvaluation::square_table_values()
+TEST( TestEvaluation, square_table_values )
 {
 	enum { piece_code, square, value };
 
@@ -118,11 +122,11 @@ void TestEvaluation::square_table_values()
 	expected_string << expected;
 	actual_string << actual;
 
-	CPPUNIT_ASSERT_EQUAL( expected_string.str(), actual_string.str() );
+	ASSERT_EQ( expected_string.str(), actual_string.str() );
 }
 
 // there are only 3 asymmetric lines: queen table ranks 2, 3 and 4 (black 7, 6 and 5)
-void TestEvaluation::test_queen_asymmetry()
+TEST( TestEvaluation, test_queen_asymmetry )
 {
 	vector<string> ranks = {
 		// clang-format off
@@ -153,23 +157,23 @@ void TestEvaluation::test_queen_asymmetry()
 		stringstream ss;
 		ss << white_result;
 
-		CPPUNIT_ASSERT_EQUAL_MESSAGE( "White", ranks[index], ss.str() );
+		ASSERT_EQ( ranks[index], ss.str() ) << "White";
 
 		ss.str( "" );
 		ss << black_result;
 
-		CPPUNIT_ASSERT_EQUAL_MESSAGE( "Black", ranks[index], ss.str() );
+		ASSERT_EQ( ranks[index], ss.str() ) << "Black";
 	}
 }
 
-void TestEvaluation::standard_board_eval_is_zero()
+TEST( TestEvaluation, standard_board_eval_is_zero )
 {
 	Board board;
 
-	CPPUNIT_ASSERT_EQUAL( board.evaluate(), 0 );
+	ASSERT_EQ( board.evaluate(), 0 );
 }
 
-void TestEvaluation::check_all_first_moves()
+TEST( TestEvaluation, check_all_first_moves )
 {
 	Board board;
 
@@ -187,7 +191,7 @@ void TestEvaluation::check_all_first_moves()
 	// );
 }
 
-void TestEvaluation::test_alpha_beta()
+TEST( TestEvaluation, test_alpha_beta )
 {
 	Board board;
 
@@ -208,7 +212,7 @@ void TestEvaluation::test_alpha_beta()
 	// cout << endl;
 }
 
-void TestEvaluation::queen_should_not_capture_rook()
+TEST( TestEvaluation, queen_should_not_capture_rook )
 {
 	Board board( "4k3/8/6p1/5r2/8/3Q4/8/4K3" );
 

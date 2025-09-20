@@ -1,5 +1,5 @@
 /*
- * test_attacktable_creation.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
+ * gtest_attacktable.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,12 @@
  * MA 02110-1301, USA.
  */
 
-#include "test_attacktable_creation.h"
+#include <gtest/gtest.h>
 
 #include <sstream>
 #include <iomanip>
-
-CPPUNIT_TEST_SUITE_REGISTRATION( TestAttackTableGen );
-
 #include <cstring>
-/****************************************************************************/
+
 struct ATTACKTABTYPE {
     char  pieceset;               /* A set of king..pawn. gives the pieces, which can move to the square */
     char direction;              /* The direction from the piece to the square */
@@ -88,7 +85,7 @@ int* CalcAttackTab_new( void )
 	return attack2;
 }
 
-void TestAttackTableGen::do_test()
+TEST( TestAttackTableGen, do_test )
 {
 	CalcAttackTab_orig();
 	int * second = CalcAttackTab_new();
@@ -107,7 +104,7 @@ void TestAttackTableGen::do_test()
 		}
 	}
 
-    CPPUNIT_ASSERT_EQUAL_MESSAGE( "Piece table parts don't match", expected.str(), actual.str() );
+    ASSERT_EQ( expected.str(), actual.str() ) << "Piece table parts don't match";
 
 	// Direction table part
 	for( int i = 0; i< 240; i++ ) {
@@ -121,6 +118,6 @@ void TestAttackTableGen::do_test()
 	}
 
 
-    CPPUNIT_ASSERT_EQUAL_MESSAGE( "Direction table parts don't match", expected.str(), actual.str() );
+    ASSERT_EQ( expected.str(), actual.str() ) << "Direction table parts don't match";
 }
 

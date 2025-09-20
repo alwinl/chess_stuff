@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * gtest_objectsizes.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,31 +17,23 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef TESTBOARD_H
-#define TESTBOARD_H
+#include <gtest/gtest.h>
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "board.h"
+#include "piece.h"
+#include "ply.h"
 
-class TestBoard : public CppUnit::TestFixture
+TEST( TestObjectSizes, Ply_size_is_32_bit )
 {
-public:
-	CPPUNIT_TEST_SUITE( TestBoard );
+	ASSERT_EQ( 4ul, (unsigned long)sizeof( Ply ) );
+}
 
-	CPPUNIT_TEST( read_write_FEN );
-	CPPUNIT_TEST( test_pawn_first_move );
-	CPPUNIT_TEST( test_pawn_capture );
-	CPPUNIT_TEST( test_pawn_promotion );
-	CPPUNIT_TEST( test_promo_match );
+TEST( TestObjectSizes, Piece_size_is_8_bit )
+{
+	ASSERT_EQ( 1ul, (unsigned long)sizeof( Piece ) );
+}
 
-	CPPUNIT_TEST_SUITE_END();
-
-private:
-	void read_write_FEN();
-	void test_pawn_first_move();
-	void test_pawn_capture();
-	void test_pawn_promotion();
-	void test_promo_match();
-};
-
-#endif // TESTBOARD_H
+TEST( TestObjectSizes, Board_size_is_64_plus_8_bytes )
+{
+	ASSERT_EQ( 72ul, (unsigned long)sizeof( Board ) );
+}

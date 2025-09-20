@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alwin Leerling <alwin@jambo>
+ * gtest_gameobject.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,41 +15,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
-#include "testgameobject.h"
+#include <gtest/gtest.h>
 
-#include "game.h"
+#include "chessgame.h"
 
-using namespace std;
+#include <fstream>
 
-CPPUNIT_TEST_SUITE_REGISTRATION( TestGameObject );
 
-void TestGameObject::create_object()
+
+TEST( TestChessGameObject, create_object)
 {
-    Game game = Game();
+    ChessGame game = ChessGame();
 
-    CPPUNIT_ASSERT(true);
+    ASSERT_TRUE(true);
 }
 
-void TestGameObject::save_load()
+TEST( TestChessGameObject, save_load)
 {
-	Game game;
+	ChessGame game;
 
-	ifstream is( "game.pgn" );
+	std::ifstream is( "game.pgn" );
 
-	if( !is.good() )
-		CPPUNIT_FAIL( "cannot open 'game.pgn'");
+	ASSERT_TRUE( is.good() ) << "cannot open 'game.pgn'";
 
-	game.load( string( istreambuf_iterator<char>(is), istreambuf_iterator<char>() ) );
+	game.load( std::string( std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>() ) );
 
     is.close();
 
-    string actual = "\"" + game.save() + "\"";
-    string expected =
-		"\""
+    std::string actual = game.save();
+    std::string expected =
 		"[Event \"F/S Return Match\"]\n"
 		"[Site \"Belgrade, Serbia JUG\"]\n"
 		"[Date \"1992.11.04\"]\n"
@@ -64,11 +60,9 @@ void TestGameObject::save_load()
 		"Nc4 Nxc4 22. Bxc4 Nb6 23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7\n"
 		"27. Qe3 Qg5 28. Qxg5 hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33.\n"
 		"f3 Bc8 34. Kf2 Bf5 35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5\n"
-		"40. Rd6 Kc5 41. Ra6 Nf2 42. g4 Bd3 43. Re6 1/2-1/2\n"
-		"\""
-		;
+		"40. Rd6 Kc5 41. Ra6 Nf2 42. g4 Bd3 43. Re6 1/2-1/2\n";
 
-	std::cout << expected << "\n\n" << actual;
-    CPPUNIT_ASSERT_EQUAL( expected, actual );
+
+    ASSERT_EQ( expected, actual );
 }
 

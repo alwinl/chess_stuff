@@ -17,23 +17,16 @@
 # MA 02110-1301, USA.
 #
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules( CPPUNIT REQUIRED cppunit)
+include( GoogleTest )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
 
 add_executable(
 	chess_test
 
-	test_runner.cc
-	testgameobject.cc
-	test_attacktable_creation.cc
+	gtest_attacktable.cc
+	gtest_gameobject.cc
 )
 
-target_include_directories( chess_test PRIVATE ${CPPUNIT_INCLUDE_DIRS} ../logicsrc )
-target_link_libraries( chess_test ${CPPUNIT_LIBRARIES} chess_logic )
-
-add_test( TestGameObject::create_object chess_test TestGameObject::create_object )
-add_test( TestGameObject::save_load chess_test TestGameObject::save_load )
-
-add_test( TestAttackTableGen::do_test chess_test TestAttackTableGen::do_test )
+target_link_libraries( chess_test gtest gtest_main chess_logic )
+gtest_discover_tests( chess_test )

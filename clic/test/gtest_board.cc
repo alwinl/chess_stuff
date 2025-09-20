@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Alwin Leerling <dna.leerling@gmail.com>
+ * gtest_board.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#include "testboard.h"
+#include <gtest/gtest.h>
 
 #include "board.h"
 #include "ply.h"
@@ -27,8 +27,6 @@
 #include <vector>
 
 using namespace std;
-
-CPPUNIT_TEST_SUITE_REGISTRATION( TestBoard );
 
 std::string build_random_fen()
 {
@@ -82,7 +80,7 @@ std::string build_random_fen()
 // 	return out;
 // }
 
-void TestBoard::read_write_FEN()
+TEST( TestBoard, read_write_FEN )
 {
 	for( int test_cases = 0; test_cases < 10; ++test_cases ) {
 		std::string expected = build_random_fen();
@@ -91,16 +89,16 @@ void TestBoard::read_write_FEN()
 		std::string actual = board.piece_placement();
 		// std::string expected = resolve_blanks( placement );
 
-		CPPUNIT_ASSERT_EQUAL( expected, actual );
+		ASSERT_EQ( expected, actual );
 	}
 }
 
-void TestBoard::test_pawn_first_move()
+TEST( TestBoard, test_pawn_first_move )
 {
 	Board board( "8/8/8/8/8/8/4P3/8" );
 	vector<Ply> moves = board.generate_legal_plys();
 
-	CPPUNIT_ASSERT_EQUAL( 2, (int)moves.size() );
+	ASSERT_EQ( 2, (int)moves.size() );
 
 	vector<string> expected = { "e2-e4", "e2-e3" };
 
@@ -109,16 +107,16 @@ void TestBoard::test_pawn_first_move()
 							 [ex_move]( const Ply &gen_move ) { return gen_move.print_LAN() == ex_move; } );
 
 		if( iter == moves.end() )
-			CPPUNIT_ASSERT_EQUAL( ex_move, string( "(none)" ) );
+			ASSERT_EQ( ex_move, string( "(none)" ) );
 	} );
 }
 
-void TestBoard::test_pawn_capture()
+TEST( TestBoard, test_pawn_capture )
 {
 	Board board( "8/8/8/8/8/3p1p2/4P3/8" );
 	vector<Ply> moves = board.generate_legal_plys();
 
-	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
+	ASSERT_EQ( 4, (int)moves.size() );
 
 	vector<string> expected = { "e2-e4", "e2-e3", "e2xd3", "e2xf3" };
 
@@ -127,16 +125,16 @@ void TestBoard::test_pawn_capture()
 							 [ex_move]( const Ply &gen_move ) { return gen_move.print_LAN() == ex_move; } );
 
 		if( iter == moves.end() )
-			CPPUNIT_ASSERT_EQUAL( ex_move, string( "(none)" ) );
+			ASSERT_EQ( ex_move, string( "(none)" ) );
 	} );
 }
 
-void TestBoard::test_pawn_promotion()
+TEST( TestBoard, test_pawn_promotion )
 {
 	Board board( "8/P7/8/8/8/8/8/8" );
 	vector<Ply> moves = board.generate_legal_plys();
 
-	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
+	ASSERT_EQ( 4, (int)moves.size() );
 
 	vector<string> expected = { "a7-a8N", "a7-a8B", "a7-a8R", "a7-a8Q" };
 
@@ -145,20 +143,19 @@ void TestBoard::test_pawn_promotion()
 							 [ex_move]( const Ply &gen_move ) { return gen_move.print_LAN() == ex_move; } );
 
 		if( iter == moves.end() )
-			CPPUNIT_ASSERT_EQUAL( ex_move, string( "(none)" ) );
+			ASSERT_EQ( ex_move, string( "(none)" ) );
 	} );
 }
 
-void TestBoard::test_promo_match()
+TEST( TestBoard, test_promo_match )
 {
 	Board board( "8/P7/8/8/8/8/8/8" );
 	vector<Ply> moves = board.generate_legal_plys();
 
-	CPPUNIT_ASSERT_EQUAL( 4, (int)moves.size() );
+	ASSERT_EQ( 4, (int)moves.size() );
 
 	vector<string> expected = { "a7-a8N", "a7-a8B", "a7-a8R", "a7-a8Q" };
 
 	for( auto move : moves )
-		if( move.check_promo_match( Piece::none ) )
-			CPPUNIT_FAIL( "Did not expect this" );
+		ASSERT_FALSE( move.check_promo_match( Piece::none ) );
 }

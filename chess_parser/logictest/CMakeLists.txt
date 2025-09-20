@@ -17,18 +17,15 @@
 # MA 02110-1301, USA.
 #
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules( CPPUNIT REQUIRED cppunit )
+include( GoogleTest )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
 
 add_executable(
 	pgn_parser_test
 
-	test_runner.cc
-	testchessparserengine.cc
+	gtest_parserengine.cc
 )
 
-target_link_libraries( pgn_parser_test ${CPPUNIT_LIBRARIES} pgn_parser_logic )
-
-# add_test( TestChessParserEngine::a_test pgn_parser_test TestChessParserEngine::a_test )
+target_link_libraries( pgn_parser_test gtest gtest_main pgn_parser_logic )
+gtest_discover_tests( pgn_parser_test )
