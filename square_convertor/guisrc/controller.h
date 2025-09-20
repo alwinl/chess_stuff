@@ -30,5 +30,10 @@ public:
 
 private:
     MainView * view;
+
+	Gtk::Label *lblSAN;
+	Gtk::Label *lblUint;
+	Gtk::Entry *fldSAN;
+	Gtk::Entry *fldUint;
 };
 

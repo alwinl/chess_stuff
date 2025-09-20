@@ -17,8 +17,6 @@
 # MA 02110-1301, USA.
 #
 
-# add_subdirectory(resources)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules( GTKMM REQUIRED gtkmm-4.0)
 
@@ -46,15 +44,8 @@ add_custom_command(
 
 add_custom_target(blueprint_ui ALL DEPENDS ${UI_FILE})
 
-
-# set_source_files_properties( ${GRESOURCE_C} PROPERTIES GENERATED TRUE )
-
 add_executable(
 	square_convertor
-
-	# square_convertor.cc
-
-    # ${GRESOURCE_C}
 
 	main.cc
 	controller.cc
@@ -63,7 +54,6 @@ add_executable(
 	${UI_FILE}
 )
 
-# add_dependencies( square_convertor square_convertor-resource )
 add_dependencies( square_convertor blueprint_ui )
 
 target_link_libraries( square_convertor PRIVATE ${LIB_SETUP} square_convertor_logic )

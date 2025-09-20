@@ -20,10 +20,11 @@
 #include "controller.h"
 #include "view.h"
  
+#include "square_convertor_utils.h"
+
 Controller::Controller() : Gtk::ApplicationWindow()
 {
     set_title("Square Convertor");
-    // set_default_size(400, 200);
 
     auto builder = Gtk::Builder::create_from_file("square_convertor.ui");
 
@@ -31,12 +32,11 @@ Controller::Controller() : Gtk::ApplicationWindow()
     set_child(*view);
     view->show();
 
+	lblSAN  = builder->get_widget<Gtk::Label>( "lblSAN"  );
+	lblUint = builder->get_widget<Gtk::Label>( "lblUint" );
+	fldSAN  = builder->get_widget<Gtk::Entry>( "fldSAN"  );
+	fldUint = builder->get_widget<Gtk::Entry>( "fldUint" );
 
-    // Constructor implementation
-    // m_button = builder->get_widget<Gtk::Button>("click_button");
-    // if (m_button)
-    //     m_button->signal_clicked().connect([this] { button_clicked(); });
-
-    // Set the main view as the child of the window
+	fldSAN->signal_changed().connect( [this](){ lblUint->set_text( SANtoUInt( fldSAN->get_text() ) ); } );
+	fldUint->signal_changed().connect( [this](){ lblSAN->set_text( UInttoSAN( fldUint->get_text() ) ); } );
 }
-
