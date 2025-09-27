@@ -17,6 +17,6 @@
 # MA 02110-1301, USA.
 #
 
-add_subdirectory(logicsrc)
-add_subdirectory(guisrc)
-add_subdirectory(logictest)
+add_subdirectory(src)
+add_subdirectory(ui)
+add_subdirectory(test)

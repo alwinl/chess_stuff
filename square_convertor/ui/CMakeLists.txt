@@ -57,3 +57,11 @@ add_executable(
 add_dependencies( square_convertor blueprint_ui )
 
 target_link_libraries( square_convertor PRIVATE ${LIB_SETUP} square_convertor_logic )
+
+# Tell code where to find installed .ui file
+set(DATADIR "${CMAKE_INSTALL_PREFIX}/share")
+target_compile_definitions(square_convertor PRIVATE DATADIR="${DATADIR}")
+
+# Install binary + generated .ui file
+install(TARGETS square_convertor RUNTIME DESTINATION bin)
+install(FILES ${UI_FILE} DESTINATION share/square_convertor/ui)

@@ -25,9 +25,11 @@ set(CMAKE_CXX_STANDARD 20)
 include(CTest)
 enable_testing()
 
+include(CPack)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+set(CPACK_GENERATOR "TGZ;ZIP")
 
 add_subdirectory(chess)
 add_subdirectory(chess_parser)

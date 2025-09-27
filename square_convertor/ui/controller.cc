@@ -26,7 +26,11 @@ Controller::Controller() : Gtk::ApplicationWindow()
 {
     set_title("Square Convertor");
 
-    auto builder = Gtk::Builder::create_from_file("square_convertor.ui");
+	std::string ui_file = "square_convertor.ui";  // local build
+	if (!Glib::file_test(ui_file, Glib::FileTest::EXISTS))
+		ui_file = std::string(DATADIR) + "/Chess_Stuff/ui/square_convertor.ui";
+
+	auto builder = Gtk::Builder::create_from_file(ui_file);
 
     view = Gtk::Builder::get_widget_derived<MainView>( builder, "MainView");
     set_child(*view);
