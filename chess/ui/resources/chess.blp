@@ -1,0 +1,652 @@
+using Gtk 4.0;
+
+ApplicationWindow main_view {
+  child: Box {
+    orientation: vertical;
+
+    PopoverMenuBar mnuArrange {
+      menu-model: modelArrange;
+    }
+
+    PopoverMenuBar mnuGame {
+      menu-model: modelGame;
+    }
+
+    PopoverMenuBar mnuStop {
+      menu-model: modelStop;
+    }
+
+    DrawingArea canvas {
+      hexpand: true;
+      vexpand: true;
+    }
+
+    Statusbar widStatusBar {}
+  };
+
+  default-height: 480;
+  default-width: 640;
+  icon-name: "user-offline";
+}
+
+AboutDialog dlgAbout {
+  authors: [
+    "Alwin Leerling",
+  ];
+
+  comments: "A GtkMM translation of Borland Chess";
+  copyright: "Copyright © 2017 Alwin Leerling";
+  hide-on-close: true;
+  license-type: gpl_3_0;
+  logo-icon-name: "chess.png";
+  program-name: "Chess";
+  transient-for: main_view;
+  version: "0.0.1";
+}
+
+Window dlgColours {
+  child: Box {
+    orientation: vertical;
+
+    Frame {
+      child: Grid {
+        Label {
+          label: _("Background");
+          xalign: 0.0;
+
+          layout {
+            column: "0";
+            row: "0";
+          }
+        }
+
+        Label {
+          label: _("White");
+          xalign: 0.0;
+
+          layout {
+            column: "0";
+            row: "2";
+          }
+        }
+
+        Label {
+          label: _("Black");
+          xalign: 0.0;
+
+          layout {
+            column: "0";
+            row: "3";
+          }
+        }
+
+        ColorButton btnBackgroundColour {
+          focusable: true;
+          receives-default: true;
+
+          layout {
+            column: "1";
+            row: "0";
+          }
+        }
+
+        ColorButton btnWhiteColour {
+          focusable: true;
+          receives-default: true;
+
+          layout {
+            column: "1";
+            row: "2";
+          }
+        }
+
+        ColorButton btnBlackColour {
+          focusable: true;
+          receives-default: true;
+
+          layout {
+            column: "1";
+            row: "3";
+          }
+        }
+
+        Label {
+          label: _("Text");
+          xalign: 0.0;
+
+          layout {
+            column: "0";
+            row: "1";
+          }
+        }
+
+        ColorButton btnForegroundColour {
+          focusable: true;
+          receives-default: true;
+
+          layout {
+            column: "1";
+            row: "1";
+          }
+        }
+      };
+
+      css-classes: [
+        "inset_frame",
+      ];
+
+      styles [
+        "inset_frame",
+      ]
+    }
+
+    Frame {
+      Box {
+        Button btnColoursCancel {
+          label: _("Cancel");
+        }
+
+        Button btnColoursOK {
+          label: _("OK");
+        }
+      }
+    }
+  };
+
+  modal: true;
+  title: "Colour Preferences";
+  transient-for: main_view;
+}
+
+Window dlgPieceValues {
+  child: Box {
+    orientation: vertical;
+
+    Frame {
+      Grid {
+        vexpand: true;
+
+        Label {
+          halign: start;
+          label: _("Queen");
+
+          layout {
+            column: "0";
+            row: "0";
+          }
+        }
+
+        Label {
+          halign: start;
+          label: _("Rook");
+
+          layout {
+            column: "0";
+            row: "1";
+          }
+        }
+
+        Label {
+          halign: start;
+          label: _("Bishop");
+
+          layout {
+            column: "0";
+            row: "2";
+          }
+        }
+
+        Label {
+          halign: start;
+          label: _("Knight");
+
+          layout {
+            column: "0";
+            row: "3";
+          }
+        }
+
+        Label {
+          halign: start;
+          label: _("Pawn");
+
+          layout {
+            column: "0";
+            row: "4";
+          }
+        }
+
+        SpinButton spnQueen {
+          adjustment: adjQueen;
+          focusable: true;
+
+          layout {
+            column: "1";
+            row: "0";
+          }
+        }
+
+        SpinButton spnRook {
+          adjustment: adjRook;
+          focusable: true;
+
+          layout {
+            column: "1";
+            row: "1";
+          }
+        }
+
+        SpinButton spnBishop {
+          adjustment: adjBishop;
+          focusable: true;
+
+          layout {
+            column: "1";
+            row: "2";
+          }
+        }
+
+        SpinButton spnKnight {
+          adjustment: adjKnight;
+          focusable: true;
+
+          layout {
+            column: "1";
+            row: "3";
+          }
+        }
+
+        SpinButton spnPawn {
+          adjustment: adjPawn;
+          focusable: true;
+
+          layout {
+            column: "1";
+            row: "4";
+          }
+        }
+      }
+    }
+
+    Frame {
+      Box {
+        valign: center;
+
+        Button btnPieceValuesRevert {
+          label: _("Revert");
+        }
+
+        Button btnPieceValuesCancel {
+          focusable: true;
+          label: _("Cancel");
+        }
+
+        Button btnPieceValuesOK {
+          label: _("OK");
+        }
+      }
+    }
+  };
+
+  modal: true;
+  title: _("Piece Values");
+  transient-for: main_view;
+}
+
+Window dlgInput {
+  child: Box {
+    orientation: vertical;
+    spacing: 2;
+
+    Frame {
+      Box {
+        margin-bottom: 5;
+        margin-end: 5;
+        margin-start: 5;
+        margin-top: 5;
+        spacing: 5;
+
+        Label lblInputPrompt {
+          label: _("label");
+        }
+
+        Entry txtInputEntry {
+          focusable: true;
+          hexpand: true;
+        }
+      }
+    }
+
+    Frame {
+      Box {
+        valign: center;
+
+        Button btnInputCancel {
+          label: _("Cancel");
+        }
+
+        Button btnInputOK {
+          label: _("OK");
+        }
+      }
+    }
+  };
+
+  modal: true;
+  title: "Input";
+  transient-for: main_view;
+}
+
+Window dlgNewGame {
+  child: Box {
+    orientation: vertical;
+    spacing: 2;
+
+    Frame {
+      Box {
+        orientation: vertical;
+
+        Button btnHumanvsAI {
+          label: _("Human vs Computer");
+        }
+
+        Button btnAIvsHuman {
+          label: _("Computer vs Human");
+        }
+
+        Button btnAIvsAI {
+          label: _("Computer vs Computer");
+        }
+
+        Button btnHumanvsHuman {
+          label: _("Human vs Human");
+        }
+      }
+    }
+
+    Frame {
+      Box {
+        Button btnNewGameCancel {
+          label: _("Cancel");
+        }
+      }
+    }
+  };
+
+  modal: true;
+  title: "Game Type";
+  transient-for: main_view;
+}
+
+Window dlgLevel {
+  child: Box {
+    orientation: vertical;
+
+    Frame {
+      Box {
+        orientation: vertical;
+
+        CheckButton chkLevelEasy {
+          label: "Easy";
+        }
+
+        CheckButton chkLevelTimed {
+          label: "Timed";
+        }
+
+        Box {
+          Label {
+            label: "Seconds per move:";
+          }
+
+          Entry fldLevelTimed {}
+        }
+
+        CheckButton chkLevelTotalTime {
+          label: "Total Time";
+        }
+
+        Box {
+          Label {
+            label: "\"Minutes per game:\"";
+          }
+
+          Entry fldLevelTotalTime {}
+        }
+
+        CheckButton chkLevelInfinite {
+          label: "Infinite";
+        }
+
+        CheckButton chkLevelPlySearch {
+          label: "Ply Search";
+        }
+
+        CheckButton chkLevelMateSearch {
+          label: "Mate Search";
+        }
+
+        CheckButton chkLevelMatching {
+          label: "Match Time";
+        }
+      }
+    }
+
+    Frame {
+      Box {
+        Button btnLevelCancel {
+          label: "Cancel";
+        }
+
+        Button btnLevelOK {
+          label: "OK";
+        }
+      }
+    }
+  };
+
+  modal: true;
+  title: "Level";
+  transient-for: main_view;
+}
+
+Adjustment adjQueen {
+  page-increment: 10.0;
+  step-increment: 1.0;
+  upper: 255.0;
+}
+
+Adjustment adjRook {
+  page-increment: 10.0;
+  step-increment: 1.0;
+  upper: 255.0;
+}
+
+Adjustment adjBishop {
+  page-increment: 10.0;
+  step-increment: 1.0;
+  upper: 255.0;
+}
+
+Adjustment adjKnight {
+  page-increment: 10.0;
+  step-increment: 1.0;
+  upper: 255.0;
+}
+
+Adjustment adjPawn {
+  page-increment: 10.0;
+  step-increment: 1.0;
+  upper: 255.0;
+}
+
+menu modelGame {
+  submenu {
+    label: "File";
+
+    section {
+      item {
+        action: "app.new";
+        label: "New";
+      }
+
+      item {
+        action: "app.restore";
+        label: "Open";
+      }
+
+      item {
+        action: "app.save";
+        label: "Save";
+      }
+
+      item {
+        action: "app.saveas";
+        label: "Save As";
+      }
+    }
+
+    section {
+      item {
+        action: "app.play";
+        label: "Play";
+      }
+
+      item {
+        action: "app.hint";
+        label: "Hint";
+      }
+    }
+
+    section {
+      item {
+        action: "app.quit";
+        label: "Quit";
+      }
+    }
+  }
+
+  submenu {
+    label: "Edit";
+
+    section {
+      item {
+        action: "app.undo";
+        label: "Undo";
+      }
+
+      item {
+        action: "app.redo";
+        label: "Redo";
+      }
+
+      item {
+        action: "app.arrange";
+        label: "Arrange";
+      }
+    }
+  }
+
+  submenu {
+    label: "Settings";
+
+    section {
+      item {
+        action: "app.level";
+        label: "Level...";
+      }
+
+      item {
+        action: "app.piecevalues";
+        label: "Piece values...";
+      }
+
+      item {
+        action: "app.colours";
+        label: "Colours...";
+      }
+
+      item {
+        action: "app.reverse";
+        label: "Reverse board";
+      }
+
+      item {
+        action: "app.showbestline";
+        label: "Show best line";
+      }
+    }
+
+    section {
+      item {
+        label: "Demo mode";
+      }
+    }
+  }
+
+  submenu {
+    label: "Help";
+
+    section {
+      item {
+        action: "app.about";
+        label: "About...";
+      }
+    }
+  }
+}
+
+menu modelArrange {
+  submenu {
+    label: "Arrange";
+
+    section {
+      item {
+        action: "app.arrange_clear";
+        label: "Clear";
+      }
+
+      item {
+        action: "app.arrange_done";
+        label: "Done";
+      }
+
+      item {
+        action: "app.arrange_cancel";
+        label: "Cancel";
+      }
+    }
+
+    section {
+      item {
+        action: "app.arrange_setwhite";
+        label: "Set white turn";
+      }
+
+      item {
+        action: "app.arrange_setblack";
+        label: "Set black turn";
+      }
+    }
+
+    section {
+      item {
+        action: "app.arrange_makeFEN";
+        label: "Show FEN";
+      }
+    }
+  }
+}
+
+menu modelStop {
+  submenu {
+    label: "Thinking";
+
+    section {
+      item {
+        action: "app.think_stop";
+        label: "Stop";
+      }
+    }
+  }
+}

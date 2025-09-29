@@ -108,7 +108,7 @@ void ChessController::connect_signals()
 
 void ChessController::get_widgets()
 {
-    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/app.ui" );
+    Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/chess.ui" );
 
 	view       = ui_model->get_widget<Gtk::ApplicationWindow>("main_view" );
     status_bar = ui_model->get_widget<Gtk::Statusbar>( "widStatusBar" );

@@ -19,8 +19,20 @@
 
 set( RESOURCE_BASE chess )
 
+find_program(BLUEPRINT_COMPILER blueprint-compiler REQUIRED)
+
+set(BLP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCE_BASE}.blp)
+set(UI_FILE ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_BASE}.ui)
+
+add_custom_command(
+    OUTPUT ${UI_FILE}
+    COMMAND ${BLUEPRINT_COMPILER} compile --output ${UI_FILE} ${BLP_FILE}
+    DEPENDS ${BLP_FILE}
+    COMMENT "Compiling ${RESOURCE_BASE} UI"
+)
+
 set( GRESOURCE_DEPEND
-	app.ui
+	${UI_FILE}
 	chess.ico
 	pieces.png
 	chess.png
@@ -39,6 +51,8 @@ add_custom_command(
 	ARGS
 		--target=${GRESOURCE_C}
 		--generate-source
+		--sourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+		--sourcedir=${CMAKE_CURRENT_BINARY_DIR}
 		${GRESOURCE_XML}
 	VERBATIM
 	MAIN_DEPENDENCY ${GRESOURCE_XML}
