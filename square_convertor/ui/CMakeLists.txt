@@ -39,10 +39,8 @@ add_custom_command(
     OUTPUT ${UI_FILE}
     COMMAND ${BLUEPRINT_COMPILER} compile --output ${UI_FILE} ${BLP_FILE}
     DEPENDS ${BLP_FILE}
-    COMMENT "Compiling Blueprint UI"
+    COMMENT "Compiling square_convertor UI"
 )
-
-add_custom_target(blueprint_ui ALL DEPENDS ${UI_FILE})
 
 add_executable(
 	square_convertor
@@ -53,8 +51,6 @@ add_executable(
 
 	${UI_FILE}
 )
-
-add_dependencies( square_convertor blueprint_ui )
 
 target_link_libraries( square_convertor PRIVATE ${LIB_SETUP} square_convertor_logic )
 
