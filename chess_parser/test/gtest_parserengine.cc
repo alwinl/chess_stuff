@@ -21,27 +21,23 @@
 
 #include "pgn_parser_engine.h"
 
-class ParserVisitor : public ParserVisitorBase
-{
-public:
-	virtual void process_tag_pair( std::string tag, std::string value ) {
-		std::cout << "Tag: " << tag << ", value: " << value << "\n";
-	}
-	virtual void process_movetext( std::string white_move, std::string black_move ) {
-		std::cout << "White: " << white_move << ", Black: " << black_move << "\n";
-	}
-
-};
-
-TEST( TestChessParserEngine, a_test )
+TEST( PGNParser, parse_valid_pgn )
 {
 	PGNParserEngine engine;
-	ParserVisitor visitor;
 
 	engine.open_file( "./game1.pgn" );
 
-	engine.visit_tag_pairs( &visitor );
-	engine.visit_movetext( &visitor );
+	std::string content;
+
+	engine.visit_tag_pairs( [&content](const std::string& tag, const std::string& value)
+		{ content += "Tag: " + tag + ", value: " + value + "\n"; }
+	);
+
+	engine.visit_movetext( [&content](const std::string& white_move, const std::string& black_move)
+		{ content += "White: " + white_move + ", Black: " + black_move + "\n"; }
+	);
+
+	std::cout << content;
 
 	ASSERT_TRUE( true );
 }

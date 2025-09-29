@@ -87,22 +87,6 @@ void PGNParser::on_activate()
     window->show();
 }
 
-class ParserVisitor : public ParserVisitorBase
-{
-public:
-	ParserVisitor( std::string& result ) : content(result) {}
-
-	virtual void process_tag_pair( std::string tag, std::string value ) {
-		content += "Tag: " + tag + ", value: " + value + "\n";
-	}
-	virtual void process_movetext( std::string white_move, std::string black_move ) {
-		content += "White: " + white_move + ", Black: " + black_move + "\n";
-	}
-
-private:
-	std::string& content;
-};
-
 void PGNParser::on_action_open()
 {
     auto dlg = Gtk::FileDialog::create();
@@ -125,17 +109,19 @@ void PGNParser::on_action_open()
         auto file  = dlg->open_finish( async_result );
 
         if( !engine->open_file( file->get_path() ) ) {
-            auto dlg = Gtk::AlertDialog::create( "Error opening chess file." );
-
-            dlg->show(*get_active_window());
+            Gtk::AlertDialog::create( "Error opening chess file." )->show(*get_active_window());
             return;
         }
 
         std::string content;
 
-        ParserVisitor visitor( content );
-        engine->visit_tag_pairs( &visitor );
-        engine->visit_movetext( &visitor );
+		engine->visit_tag_pairs( [&content](const std::string& tag, const std::string& value)
+			{ content += "Tag: " + tag + ", value: " + value + "\n"; }
+		);
+
+		engine->visit_movetext( [&content](const std::string& white_move, const std::string& black_move)
+			{ content += "White: " + white_move + ", Black: " + black_move + "\n"; }
+		);
 
         text_buffer->set_text( content );
     };

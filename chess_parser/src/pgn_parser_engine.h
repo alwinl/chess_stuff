@@ -23,27 +23,17 @@
 #include <vector>
 #include <utility>
 
-class ParserVisitorBase
-{
-public:
-	virtual void process_tag_pair( std::string tag, std::string value ) = 0;
-	virtual void process_movetext( std::string white_move, std::string black_move ) = 0;
-};
-
 class PGNParserEngine
 {
 public:
 	bool open_file( std::string filename );
 
-	void visit_tag_pairs( ParserVisitorBase* processor );
-	void visit_movetext( ParserVisitorBase* processor );
+	template <typename Func> void visit_tag_pairs( Func&& func ) const { for( const auto& tag_pair : tag_pairs ) func( tag_pair.first, tag_pair.second ); }
+	template <typename Func> void visit_movetext( Func&& func ) const { for( const auto& movetext : movetexts ) func( movetext.first, movetext.second ); }
 
 private:
 	std::vector< std::pair<std::string,std::string> > tag_pairs;
 	std::vector< std::pair<std::string, std::string> > movetexts;
-
-//	std::string parse_tag_pairs( std::string input );
-//	void parse_movetext( std::string input );
 
 	void load( std::string input );
 };
