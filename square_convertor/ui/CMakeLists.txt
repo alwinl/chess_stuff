@@ -45,9 +45,7 @@ add_custom_command(
 add_executable(
 	square_convertor
 
-	main.cc
-	controller.cc
-	view.cc
+	square_convertor.cc
 
 	${UI_FILE}
 )
