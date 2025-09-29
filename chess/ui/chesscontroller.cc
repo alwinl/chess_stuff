@@ -70,9 +70,7 @@ void ChessController::bind_actions()
 	add_action_bool("arrange_setblack", sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black), false );
     add_action("arrange_makeFEN", sigc::mem_fun( *this, &ChessController::on_action_arrange_make_fen ) );
 
-    add_action("think_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
-
-
+	add_action("think_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
 }
 
 void ChessController::connect_signals()
@@ -111,7 +109,7 @@ void ChessController::get_widgets()
     Glib::RefPtr<Gtk::Builder> ui_model = Gtk::Builder::create_from_resource( "/net/dnatechnologies/chess/chess.ui" );
 
 	view       = ui_model->get_widget<Gtk::ApplicationWindow>("main_view" );
-    status_bar = ui_model->get_widget<Gtk::Statusbar>( "widStatusBar" );
+    status_bar = ui_model->get_widget<Gtk::Label>( "widStatusBar" );
 	dlgAbout   = ui_model->get_widget<Gtk::AboutDialog>( "dlgAbout"   );
     mnuGame    = ui_model->get_widget<Gtk::PopoverMenuBar>( "mnuGame" );
     mnuArrange = ui_model->get_widget<Gtk::PopoverMenuBar>( "mnuArrange" );
@@ -123,7 +121,6 @@ void ChessController::get_widgets()
     dlgColours     = Gtk::Builder::get_widget_derived<DialogColours>( ui_model, "dlgColours"   );
     dlgLevel       = Gtk::Builder::get_widget_derived<DialogLevel>( ui_model, "dlgLevel"   );
 	dlgTimeInput   = Gtk::Builder::get_widget_derived<DialogInput>( ui_model, "dlgInput"     );
-
 }
 
 void ChessController::on_activate()
@@ -138,7 +135,7 @@ void ChessController::on_activate()
 	add_window( *view );
 	view->show();
 
-	status_bar->push( std::string("") );
+	status_bar->set_text( "" );
 
 	board->set_colours( colours );
 	board->set_piece_positions( engine->get_piece_positions() );
@@ -153,7 +150,7 @@ void ChessController::on_activate()
  */
 void ChessController::on_action_new()
 {
-	status_bar->push( ::std::string("") );
+	status_bar->set_text( "" );
 
 	dlgNewGame->set_visible( true );
 }
@@ -174,7 +171,7 @@ void ChessController::on_action_open()
 		board->set_piece_positions( engine->get_piece_positions() );
 		board->set_info( engine->get_info() );
 
-		status_bar->push( std::string("Opened ") + file->get_path() );
+		status_bar->set_text( "Opened " + file->get_path() );
     };
 
     dlg->set_title( "Open Chess File" );
@@ -195,14 +192,14 @@ void ChessController::on_action_open()
 
 void ChessController::on_action_save()
 {
-	status_bar->push( std::string("") );
+	status_bar->set_text( "" );
 
 	if( ! engine->save_game( "" ) ) {
 		on_action_save_as();
 		return;
 	}
 
-	status_bar->push( std::string("Saved game") );
+	status_bar->set_text( "Saved game" );
 }
 
 void ChessController::on_action_save_as()
@@ -218,7 +215,7 @@ void ChessController::on_action_save_as()
             return;
         }
 
-		status_bar->push( std::string("Saved ") + file->get_path() );
+		status_bar->set_text( "Saved " + file->get_path() );
     };
 
     dlg->set_title( "Save Chess File" );
@@ -268,7 +265,7 @@ void ChessController::on_action_undo()
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
-	status_bar->push( std::string("Undone") );
+	status_bar->set_text( std::string("Undone") );
 }
 
 void ChessController::on_action_redo()
@@ -279,7 +276,7 @@ void ChessController::on_action_redo()
 	board->set_piece_positions( engine->get_piece_positions() );
 	board->set_info( engine->get_info() );
 
-	status_bar->push( std::string("Redone") );
+	status_bar->set_text( std::string("Redone") );
 }
 
 void ChessController::on_action_arrange()
@@ -306,7 +303,7 @@ void ChessController::on_dialog_response( DlgID response )
 		if( ! engine->current_player_is_human() )
 			move_calculator_start();
 
-		status_bar->push( std::string("New game") );
+		status_bar->set_text( std::string("New game") );
 		break;
 
 	case DlgID::PIECEVALUES:
@@ -315,7 +312,7 @@ void ChessController::on_dialog_response( DlgID response )
 			break;
 		}
 
-		status_bar->push( std::string("Piece values changed") );
+		status_bar->set_text( std::string("Piece values changed") );
 		break;
 
 	case DlgID::INPUT:
@@ -325,7 +322,7 @@ void ChessController::on_dialog_response( DlgID response )
 	case DlgID::COLOURS:
 		colours = dlgColours->get_colours();
 		board->set_colours( colours );
-		status_bar->push( std::string("Changed colours") );
+		status_bar->set_text( std::string("Changed colours") );
 		break;
 
 	case DlgID::LEVEL:
@@ -334,7 +331,7 @@ void ChessController::on_dialog_response( DlgID response )
 		// 	break;
 		// }
 
-		// status_bar->push( std::string("Level: ") + engine->get_level_string() );
+		// status_bar->set_text( std::string("Level: ") + engine->get_level_string() );
 		break;
 
 	case DlgID::NONE:
@@ -358,7 +355,7 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Easy") );
+// 	status_bar->set_text( std::string("Level: Easy") );
 // }
 
 // void ChessController::on_action_level_timed()
@@ -381,7 +378,7 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Timed") );
+// 	status_bar->set_text( std::string("Level: Timed") );
 // }
 
 // void ChessController::on_action_level_total_time()
@@ -404,7 +401,7 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Total Time") );
+// 	status_bar->set_text( std::string("Level: Total Time") );
 // }
 
 // void ChessController::on_action_level_infinite()
@@ -418,7 +415,7 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Inifnite") );
+// 	status_bar->set_text( std::string("Level: Inifnite") );
 // }
 
 // void ChessController::on_action_level_ply_search()
@@ -432,7 +429,7 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Ply Search") );
+// 	status_bar->set_text( std::string("Level: Ply Search") );
 // }
 
 // void ChessController::on_action_level_mate_search()
@@ -446,7 +443,7 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Mate Search") );
+// 	status_bar->set_text( std::string("Level: Mate Search") );
 // }
 
 // void ChessController::on_action_level_matching()
@@ -454,7 +451,7 @@ void ChessController::on_action_level()
 // 	// if( ! chkLevelMatching->get_active() )
 // 	// 	return;
 
-// 	// status_bar->push( std::string("") );
+// 	// status_bar->set_text( std::string("") );
 
 // 	// if( ! engine->set_level_matching() ) {
 		// Gtk::AlertDialog::create( "Error setting matching level." )->show( *view );
@@ -462,13 +459,13 @@ void ChessController::on_action_level()
 // 	// }
 
 // 	board->set_info( engine->get_info() );
-// 	status_bar->push( std::string("Level: Matching") );
+// 	status_bar->set_text( std::string("Level: Matching") );
 // }
 
 void ChessController::on_action_demomode()
 {
 	/// @TODO Implement demo. Load a game and start animating it
-	status_bar->push( std::string("Demo") );
+	status_bar->set_text( std::string("Demo") );
 
 	is_demo = true;
 
@@ -480,7 +477,7 @@ void ChessController::on_action_demomode()
 
 void ChessController::on_action_piecevalues()
 {
-	status_bar->push( std::string("") );
+	status_bar->set_text( std::string("") );
 
 	dlgPieceValues->set_values( engine->get_piece_values() );
 
@@ -489,7 +486,7 @@ void ChessController::on_action_piecevalues()
 
 void ChessController::on_action_colours()
 {
-	status_bar->push( std::string("") );
+	status_bar->set_text( std::string("") );
 
 	dlgColours->set_colours( colours );
 
@@ -498,20 +495,20 @@ void ChessController::on_action_colours()
 
 void ChessController::on_action_reverse()
 {
-	status_bar->push( std::string("") );
+	status_bar->set_text( std::string("") );
 
 	board->toggle_reverse( );
 
-	status_bar->push( std::string("Toggled reverse") );
+	status_bar->set_text( std::string("Toggled reverse") );
 }
 
 void ChessController::on_action_showbestline()
 {
-	status_bar->push( std::string("") );
+	status_bar->set_text( std::string("") );
 
 	board->toggle_bestline();
 
-	status_bar->push( std::string("Toggled bestline") );
+	status_bar->set_text( std::string("Toggled bestline") );
 }
 
 void ChessController::on_action_help_about()

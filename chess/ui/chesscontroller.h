@@ -116,7 +116,7 @@ private:
     DialogColours * dlgColours;
     DialogInput * dlgTimeInput;
     DialogNewGame * dlgNewGame;
-    Gtk::Statusbar * status_bar;
+    Gtk::Label * status_bar;
 	Gtk::AboutDialog * dlgAbout;
     Gtk::PopoverMenuBar * mnuGame;
     Gtk::PopoverMenuBar * mnuArrange;

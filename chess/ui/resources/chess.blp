@@ -21,7 +21,9 @@ ApplicationWindow main_view {
       vexpand: true;
     }
 
-    Statusbar widStatusBar {}
+    Label widStatusBar {
+      xalign: 0;
+    }
   };
 
   default-height: 480;
@@ -80,7 +82,7 @@ Window dlgColours {
           }
         }
 
-        ColorButton btnBackgroundColour {
+        ColorDialogButton btnBackgroundColour {
           focusable: true;
           receives-default: true;
 
@@ -90,7 +92,7 @@ Window dlgColours {
           }
         }
 
-        ColorButton btnWhiteColour {
+        ColorDialogButton btnWhiteColour {
           focusable: true;
           receives-default: true;
 
@@ -100,7 +102,7 @@ Window dlgColours {
           }
         }
 
-        ColorButton btnBlackColour {
+        ColorDialogButton btnBlackColour {
           focusable: true;
           receives-default: true;
 
@@ -120,7 +122,7 @@ Window dlgColours {
           }
         }
 
-        ColorButton btnForegroundColour {
+        ColorDialogButton btnForegroundColour {
           focusable: true;
           receives-default: true;
 

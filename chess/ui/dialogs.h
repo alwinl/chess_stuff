@@ -41,10 +41,12 @@ public:
     ColorArray get_colours( );
 
 private:
-    Gtk::ColorButton * btnBackground;
-    Gtk::ColorButton * btnForeground;
-    Gtk::ColorButton * btnWhiteColour;
-    Gtk::ColorButton * btnBlackColour;
+    Gtk::ColorDialogButton * btnBackground;
+    Gtk::ColorDialogButton * btnForeground;
+    Gtk::ColorDialogButton * btnWhiteColour;
+    Gtk::ColorDialogButton * btnBlackColour;
+
+    Glib::RefPtr<Gtk::ColorDialog> colour_dialog;
 
     ColorArray initial_colours;
 

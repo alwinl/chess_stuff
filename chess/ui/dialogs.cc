@@ -30,10 +30,19 @@ DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::B
 	ui_model->get_widget<Gtk::Button>( "btnColoursOK" )->signal_clicked().connect( [this](){ result = eResult::OK; hide(); } );
 	ui_model->get_widget<Gtk::Button>( "btnColoursCancel" )->signal_clicked().connect( [this](){ result = eResult::CANCEL; hide(); } );
 
-	btnBackground  = ui_model->get_widget<Gtk::ColorButton>( "btnBackgroundColour");
-	btnForeground  = ui_model->get_widget<Gtk::ColorButton>( "btnForegroundColour");
-	btnWhiteColour = ui_model->get_widget<Gtk::ColorButton>( "btnWhiteColour"     );
-	btnBlackColour = ui_model->get_widget<Gtk::ColorButton>( "btnBlackColour"     );
+	btnBackground  = ui_model->get_widget<Gtk::ColorDialogButton>( "btnBackgroundColour");
+	btnForeground  = ui_model->get_widget<Gtk::ColorDialogButton>( "btnForegroundColour");
+	btnWhiteColour = ui_model->get_widget<Gtk::ColorDialogButton>( "btnWhiteColour"     );
+	btnBlackColour = ui_model->get_widget<Gtk::ColorDialogButton>( "btnBlackColour"     );
+
+	colour_dialog = Gtk::ColorDialog::create();
+
+	btnBackground ->set_dialog( colour_dialog );
+	btnForeground ->set_dialog( colour_dialog );
+	btnWhiteColour->set_dialog( colour_dialog );
+	btnBlackColour->set_dialog( colour_dialog );
+
+
 }
 
 void DialogColours::set_colours( ColorArray  colours )
