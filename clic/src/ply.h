@@ -17,12 +17,11 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef PLY_H
-#define PLY_H
+#pragma once
 
-#include <vector>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "piece.h"
 
@@ -126,5 +125,3 @@ private:
 	eColor current_color;
 	bool ep_move = false;
 };
-
-#endif // PLY_H

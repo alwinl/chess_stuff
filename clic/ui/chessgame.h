@@ -17,8 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef CHESSGAME_H
-#define CHESSGAME_H
+#pragma once
 
 #include <vector>
 
@@ -46,5 +45,3 @@ private:
 	bool ai_move( eColor player, std::vector<Ply> moves );
 	void apply_move( Ply the_move );
 };
-
-#endif // CHESSGAME_H

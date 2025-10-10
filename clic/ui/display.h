@@ -17,8 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#pragma once
 
 #include <cstdint>
 #include <ostream>
@@ -35,10 +34,10 @@ public:
 	unsigned int select_gametype();
 
 	void print_board_header();
-	void print_board_footer();
 	void print_rank_header( unsigned int rank );
-	void print_rank_footer( unsigned int rank );
 	void print_square( unsigned int rank, unsigned int file, uint16_t type, bool is_white );
+	void print_rank_footer( unsigned int rank );
+	void print_board_footer();
 
 	void print_move( std::string the_move );
 
@@ -46,7 +45,6 @@ public:
 	void print_castling_move( uint16_t from, uint16_t to );
 	void print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture );
 	void print_invalid_move();
-
 	void print_total_possible_moves( unsigned int no_of_moves );
 
 	void print_input_header( bool is_white );
@@ -65,5 +63,3 @@ private:
 	std::ostream &erase_display( std::ostream &os ); /* clears from cursor to end of screen */
 	std::ostream &erase_line( std::ostream &os );	 /* clears from cursor to end of line */
 };
-
-#endif // DISPLAY_H

@@ -17,10 +17,11 @@
 # MA 02110-1301, USA.
 #
 
-add_executable( clic
+add_executable(
+	clic
+
 	chessgame.cc
 	display.cc
 )
 
-target_include_directories( clic PUBLIC ../logicsrc )
 target_link_libraries( clic PUBLIC clic_logic )

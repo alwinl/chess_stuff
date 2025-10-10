@@ -248,9 +248,7 @@ std::vector<Ply> Board::generate_plys() const
 			}
 
 			/* capture moves */
-			for( int offset : {9, 11}/*counter = 0; counter < 2; ++counter*/ ) {
-
-				// int offset = ( ( counter == 0 ) ? 9 : 11 );
+			for( int offset : {9, 11} ) {
 
 				if( piece.is_color( black ) )
 					offset *= -1;
