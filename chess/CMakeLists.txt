@@ -20,4 +20,3 @@
 add_subdirectory( src )
 add_subdirectory( ui )
 add_subdirectory( test )
-add_subdirectory( doxygen )

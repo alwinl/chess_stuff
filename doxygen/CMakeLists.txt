@@ -19,20 +19,28 @@
 
 find_package(Doxygen)
 
-if( DOXYGEN_FOUND )
-
-	set( doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doxyfile )
-	set( doxyfile_out ${CMAKE_CURRENT_BINARY_DIR}/doxyfile )
+function( add_doxygen_target config_file )
+	
+	set( doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/${config_file} )
+	set( doxyfile_out ${CMAKE_CURRENT_BINARY_DIR}/${config_file} )
 
 	configure_file( ${doxyfile_in} ${doxyfile_out} @ONLY )
 
 	add_custom_target(
-		chess_documentation
+		${config_file}
 
 		COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile_out}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Generating API documentation"
 		VERBATIM
 	)
+
+endfunction( add_doxygen_target )
+
+
+if( DOXYGEN_FOUND )
+
+	add_doxygen_target( chess_api )
+	add_doxygen_target( clic_api )
 
 endif()
