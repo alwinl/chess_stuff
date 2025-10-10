@@ -40,10 +40,6 @@ public:
 	void print_board_footer();
 
 	void print_move( std::string the_move );
-
-	void print_promotion_move( uint16_t from, uint16_t to, bool is_capture, uint16_t promo_type );
-	void print_castling_move( uint16_t from, uint16_t to );
-	void print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture );
 	void print_invalid_move();
 	void print_total_possible_moves( unsigned int no_of_moves );
 

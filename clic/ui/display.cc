@@ -105,42 +105,6 @@ void Display::print_move( std::string the_move )
 	flush( cout );
 }
 
-void Display::print_promotion_move( uint16_t from, uint16_t to, bool is_capture, uint16_t promo_type )
-{
-	set_cursor( cout, 3, 12 );
-	erase_line( cout );
-
-	cout << (char)( 'a' + ( from % 8 ) ) << (char)( '1' + ( from / 8 ) );
-	cout << ( is_capture ? " x " : " - " );
-	cout << (char)( 'a' + ( to % 8 ) ) << (char)( '1' + ( to / 8 ) );
-	cout << string( "E NBRQK" )[promo_type];
-
-	flush( cout );
-}
-
-void Display::print_castling_move( uint16_t from, uint16_t to )
-{
-	set_cursor( cout, 3, 12 );
-	erase_line( cout );
-
-	cout << ( ( to > from ) ? "O - O" : "O - O - O" );
-
-	flush( cout );
-}
-
-void Display::print_regular_move( uint16_t type, uint16_t from, uint16_t to, bool is_capture )
-{
-	set_cursor( cout, 3, 12 );
-	erase_line( cout );
-
-	cout << string( "E NBRQK" )[type];
-	cout << (char)( 'a' + ( from % 8 ) ) << (char)( '1' + ( from / 8 ) );
-	cout << ( is_capture ? " x " : " - " );
-	cout << (char)( 'a' + ( to % 8 ) ) << (char)( '1' + ( to / 8 ) );
-
-	flush( cout );
-}
-
 void Display::print_invalid_move()
 {
 	set_cursor( cout, 3, 12 );
