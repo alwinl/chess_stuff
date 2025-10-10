@@ -29,7 +29,7 @@ public:
 	Display();
 	~Display();
 
-	uint16_t get_square();
+	uint16_t select_square();
 	unsigned int select_promo_type();
 	unsigned int select_gametype();
 

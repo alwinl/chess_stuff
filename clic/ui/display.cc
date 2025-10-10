@@ -200,7 +200,7 @@ void Display::print_total_possible_moves( unsigned int no_of_moves )
 	flush( cout );
 }
 
-uint16_t Display::get_square()
+uint16_t Display::select_square()
 {
 	char file_char;
 	char rank_char;

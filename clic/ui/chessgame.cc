@@ -105,7 +105,7 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 	for( ;; ) {
 		disp.print_input_header( player == white );
 
-		if( ( square_from = disp.get_square() ) == uint16_t( -1 ) )
+		if( ( square_from = disp.select_square() ) == uint16_t( -1 ) )
 			return true;
 
 		if( square_from == 64 )
@@ -113,7 +113,7 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 
 		disp.print_bar();
 
-		if( ( square_to = disp.get_square() ) == uint16_t( -1 ) )
+		if( ( square_to = disp.select_square() ) == uint16_t( -1 ) )
 			return true;
 
 		if( square_to == 64 )
