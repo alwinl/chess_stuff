@@ -47,8 +47,11 @@ public:
 	uint16_t get_ep_square() const
 		{ return ( ep_candidate == 1 ) ? to + ( (from < to) ? -8 : 8 ) : (uint16_t)-1; }
 
+	Piece::eType get_type() const { return Piece::eType( type ); }
 	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
 
+	bool check_match( uint16_t from_square, uint16_t to_square, char promo_piece ) const
+		{ return (from_square == from) && (to_square == to) && ( (promo_piece == ' ') || (promo_type == Piece(promo_piece).get_type() ) ); }
 
 	bool check_square_match( uint16_t rhs_from, uint16_t rhs_to ) const
 		{ return ( from == rhs_from ) && ( to == rhs_to ); }
