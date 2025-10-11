@@ -34,13 +34,13 @@ public:
 	Board( std::string PiecePlacement = "" );
 
 	void update_board( Ply a_ply );
-	Board make( Ply a_ply ) const;
 
 	std::vector<Ply> generate_legal_plys() const;
 
 	int evaluate() const;
+	Board make( Ply a_ply ) const;
 
-	int evaluate_ply( const Ply &ply, int depth_left ) const;
+	int evaluate_ply( const Ply& ply, int depth ) const;
 
 	std::string piece_placement() const;
 	Piece get_piece( unsigned int index ) { return position[index]; }

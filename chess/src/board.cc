@@ -21,6 +21,8 @@
 
 #include "board.h"
 
+#include "ply.h"
+
 #include <algorithm>
 #include <limits>
 #include <sstream>

@@ -20,13 +20,14 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <string>
 #include <array>
+#include <string>
 #include <vector>
 #include <map>
 
 #include "piece.h"
-#include "ply.h"
+
+class Ply;
 
 class Board
 {
@@ -47,11 +48,11 @@ public:
 	int evaluate() const;
 	Board make( Ply a_ply ) const;
 
+	int evaluate_ply( const Ply& ply, int depth ) const;
+
 	eColor get_current_colour() const { return current_player; };
 	Piece::eType get_type_on_square( uint16_t square ) const { return position[square].get_type(); }
 	std::array<char,64> get_position_codes() const;
-
-	int evaluate_ply( const Ply& ply, int depth ) const;
 
 private:
 	std::array<Piece,64> position;

@@ -26,6 +26,9 @@ add_executable(
 
 	gtest_attacktable.cc
 	gtest_gameobject.cc
+	gtest_objectsizes.cc
+	gtest_board.cc
+	gtest_evaluation.cc
 )
 
 target_link_libraries( chess_test gtest gtest_main chess_logic )
