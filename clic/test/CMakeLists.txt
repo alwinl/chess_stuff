@@ -24,10 +24,11 @@ file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/game.pgn DESTINATION ${CMAKE_CURRENT_BINA
 add_executable(
 	clic_test
 
-	gtest_board.cc
-	gtest_evaluation.cc
+	gtest_attacktable.cc
 	gtest_gameobject.cc
 	gtest_objectsizes.cc
+	gtest_board.cc
+	gtest_evaluation.cc
 )
 
 target_link_libraries( clic_test gtest gtest_main clic_logic )
