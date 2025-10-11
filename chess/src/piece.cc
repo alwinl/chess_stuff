@@ -27,8 +27,8 @@ using namespace std;
 
 extern int* square_tables[];
 
-//std::array<unsigned int,7> material_value = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
-std::array<unsigned int,7> material_value = { 0, 256, 768, 768, 1280, 2304, 0 };		// Borland
+std::array<unsigned int,7> material_value = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
+// std::array<unsigned int,7> material_value = { 0, 256, 768, 768, 1280, 2304, 0 };		// Borland
 
 eColor operator!( eColor old_color ) { return old_color == eColor::white ? eColor::black : eColor::white; }
 
@@ -88,7 +88,7 @@ char Piece::get_code() const
 
 unsigned int Piece::get_score( uint16_t square ) const
 {
-	if( color )
+	if( !color )
 		square ^= REVERSE_RANK_MASK;
 
 	return material_value[type] + square_tables[type][square];
