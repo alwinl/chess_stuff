@@ -80,7 +80,7 @@ std::string build_random_fen()
 // 	return out;
 // }
 
-TEST( TestBoard, read_write_FEN )
+TEST( Clic, read_write_FEN )
 {
 	for( int test_cases = 0; test_cases < 10; ++test_cases ) {
 		std::string expected = build_random_fen();
@@ -93,7 +93,7 @@ TEST( TestBoard, read_write_FEN )
 	}
 }
 
-TEST( TestBoard, test_pawn_first_move )
+TEST( Clic, test_pawn_first_move )
 {
 	Board board( "8/8/8/8/8/8/4P3/8" );
 	vector<Ply> moves = board.generate_legal_plys();
@@ -111,7 +111,7 @@ TEST( TestBoard, test_pawn_first_move )
 	} );
 }
 
-TEST( TestBoard, test_pawn_capture )
+TEST( Clic, test_pawn_capture )
 {
 	Board board( "8/8/8/8/8/3p1p2/4P3/8" );
 	vector<Ply> moves = board.generate_legal_plys();
@@ -129,7 +129,7 @@ TEST( TestBoard, test_pawn_capture )
 	} );
 }
 
-TEST( TestBoard, test_pawn_promotion )
+TEST( Clic, test_pawn_promotion )
 {
 	Board board( "8/P7/8/8/8/8/8/8" );
 	vector<Ply> moves = board.generate_legal_plys();
@@ -147,7 +147,7 @@ TEST( TestBoard, test_pawn_promotion )
 	} );
 }
 
-TEST( TestBoard, test_promo_match )
+TEST( Clic, test_promo_match )
 {
 	Board board( "8/P7/8/8/8/8/8/8" );
 	vector<Ply> moves = board.generate_legal_plys();

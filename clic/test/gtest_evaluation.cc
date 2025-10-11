@@ -37,7 +37,7 @@ uint16_t parse_square( std::string SAN )
 };
 
 
-TEST( TestEvaluation, test_square_parsing )
+TEST( Clic, test_square_parsing )
 {
 	unsigned int expected_square = 0;
 
@@ -56,7 +56,7 @@ TEST( TestEvaluation, test_square_parsing )
 
 #define REVERSE_RANK_MASK 0b00111000
 
-TEST( TestEvaluation, piece_scores_depend_on_color )
+TEST( Clic, piece_scores_depend_on_color )
 {
 	for( unsigned int i = 0; i < 6; ++i ) {
 
@@ -90,7 +90,7 @@ template <typename T> std::ostream &operator<<( std::ostream &os, const std::vec
 	return os << "]";
 }
 
-TEST( TestEvaluation, square_table_values )
+TEST( Clic, square_table_values )
 {
 	enum { piece_code, square, value };
 
@@ -126,7 +126,7 @@ TEST( TestEvaluation, square_table_values )
 }
 
 // there are only 3 asymmetric lines: queen table ranks 2, 3 and 4 (black 7, 6 and 5)
-TEST( TestEvaluation, test_queen_asymmetry )
+TEST( Clic, test_queen_asymmetry )
 {
 	vector<string> ranks = {
 		// clang-format off
@@ -166,14 +166,14 @@ TEST( TestEvaluation, test_queen_asymmetry )
 	}
 }
 
-TEST( TestEvaluation, standard_board_eval_is_zero )
+TEST( Clic, standard_board_eval_is_zero )
 {
 	Board board;
 
 	ASSERT_EQ( board.evaluate(), 0 );
 }
 
-TEST( TestEvaluation, check_all_first_moves )
+TEST( Clic, check_all_first_moves )
 {
 	Board board;
 
@@ -191,7 +191,7 @@ TEST( TestEvaluation, check_all_first_moves )
 	// );
 }
 
-TEST( TestEvaluation, test_alpha_beta )
+TEST( Clic, test_alpha_beta )
 {
 	Board board;
 
@@ -212,7 +212,7 @@ TEST( TestEvaluation, test_alpha_beta )
 	// cout << endl;
 }
 
-TEST( TestEvaluation, queen_should_not_capture_rook )
+TEST( Clic, queen_should_not_capture_rook )
 {
 	Board board( "4k3/8/6p1/5r2/8/3Q4/8/4K3" );
 

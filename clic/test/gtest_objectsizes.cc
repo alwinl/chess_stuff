@@ -23,17 +23,17 @@
 #include "piece.h"
 #include "ply.h"
 
-TEST( TestObjectSizes, Ply_size_is_32_bit )
+TEST( Clic, Ply_size_is_32_bit )
 {
 	ASSERT_EQ( 4ul, (unsigned long)sizeof( Ply ) );
 }
 
-TEST( TestObjectSizes, Piece_size_is_8_bit )
+TEST( Clic, Piece_size_is_8_bit )
 {
 	ASSERT_EQ( 1ul, (unsigned long)sizeof( Piece ) );
 }
 
-TEST( TestObjectSizes, Board_size_is_64_plus_8_bytes )
+TEST( Clic, Board_size_is_64_plus_8_bytes )
 {
 	ASSERT_EQ( 72ul, (unsigned long)sizeof( Board ) );
 }

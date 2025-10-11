@@ -85,7 +85,7 @@ int* CalcAttackTab_new( void )
 	return attack2;
 }
 
-TEST( TestAttackTableGen, do_test )
+TEST( Chess, do_test )
 {
 	CalcAttackTab_orig();
 	int * second = CalcAttackTab_new();

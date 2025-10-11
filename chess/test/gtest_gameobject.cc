@@ -25,14 +25,14 @@
 
 
 
-TEST( TestChessGameObject, create_object)
+TEST( Chess, create_object)
 {
     ChessGame game = ChessGame();
 
     ASSERT_TRUE(true);
 }
 
-TEST( TestChessGameObject, save_load)
+TEST( Chess, save_load)
 {
 	ChessGame game;
 

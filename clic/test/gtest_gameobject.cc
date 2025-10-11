@@ -23,14 +23,16 @@
 
 #include <fstream>
 
-TEST( TestGameObject, create_object )
+
+
+TEST( Clic, create_object)
 {
     ChessGame game = ChessGame();
 
     ASSERT_TRUE(true);
 }
 
-TEST( TestGameObject, save_load )
+TEST( Clic, save_load)
 {
 	ChessGame game;
 
@@ -42,9 +44,8 @@ TEST( TestGameObject, save_load )
 
     is.close();
 
-    std::string actual = "\"" + game.save() + "\"";
+    std::string actual = game.save();
     std::string expected =
-		"\""
 		"[Event \"F/S Return Match\"]\n"
 		"[Site \"Belgrade, Serbia JUG\"]\n"
 		"[Date \"1992.11.04\"]\n"
@@ -59,11 +60,9 @@ TEST( TestGameObject, save_load )
 		"Nc4 Nxc4 22. Bxc4 Nb6 23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7\n"
 		"27. Qe3 Qg5 28. Qxg5 hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33.\n"
 		"f3 Bc8 34. Kf2 Bf5 35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5\n"
-		"40. Rd6 Kc5 41. Ra6 Nf2 42. g4 Bd3 43. Re6 1/2-1/2\n"
-		"\""
-		;
+		"40. Rd6 Kc5 41. Ra6 Nf2 42. g4 Bd3 43. Re6 1/2-1/2\n";
 
-	// std::cout << expected << "\n\n" << actual;
+
     ASSERT_EQ( expected, actual );
 }
 
