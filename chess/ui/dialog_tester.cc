@@ -72,15 +72,14 @@ int main( int argc, char* argv[] )
         main_window.set_visible(true);
 
 		auto css_provider = Gtk::CssProvider::create();
-		css_provider->load_from_path("/home/alwin/Documents/Programming/chess_stuff/chess/guisrc/resources/app.css");
+		css_provider->load_from_path("/home/alwin/Documents/Programming/chess_stuff/chess/ui/resources/chess.css");
 		Gtk::StyleContext::add_provider_for_display( Gdk::Display::get_default(), css_provider, GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 
         // Use the wrapper to show the dialog loaded from a UI file
-        const std::string ui_file_path = "/home/alwin/Documents/Programming/chess_stuff/chess/guisrc/resources/app.ui";
+        const std::string ui_file_path = "/home/alwin/Documents/Programming/chess_stuff/.build/chess/ui/resources/chess.ui";
 
-		std::vector<std::string> dialogs { "dlgLevel", "dlgColours", "dlgNewGame", "dlgInput", "dlgPieceValue" };
-        // const std::string window_id = "dlgColours";
+		std::vector<std::string> dialogs { "dlgLevel", "dlgColours", "dlgNewGame", "dlgInput", "dlgPieceValues" };
 
 		std::for_each( dialogs.begin(), dialogs.end(), [&ui_file_path, &main_window]( std::string window_id )
 			{
