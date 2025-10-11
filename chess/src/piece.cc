@@ -21,14 +21,16 @@
 
 #include <map>
 #include <string>
+#include <array>
 
 using namespace std;
 
 extern int* square_tables[];
 
-//std::array<unsigned int,7> Piece::material_value = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
-std::array<unsigned int,7> Piece::material_value = { 0, 256, 768, 768, 1280, 2304, 0 };		// Borland
+//std::array<unsigned int,7> material_value = { 0, 100, 320, 330, 500, 900, 20000 };		//  Tomasz Michniewski
+std::array<unsigned int,7> material_value = { 0, 256, 768, 768, 1280, 2304, 0 };		// Borland
 
+eColor operator!( eColor old_color ) { return old_color == eColor::white ? eColor::black : eColor::white; }
 
 void Piece::set_value( eType type, unsigned int new_value )
 {
@@ -39,30 +41,33 @@ void Piece::set_value( eType type, unsigned int new_value )
 unsigned int Piece::get_value( eType type )
 	{ return material_value[type]; }
 
-
-Piece::Piece( eType type, eColor color  )
+Piece::Piece( eType type, eColor color )
 {
 	this->piece = 0;
 
-	this->color = (color == eColor::white) ? 0 : 1;
+	this->hasmoved = false;
+	set_color(color);
 	this->type = type;
 }
 
 Piece::Piece( char code )
 {
-	static map<char, pair<Piece::eType,int> > code_to_type {
-		{ 'p', {Piece::pawn, 1} }, { 'P', {Piece::pawn, 0} },
-		{ 'n', {Piece::knight, 1} }, { 'N', {Piece::knight, 0} },
-		{ 'b', {Piece::bishop, 1} }, { 'B', {Piece::bishop, 0} },
-		{ 'r', {Piece::rook, 1} }, { 'R', {Piece::rook, 0} },
-		{ 'q', {Piece::queen, 1} }, { 'Q', {Piece::queen, 0} },
-		{ 'k', {Piece::king, 1} }, { 'K', {Piece::king, 0} }
+	static map<char, Piece::eType> code_to_type{
+		// clang-format off
+		{ 'p', Piece::pawn   }, { 'P', Piece::pawn   },
+		{ 'n', Piece::knight }, { 'N', Piece::knight },
+		{ 'b', Piece::bishop }, { 'B', Piece::bishop },
+		{ 'r', Piece::rook   }, { 'R', Piece::rook   },
+		{ 'q', Piece::queen  }, { 'Q', Piece::queen  },
+		{ 'k', Piece::king   }, { 'K', Piece::king   }
+		// clang-format on
 	};
 
 	piece = 0;
 
-	color = get<1>(code_to_type.at( code ));
-	type = get<0>(code_to_type.at( code ));
+	hasmoved = false;
+	set_color( ( string( "KQRBNP" ).find( code ) != string::npos ) ? eColor::white : eColor::black );
+	type = code_to_type.at( code );
 }
 
 Piece Piece::make_promo_piece( Piece::eType new_type ) const
@@ -72,6 +77,21 @@ Piece Piece::make_promo_piece( Piece::eType new_type ) const
 	new_piece.type = new_type;
 
 	return new_piece;
+}
+
+char Piece::get_code() const
+{
+	return color ? (std::string(" pnbrqk"))[type] : (std::string(" PNBRQK"))[type];
+}
+
+#define REVERSE_RANK_MASK 0b00111000
+
+unsigned int Piece::get_score( uint16_t square ) const
+{
+	if( color )
+		square ^= REVERSE_RANK_MASK;
+
+	return material_value[type] + square_tables[type][square];
 }
 
 unsigned int Piece::ray_directions() const
@@ -95,20 +115,3 @@ unsigned int Piece::get_ray_offset( unsigned int ray ) const
 
 	return offset[type][ray];
 }
-
-char Piece::get_code() const
-{
-	return color ? (std::string(" pnbrqk"))[type] : (std::string(" PNBRQK"))[type];
-}
-
-#define REVERSE_RANK_MASK 0b00111000
-
-unsigned int Piece::get_score( uint16_t square ) const
-{
-	if( color )
-		square ^= REVERSE_RANK_MASK;
-
-	return material_value[type] + square_tables[type][square];
-}
-
-

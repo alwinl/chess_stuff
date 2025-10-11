@@ -21,12 +21,13 @@
 
 #include <algorithm>
 #include <limits>
+#include <unordered_map>
 
 #include "ply.h"
 
 Board::Board( std::string PiecePlacement )
 {
-	side_to_move = white;
+	side_to_move = eColor::white;
 	ep_square = (uint8_t)-1;
 
 	if( PiecePlacement.empty() )
@@ -138,7 +139,7 @@ void Board::update_board( Ply a_ply )
 	}
 
 	ep_square = a_ply.get_ep_square();
-	side_to_move = eColor( side_to_move ^ 1 );
+	side_to_move = !side_to_move;
 }
 
 std::vector<Ply> Board::generate_plys() const
@@ -223,13 +224,13 @@ std::vector<Ply> Board::generate_plys() const
 		if( piece.is_of_type( Piece::pawn ) ) {
 
 			/* quiet moves */
-			int offset = ( piece.is_color( white ) ? 10 : -10 );
+			int offset = ( piece.is_color( eColor::white ) ? 10 : -10 );
 
 			uint16_t target_square = mailbox[mailbox64[square] + offset]; /* next square in this direction */
 
 			if( position[target_square].is_of_type( Piece::none ) ) {
 
-				if( target_square / 8 == ( piece.is_color( white ) ? 7 : 0 ) ) { // promotion ranks
+				if( target_square / 8 == ( piece.is_color( eColor::white ) ? 7 : 0 ) ) { // promotion ranks
 					for( Piece::eType type = Piece::knight; type < Piece::Piece::king; type = Piece::eType( type + 1 ) )
 						plys.push_back( Ply::create( piece, square, target_square ).setPromoType( type ).build() );
 
@@ -237,7 +238,7 @@ std::vector<Ply> Board::generate_plys() const
 
 					plys.push_back( Ply::create( piece, square, target_square ).build() );
 
-					if( square / 8 == ( piece.is_color( white ) ? 1 : 6 ) ) { // first pawn rank
+					if( square / 8 == ( piece.is_color( eColor::white ) ? 1 : 6 ) ) { // first pawn rank
 
 						target_square = mailbox[mailbox64[square] + 2 * offset]; // try double move
 
@@ -250,7 +251,7 @@ std::vector<Ply> Board::generate_plys() const
 			/* capture moves */
 			for( int offset : {9, 11} ) {
 
-				if( piece.is_color( black ) )
+				if( piece.is_color( eColor::black ) )
 					offset *= -1;
 
 				target_square = mailbox[mailbox64[square] + offset];
@@ -261,7 +262,7 @@ std::vector<Ply> Board::generate_plys() const
 				if( !position[target_square].is_of_type( Piece::none ) &&
 					!position[target_square].is_color( side_to_move ) ) { /* something is there, and its their piece */
 
-					if( target_square / 8 == ( piece.is_color( white ) ? 7 : 0 ) ) { // promotion ranks
+					if( target_square / 8 == ( piece.is_color( eColor::white ) ? 7 : 0 ) ) { // promotion ranks
 						for( Piece::eType type = Piece::knight; type < Piece::king; type = Piece::eType( type + 1 ) )
 							plys.push_back( Ply::create( piece, square, target_square )
 												.setCaptureType( position[target_square].get_type() )
@@ -315,7 +316,7 @@ std::vector<Ply> Board::generate_legal_plys() const
 	auto mark_check = [this, king_capture](Ply& a_ply)
 	{
 		Board test = make( a_ply );
-		test.side_to_move = eColor( test.side_to_move ^ 1 );
+		test.side_to_move = ! test.side_to_move;
 		std::vector<Ply> plys = test.generate_plys();
 		auto it = find_if( plys.begin(), plys.end(), king_capture );
 		if( it != plys.end() )
@@ -328,15 +329,15 @@ std::vector<Ply> Board::generate_legal_plys() const
 
 int Board::evaluate() const
 {
-	unsigned int score[2] = { 0, 0 };
+	std::unordered_map<eColor, int> score = { {eColor::white, 0}, {eColor::black, 0 } };
 
 	for( uint16_t square = 0; square < 64; ++square )
 		if( !position[square].is_of_type( Piece::none ) ) {
-			unsigned int index = position[square].is_color( white ) ? white : black;
+			eColor index = position[square].is_color( eColor::white ) ? eColor::white : eColor::black;
 			score[index] += position[square].get_score( square );
 		}
 
-	return score[white] - score[black];
+	return score[eColor::white] - score[eColor::black];
 }
 
 /*
@@ -352,7 +353,7 @@ int Board::alpha_beta( int alpha, int beta, int depth_left ) const
 
 	int best_score;
 
-	if( side_to_move == white ) { // maximiser
+	if( side_to_move == eColor::white ) { // maximiser
 		best_score = std::numeric_limits<int>::min();
 		for( Ply &ply : plys ) {
 			best_score = std::max( best_score, make( ply ).alpha_beta( alpha, beta, depth_left - 1 ) );

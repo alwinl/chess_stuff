@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 
 #include "board.h"
 #include "display.h"
@@ -34,8 +35,8 @@ public:
 
 private:
 	Display disp;
-	eColor current_player = white;
-	bool is_human[2];
+	eColor current_player = eColor::white;
+	std::unordered_map<eColor,bool> is_human;
 	Board board;
 	std::vector<Ply> game_moves;
 

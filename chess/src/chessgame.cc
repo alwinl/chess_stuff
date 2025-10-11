@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Alwin Leerling <alwin@jambo>
+ * Copyright 2023 Alwin Leerling <dna.leerling@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,36 +15,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- *
- *
  */
 
 #include "chessgame.h"
 
-#include <regex>
 #include <numeric>
 #include <stdexcept>
+#include <regex>
 
 using namespace std;
 
-
-ChessGame::ChessGame( )
+ChessGame::ChessGame()
 {
-    initial = Board();
-    plys.clear();
-
-    tag_pairs = vector<pair<string,string>>{
-    	pair<string,string>( "Event", "Unknown" ),
-    	pair<string,string>( "Site", "Unknown" ),
-    	pair<string,string>( "Date", "Unknown" ),
-    	pair<string,string>( "Round", "Unknown" ),
-    	pair<string,string>( "White", "Unknown" ),
-    	pair<string,string>( "Black", "Unknown" ),
-    	pair<string,string>( "Result", "*" ),
-    };
+	tag_pairs = vector<pair<string,string>>{
+		pair<string,string>( "Event", "Unknown" ),
+		pair<string,string>( "Site", "Unknown" ),
+		pair<string,string>( "Date", "Unknown" ),
+		pair<string,string>( "Round", "Unknown" ),
+		pair<string,string>( "White", "Unknown" ),
+		pair<string,string>( "Black", "Unknown" ),
+		pair<string,string>( "Result", "*" ),
+	};
 }
 
-void ChessGame::load( std::string pgn_string )
+void ChessGame::load(std::string pgn_string)
 {
 	regex re_tvpair( "\\[(.*) \"(.*)\"\\]\\n" );
 	smatch tvpair_match;
@@ -79,6 +73,34 @@ void ChessGame::load( std::string pgn_string )
 	}
 }
 
+void ChessGame::add_tag_pair( std::string tag, std::string value )
+{
+	auto it( find_if( tag_pairs.begin(), tag_pairs.end(), [tag]( auto tag_pair ) { return tag_pair.first == tag;} ) );
+
+	if( it != tag_pairs.end() )
+		(*it).second = value;
+	else
+		tag_pairs.push_back( make_pair(tag, value) );
+
+	// http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm chapter 9.7 Alternative starting positions
+	if( (tag == "SetUp") || ( tag == "FEN" ) )
+		set_alternate_starting_position();
+}
+
+void ChessGame::set_alternate_starting_position()
+{
+	auto SetUp_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "SetUp";} ) );
+	auto FEN_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "FEN";} ) );
+
+	if( (SetUp_it == tag_pairs.end() ) || (FEN_it == tag_pairs.end() ) )
+		return;
+
+	if( (*SetUp_it).second != "1" )
+		return;
+
+	initial = Board( (*FEN_it).second );
+}
+
 #define REVERSE_RANK_MASK 0b00111000
 
 void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
@@ -99,9 +121,7 @@ void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
 			target_square ^= REVERSE_RANK_MASK;
 		}
 
-		Ply test_ply( Ply::make_castle_ply( start_square, target_square ) );
-
-		auto ply_it( find_if( legal_plys.begin(), legal_plys.end(), [test_ply]( Ply the_ply) { return the_ply.check_square_match( test_ply ); } ) );
+		auto ply_it( find_if( legal_plys.begin(), legal_plys.end(), [start_square, target_square]( Ply the_ply) { return the_ply.check_square_match(start_square, target_square); } ) );
 
 		if( ply_it == legal_plys.end() )
 			throw( domain_error( "Cannot find matching ply") );
@@ -111,12 +131,11 @@ void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
 		return;
 	}
 
+	uint16_t target_square;
 	Piece::eType current_type = ( SAN[0] >= 'a' && SAN[0] <= 'h' ) ? Piece::pawn : Piece(SAN[0]).get_type();
+	Piece::eType promo_type = Piece::none;
 
 	size_t length = SAN.size();
-
-	Piece::eType promo_type = Piece::none;
-	uint16_t target_square;
 	unsigned int pos;
 
 	for( pos = length-1; pos != 0; --pos ) {
@@ -131,11 +150,14 @@ void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
 		}
 	}
 
-	Ply test_ply( Ply::make_test_ply( target_square, current_type, current.get_type_on_square(target_square), promo_type ) );
+	auto ply_test = [target_square, current_type, promo_type]( Ply the_ply )
+	{
+		return the_ply.check_san_match( target_square, current_type, promo_type );
+	};
 
 	vector<Ply> filtered_plys;
 
-	copy_if( legal_plys.begin(), legal_plys.end(), back_inserter( filtered_plys), [test_ply]( Ply the_ply ) { return the_ply.check_san_match( test_ply ); } );
+	copy_if( legal_plys.begin(), legal_plys.end(), back_inserter( filtered_plys), ply_test );
 
 	if( filtered_plys.empty() )
 		throw( domain_error( "Cannot find legal ply") );
@@ -172,42 +194,14 @@ void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
 	plys.push_back( *ply_it );
 }
 
-void ChessGame::add_tag_pair( std::string tag, std::string value )
-{
-	auto it( find_if( tag_pairs.begin(), tag_pairs.end(), [tag]( auto tag_pair ) { return tag_pair.first == tag;} ) );
-
-	if( it != tag_pairs.end() )
-		(*it).second = value;
-	else
-		tag_pairs.push_back( make_pair(tag, value) );
-
-	// http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm chapter 9.7 Alternative starting positions
-	if( (tag == "SetUp") || ( tag == "FEN" ) )
-		set_alternate_starting_position();
-}
-
-void ChessGame::set_alternate_starting_position()
-{
-	auto SetUp_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "SetUp";} ) );
-	auto FEN_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "FEN";} ) );
-
-	if( (SetUp_it == tag_pairs.end() ) || (FEN_it == tag_pairs.end() ) )
-		return;
-
-	if( (*SetUp_it).second != "1" )
-		return;
-
-	initial = Board( (*FEN_it).second );
-}
-
 std::string ChessGame::save()
 {
-	string result = accumulate( tag_pairs.begin(), tag_pairs.end(), string(""),
-		[]( string collector, pair<string,string>& tag_pair )
-		{
-			return move(collector) + "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
-		}
-	);
+	auto tag_pair_accumulator = []( string collector, pair<string,string>& tag_pair )
+	{
+		return move(collector) + "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
+	};
+
+	string result = accumulate( tag_pairs.begin(), tag_pairs.end(), string(""), tag_pair_accumulator );
 
 	result += "\n";
 
@@ -229,8 +223,11 @@ std::string ChessGame::save()
 			collected += moveno_rep;
 		}
 
-		string ply_rep( plys[i].print_SAN( current ) + " " );
+		// Calculate the SAN of this ply
+		vector<Ply> legal_plys = current.generate_legal_plys();
+		string ply_rep( plys[i].print_SAN( legal_plys ) + " " );
 
+		// Add the SAN to the move section
 		if( collected.length() + ply_rep.length() > 80 ) {
 			collected.pop_back();		// remove last space
 			result += collected + "\n";
@@ -252,14 +249,4 @@ std::string ChessGame::save()
 	result += (*result_it).second + "\n";
 
 	return result;
-}
-
-void ChessGame::visit_tag_pairs( ChessGameVisitorBase* processor )
-{
-	for_each( tag_pairs.begin(), tag_pairs.end(), [processor]( auto tag_pair ) { processor->process_tag_pair( tag_pair.first, tag_pair.second ); } );
-}
-
-void ChessGame::visit_plys( ChessGameVisitorBase* processor )
-{
-	for_each( plys.begin(), plys.end(), [processor]( auto ply ) { processor->process_ply( ply ); } );
 }

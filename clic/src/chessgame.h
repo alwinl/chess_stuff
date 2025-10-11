@@ -17,8 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -27,25 +26,28 @@
 #include "board.h"
 #include "ply.h"
 
-class Game
+class ChessGame
 {
 public:
-	Game();
+	ChessGame();
 
 	void load( std::string pgn_string );
 	std::string save();
 
 	void add_tag_pair( std::string tag, std::string value );
+	void add_ply( Ply ply ) { plys.push_back( ply ); }
 
+	Ply last_ply() { return plys.back(); }
+
+	template <typename Func> void visit_tag_pairs( Func&& func ) const { for( const auto& tag_pair : tag_pairs ) func( tag_pair.first, tag_pair.second ); }
+	template <typename Func> void visit_movetext( Func&& func ) const { for( const auto& ply : plys ) func( ply ); }
 
 private:
     Board initial;
-    std::vector<Ply> moves;
+    std::vector<Ply> plys;
 
     std::vector<std::pair<std::string, std::string> > tag_pairs;
 
-	void set_alternate_starting_position();
 	void add_ply( eColor color, std::string SAN, Board& current );
+	void set_alternate_starting_position();
 };
-
-#endif

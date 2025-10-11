@@ -28,11 +28,11 @@
 class Ply
 {
 public:
-	bool operator==( const Ply rhs ) const { return ply == rhs.ply; };
-	std::string print_LAN() const;
-	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
 
 	void set_check() { check = 1; }		// not happy with this function
+
+	std::string print_LAN() const;
+	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
 
 	uint16_t square_from() const { return from; };
 	uint16_t square_to() const { return to; };
@@ -53,10 +53,8 @@ public:
 	bool check_match( uint16_t from_square, uint16_t to_square, char promo_piece ) const
 		{ return (from_square == from) && (to_square == to) && ( (promo_piece == ' ') || (promo_type == Piece(promo_piece).get_type() ) ); }
 
-	bool check_square_match( uint16_t rhs_from, uint16_t rhs_to ) const
-		{ return ( from == rhs_from ) && ( to == rhs_to ); }
-
-	bool check_promo_match( Piece::eType rhs_promo_type ) const { return ( promo_type == rhs_promo_type ); }
+	bool check_square_match( uint16_t rhs_from, uint16_t rhs_to ) const { return ( from == rhs_from ) && ( to == rhs_to ); }
+	bool check_promo_match( Piece::eType rhs_promo_type ) const { return (promo_type == rhs_promo_type); }
 
 	bool check_san_match( uint16_t rhs_target_square, Piece::eType rhs_current_type, Piece::eType rhs_promo_type) const
 		{ return (to == rhs_target_square) && (type == rhs_current_type) && (promo_type == rhs_promo_type); };
@@ -86,7 +84,7 @@ private:
 	};
 
 	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType capture_type,
-		 Piece::eType promo_type, eColor color, bool ep_move );
+		Piece::eType promo_type, eColor color, bool ep_move );
 };
 
 class Ply::Builder
@@ -94,7 +92,7 @@ class Ply::Builder
 public:
 	Builder( Piece &piece, uint16_t current_square, uint16_t target_square )
 		: current_square( current_square ), target_square( target_square ), current_type( piece.get_type() ),
-		  current_color( piece.is_color( white ) ? white : black )
+		  current_color( piece.get_color() )
 	{
 	}
 

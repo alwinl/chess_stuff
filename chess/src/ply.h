@@ -17,8 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef PLY_H
-#define PLY_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -26,23 +25,14 @@
 
 #include "piece.h"
 
-class Board;
-
 class Ply
 {
 public:
-	static Ply make_quiet_ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type );
-	static Ply make_capture_ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type );
-	static Ply make_ep_ply( uint16_t current_square, uint16_t target_square );
-	static Ply make_castle_ply( uint16_t current_square, uint16_t target_square );
-	static Ply make_promotion_ply( uint16_t current_square, uint16_t target_square, Piece::eType promo_type, Piece::eType target_square_type = Piece::none );
-
-	static Ply make_test_ply( uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type );
 
 	void set_check() { check = 1; }		// not happy with this function
 
 	std::string print_LAN() const;
-	std::string print_SAN( const Board& current_state ) const;
+	std::string print_SAN( std::vector<Ply>& legal_plys ) const;
 
 	uint16_t square_from() const { return from; };
 	uint16_t square_to() const { return to; };
@@ -52,18 +42,26 @@ public:
 	bool is_kingcapture() const { return king_capture == 1; }
 	bool halfclock_needs_reset() const { return (type == Piece::pawn) || capture; }
 
-	uint16_t get_castling_rook_square_from( ) const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
-	uint16_t get_castling_rook_square_to( ) const { return to + (  ( to > from ) ? -1 : +1 ); };
-	uint16_t get_ep_square( ) const;
-	uint16_t get_ep_captured_square( ) const;
+	uint16_t get_castling_rook_square_from() const { return from + ( ( to > from ) ? +3 : -4 ); }; // King / Queen side
+	uint16_t get_castling_rook_square_to() const { return to + ( ( to > from ) ? -1 : +1 ); };
+	uint16_t get_ep_square() const
+		{ return ( ep_candidate == 1 ) ? to + ( (from < to) ? -8 : 8 ) : (uint16_t)-1; }
+
 	Piece::eType get_type() const { return Piece::eType( type ); }
 	Piece::eType get_promo_type() const { return Piece::eType( promo_type ); }
 
-	bool check_square_match( Ply rhs ) const { return (from == rhs.from) && (to == rhs.to); }
-	bool check_promo_match( Ply rhs ) const { return (promo_type == rhs.promo_type); }
+	bool check_match( uint16_t from_square, uint16_t to_square, char promo_piece ) const
+		{ return (from_square == from) && (to_square == to) && ( (promo_piece == ' ') || (promo_type == Piece(promo_piece).get_type() ) ); }
+
+	bool check_square_match( uint16_t rhs_from, uint16_t rhs_to ) const { return ( from == rhs_from ) && ( to == rhs_to ); }
 	bool check_promo_match( Piece::eType rhs_promo_type ) const { return (promo_type == rhs_promo_type); }
-	bool check_match( uint16_t from_square, uint16_t to_square, char promo_piece ) const;
-	bool check_san_match( Ply rhs ) const;
+
+	bool check_san_match( uint16_t rhs_target_square, Piece::eType rhs_current_type, Piece::eType rhs_promo_type) const
+		{ return (to == rhs_target_square) && (type == rhs_current_type) && (promo_type == rhs_promo_type); };
+
+public:
+	class Builder;
+	static Builder create( Piece &piece, uint16_t current_square, uint16_t target_square );
 
 private:
 	union {
@@ -85,7 +83,46 @@ private:
 		};
 	};
 
-	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType target_square_type, Piece::eType promo_type, bool is_ep );
+	Ply( uint16_t current_square, uint16_t target_square, Piece::eType current_type, Piece::eType capture_type,
+		Piece::eType promo_type, eColor color, bool ep_move );
 };
 
-#endif // PLY_H
+class Ply::Builder
+{
+public:
+	Builder( Piece &piece, uint16_t current_square, uint16_t target_square )
+		: current_square( current_square ), target_square( target_square ), current_type( piece.get_type() ),
+		  current_color( piece.get_color() )
+	{
+	}
+
+	Builder &setCaptureType( Piece::eType type )
+	{
+		target_type = type;
+		return *this;
+	}
+	Builder &setPromoType( Piece::eType type )
+	{
+		promo_type = type;
+		return *this;
+	}
+	Builder &setEPMove()
+	{
+		ep_move = true;
+		return *this;
+	}
+
+	Ply build() const
+	{
+		return Ply( current_square, target_square, current_type, target_type, promo_type, current_color, ep_move );
+	}
+
+private:
+	uint16_t current_square;
+	uint16_t target_square;
+	Piece::eType current_type;
+	Piece::eType target_type = Piece::none;
+	Piece::eType promo_type = Piece::none;
+	eColor current_color;
+	bool ep_move = false;
+};

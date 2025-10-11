@@ -17,16 +17,15 @@
  * MA 02110-1301, USA.
  */
 
-#include "game.h"
+#include "chessgame.h"
 
-#include <algorithm>
 #include <numeric>
 #include <stdexcept>
 #include <regex>
 
 using namespace std;
 
-Game::Game()
+ChessGame::ChessGame()
 {
 	tag_pairs = vector<pair<string,string>>{
 		pair<string,string>( "Event", "Unknown" ),
@@ -39,13 +38,13 @@ Game::Game()
 	};
 }
 
-void Game::load(std::string pgn_string)
+void ChessGame::load(std::string pgn_string)
 {
 	regex re_tvpair( "\\[(.*) \"(.*)\"\\]\\n" );
 	smatch tvpair_match;
 
 	tag_pairs.clear();
-	moves.clear();
+	plys.clear();
     initial = Board();
 
 	while( regex_search( pgn_string, tvpair_match, re_tvpair ) ) {
@@ -62,74 +61,19 @@ void Game::load(std::string pgn_string)
 
 		if( movetext_match[2] != "..." ) {
 			add_ply( eColor::white, movetext_match[2], current );
-			current = current.make( moves.back() );
+			current = current.make( plys.back() );
 		}
 
 		if( movetext_match[3] != "" ) {
 			add_ply( eColor::black, movetext_match[3], current );
-			current = current.make( moves.back() );
+			current = current.make( plys.back() );
 		}
 
 		pgn_string = movetext_match.suffix();
 	}
 }
 
-std::string Game::save()
-{
-	auto tag_pair_accumulator = []( string collector, pair<string,string>& tag_pair )
-	{
-		return move(collector) + "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
-	};
-
-	string result = accumulate( tag_pairs.begin(), tag_pairs.end(), string(""), tag_pair_accumulator );
-
-	result += "\n";
-
-	Board current( initial );
-	string collected;
-
-	for( unsigned int i = 0; i < moves.size(); ++i ) {
-
-		if( !(i%2) ) {				// even is white move
-
-			string moveno_rep( to_string( i/2 + 1 ) + ". " );
-
-			if( collected.length() + moveno_rep.length() > 80 ) {
-				collected.pop_back();		// remove last space
-				result += collected + "\n";
-				collected.clear();
-			}
-
-			collected += moveno_rep;
-		}
-
-		vector<Ply> plys = current.generate_legal_plys();
-		string ply_rep( moves[i].print_SAN( plys ) + " " );
-
-		if( collected.length() + ply_rep.length() > 80 ) {
-			collected.pop_back();		// remove last space
-			result += collected + "\n";
-			collected.clear();
-		}
-
-		collected += ply_rep;
-
-		current = current.make( moves[i] );
-	}
-
-	result += collected;
-
-	auto result_it = find_if( tag_pairs.begin(), tag_pairs.end(), [](pair<string,string>& tp) { return tp.first == "Result"; } );
-
-	if( result_it == tag_pairs.end() )
-		throw( domain_error( "Cannot find game result") );
-
-	result += (*result_it).second + "\n";
-
-	return result;
-}
-
-void Game::add_tag_pair(std::string tag, std::string value)
+void ChessGame::add_tag_pair( std::string tag, std::string value )
 {
 	auto it( find_if( tag_pairs.begin(), tag_pairs.end(), [tag]( auto tag_pair ) { return tag_pair.first == tag;} ) );
 
@@ -143,7 +87,7 @@ void Game::add_tag_pair(std::string tag, std::string value)
 		set_alternate_starting_position();
 }
 
-void Game::set_alternate_starting_position()
+void ChessGame::set_alternate_starting_position()
 {
 	auto SetUp_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "SetUp";} ) );
 	auto FEN_it( find_if( tag_pairs.begin(), tag_pairs.end(), []( auto tag_pair ) { return tag_pair.first == "FEN";} ) );
@@ -159,7 +103,7 @@ void Game::set_alternate_starting_position()
 
 #define REVERSE_RANK_MASK 0b00111000
 
-void Game::add_ply(eColor color, std::string SAN, Board & current)
+void ChessGame::add_ply( eColor color, std::string SAN, Board& current )
 {
 	// result
 	if( SAN == "1-0" || SAN == "0-1" || SAN == "1/2-1/2" )
@@ -177,15 +121,12 @@ void Game::add_ply(eColor color, std::string SAN, Board & current)
 			target_square ^= REVERSE_RANK_MASK;
 		}
 
-		// Ply test_ply( Ply::make_castle_ply( start_square, target_square ) );
-
 		auto ply_it( find_if( legal_plys.begin(), legal_plys.end(), [start_square, target_square]( Ply the_ply) { return the_ply.check_square_match(start_square, target_square); } ) );
-		// auto ply_it( find_if( legal_plys.begin(), legal_plys.end(), [test_ply]( Ply the_ply) { return the_ply.check_square_match( test_ply ); } ) );
 
 		if( ply_it == legal_plys.end() )
 			throw( domain_error( "Cannot find matching ply") );
 
-		moves.push_back( *ply_it );
+		plys.push_back( *ply_it );
 
 		return;
 	}
@@ -209,18 +150,20 @@ void Game::add_ply(eColor color, std::string SAN, Board & current)
 		}
 	}
 
-	// Ply test_ply( Ply::make_test_ply( target_square, current_type, current.get_type_on_square(target_square), promo_type ) );
+	auto ply_test = [target_square, current_type, promo_type]( Ply the_ply )
+	{
+		return the_ply.check_san_match( target_square, current_type, promo_type );
+	};
 
 	vector<Ply> filtered_plys;
 
-	copy_if( legal_plys.begin(), legal_plys.end(), back_inserter( filtered_plys), [target_square, current_type, promo_type]( Ply the_ply ) { return the_ply.check_san_match(target_square, current_type, promo_type); } );
-	// copy_if( legal_plys.begin(), legal_plys.end(), back_inserter( filtered_plys), [test_ply]( Ply the_ply ) { return the_ply.check_san_match( test_ply ); } );
+	copy_if( legal_plys.begin(), legal_plys.end(), back_inserter( filtered_plys), ply_test );
 
 	if( filtered_plys.empty() )
 		throw( domain_error( "Cannot find legal ply") );
 
 	if( filtered_plys.size() == 1 ) {
-		moves.push_back( filtered_plys[0] );
+		plys.push_back( filtered_plys[0] );
 		return;
 	}
 
@@ -248,6 +191,62 @@ void Game::add_ply(eColor color, std::string SAN, Board & current)
 	if( ply_it == filtered_plys.end() )
 		throw( domain_error( "Cannot find matching ply") );
 
-	moves.push_back( *ply_it );
+	plys.push_back( *ply_it );
 }
 
+std::string ChessGame::save()
+{
+	auto tag_pair_accumulator = []( string collector, pair<string,string>& tag_pair )
+	{
+		return move(collector) + "[" + tag_pair.first + " \"" + tag_pair.second + "\"]\n";
+	};
+
+	string result = accumulate( tag_pairs.begin(), tag_pairs.end(), string(""), tag_pair_accumulator );
+
+	result += "\n";
+
+	Board current( initial );
+	string collected;
+
+	for( unsigned int i = 0; i < plys.size(); ++i ) {
+
+		if( !(i%2) ) {				// even is white move
+
+			string moveno_rep( to_string( i/2 + 1 ) + ". " );
+
+			if( collected.length() + moveno_rep.length() > 80 ) {
+				collected.pop_back();		// remove last space
+				result += collected + "\n";
+				collected.clear();
+			}
+
+			collected += moveno_rep;
+		}
+
+		// Calculate the SAN of this ply
+		vector<Ply> legal_plys = current.generate_legal_plys();
+		string ply_rep( plys[i].print_SAN( legal_plys ) + " " );
+
+		// Add the SAN to the move section
+		if( collected.length() + ply_rep.length() > 80 ) {
+			collected.pop_back();		// remove last space
+			result += collected + "\n";
+			collected.clear();
+		}
+
+		collected += ply_rep;
+
+		current = current.make( plys[i] );
+	}
+
+	result += collected;
+
+	auto result_it = find_if( tag_pairs.begin(), tag_pairs.end(), [](pair<string,string>& tp) { return tp.first == "Result"; } );
+
+	if( result_it == tag_pairs.end() )
+		throw( domain_error( "Cannot find game result") );
+
+	result += (*result_it).second + "\n";
+
+	return result;
+}

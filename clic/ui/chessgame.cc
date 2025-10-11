@@ -46,8 +46,8 @@ bool ChessGame::setup()
 		gametype = disp.select_gametype();
 	}
 
-	is_human[0] = ( ( gametype == 1 ) || ( gametype == 4 ) );
-	is_human[1] = ( ( gametype == 2 ) || ( gametype == 4 ) );
+	is_human[eColor::white] = ( ( gametype == 1 ) || ( gametype == 4 ) );
+	is_human[eColor::black] = ( ( gametype == 2 ) || ( gametype == 4 ) );
 
 	return ( gametype == 5 );
 }
@@ -69,7 +69,7 @@ bool ChessGame::game_loop()
 	else
 		quit = ai_move( current_player, plys );
 
-	current_player = eColor( current_player ^ 1 );
+	current_player = ! current_player;
 
 	return quit;
 }
@@ -88,7 +88,7 @@ void ChessGame::print_board()
 
 			Piece piece = board.get_piece( index );
 
-			disp.print_square( rank, file, piece.get_type(), piece.is_color( white ) );
+			disp.print_square( rank, file, piece.get_type(), piece.is_color( eColor::white ) );
 		}
 
 		disp.print_rank_footer( rank );
@@ -103,7 +103,7 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 	unsigned int square_to;
 
 	for( ;; ) {
-		disp.print_input_header( player == white );
+		disp.print_input_header( player == eColor::white );
 
 		if( ( square_from = disp.select_square() ) == uint16_t( -1 ) )
 			return true;
@@ -161,7 +161,7 @@ bool ChessGame::human_move( eColor player, std::vector<Ply> plys )
 bool ChessGame::ai_move( eColor player, std::vector<Ply> plys )
 {
 	sort( plys.begin(), plys.end(), [this]( const Ply &lhs, const Ply &rhs ) {
-		if( current_player == white )
+		if( current_player == eColor::white )
 			return board.evaluate_ply( lhs, 0 ) > board.evaluate_ply( rhs, 0 );
 		else
 			return board.evaluate_ply( lhs, 0 ) < board.evaluate_ply( rhs, 0 );

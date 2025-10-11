@@ -17,13 +17,13 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef PIECE_H
-#define PIECE_H
+#pragma once
 
 #include <cstdint>
-#include <array>
 
-enum class eColor { white, black};
+enum class eColor { white, black };
+
+eColor operator!( eColor old_color );
 
 class Piece
 {
@@ -33,19 +33,25 @@ public:
 	static void set_value( eType type, unsigned int new_value );
 	static unsigned int get_value( eType type );
 
-	Piece( eType type = eType::none, eColor color = eColor::white  );
+	Piece( eType type = eType::none, eColor color = eColor::white );
 	Piece( char code );
 
-	Piece make_promo_piece( Piece::eType new_type ) const;
-
 	bool is_color( eColor test_color ) const { if(test_color == eColor::white) return (color == 0); else return (color == 1); }
-	bool is_sliding() const {	return (type == eType::bishop) || (type == eType::rook) || (type == eType::queen); }
+	bool is_sliding() const { return (type == eType::bishop) || (type == eType::rook) || (type == eType::queen); }
 	bool is_of_type( eType test_type ) const { return type == test_type; }
+	bool has_moved() const { return hasmoved; }
 
-	eType get_type() const { return eType( type ); }
 	eColor get_color() const { return (color == 0) ? eColor::white : eColor::black; }
+	eType get_type() const { return eType( type ); }
 	char get_code() const;
+
 	unsigned int get_score( uint16_t square ) const;
+	Piece make_promo_piece( Piece::eType new_type ) const;
+	void moved() { hasmoved = true; }
+
+	bool operator<( const Piece rhs ) const { return piece < rhs.piece; }
+	bool operator!=( const Piece rhs ) const { return piece != rhs.piece; }
+
 	unsigned int ray_directions() const;
 	unsigned int get_ray_offset( unsigned int ray ) const;
 
@@ -53,13 +59,12 @@ protected:
 	union {
 		uint8_t piece;
 		struct {
-			uint8_t color:1;	// white is 0, black is 1
-			uint8_t type:3;
-			uint8_t reserved:4;
+			uint8_t hasmoved : 1;
+			uint8_t color : 1;
+			uint8_t type : 3;
+			uint8_t reserved : 3;
 		};
 	};
 
-	static std::array<unsigned int,7> material_value;
+	void set_color( eColor colour ) { color = (colour == eColor::white) ? 0 : 1; }
 };
-
-#endif // PIECE_H

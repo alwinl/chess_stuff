@@ -19,20 +19,20 @@
 
 #include <gtest/gtest.h>
 
-#include "game.h"
+#include "chessgame.h"
 
 #include <fstream>
 
 TEST( TestGameObject, create_object )
 {
-    Game game = Game();
+    ChessGame game = ChessGame();
 
     ASSERT_TRUE(true);
 }
 
 TEST( TestGameObject, save_load )
 {
-	Game game;
+	ChessGame game;
 
 	std::ifstream is( "game.pgn" );
 
