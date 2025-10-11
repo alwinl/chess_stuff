@@ -110,17 +110,17 @@ void ChessController::get_widgets()
 
 	view       = ui_model->get_widget<Gtk::ApplicationWindow>("main_view" );
     status_bar = ui_model->get_widget<Gtk::Label>( "widStatusBar" );
-	dlgAbout   = ui_model->get_widget<Gtk::AboutDialog>( "dlgAbout"   );
+	dlgAbout   = ui_model->get_widget<Gtk::AboutDialog>( "dlgAbout" );
     mnuGame    = ui_model->get_widget<Gtk::PopoverMenuBar>( "mnuGame" );
     mnuArrange = ui_model->get_widget<Gtk::PopoverMenuBar>( "mnuArrange" );
     mnuStop    = ui_model->get_widget<Gtk::PopoverMenuBar>( "mnuStop" );
 
 	board          = Gtk::Builder::get_widget_derived<ChessBoard>( ui_model, "canvas" );
-	dlgNewGame     = Gtk::Builder::get_widget_derived<DialogNewGame>( ui_model, "dlgNewGame"   );
-    dlgPieceValues = Gtk::Builder::get_widget_derived<DialogPieceValues>( ui_model, "dlgPieceValues");
-    dlgColours     = Gtk::Builder::get_widget_derived<DialogColours>( ui_model, "dlgColours"   );
-    dlgLevel       = Gtk::Builder::get_widget_derived<DialogLevel>( ui_model, "dlgLevel"   );
-	dlgTimeInput   = Gtk::Builder::get_widget_derived<DialogInput>( ui_model, "dlgInput"     );
+	dlgNewGame     = Gtk::Builder::get_widget_derived<DialogNewGame>( ui_model, "dlgNewGame" );
+    dlgPieceValues = Gtk::Builder::get_widget_derived<DialogPieceValues>( ui_model, "dlgPieceValues" );
+    dlgColours     = Gtk::Builder::get_widget_derived<DialogColours>( ui_model, "dlgColours" );
+    dlgLevel       = Gtk::Builder::get_widget_derived<DialogLevel>( ui_model, "dlgLevel" );
+	dlgTimeInput   = Gtk::Builder::get_widget_derived<DialogInput>( ui_model, "dlgInput" );
 }
 
 void ChessController::on_activate()
