@@ -33,11 +33,10 @@ private:
 
 	void on_action_open();
 	bool on_action_quit();
-	void on_action_about();
+	void init_aboutdialog( Gtk::ApplicationWindow * view );
 
 	Glib::RefPtr<Gtk::TextBuffer> text_buffer;
 	std::unique_ptr<PGNParserEngine> engine;
-	std::unique_ptr<Gtk::AboutDialog> about_dlg;
 };
 
 int main( int argc, char* argv[])
@@ -57,7 +56,6 @@ PGNParser::PGNParser() : Gtk::Application( "net.dnatechnologies.chessparser" )
 void PGNParser::on_activate()
 {
     add_action( "open", sigc::mem_fun( *this, &PGNParser::on_action_open ) );
-	add_action( "about", sigc::mem_fun( *this, &PGNParser::on_action_about ) );
 
 	auto window = Gtk::make_managed<Gtk::ApplicationWindow>();
 	window->set_title( "Portable Game Notation parser" );
@@ -70,6 +68,9 @@ void PGNParser::on_activate()
     menu_model->append( "About", "app.about");
 
 	menu_button->set_menu_model(menu_model);
+
+	init_aboutdialog( window );
+
 
 	auto header_bar = Gtk::make_managed<Gtk::HeaderBar>();
 	header_bar->pack_start(*menu_button);
@@ -147,26 +148,21 @@ bool PGNParser::on_action_quit()
     return true;
 }
 
-void PGNParser::on_action_about()
+void PGNParser::init_aboutdialog( Gtk::ApplicationWindow * view )
 {
-	if( about_dlg == nullptr ) {
+	auto about_dialog = Gtk::make_managed<Gtk::AboutDialog>();
 
-		about_dlg = std::make_unique<Gtk::AboutDialog>();
+    about_dialog->set_transient_for( *view );
+    about_dialog->set_program_name("Chess Parser");
+    // about_dialog->set_logo( Gdk::Texture::create_from_resource("/net/dnatechnologies/chessparser/application.png") ) ;
+    about_dialog->set_version( "1.0.0" );
+    about_dialog->set_comments("Parse PNG files.");
+    about_dialog->set_copyright( "Copyright © 2021 Alwin Leerling" );
+    about_dialog->set_website( "http://github" );
+	about_dialog->set_license("LGPL");
+	about_dialog->set_website_label("gtkmm website");
+	about_dialog->set_authors({ "Alwin Leerling" });
+	about_dialog->set_hide_on_close();
 
-		about_dlg->set_transient_for(*get_active_window());
-		about_dlg->set_hide_on_close();
-		about_dlg->set_logo(Gdk::Texture::create_from_resource("/net/dnatechnologies/chessparser/application.png"));
-		about_dlg->set_program_name("Chess Parser");
-		about_dlg->set_version("1.0.0");
-		about_dlg->set_copyright("Alwin Leerling");
-		about_dlg->set_comments("Parse PNG files.");
-		about_dlg->set_license("LGPL");
-		about_dlg->set_website("http://www.gtkmm.org");
-		about_dlg->set_website_label("gtkmm website");
-		about_dlg->set_authors({ "Alwin Leerling" });
-		about_dlg->set_modal( true );
-	}
-
-	about_dlg->set_visible( true );
-	about_dlg->present();
+	add_action( "about", [about_dialog](){ about_dialog->set_visible(); } );
 }
