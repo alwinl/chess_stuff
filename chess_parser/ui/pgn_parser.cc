@@ -1,5 +1,5 @@
 /*
- * ChessParser Copyright 2022 Alwin Leerling dna.leerling@gmail.com
+ * pgn_parser.cc Copyright 2025 Alwin Leerling dna.leerling@gmail.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,76 +17,54 @@
  * MA 02110-1301, USA.
  */
 
-#include <string>
+#include <gtkmm.h>
 
 #include "pgn_parser_engine.h"
 
-#include <gtkmm.h>
-
-class PGNParser : public Gtk::Application
+class PGNParser : public Gtk::ApplicationWindow
 {
 public:
 	PGNParser();
 
 private:
-	void on_activate() override;
-
-	void on_action_open();
-	bool on_action_quit();
-	void init_aboutdialog( Gtk::ApplicationWindow * view );
-
 	Glib::RefPtr<Gtk::TextBuffer> text_buffer;
 	std::unique_ptr<PGNParserEngine> engine;
+
+    void init_aboutdialog();
+    void on_action_open();
+    bool on_action_quit();
 };
 
-int main( int argc, char* argv[])
+PGNParser::PGNParser()
 {
-	Glib::set_init_to_users_preferred_locale(false);
-
-    PGNParser().run( argc, argv );
-}
-
-PGNParser::PGNParser() : Gtk::Application( "net.dnatechnologies.chessparser" )
-{
-	Glib::set_application_name("chessparser");
-
     engine = std::make_unique<PGNParserEngine>();
-}
 
-void PGNParser::on_activate()
-{
-    add_action( "open", sigc::mem_fun( *this, &PGNParser::on_action_open ) );
+    set_title( "Portable Game Notation parser");
 
-	auto window = Gtk::make_managed<Gtk::ApplicationWindow>();
-	window->set_title( "Portable Game Notation parser" );
+    add_action( "open", [this](){ on_action_open(); } );
+	init_aboutdialog( );
 
 	auto menu_button = Gtk::make_managed<Gtk::MenuButton>();
 	menu_button->set_icon_name("open-menu-symbolic");
 
     auto menu_model = Gio::Menu::create();
-    menu_model->append( "Open", "app.open");
-    menu_model->append( "About", "app.about");
+    menu_model->append( "Open", "win.open");
+    menu_model->append( "About", "win.about");
 
 	menu_button->set_menu_model(menu_model);
-
-	init_aboutdialog( window );
-
 
 	auto header_bar = Gtk::make_managed<Gtk::HeaderBar>();
 	header_bar->pack_start(*menu_button);
 
-	window->set_titlebar( *header_bar );
+	set_titlebar( *header_bar );
 
 	auto child = Gtk::make_managed<Gtk::TextView>();
     child->set_size_request( 640, 480 );
     text_buffer = child->get_buffer();
-	window->set_child( *child );
+	set_child( *child );
 
-    window->signal_close_request().connect( sigc::mem_fun( *this, &PGNParser::on_action_quit ), true );
-
-	add_window( *window );
-    window->show();
-}
+    signal_close_request().connect( [this](){ return on_action_quit(); }, true );
+};
 
 void PGNParser::on_action_open()
 {
@@ -110,7 +88,7 @@ void PGNParser::on_action_open()
         auto file  = dlg->open_finish( async_result );
 
         if( !engine->open_file( file->get_path() ) ) {
-            Gtk::AlertDialog::create( "Error opening chess file." )->show(*get_active_window());
+            Gtk::AlertDialog::create( "Error opening chess file." )->show(*this);
             return;
         }
 
@@ -127,7 +105,7 @@ void PGNParser::on_action_open()
         text_buffer->set_text( content );
     };
 
-    dlg->open( *get_active_window(), open_fun );
+    dlg->open( *this, open_fun );
 }
 
 bool PGNParser::on_action_quit()
@@ -140,19 +118,19 @@ bool PGNParser::on_action_quit()
     auto choice_fun = [this,dlg]( std::shared_ptr<Gio::AsyncResult>& async_result )
     {
         if( dlg->choose_finish( async_result ) == 0 )
-            quit();
+            set_visible( false );
     };
 
-    dlg->choose( *get_active_window(), choice_fun );
+    dlg->choose( *this, choice_fun );
 
     return true;
 }
 
-void PGNParser::init_aboutdialog( Gtk::ApplicationWindow * view )
+void PGNParser::init_aboutdialog()
 {
 	auto about_dialog = Gtk::make_managed<Gtk::AboutDialog>();
 
-    about_dialog->set_transient_for( *view );
+    about_dialog->set_transient_for( *this );
     about_dialog->set_program_name("Chess Parser");
     // about_dialog->set_logo( Gdk::Texture::create_from_resource("/net/dnatechnologies/chessparser/application.png") ) ;
     about_dialog->set_version( "1.0.0" );
@@ -165,4 +143,13 @@ void PGNParser::init_aboutdialog( Gtk::ApplicationWindow * view )
 	about_dialog->set_hide_on_close();
 
 	add_action( "about", [about_dialog](){ about_dialog->set_visible(); } );
+}
+
+int main(int argc, char** argv)
+{
+	Glib::set_init_to_users_preferred_locale(false);
+
+	auto app = Gtk::Application::create();
+
+	return app->make_window_and_run<PGNParser>(argc, argv);
 }
