@@ -21,10 +21,10 @@
 
 #include <gtkmm.h>
 
-class Controller : public Gtk::ApplicationWindow
+class SquareConvertor : public Gtk::ApplicationWindow
 {
 public:
-    Controller();
+    SquareConvertor();
 
 private:
     Gtk::Grid * view;
@@ -36,7 +36,7 @@ private:
 };
 
 
-Controller::Controller() : Gtk::ApplicationWindow()
+SquareConvertor::SquareConvertor() : Gtk::ApplicationWindow()
 {
     set_title("Square Convertor");
 
@@ -63,5 +63,5 @@ int main( int argc, char * argv[] )
 {
     auto app = Gtk::Application::create();
 
-    return app->make_window_and_run<Controller>( argc, argv );
+    return app->make_window_and_run<SquareConvertor>( argc, argv );
 }
