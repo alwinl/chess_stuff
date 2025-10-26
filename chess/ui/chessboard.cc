@@ -392,18 +392,12 @@ void ChessBoard::highlight_finish()
 
 #define REVERSE_RANK_MASK 0b00111000
 
-bool ChessBoard::point_in_chessboard( Point point )
-{
-	return board_outline.intersects( {(int)point.first, (int)point.second, 1, 1} );
-}
-
 uint16_t ChessBoard::boardpoint_to_chesssquare( Point point )
 {
-	if( ! point_in_chessboard( point ) )
+	if( ! board_outline.intersects( {(int)point.first, (int)point.second, 1, 1} ) )
 		return (uint16_t)-1;
 
-	point = point - Point( board_outline.get_x(), board_outline.get_y() );
-	// point = point - Point( 1, 1 );
+	point = ( point - Point( board_outline.get_x(), board_outline.get_y() ) );
 	point = point / SQUARE_SIZE;
 
 	uint16_t square = (int)point.first + 8 * (7 - (int)(point.second));
@@ -419,25 +413,19 @@ Point ChessBoard::chesssquare_to_boardpoint( uint16_t square )
 	if( is_reversed )
 		square ^= REVERSE_RANK_MASK;
 
-	Point point( square % 8, 7 - (square / 8) );
+	Point point( (square % 8), (7 - (square / 8)) );
 
 	point = point * SQUARE_SIZE;
-	// point = point + Point( 1, 1 );
 	point = point + Point( board_outline.get_x(), board_outline.get_y() );
 
 	return point;
-}
-
-bool ChessBoard::point_in_editwindow( Point point )
-{
-	return is_edit && edit_outline.intersects( {(int)point.first, (int)point.second, 1, 1} );		// can only intersect when editing
 }
 
 char ChessBoard::editpoint_to_piececode( Point point )
 {
 	static std::string piece_chars = "KQRBNPkqrbnp";
 
-	if( !point_in_editwindow( point ) )
+	if( !is_edit || !edit_outline.intersects( {(int)point.first, (int)point.second, 1, 1} ) )
 		return ' ';
 
 	point = point - Point( edit_outline.get_x(), edit_outline.get_y() );

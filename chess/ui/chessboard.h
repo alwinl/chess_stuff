@@ -53,11 +53,11 @@ public:
 	void highlight_continue();
 	void highlight_finish();
 
-	bool point_in_chessboard( Point point );
+	// bool point_in_chessboard( Point point );
 	Point chesssquare_to_boardpoint( uint16_t square );
 	uint16_t boardpoint_to_chesssquare( Point point );
 
-	bool point_in_editwindow( Point point );
+	// bool point_in_editwindow( Point point );
 	char editpoint_to_piececode( Point point );
 	Point piececode_to_editpoint( char piece_code );
 

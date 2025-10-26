@@ -80,6 +80,7 @@ private:
 	void on_action_arrange_make_fen();
 	void on_action_thinking_stop();
 
+	void init_action_arrange_turn();
 	// void on_action_level_easy();
 	// void on_action_level_timed();
 	// void on_action_level_total_time();

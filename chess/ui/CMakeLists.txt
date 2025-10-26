@@ -54,3 +54,16 @@ add_executable(
 	dialogs.cc
 )
 target_link_libraries( dialog_tester PRIVATE ${LIB_SETUP} )
+
+add_executable(
+	chess2
+
+	new_chess.cc
+	chess_window.cc
+	board_view.cc
+	dialogs.cc
+
+    ${GRESOURCE_C}
+)
+add_dependencies( chess2 chess-resource )
+target_link_libraries( chess2 PRIVATE ${LIB_SETUP} chess_logic )

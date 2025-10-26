@@ -41,8 +41,6 @@ DialogColours::DialogColours( BaseObjectType* cobject, const Glib::RefPtr<Gtk::B
 	btnForeground ->set_dialog( colour_dialog );
 	btnWhiteColour->set_dialog( colour_dialog );
 	btnBlackColour->set_dialog( colour_dialog );
-
-
 }
 
 void DialogColours::set_colours( ColorArray  colours )
@@ -78,15 +76,17 @@ DialogPieceValues::DialogPieceValues( BaseObjectType* cobject, const Glib::RefPt
 
 	ui_model->get_widget<Gtk::Button>( "btnPieceValuesOK" )->signal_clicked().connect( [this](){ result = eResult::OK; hide(); } );
 	ui_model->get_widget<Gtk::Button>( "btnPieceValuesCancel" )->signal_clicked().connect( [this](){ result = eResult::CANCEL; hide(); } );
-    ui_model->get_widget<Gtk::Button>( "btnPieceValuesRevert" )->signal_clicked().connect(
-		[this](){
-			spnButton[0]->set_value( orig_value[0] );
-			spnButton[1]->set_value( orig_value[1] );
-			spnButton[2]->set_value( orig_value[2] );
-			spnButton[3]->set_value( orig_value[3] );
-			spnButton[4]->set_value( orig_value[4] );
-		}
-	);
+
+	auto revert_func = [this]()
+	{
+		spnButton[0]->set_value( orig_value[0] );
+		spnButton[1]->set_value( orig_value[1] );
+		spnButton[2]->set_value( orig_value[2] );
+		spnButton[3]->set_value( orig_value[3] );
+		spnButton[4]->set_value( orig_value[4] );
+	};
+
+    ui_model->get_widget<Gtk::Button>( "btnPieceValuesRevert" )->signal_clicked().connect( revert_func );
 }
 
 void DialogPieceValues::set_values( std::map<char, int> values )
@@ -159,19 +159,18 @@ int DialogInput::get_input()
 DialogNewGame::DialogNewGame( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
 	: Gtk::Window( cobject )
 {
-	Gtk::Button * button;
+	auto button_def = [this, ui_model]( std::string widget_name, int the_choice )
+	{
+		Gtk::Button * button;
 
-	button = ui_model->get_widget<Gtk::Button>( "btnHumanvsAI" );
-	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 1 ) );
+		button = ui_model->get_widget<Gtk::Button>( widget_name );
+		button->signal_clicked().connect( [this, the_choice](){ choice = the_choice; hide(); } );
+	};
 
-	button = ui_model->get_widget<Gtk::Button>( "btnAIvsHuman" );
-	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 2 ) );
-
-	button = ui_model->get_widget<Gtk::Button>( "btnAIvsAI" );
-	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 3 ) );
-
-	button = ui_model->get_widget<Gtk::Button>( "btnHumanvsHuman" );
-	button->signal_clicked().connect( sigc::bind( sigc::mem_fun(*this, &DialogNewGame::make_choice), 4 ) );
+	button_def( "btnHumanvsAI", 1 );
+	button_def( "btnAIvsHuman", 2 );
+	button_def( "btnAIvsAI", 3 );
+	button_def( "btnHumanvsHuman", 4 );
 }
 
 DialogLevel::DialogLevel( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& ui_model )
@@ -180,14 +179,15 @@ DialogLevel::DialogLevel( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Build
 	ui_model->get_widget<Gtk::Button>( "btnLevelOK" )->signal_clicked().connect( [this](){ result = eResult::OK; hide(); } );
 	ui_model->get_widget<Gtk::Button>( "btnLevelCancel" )->signal_clicked().connect( [this](){ result = eResult::CANCEL; hide(); } );
 
-	// ui_model->get_widget( "chkLevelEasy", chkLevelEasy );
-	// ui_model->get_widget( "chkLevelTimed", chkLevelTimed );
-	// ui_model->get_widget( "chkLevelTotalTime", chkLevelTotalTime );
-	// ui_model->get_widget( "chkLevelInfinite", chkLevelInfinite );
-	// ui_model->get_widget( "chkLevelPlySearch", chkLevelPlySearch );
-	// ui_model->get_widget( "chkLevelMateSearch", chkLevelMateSearch );
-	// ui_model->get_widget( "chkLevelMatching", chkLevelMatching );
-
+	chkLevelEasy       = ui_model->get_widget<Gtk::CheckButton>( "chkLevelEasy" );
+	chkLevelTimed      = ui_model->get_widget<Gtk::CheckButton>( "chkLevelTimed" );
+	chkLevelTotalTime  = ui_model->get_widget<Gtk::CheckButton>( "chkLevelTotalTime" );
+	chkLevelInfinite   = ui_model->get_widget<Gtk::CheckButton>( "chkLevelInfinite" );
+	chkLevelPlySearch  = ui_model->get_widget<Gtk::CheckButton>( "chkLevelPlySearch" );
+	chkLevelMateSearch = ui_model->get_widget<Gtk::CheckButton>( "chkLevelMateSearch" );
+	chkLevelMatching   = ui_model->get_widget<Gtk::CheckButton>( "chkLevelMatching" );
+    fldLevelTimed      = ui_model->get_widget<Gtk::Entry>( "fldLevelTimed" );
+    fldLevelTotalTime  = ui_model->get_widget<Gtk::Entry>( "fldLevelTotalTime" );
 }
 
 }

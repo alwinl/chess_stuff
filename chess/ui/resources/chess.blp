@@ -6,6 +6,7 @@ ApplicationWindow main_view {
 
     PopoverMenuBar mnuArrange {
       menu-model: modelArrange;
+      visible: false;
     }
 
     PopoverMenuBar mnuGame {
@@ -14,6 +15,7 @@ ApplicationWindow main_view {
 
     PopoverMenuBar mnuStop {
       menu-model: modelStop;
+      visible: false;
     }
 
     DrawingArea canvas {
@@ -49,9 +51,18 @@ AboutDialog dlgAbout {
 Window dlgColours {
   child: Box {
     orientation: vertical;
+    margin-start: 5;
+    margin-end: 5;
+    margin-top: 5;
+    margin-bottom: 5;
 
     Frame {
       child: Grid {
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
+
         Label {
           label: _("Background");
           xalign: 0.0;
@@ -163,10 +174,18 @@ Window dlgColours {
 Window dlgPieceValues {
   child: Box {
     orientation: vertical;
+    margin-start: 5;
+    margin-end: 5;
+    margin-top: 5;
+    margin-bottom: 5;
 
     Frame {
       Grid {
         vexpand: true;
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
 
         Label {
           halign: start;
@@ -273,6 +292,10 @@ Window dlgPieceValues {
     Frame {
       Box {
         valign: center;
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
 
         Button btnPieceValuesRevert {
           label: _("Revert");
@@ -343,10 +366,18 @@ Window dlgNewGame {
   child: Box {
     orientation: vertical;
     spacing: 2;
+    margin-start: 5;
+    margin-end: 5;
+    margin-top: 5;
+    margin-bottom: 5;
 
     Frame {
       Box {
         orientation: vertical;
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
 
         Button btnHumanvsAI {
           label: _("Human vs Computer");
@@ -368,6 +399,11 @@ Window dlgNewGame {
 
     Frame {
       Box {
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
+
         Button btnNewGameCancel {
           label: _("Cancel");
         }
@@ -383,20 +419,35 @@ Window dlgNewGame {
 Window dlgLevel {
   child: Box {
     orientation: vertical;
+    margin-start: 5;
+    margin-end: 5;
+    margin-top: 5;
+    margin-bottom: 5;
 
     Frame {
       Box {
         orientation: vertical;
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
 
         CheckButton chkLevelEasy {
           label: "Easy";
+          active: true;
+          css-classes: ["radiobutton"];
         }
 
         CheckButton chkLevelTimed {
           label: "Timed";
+          group: chkLevelEasy;
+          css-classes: ["radiobutton"];
         }
 
         Box {
+          margin-start: 50;
+          margin-end: 10;
+
           Label {
             label: "Seconds per move:";
           }
@@ -406,11 +457,16 @@ Window dlgLevel {
 
         CheckButton chkLevelTotalTime {
           label: "Total Time";
+          group: chkLevelEasy;
+          css-classes: ["radiobutton"];
         }
 
         Box {
+          margin-start: 50;
+          margin-end: 10;
+
           Label {
-            label: "\"Minutes per game:\"";
+            label: "Minutes per game:";
           }
 
           Entry fldLevelTotalTime {}
@@ -418,24 +474,37 @@ Window dlgLevel {
 
         CheckButton chkLevelInfinite {
           label: "Infinite";
+          group: chkLevelEasy;
+          css-classes: ["radiobutton"];
         }
 
         CheckButton chkLevelPlySearch {
           label: "Ply Search";
+          group: chkLevelEasy;
+          css-classes: ["radiobutton"];
         }
 
         CheckButton chkLevelMateSearch {
           label: "Mate Search";
+          group: chkLevelEasy;
+          css-classes: ["radiobutton"];
         }
 
         CheckButton chkLevelMatching {
           label: "Match Time";
+          group: chkLevelEasy;
+          css-classes: ["radiobutton"];
         }
       }
     }
 
     Frame {
       Box {
+        margin-start: 5;
+        margin-end: 5;
+        margin-top: 5;
+        margin-bottom: 5;
+
         Button btnLevelCancel {
           label: "Cancel";
         }
@@ -493,7 +562,7 @@ menu modelGame {
       }
 
       item {
-        action: "app.restore";
+        action: "app.open";
         label: "Open";
       }
 
@@ -621,13 +690,15 @@ menu modelArrange {
 
     section {
       item {
-        action: "app.arrange_setwhite";
+        action: "app.arrange_turn";
         label: "Set white turn";
+        target: "white";
       }
 
       item {
-        action: "app.arrange_setblack";
+        action: "app.arrange_turn";
         label: "Set black turn";
+        target: "black";
       }
     }
 

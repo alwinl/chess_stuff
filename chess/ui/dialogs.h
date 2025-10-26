@@ -62,14 +62,9 @@ public:
 	std::map<char, int> get_values();
 
 private:
-    // void on_revert_clicked();
-
-	// struct PieceData {
 	std::array<Gtk::SpinButton *,5> spnButton;
-	std::array<int,5> orig_value;
-	// };
 
-	// std::array<PieceData,5> piece_data;
+    std::array<int,5> orig_value;
 
     eResult result = eResult::UNKNOWN;
 };
@@ -115,7 +110,17 @@ public:
     eLevels get_level() const { return choice; }
 
 private:
-	void make_choice( eLevels the_choice ) { choice = the_choice; hide(); };
+	Gtk::CheckButton * chkLevelEasy;
+	Gtk::CheckButton * chkLevelTimed;
+	Gtk::CheckButton * chkLevelTotalTime;
+	Gtk::CheckButton * chkLevelInfinite;
+	Gtk::CheckButton * chkLevelPlySearch;
+	Gtk::CheckButton * chkLevelMateSearch;
+	Gtk::CheckButton * chkLevelMatching;
+    Gtk::Entry * fldLevelTimed;
+    Gtk::Entry * fldLevelTotalTime;
+
+    void make_choice( eLevels the_choice ) { choice = the_choice; hide(); };
 
 	eLevels choice;
 

@@ -43,7 +43,7 @@ ChessController::ChessController( ) : Gtk::Application( "net.dnatechnologies.che
 void ChessController::bind_actions()
 {
     add_action("new",     sigc::mem_fun( *this, &ChessController::on_action_new ) );
-    add_action("restore", sigc::mem_fun( *this, &ChessController::on_action_open ) );
+    add_action("open",    sigc::mem_fun( *this, &ChessController::on_action_open ) );
     add_action("save",    sigc::mem_fun( *this, &ChessController::on_action_save ) );
     add_action("saveas",  sigc::mem_fun( *this, &ChessController::on_action_save_as ) );
     add_action("play",    sigc::mem_fun( *this, &ChessController::on_action_play ) );
@@ -66,11 +66,34 @@ void ChessController::bind_actions()
     add_action("arrange_clear",  sigc::mem_fun( *this, &ChessController::on_action_arrange_clear ) );
     add_action("arrange_done",   sigc::mem_fun( *this, &ChessController::on_action_arrange_done ) );
     add_action("arrange_cancel", sigc::mem_fun( *this, &ChessController::on_action_arrange_cancel ) );
-	add_action_bool("arrange_setwhite", sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_white), true );
-	add_action_bool("arrange_setblack", sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black), false );
+
+	init_action_arrange_turn();
+
+	// add_action_bool("arrange_setwhite", sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_white), true );
+	// add_action_bool("arrange_setblack", sigc::mem_fun(*this, &ChessController::on_action_arrange_turn_black), false );
     add_action("arrange_makeFEN", sigc::mem_fun( *this, &ChessController::on_action_arrange_make_fen ) );
 
 	add_action("think_stop", sigc::mem_fun( *this, &ChessController::on_action_thinking_stop ) );
+}
+
+void ChessController::init_action_arrange_turn()
+{
+    auto action = Gio::SimpleAction::create( "arrange_turn", Glib::VariantType("s"), Glib::Variant<Glib::ustring>::create("white") );
+
+    action->signal_activate().connect(
+        [this, action](const Glib::VariantBase& value)
+        {
+            auto color = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(value).get();
+            action->change_state(Glib::Variant<Glib::ustring>::create(color));
+
+            std::cout << color << " turn" << std::endl;
+            if (color == "white")
+                engine->arrange_set_turn(eColor::white);
+            else
+                engine->arrange_set_turn(eColor::black);
+        });
+
+    add_action(action);
 }
 
 void ChessController::connect_signals()
@@ -236,13 +259,21 @@ void ChessController::on_action_save_as()
 
 void ChessController::on_action_quit()
 {
-	// if( engine->can_quit() )
-		quit();
+	auto quit_dlg = Gtk::AlertDialog::create( "You really want to quit?" );
 
-		// Gtk::AlertDialog::create( "This is not a valid board. Please fix." )->show( *view );
-	// Gtk::MessageDialog dlg( *view, "Unsaved game. You really want to quit?", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK_CANCEL, true );
-	// if( dlg.run() == Gtk::RESPONSE_OK)
-	// 	quit();
+	quit_dlg->set_buttons( {"Ok", "Cancel"} );
+	quit_dlg->set_modal();
+
+	auto response_handler = [this, quit_dlg]( Glib::RefPtr<Gio::AsyncResult>& result )
+	{
+		try {
+			if( quit_dlg->choose_finish( result) == 0 )
+				quit();
+		}
+		catch( const Glib::Error& ex ) { /* user dismissed the dialog, do not shutdown */ }
+	};
+
+	quit_dlg->choose( *get_active_window(), response_handler );
 }
 
 void ChessController::on_action_play()
@@ -604,34 +635,22 @@ void ChessController::on_drag_start( int n_press, double mouse_x, double mouse_y
 	if( is_animating || is_computer_move )		// block user input during animations
 		return;
 
-	if( board->point_in_chessboard( {mouse_x, mouse_y} ) ) {
+	drag_start_square = board->boardpoint_to_chesssquare( {mouse_x, mouse_y} );
+	drag_piece_code = ( drag_start_square != (uint16_t)-1 ) ?
+						(engine->get_piece_positions())[drag_start_square] :		// The mouse is clicked on the board
+						board->editpoint_to_piececode( {mouse_x, mouse_y} );		// the mouse might have been clicked on the edit window
 
-		drag_start_square = board->boardpoint_to_chesssquare( {mouse_x, mouse_y} );
-		drag_piece_code = (engine->get_piece_positions())[drag_start_square];
+	if( drag_piece_code == ' ' )
+		return;
 
-		if( drag_piece_code == ' ' )
-			return;
-
+	if( drag_start_square != (uint16_t)-1 ) {
 		auto temp_board = engine->get_piece_positions();
 		temp_board[drag_start_square] = ' ';
 		board->set_piece_positions( temp_board );
-
-		board->drag_start( mouse_x, mouse_y, drag_piece_code );
-		is_dragging = true;
-
-		return;
 	}
 
-	if( board->point_in_editwindow( {mouse_x, mouse_y} ) ) {
-
-		drag_start_square = (uint16_t)-1;
-		drag_piece_code = board->editpoint_to_piececode( {mouse_x, mouse_y} );
-
-		board->drag_start(  mouse_x, mouse_y, drag_piece_code );
-		is_dragging = true;
-
-		return;
-	}
+	board->drag_start(  mouse_x, mouse_y, drag_piece_code );
+	is_dragging = true;
 }
 
 void ChessController::on_drag_motion( double mouse_x, double mouse_y )
@@ -647,9 +666,9 @@ void ChessController::on_drag_done( int n_press, double mouse_x, double mouse_y 
 
 	board->drag_finish();
 
-	if( board->point_in_chessboard( {mouse_x, mouse_y} ) ) {
+	uint16_t drag_end_square = board->boardpoint_to_chesssquare( {mouse_x, mouse_y} );
 
-		uint16_t drag_end_square = board->boardpoint_to_chesssquare( {mouse_x, mouse_y} );
+	if( drag_end_square != (uint16_t)-1 ) {
 
 		if( drag_start_square == drag_end_square ) {
 
@@ -660,17 +679,16 @@ void ChessController::on_drag_done( int n_press, double mouse_x, double mouse_y 
 			if( drag_start_square != (uint16_t)-1 )
 				engine->arrange_remove_piece( drag_start_square );
 
-			if( drag_end_square != (uint16_t)-1 )
-				engine->arrange_add_piece( drag_end_square, drag_piece_code );
+			engine->arrange_add_piece( drag_end_square, drag_piece_code );
 
 			board->set_piece_positions( engine->get_piece_positions() );
 
 		} else {
 
 			// regular move, check if this this move can be made
-			if( engine->human_move( drag_start_square, drag_end_square ) )
+			if( engine->human_move( drag_start_square, drag_end_square ) ) {
 				do_animate( drag_start_square, drag_end_square, drag_piece_code );
-			else {
+			} else {
 				board->set_piece_positions( engine->get_piece_positions() );
 			}
 		}
@@ -690,6 +708,10 @@ void ChessController::on_drag_done( int n_press, double mouse_x, double mouse_y 
 		is_dragging = false;
 		return;
 	}
+
+	board->set_piece_positions( engine->get_piece_positions() );
+
+	is_dragging = false;
 }
 
 /**-----------------------------------------------------------------------------
