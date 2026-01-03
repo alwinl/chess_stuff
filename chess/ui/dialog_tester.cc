@@ -61,7 +61,7 @@ static int show_dialog_from_ui(Gtk::Window& parent, const std::string& ui_file_p
 
 int main( int argc, char* argv[] )
 {
-    auto app = Gtk::Application::create("org.example.dialogwrapper");
+    auto app = Gtk::Application::create("net.dnatechnologies.chessdialogtester");
 
     Gtk::Window main_window;
     main_window.set_default_size(400, 300);

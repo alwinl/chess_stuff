@@ -149,7 +149,7 @@ int main(int argc, char** argv)
 {
 	Glib::set_init_to_users_preferred_locale(false);
 
-	auto app = Gtk::Application::create();
+	auto app = Gtk::Application::create("net.dnatechnologies.pgn_parser");
 
 	return app->make_window_and_run<PGNParser>(argc, argv);
 }
